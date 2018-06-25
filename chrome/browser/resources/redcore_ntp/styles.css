@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 html {
   width: 100%;
   height: 100%;
@@ -575,3 +576,715 @@ h2:after {
 .hello .signin {
   padding-left: 0;
 }
+||||||| parent of ffef05f456bc... Add untracked files after rebase
+=======
+html {
+  width: 100%;
+  height: 100%;
+}
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Microsoft YaHei", FreeSans, Arimo, "wenquanyi micro hei", "Hiragino Sans GB", "Hiragino Sans GB W3", sans-serif;
+}
+.login {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  /*background-color: '#eee';*/
+  /*background-image: url('imgs/defaultBG.png');*/
+  background-image:linear-gradient(-141deg, #ee2351 0%, #c00059 100%);
+  background-position: center;
+}
+.login h2 {
+  text-align: center;
+  line-height: 1;
+  font-size: 28px;
+  font-weight: 400;
+  margin-top: 28px;
+  margin-bottom: 54px;
+}
+h2:after {
+  content: "";
+  width: 48px;
+  height: 3px;
+  background-image: linear-gradient(-141deg, #ee2351 0%, #c00059 100%);
+  position: absolute;
+  z-index: 1;
+  left: 177px;
+  top: 35px;
+}
+.login .wrap {
+  position: absolute;
+  top: 25%;
+  width: 650px;
+  left: 55%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+@media screen and (max-width: 1366px) {
+  .wrap {
+    top: 10% !important;
+  }
+}
+.login .form {
+  position: absolute;
+  right: 0px;
+  width: 540px;
+  height: 520px;
+  padding: 50px 70px 40px 70px;
+  border-radius: 10px;
+  /*background: #fff;*/
+  background-image:linear-gradient(-180deg, #fff8f8 0%, #ffe2e3 99%);
+  box-shadow:0 0 13px 0 rgba(200,7,88,0.35);
+  box-sizing: border-box;
+}
+
+.login .wrap-left {
+  position: absolute;
+  left: -240px;
+  top: 46px;
+  width: 400px;
+  height: 440px;
+  padding: 40px 50px;
+  border-radius: 10px;
+  /*background: #fff;*/
+  background-image:linear-gradient(-180deg, #ff7a95 0%, #fea885 100%);
+  box-shadow:0 0 14px 0 #b40047;
+  box-sizing: border-box;
+}
+
+.login .wrap-img {
+  position: absolute;
+  top: 113px;
+  width: 350px;
+  left: -188px;
+  z-index: 999;
+}
+.login .form input {
+  margin-bottom: 16px;
+}
+.login .login-button {
+  position: relative;
+}
+.login .login-button:after {
+  content: ' ';
+  position: absolute;
+  right: 70px;
+  top: 7px;
+  width: 29px;
+  height: 29px;
+  background: url('imgs/loading.svg');
+  animation: 1s rotate linear infinite;
+  transform-origin: center;
+}
+.form p{
+  margin: 10px 0;
+}
+/*企业域名页面*/
+
+.company_domain input{
+  margin-top: 60px !important;
+  margin-bottom: 0px !important;
+}
+.company_logo {
+  display: block;
+  width: 95%;
+}
+
+
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.login .hidden {
+  display: none;
+}
+.login .setting {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.setting .forget {
+  font-size:16px;
+  color:#3271e9;
+}
+.forget:hover {
+  cursor: pointer;
+}
+.login .link {
+  color: #5b81ff;
+  font-size: 16px;
+  line-height: 1;
+  align-self: center;
+  cursor: pointer;
+}
+.login .right {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}
+.login .button {
+  margin-bottom: 10px;
+  margin-top: 50px;
+}
+.login .checkbox-label {
+  line-height: 16px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #666;
+  margin-bottom: 0px;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+}
+.login .checkbox-label > input[type=checkbox] {
+  visibility: hidden;
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: -1;
+}
+.login .checkbox-label > input[type=checkbox]:checked + .checkbox {
+  border-color: #5b81ff;
+  background: url('imgs/selectIcon.png') center no-repeat;
+}
+.login .checkbox-label .checkbox {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #999999;
+  border-radius: 1px;
+  margin-top: 1px;
+  margin-right: 5px;
+  vertical-align: top;
+  box-sizing: border-box;
+}
+.login .checkbox-label .checkbox:after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+}
+
+.login .settingServer {
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding: 40px 50px;
+  background: #fff;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.login .settingServer > input {
+  margin-bottom: 40px;
+}
+.login .settingServer .back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
+}
+
+.company_userMessage .back {
+  position: absolute;
+  top: -22px;
+  left: -46px;
+  cursor: pointer;
+}
+.company_userMessage .personal-account {
+  display: flex;
+  align-items: baseline;
+}
+.company_userMessage .personal-account span {
+  width: 119px;
+  font-size: 16px;
+}
+#QRcode, #back_login {
+  position: absolute;
+  right: -49px;
+  top: -56px;
+  width: 60px;
+}
+#QRcode:hover {
+  cursor: pointer;
+}
+#back_login:hover {
+  cursor: pointer;
+}
+#code_pack {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 155px;
+}
+#code_pack:hover {
+  cursor: pointer;
+}
+/*#qrcode_img {*/
+  /*width:100px;*/
+  /*height:100px;*/
+/*}*/
+#code_tip {
+  padding-left: 20px;
+  display: none
+}
+#code_tip img {
+  display: block;
+  width: 130px;
+}
+/*扫描成功*/
+#code_pack_qrcodeSuccess, #code_pack_qrcodeInvalid{
+  text-align: center;
+}
+#code_pack_qrcodeSuccess, #code_pack_qrcodeInvalid .refresh{
+  border-radius:2px;
+  margin-top: 30px;
+}
+#code_pack_qrcodeSuccess img {
+  width: 50px;
+}
+#code_pack_qrcodeSuccess p {
+  margin: 5px;
+}
+/*二维码失效*/
+#code_pack_qrcodeInvalid {
+  width: 150px;
+  height: 150px;
+  margin: auto;
+  padding: 10px 0;
+  background: url("./imgs/invalid.png");
+  background-size: 100% 100%;
+}
+
+.forgetPassword {
+  background: #ffffff;
+  box-shadow: 0 2px 20px 0 rgba(51,51,51,0.20);
+  border-radius: 2px;
+  width: 460px;
+  padding: 40px;
+  height: 180px;
+  position: absolute;
+  z-index: 999;
+  display: none;
+  top: 133px;
+}
+.forgetPassword .bottom {
+  text-align: right;
+}
+.forgetPassword button {
+  background:#464974;
+  border-radius:4px;
+  border: none;
+  color: #FFFFFF;
+  width:88px;
+  height:40px;
+}
+.login .row {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  align-items: center;
+  bottom: 155px;
+  text-align: center;
+  width: 397px;
+  height: 36px;
+}
+.login .error-tip {
+  color: #fb5343;
+  font-size: 16px;
+  line-height: 1;
+}
+.error-tip img {
+  padding: 0px 5px;
+  vertical-align: bottom;
+}
+.nav {
+  display: none;
+  width: 100%;
+  min-height: 100%;
+  background: url("./imgs/background/bg-1.png");
+  overflow: hidden;
+    min-width: 1024px;
+  background-attachment: fixed;
+}
+.nav header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 280px;
+  color: #fff;
+  background-image: linear-gradient(-154deg, #302663 0%, #3861bd 100%);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.nav .title {
+  display: flex;
+  height: 54px;
+  align-items: center;
+  vertical-align: center;
+  position: fixed;
+  z-index: 9999;
+  padding-left: 20px;
+}
+.nav .title > h1 {
+  font-size: 40px;
+  font-weight: 300;
+  margin: 0;
+  margin-left: 20px;
+}
+.nav .title > img {
+  width: auto;
+  height: 36px;
+}
+.nav .nav-tabs {
+  display: flex;
+  justify-content: center;
+  /*padding-top: 80px;*/
+  /*background: #f7f7f7;*/
+}
+.nav .linkitems-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.nav .linkitems {
+  /*max-width: 1200px;*/
+  max-width: 1270px;
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  margin-left: -20px;
+}
+@media screen and (max-width: 1200px) {
+  .nav .linkitems {
+    justify-content: center;
+  }
+}
+.nav .linkitem {
+  /*width: 220px;*/
+  /*height: 140px;*/
+  width: 280px;
+  height: 200px;
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*justify-content: center;*/
+  /*align-items: center;*/
+  margin-left: 30px;
+  margin-bottom: 70px;
+  text-decoration: none;
+  border: 1px solid rgba(51, 51, 51, 0.1);
+  border-radius: 4px;
+  background: #ffffff;
+  box-sizing: border-box;
+  cursor: pointer;
+  position: relative;
+  box-shadow:0 2px 20px 0 rgba(20,34,57,0.20);
+  transition: all 0.6s;
+}
+.nav .linkitem:hover img {
+  transform: scale(1.15);
+}
+.nav .linkitem:hover .linkitem-content {
+    background:rgba(255,255,255,1);
+}
+.nav .linkitem:hover {
+  box-shadow:0 2px 40px 0 rgba(20,34,57,0.20);
+}
+.nav .linkitem-content {
+  font-size: 14px;
+  color: #333333;
+  line-height: 26px;
+  position: absolute;
+  bottom: -42px;
+  /*width: 100%;*/
+  left: 0px;
+  right: 0px;
+
+  background:rgba(255,255,255,0.80);
+  box-shadow:0 2px 20px 0 rgba(20,34,57,0.20);
+  border-radius:20px;
+  width: fit-content;
+  height:26px;
+  margin: auto;
+  padding: 0px 15px;
+  transition: all 0.6s;
+    box-sizing: content-box;
+}
+.nav .linkitem-icon {
+    width: 280px;
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.nav .linkitem-icon img {
+  max-width: 180px;
+    max-height: 80px;
+  /*margin-bottom: 10px;*/
+  transition: all 0.6s;
+}
+.search-box {
+  position: fixed;
+  z-index: 9999;
+  right: 0px;
+  border-radius:2px;
+  height:54px;
+  display: flex;
+  align-items: center;
+  padding-right: 18px;
+}
+.search-box input {
+  background:#f1f1f1;
+  height: 30px;
+  padding-left: 35px;
+  width: 300px;
+
+}
+.search-box input::-webkit-input-placeholder {
+  color:#999999;
+}
+@media screen and (max-width:1440px) {.search-box input{
+    width: 260px;
+}}
+/*公司名称*/
+.company-title {
+  position: absolute;
+  margin: 150px auto 0 auto;
+  text-align: center;
+  /*font-size:48px;*/
+  color:#ffffff;
+  width: 100%;
+}
+.company-title h1 {
+    font-size: 58px;
+}
+
+/* 浏览器通告栏名单*/
+.notice {
+    max-width: 1200px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: space-between;
+}
+.notice-wall {
+    width:578px;
+    height:166px;
+    background:#ffffff;
+    border:1px solid rgba(51,51,51,0.10);
+}
+.notice-wall div {
+    overflow-x: hidden;
+    height: 80px;
+    padding: 0px 50px;
+}
+.notice-wall div::-webkit-scrollbar {/*滚动条整体样式*/
+  width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
+  height: 4px;
+}
+.notice-wall div::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+  border-radius: 5px;
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.2);
+}
+.notice-wall div::-webkit-scrollbar-track {/*滚动条里面轨道*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  border-radius: 0;
+  background: rgba(0,0,0,0.1);
+}
+
+.notice-wall h3 {
+    padding: 15px;
+    margin-bottom: 0px;
+    font-size: 18px;
+    text-align: center;
+    color:#333333;
+    font-weight: normal;
+}
+.notice-wall span {
+  padding: 0px 10px;
+    font-size:16px;
+    color:#666666;
+}
+.search-box > span {
+  width: 40px;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  padding: 0 10px;
+  background-position: center;
+  background-image: url('imgs/search_icon.svg');
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.am-tabs {
+  width: 100%;
+  font-size: 14px;
+  text-align: center;
+}
+.am-tabs .am-tabs-bd {
+  display: flex;
+  justify-content: center;
+  border: 0;
+  margin-top: 280px;
+}
+.am-tabs .am-tabs-bd .am-tab-panel {
+  flex: 1;
+}
+.am-tabs .am-tabs-nav {
+  display: inline-block;
+  /*border-bottom: 1px solid #e7e7ef;*/
+  background: #fff;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  z-index: 999;
+  height: 54px;
+    box-shadow:0 2px 20px 0 rgba(20,34,57,0.10);
+}
+.am-tabs .am-nav-tabs {
+    border-bottom: none;
+}
+.am-tabs .am-nav-tabs > li {
+  margin: 0;
+}
+
+.am-tabs .am-nav-tabs > li:last-child {
+  margin-right: 0;
+}
+.am-tabs .am-nav-tabs > li > a {
+  color: #999;
+  border: 0;
+  padding: 14px 0px;
+  margin-right: 0;
+  box-sizing: border-box;
+  user-select: none;
+  font-size:14px;
+  color:#666666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+}
+.am-tabs .am-nav-tabs > li > a:hover {
+  box-sizing: border-box;
+  color: #464974;
+  background: none;
+  border: 0px solid transparent;
+}
+.am-tabs .am-nav-tabs > li.am-active > a,
+.am-tabs .am-nav-tabs > li.am-active > a:focus,
+.am-tabs .am-nav-tabs > li.am-active > a:hover {
+  box-sizing: border-box;
+  color: #464974;
+  background: none;
+  font-weight: bold;
+  border: 0;
+  border-bottom: 4px solid #5b81ff;
+}
+.am-tabs .am-nav-tabs > li.am-active > a {
+  color:#464974;
+}
+/*
+* global
+* ===============================
+*/
+.show {
+  display: block;
+}
+.hide {
+  display: none;
+}
+.field {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1em;
+  color: #333;
+  padding: 10px 14px;
+  border: 1px solid #dddddd;
+  border-radius: 2px;
+  background: #ffffff;
+  box-sizing: border-box;
+  outline: 0;
+}
+.field:active,
+.field:focus {
+  outline: 0;
+  border-color: #5b81ff;
+}
+.field::-moz-placeholder {
+  color: #dddddd;
+}
+.field::-webkit-input-placeholder {
+  color: #dddddd;
+  line-height: 19px;
+}
+.field:-ms-input-placeholder {
+  color: #dddddd;
+}
+.field.error {
+  border-color: #fb5343;
+}
+.field-block {
+  width: 100%;
+}
+.button {
+  display: inline-block;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  padding: 10px 20px;
+  background-image:linear-gradient(-225deg, #ff2929 0%, #ed0072 100%);
+  border-radius: 2px;
+  border: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-appearance: none;
+  user-select: none;
+}
+.block {
+  width: 100%;
+}
+
+/* 欢迎页样式 */
+.hello {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-family: Microsoft YaHei!important;
+  overflow: auto;
+}
+
+.hello .signin {
+  padding-left: 0;
+}
+>>>>>>> ffef05f456bc... Add untracked files after rebase
