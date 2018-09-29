@@ -542,6 +542,9 @@ class HistoryService : public syncer::SyncableService, public KeyedService {
   syncer::SyncError ProcessSyncChanges(
       const base::Location& from_here,
       const syncer::SyncChangeList& change_list) override;
+#ifdef REDCORE
+  void ClearHistoryForUser(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
+#endif    
 
   // For sync codebase only: instantiates a controller delegate to interact with
   // TypedURLSyncBridge. Must be called from the UI thread.

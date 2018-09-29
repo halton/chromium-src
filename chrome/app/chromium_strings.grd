@@ -129,11 +129,11 @@ If you update this file, be sure also to update google_chrome_strings.grd. -->
       <message name="IDS_PROFILES_DISCONNECT_MANAGED_PROFILE_TEXT" desc="Message explaining to the user what will happen if they disconnect the managed profile.">
         Disconnecting <ph name="USERNAME">$1<ex>someone@example.com</ex></ph> will clear your history, bookmarks, settings, and other Chromium data stored on this device. Data stored in your Google Account will not be cleared and can be managed on <ph name="GOOGLE_DASHBOARD_LINK">&lt;a target="_blank" href="$2"&gt;</ph>Google Dashboard<ph name="END_GOOGLE_DASHBOARD_LINK">&lt;/a&gt;</ph>.
       </message>
-      <message name="IDS_PRODUCT_NAME" desc="The Chrome application name">
-        Chromium
+      <message name="IDS_PRODUCT_NAME" desc="The Redcore application name">
+        Redcore
       </message>
-      <message name="IDS_SHORT_PRODUCT_NAME" desc="The Chrome application short name.">
-        Chromium
+      <message name="IDS_SHORT_PRODUCT_NAME" desc="The Redcore application short name.">
+        Redcore
       </message>
       <if expr="is_win">
         <message name="IDS_SXS_SHORTCUT_NAME" desc="Unused in Chromium builds" translateable="false">

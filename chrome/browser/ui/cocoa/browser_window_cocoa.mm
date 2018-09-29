@@ -284,6 +284,15 @@ NSString* BrowserWindowCocoa::WindowTitle() {
 bool BrowserWindowCocoa::IsToolbarShowing() const {
   if (!IsFullscreen())
     return true;
+#ifdef REDCORE
+  // copy / cut control
+  if (!YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+    DLOG(INFO) << "checking copy enabled, event.windowsKeyCode: " << event.windowsKeyCode
+    << ", event.modifiers: " << std::hex << event.modifiers;
+    if ((event.windowsKeyCode == 'C' || event.windowsKeyCode == 'X') && (event.modifiers & blink::WebInputEvent::MetaKey))
+      return true;
+  }
+#endif
 
   return [cocoa_controller() isToolbarShowing] == YES;
 }

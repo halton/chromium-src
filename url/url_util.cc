@@ -34,6 +34,7 @@ const SchemeWithType kStandardURLSchemes[] = {
     // field.  Unlike other SCHEME_WITH_HOST schemes, the 'host' in a file
     // URL may be empty, a behavior which is special-cased during
     // canonicalization.
+    {"chrome", SCHEME_WITH_HOST},
     {kFileScheme, SCHEME_WITH_HOST},
     {kFtpScheme, SCHEME_WITH_HOST_PORT_AND_USER_INFORMATION},
     {kGopherScheme, SCHEME_WITH_HOST_PORT_AND_USER_INFORMATION},

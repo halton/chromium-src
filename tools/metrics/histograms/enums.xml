@@ -16611,6 +16611,10 @@ Called by update_net_error_codes.py.-->
   <int value="1268" label="AUTOFILLPRIVATE_MIGRATECREDITCARDS"/>
   <int value="1271"
       label="ENTERPRISE_HARDWAREPLATFORM_GETHARDWAREPLATFORMINFO"/>
+  <int value="1272" label="TABS_SETIEAUTOLOGININFO"/>
+  <int value="1273" label="TABS_STARTLISTENIELOGIN"/>
+  <int value="1274" label="YSPMANAGER_GETENTERPLORERINFO"/>
+  <int value="1275" label="YSPMANAGER_SETPUSHDATA"/>
 </enum>
 
 <enum name="ExtensionIconState">

@@ -19,6 +19,9 @@ from grit import util
 from grit.node import include
 from grit.node import message
 from grit.node import structure
+# //ysp+ { localization
+from grit.format.yspbrowser import processor
+# //ysp+ }
 
 
 PACK_FILE_VERSION = 5

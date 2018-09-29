@@ -117,6 +117,12 @@ InputStream::StreamState DownloadFileImpl::SourceStream::Read(
   return input_stream_->Read(data, length);
 }
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+bool DownloadFileImpl::IsIEDownload() {
+	return false;
+}
+#endif
+
 DownloadFileImpl::DownloadFileImpl(
     std::unique_ptr<DownloadSaveInfo> save_info,
     const base::FilePath& default_download_directory,

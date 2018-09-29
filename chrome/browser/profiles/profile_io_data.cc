@@ -175,6 +175,9 @@
 #include "net/cert/cert_verify_proc_builtin.h"
 #endif
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif /*REDCORE*/
 using content::BrowserContext;
 using content::BrowserThread;
 using content::ResourceContext;
@@ -1365,6 +1368,17 @@ void ProfileIOData::ShutdownOnUIThread(
 
 void ProfileIOData::DestroyResourceContext() {
   resource_context_.reset();
+#if REDCORE
+// ysp*(LIUWEI) Move this from ~ProfileIOData to here to fix a crash issue, the cause is
+// that certificate_report_sender_.reset() refers to the factory object that is destroyed
+// in subclass's destructor (~ProfileImplIOData). This is called in ~ProfileImplIOData
+//
+// (halton) Disable on Cr69 rebase
+//
+//  if (transport_security_state_)
+//    transport_security_state_->SetReportSender(nullptr);
+//  certificate_report_sender_.reset();
+#endif
 }
 
 std::unique_ptr<net::HttpCache> ProfileIOData::CreateHttpFactory(

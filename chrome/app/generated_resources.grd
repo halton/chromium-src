@@ -9085,6 +9085,264 @@ Please help our engineers fix this problem. Tell us what happened right before y
       </message>
     </if>
 
+    <!-- //ysp+ { -->
+    <message name="IDS_ACCNAME_YSP_LOCK_SCREEN" desc="The accessible name for the button that is used to close a specific tab.">
+      Close <ph name="TAB_NAME">$1<ex>Google Search</ex></ph>
+    </message>
+    <message name="IDS_ABOUT_YSP_PRODUCT_VERSION" desc="The text label describing the version of the browser">
+      Version <ph name="PRODUCT_VERSION">$1<ex>1.0.0</ex></ph>
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_TITLE" desc="">
+      Login the Browser
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_DOMAIN_PLACEHOLDER" desc="">
+      Input domain
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_DOMAIN_PROMPT" desc="">
+      Please input the domain
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_ACCOUNT_PLACEHOLDER" desc="">
+      Input account
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_ACCOUNT_PROMPT" desc="">
+      Please input your account
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_PASSWORD_PLACEHOLDER" desc="">
+      Input password
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_PASSWORD_PROMPT" desc="">
+      Please input password
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_AUTO_LOGIN" desc="">
+      Auto login
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_LOGIN" desc="">
+      Sign in
+    </message>
+    <message name="IDS_YSP_LOGIN_VIEW_SET_SERVER" desc="">
+      Set server host
+    </message>
+    <message name="IDS_YSP_LOGOUT_VIEW_LOGOUT" desc="">
+      Sign out the browser
+    </message>
+    <message name="IDS_YSP_LOGIN_SETTING_VIEW_TITLE" desc="">
+      Server Host
+    </message>
+    <message name="IDS_YSP_LOGIN_SETTING_VIEW_BACK" desc="">
+      Return
+    </message>
+    <message name="IDS_YSP_LOGIN_SETTING_VIEW_CLEAR" desc="">
+      Clear host
+    </message>
+    <message name="IDS_YSP_LOGIN_SETTING_VIEW_HOST_PLACEHOLDER" desc="">
+      Input the host
+    </message>
+    <message name="IDS_YSP_LOGIN_SETTING_VIEW_OK" desc="">
+      OK
+    </message>
+    <message name="IDS_YSP_LOGIN_ERROR_REQUEST_FAILED" desc="">
+      Login failed, please check the server settings.
+    </message>
+    <message name="IDS_YSP_LOGIN_ERROR_RESPONSE_PARSE_FAILED" desc="">
+      Response data parse failed.
+    </message>
+    <message name="IDS_YSP_LOGIN_ERROR_INVALID_ACCOUNT_INFO" desc="">
+      Login failed, invalid account or password.
+    </message>
+    <message name="IDS_YSP_LOGIN_STATE_NOT_LOGIN" desc="">
+      Not login
+    </message>
+    <message name="IDS_YSP_LOGIN_HELLO" desc="">
+      Hello,
+    </message>
+    <message name="IDS_YSP_FOLDER_TITLE_MANAGED_BOOKMARKS" desc="">
+      Managed Bookmarks
+    </message>
+    <!--<message name="IDS_CORE_MENU" desc="">
+      Kernel
+    </message>-->
+    <message name="IDS_CHROME_CORE" desc="">
+      Redcore mode
+    </message>
+    <message name="IDS_IE_CORE" desc="">
+      Compatibility mode
+    </message>
+    <message name="IDS_YSP_URL_FILTERED_TITLE" desc="">
+      Open URL Denied
+    </message>
+    <message name="IDS_YSP_URL_FILTERED_MESSAGE" desc="">
+      Can not open the URL according to security policies managed by administrator.
+    </message>
+    <message name="IDS_YSP_PWD_MANAGER" desc="">
+      Password manager
+    </message>
+    <message name="IDS_YSP_FILE_FILTERED_MESSAGE" desc="">
+      Can not get the file according to security policies managed by administrator.
+    </message>
+    <message name="IDS_YSP_ACTIVEX_DOWNLOAD_INFOBAR_MESSAGE" desc="">
+      Plugin <ph name="displayName">$1<ex>winrar</ex></ph> is updated.
+    </message>
+    <message name="IDS_YSP_ACTIVEX_DOWNLOAD_BUTTON_OK" desc="">
+      Upgrade ActiveX
+    </message>
+    <message name="IDS_YSP_ACTIVEX_DOWNLOAD_BUTTON_CANCEL" desc="">
+      Ignore ActiveX
+    </message>
+    <message name="IDS_YSP_ACTIVEX_DOWNLOAD_BUTTON_NO_PROMPT" desc="">
+      Not popup
+    </message>
+    <message name="IDS_YSP_AUTO_UPDATE_TITLE" desc="">
+      New version notification
+    </message>
+    <message name="IDS_YSP_AUTO_UPDATE_MESSAGE" desc="">
+      A new version of RedCore is available. click OK to update.
+    </message>
+    <message name="IDS_YSP_AUTO_UPDATE_BUTTON_OK" desc="">
+      OK
+    </message>
+    <message name="IDS_YSP_AUTO_UPDATE_BUTTON_CANCEL" desc="">
+      Cancel
+    </message>
+    <message name="IDS_YSP_COMPATIBLE_SETTING" desc="">
+      Compatible setting
+    </message>
+    <message name="IDS_YSP_EMULATION_7" desc="">
+      Browser mode(IE7)
+    </message>
+    <message name="IDS_YSP_EMULATION_8" desc="">
+      Browser mode(IE8)
+    </message>
+    <message name="IDS_YSP_EMULATION_9" desc="">
+      Browser mode(IE9)
+    </message>
+    <message name="IDS_YSP_EMULATION_10" desc="">
+      Browser mode(IE10)
+    </message>
+    <message name="IDS_YSP_EMULATION_11" desc="">
+      Browser mode(IE11)
+    </message>
+    <message name="IDS_YSP_DOCMODE_6" desc="">
+      Document mode(IE6)
+    </message>
+    <message name="IDS_YSP_DOCMODE_7" desc="">
+      Document mode(IE7)
+    </message>
+    <message name="IDS_YSP_DOCMODE_8" desc="">
+      Document mode(IE8)
+    </message>
+    <message name="IDS_YSP_DOCMODE_9" desc="">
+      Document mode(IE9)
+    </message>
+    <message name="IDS_YSP_DOCMODE_10" desc="">
+      Document mode(IE10)
+    </message>
+    <message name="IDS_YSP_DOCMODE_11" desc="">
+      Document mode(IE11)
+    </message>
+    <message name="IDS_YSP_DOCMODE_SYS" desc="">
+      Document mode(Auto)
+    </message>
+    <message name="IDS_SHOW_CONFIG_TITLE" desc="Title of the show config page, not to be confused with the action of opening a new tab.">
+      Redcore Config
+    </message>
+    <message name="IDS_OPTIONS_PASSWORDS_MANAGE_AD_PASSWORDS_LINK" desc="The label of the 'Manage AD passwords' link">
+      Setting
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORDS_CERTIFICATION_NAME" desc="The title of the 'AD Certification' group">
+      Active Directory authentication proxy
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORD_CERTIFICATION_BODY" desc="The label of the password certification body">
+      Please update the configuration, when the password has been changed.
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORD_LIST" desc="The label of the saved password list">
+      List
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORD_SEARCH_APP" desc="The label of the AD password manager search">
+      Search App/Host
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORD_USERNAME" desc="The label of the AD password manager username">
+      Username
+    </message>
+    <message name="IDS_OPTIONS_AD_PASSWORD_PASSWORD" desc="The label of the AD password manager password">
+      Password
+    </message>
+    <message name="IDS_IE_DOWNLOAD_REMOVE_CONFIRM_EXPLANATION" desc="Explanation of the dialog asking for user confirmation to close the window when one IE download is in progress.">
+      A download is currently in progress. Do you want to cancel the download and continue?
+    </message>
+    <message name="IDS_IE_DOWNLOAD_REMOVE_CONFIRM_TITLE" desc="Title of the dialog asking for user confirmation to close the Tab one or more downloads are in progress.">
+      A download in progress
+    </message>
+    <message name="IDS_YSP_COMPANY_NOT_FOUND" desc="">
+      Company not found
+    </message>
+    <message name="IDS_YSP_USER_NOT_FOUND" desc="">
+      User not found
+    </message>
+    <message name="IDS_YSP_WRONG_PASSWORD" desc="">
+      Wrong password
+    </message>
+    <message name="IDS_YSP_DEVICE_DISABLED" desc="">
+      Device disabled
+    </message>
+    <message name="IDS_YSP_USER_DISABLED" desc="">
+      User disabled
+    </message>
+    <message name="IDS_YSP_ACCESS_PROHIBITION" desc="">
+      Access prohibition
+    </message>
+    <message name="IDS_YSP_HANDLE_ERROR" desc="">
+      Handle error
+    </message>
+    <message name="IDS_YSP_UNKNOWN_ERROR" desc="">
+      Unknown error
+    </message>
+    <message name="IDS_YSP_CONNENT_SERVICE_FAILED" desc="">
+      Unable to connect to the redcore management server, contact the system administrator.
+    </message>
+    <message name="IDS_YSP_SERVER_RESOURCE_ERROR" desc="">
+      Redcore management server resource error,please contact administrator.
+    </message>
+    <message name="IDS_YSP_SERVER_INTERNAL_ERROR" desc="">
+      Redcore management server internal error, please contact administrator.
+    </message>
+    <message name="IDS_YSP_SERVER_ERROR_CODE" desc="">
+      Error code:
+    </message>
+    <message name="IDS_YSP_ACCESS_TOKEN_EXPIRED" desc="">
+      Access token expired
+    </message>
+    <message name="IDS_YSP_REFRESH_TOKEN_EXPIRED" desc="">
+      Refresh token expired
+    </message>
+    <message name="IDS_YSP_AD_USERS_FORBID_UPDATING" desc="">
+      Forbid updating AD users' user information
+    </message>
+    <message name="IDS_YSP_REDCORE_ENTERPRISE_BROWSER" desc="">
+      RedCore Enterprise Browser
+    </message>
+    <message name="IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE" desc="">
+      Your browser is currently in lock mode.
+    </message>
+    <message name="IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK" desc="">
+      Please enter the browser login password to unlock.
+    </message>
+    <message name="IDS_YSP_LOCK_BROWSER_REENTER_PASSWORD" desc="">
+      Password is wrong, please re-enter.
+    </message>
+    <message name="IDS_YSP_FLOAT_LOGIN_WINDOW_VIEW_TITLE" desc="">
+      Authentication required, Please enter the password for authentication.
+    </message>
+    <message name="IDS_YSP_IE_WINDOWS_AD_VIEW_TITLE" desc="">
+      Website authentication
+    </message>
+    <message name="IDS_YSP_IE_WINDOWS_AD_VIEW_DESC" desc="">
+      Choice a Windows domain account to login please.
+    </message>
+    <message name="IDS_YSP_REMOVE_DEVICE_DESC" desc="">
+      You are logged out because this device has been disabled.
+    </message>
+    <!-- //ysp+ } -->
+    
     <!-- Web-modal dialog shown during Web Authenticaton API requests. -->
     <if expr="is_win or is_macosx or desktop_linux or chromeos">
       <message name="IDS_WEBAUTHN_GENERIC_TITLE" desc="Title of most dialogs shown while the user is authenticating on a web site using a security key.">

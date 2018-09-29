@@ -164,6 +164,9 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       uint32_t id,
       const base::FilePath& current_path,
       const base::FilePath& target_path,
+#ifdef REDCORE
+      const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
       const GURL& site_url,
@@ -190,6 +193,9 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   // |net_log| is constructed externally for our use.
   DownloadItemImpl(DownloadItemImplDelegate* delegate,
                    uint32_t id,
+#ifdef REDCORE
+                   const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
                    const DownloadCreateInfo& info);
 
   // Constructing for the "Save Page As..." feature:
@@ -197,6 +203,9 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   DownloadItemImpl(
       DownloadItemImplDelegate* delegate,
       uint32_t id,
+#ifdef REDCORE
+      const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
       const base::FilePath& path,
       const GURL& url,
       const std::string& mime_type,
@@ -284,6 +293,18 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   void SetDisplayName(const base::FilePath& name) override;
   std::string DebugString(bool verbose) const override;
   void SimulateErrorForTesting(DownloadInterruptReason reason) override;
+
+#ifdef REDCORE
+  std::string GetYSPUserName() const override;
+  bool is_doc_view() override;
+  void set_is_doc_view(bool doc_view) override;
+  bool is_update() override;
+  void set_is_update(bool update) override;
+#endif
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  bool IsIEDownload() override;
+#endif
 
   // All remaining public interfaces virtual to allow for DownloadItemImpl
   // mocks.
@@ -773,6 +794,18 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   DownloadSource download_source_ = DownloadSource::UNKNOWN;
 
   THREAD_CHECKER(thread_checker_);
+
+#ifdef REDCORE
+  std::string YSPUserName_; //YSP+ { User information isolation }
+  bool is_doc_view_;
+  bool is_update_;
+#endif
+
+#if defined(IE_REDCORE)
+  bool is_ie_download_;
+//   int render_process_host_id_;
+//   int render_frame_host_id_;
+#endif
 
   base::WeakPtrFactory<DownloadItemImpl> weak_ptr_factory_;
 

@@ -166,13 +166,32 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the navigation occurs."},
-              "url": {"type": "string"},
-              "processId": {"type": "integer", "description": "The ID of the process that runs the renderer for this frame."},
-              "frameId": {"type": "integer", "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."},
-              "transitionType": {"$ref": "TransitionType", "description": "Cause of the navigation."},
-              "transitionQualifiers": {"type": "array", "description": "A list of transition qualifiers.", "items": {"$ref": "TransitionQualifier"}},
-              "timeStamp": {"type": "number", "description": "The time when the navigation was committed, in milliseconds since the epoch."}
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "transitionType": {
+                "$ref": "TransitionType",
+                "description": "Cause of the navigation."
+              },
+              "transitionQualifiers": {
+                "type": "array",
+                "description": "A list of transition qualifiers.",
+                "items": { "$ref": "TransitionQualifier" }
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the navigation was committed, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -194,11 +213,23 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the navigation occurs."},
-              "url": {"type": "string"},
-              "processId": {"type": "integer", "description": "The ID of the process that runs the renderer for this frame."},
-              "frameId": {"type": "integer", "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."},
-              "timeStamp": {"type": "number", "description": "The time when the page's DOM was fully constructed, in milliseconds since the epoch."}
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the page's DOM was fully constructed, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -220,11 +251,54 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the navigation occurs."},
-              "url": {"type": "string"},
-              "processId": {"type": "integer", "description": "The ID of the process that runs the renderer for this frame."},
-              "frameId": {"type": "integer", "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."},
-              "timeStamp": {"type": "number", "description": "The time when the document finished loading, in milliseconds since the epoch."}
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the document finished loading, in milliseconds since the epoch."
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "onIECompleted",
+        "type": "function",
+        "description": "ysp+ {IE Embedded} Fired when IE document is completely loaded and initialized",
+        "parameters": [
+          {
+            "name": "details",
+            "type": "object",
+            "description": "Details of the tab that was created.",
+            "properties": {
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the document finished loading, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -277,12 +351,30 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "sourceTabId": {"type": "integer", "description": "The ID of the tab in which the navigation is triggered."},
-              "sourceProcessId": {"type": "integer", "description": "The ID of the process that runs the renderer for the source frame."},
-              "sourceFrameId": {"type": "integer", "description": "The ID of the frame with sourceTabId in which the navigation is triggered. 0 indicates the main frame."},
-              "url": {"type": "string", "description": "The URL to be opened in the new window."},
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the url is opened"},
-              "timeStamp": {"type": "number", "description": "The time when the browser was about to create a new view, in milliseconds since the epoch."}
+              "sourceTabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation is triggered."
+              },
+              "sourceProcessId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for the source frame."
+              },
+              "sourceFrameId": {
+                "type": "integer",
+                "description": "The ID of the frame with sourceTabId in which the navigation is triggered. 0 indicates the main frame."
+              },
+              "url": {
+                "type": "string",
+                "description": "The URL to be opened in the new window."
+              },
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the url is opened"
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the browser was about to create a new view, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -304,13 +396,32 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the navigation occurs."},
-              "url": {"type": "string"},
-              "processId": {"type": "integer", "description": "The ID of the process that runs the renderer for this frame."},
-              "frameId": {"type": "integer", "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."},
-              "transitionType": {"$ref": "TransitionType", "description": "Cause of the navigation."},
-              "transitionQualifiers": {"type": "array", "description": "A list of transition qualifiers.", "items": {"$ref": "TransitionQualifier"}},
-              "timeStamp": {"type": "number", "description": "The time when the navigation was committed, in milliseconds since the epoch."}
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "transitionType": {
+                "$ref": "TransitionType",
+                "description": "Cause of the navigation."
+              },
+              "transitionQualifiers": {
+                "type": "array",
+                "description": "A list of transition qualifiers.",
+                "items": { "$ref": "TransitionQualifier" }
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the navigation was committed, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -324,9 +435,18 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "replacedTabId": {"type": "integer", "description": "The ID of the tab that was replaced."},
-              "tabId": {"type": "integer", "description": "The ID of the tab that replaced the old tab."},
-              "timeStamp": {"type": "number", "description": "The time when the replacement happened, in milliseconds since the epoch."}
+              "replacedTabId": {
+                "type": "integer",
+                "description": "The ID of the tab that was replaced."
+              },
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab that replaced the old tab."
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the replacement happened, in milliseconds since the epoch."
+              }
             }
           }
         ]
@@ -348,13 +468,89 @@
             "type": "object",
             "name": "details",
             "properties": {
-              "tabId": {"type": "integer", "description": "The ID of the tab in which the navigation occurs."},
-              "url": {"type": "string"},
-              "processId": {"type": "integer", "description": "The ID of the process that runs the renderer for this frame."},
-              "frameId": {"type": "integer", "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."},
-              "transitionType": {"$ref": "TransitionType", "description": "Cause of the navigation."},
-              "transitionQualifiers": {"type": "array", "description": "A list of transition qualifiers.", "items": {"$ref": "TransitionQualifier"}},
-              "timeStamp": {"type": "number", "description": "The time when the navigation was committed, in milliseconds since the epoch."}
+              "tabId": {
+                "type": "integer",
+                "description": "The ID of the tab in which the navigation occurs."
+              },
+              "url": { "type": "string" },
+              "processId": {
+                "type": "integer",
+                "description": "The ID of the process that runs the renderer for this frame."
+              },
+              "frameId": {
+                "type": "integer",
+                "description": "0 indicates the navigation happens in the tab content window; a positive value indicates navigation in a subframe. Frame IDs are unique within a tab."
+              },
+              "transitionType": {
+                "$ref": "TransitionType",
+                "description": "Cause of the navigation."
+              },
+              "transitionQualifiers": {
+                "type": "array",
+                "description": "A list of transition qualifiers.",
+                "items": { "$ref": "TransitionQualifier" }
+              },
+              "timeStamp": {
+                "type": "number",
+                "description": "The time when the navigation was committed, in milliseconds since the epoch."
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "onLogin",
+        "type": "function",
+        "description": "ysp+ {IE SWA} Fired when webcontent get webpage login infomation",
+        "parameters": [
+          {
+            "name": "info",
+            "type": "object",
+            "description": "Details of the webpage login infomation.",
+            "properties": {
+              "url": { "type": "string" },
+              "userName": {
+                "type": "string",
+                "description": "login user name."
+              },
+              "userPassword": {
+                "type": "string",
+                "description": "login user password."
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "onYspManager",
+        "type": "function",
+        "description": "ysp+ {push server api} Triggered when the login mamager is successful",
+        "parameters": [
+          {
+            "name": "details",
+            "type": "object",
+            "description": "manager address and login status change.",
+            "properties": {
+              "loginStatus": {
+                "type": "string",
+                "description": "login or logout."
+              },
+              "deviceId": {
+                "type": "string",
+                "description": "login success the device id."
+              },
+              "managerServer": {
+                "type": "string",
+                "description": "Successful login manager address."
+              },
+              "userId": {
+                "type": "string",
+                "description": "login success the user id."
+              },
+              "companyId": {
+                "type": "string",
+                "description": "login success the company id."
+              }
             }
           }
         ]

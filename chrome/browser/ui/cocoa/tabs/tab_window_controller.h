@@ -54,6 +54,15 @@
   // of the drag) to the |overlayWindow_|.
   NSView* originalContentView_;  // weak
 
+#ifdef REDCORE
+  base::scoped_nsobject<NSView> yspTitleView_;
+  base::scoped_nsobject<NSView> yspLockView_;
+#if 0
+  base::scoped_nsobject<NSTextField> userNameLabel_;
+  base::scoped_nsobject<NSButton> yspAvatarButton_;
+#endif
+#endif
+
   base::scoped_nsobject<FocusTracker> focusBeforeOverlay_;
   BOOL closeDeferred_;  // If YES, call performClose: in removeOverlay:.
 }
@@ -77,6 +86,15 @@
 // |window|, or nil if neither |window| nor its parent or any other ancestor
 // has one.
 + (TabWindowController*)tabWindowControllerForWindow:(NSWindow*)window;
+
+#ifdef REDCORE
+@property(readonly, nonatomic) NSView* yspTitleView;
+@property(readonly, nonatomic) NSView* yspLockView;
+#if 0
+@property(readonly, nonatomic) NSTextField* userNameLabel;
+@property(readonly, nonatomic) NSButton* yspAvatarButton;
+#endif
+#endif
 
 // This is the designated initializer for this class.
 - (id)initTabWindowControllerWithTabStrip:(BOOL)hasTabStrip

@@ -98,9 +98,13 @@ enum PageTransition {
   // type of KEYWORD_GENERATED.
   PAGE_TRANSITION_KEYWORD = 9,
 
+#ifdef IE_REDCORE
+  PAGE_TRANSITION_IE_NEWWINDOW = 10,
+#endif
+
   // Corresponds to a visit generated for a keyword. See description of
   // KEYWORD for more details.
-  PAGE_TRANSITION_KEYWORD_GENERATED = 10,
+  PAGE_TRANSITION_KEYWORD_GENERATED = 11,
 
   // ADDING NEW CORE VALUE? Be sure to update the LAST_CORE and CORE_MASK
   // values below.  Also update CoreTransitionString().

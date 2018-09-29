@@ -167,6 +167,9 @@ class CONTENT_EXPORT DownloadManager : public base::SupportsUserData::Data {
       uint32_t id,
       const base::FilePath& current_path,
       const base::FilePath& target_path,
+#ifdef REDCORE
+      const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
       const GURL& site_url,
@@ -239,6 +242,14 @@ class CONTENT_EXPORT DownloadManager : public base::SupportsUserData::Data {
   // Get the download item for |guid|.
   virtual download::DownloadItem* GetDownloadByGuid(
       const std::string& guid) = 0;
+
+#ifdef REDCORE
+  virtual void RemoveDownloadsForUserid(std::string& userid) = 0; //TODO (matianzhi): YSP+ { clear user data }
+#endif
+
+#ifdef IE_REDCORE
+  virtual void RegisterCallbackSucceeded() = 0;  //ysp+{IE Embedded}
+#endif
 };
 
 }  // namespace content

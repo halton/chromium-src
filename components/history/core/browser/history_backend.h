@@ -84,6 +84,10 @@ class QueuedHistoryDBTask {
   bool Run(HistoryBackend* backend, HistoryDatabase* db);
   void DoneRun();
 
+#ifdef REDCORE
+  void ClearHistoryForUser(const std::string& userid);
+#endif
+
  private:
   std::unique_ptr<HistoryDBTask> task_;
   scoped_refptr<base::SingleThreadTaskRunner> origin_loop_;
@@ -511,7 +515,9 @@ class HistoryBackend : public base::RefCountedThreadSafe<HistoryBackend>,
   virtual bool IsExpiredVisitTime(const base::Time& time);
 
   base::Time GetFirstRecordedTimeForTest() { return first_recorded_time_; }
-
+#ifdef REDCORE
+  void ClearHistoryForUser(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
+#endif
  protected:
   ~HistoryBackend() override;
 

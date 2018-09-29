@@ -217,6 +217,23 @@ void ImageView::OnPaintImage(gfx::Canvas* canvas) {
   if (image_bounds.IsEmpty())
     return;
 
+#ifdef REDCORE
+  //ysp+ {
+  if (draw_circle_) {
+    int corner_radius = image_bounds.width()/2;
+    SkPath clipPath;
+    SkRect clipRect = SkRect::MakeXYWH(
+      image_bounds.x(), image_bounds.y(),
+      image_bounds.width(), image_bounds.height());
+    clipPath.addRoundRect(
+        clipRect,
+        SkIntToScalar(corner_radius),
+        SkIntToScalar(corner_radius));
+    canvas->ClipPath(clipPath, true);
+  }
+  //ysp+ }
+#endif
+
   if (image_bounds.size() != gfx::Size(image.width(), image.height())) {
     // Resize case
     cc::PaintFlags flags;

@@ -75,6 +75,10 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadFileImpl : public DownloadFile {
   void Pause() override;
   void Resume() override;
 
+  #if defined(REDCORE) && defined(IE_REDCORE)
+      bool IsIEDownload() override;
+  #endif
+
   // Wrapper of a ByteStreamReader or ScopedDataPipeConsumerHandle, and the meta
   // data needed to write to a slice of the target file.
   //

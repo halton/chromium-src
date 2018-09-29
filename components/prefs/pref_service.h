@@ -50,6 +50,13 @@ class PrefMemberBase;
 class ScopedUserPrefUpdateBase;
 }
 
+#ifdef REDCORE
+class COMPONENTS_PREFS_EXPORT ManagedSettingsProvider {
+ public:
+  virtual base::Value* GetManagedValue(const std::string& path) = 0;
+};
+#endif
+
 // Base class for PrefServices. You can use the base class to read and
 // interact with preferences, but not to register new preferences; for
 // that see e.g. PrefRegistrySimple.
@@ -352,6 +359,12 @@ class COMPONENTS_PREFS_EXPORT PrefService {
   void AddPrefObserverAllPrefs(PrefObserver* obs);
   void RemovePrefObserverAllPrefs(PrefObserver* obs);
 
+#ifdef REDCORE
+  void SetManagedSettingsProvider(ManagedSettingsProvider* provider) {
+    managed_settings_provider_ = provider;
+  }
+#endif
+
  protected:
   // The PrefNotifier handles registering and notifying preference observers.
   // It is created and owned by this PrefService. Subclasses may access it for
@@ -445,6 +458,10 @@ class COMPONENTS_PREFS_EXPORT PrefService {
   mutable PreferenceMap prefs_map_;
 
   SEQUENCE_CHECKER(sequence_checker_);
+
+#ifdef REDCORE
+  ManagedSettingsProvider* managed_settings_provider_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(PrefService);
 };

@@ -72,6 +72,18 @@
 #include "net/url_request/url_request_throttler_manager.h"
 #include "net/url_request/websocket_handshake_userdata_key.h"
 #include "url/origin.h"
+#ifdef REDCORE
+#include "base/strings/string_number_conversions.h"
+#include "base/json/json_reader.h" //YSP+ { SingleSignOn config }
+#include "base/json/json_writer.h" //YSP+ { SingleSignOn config }
+#include "base/json/json_file_value_serializer.h" //YSP+ { SingleSignOn config }
+#include "crypto/ysp_crypto_header.h" //ysp+ { crypto http header }
+
+//ysp+ {
+// static
+static std::map<std::string, std::string>& global_headers_ = * new std::map<std::string, std::string>();
+//ysp+ }
+#endif /*REDCORE*/
 
 #if defined(OS_ANDROID)
 #include "net/android/network_library.h"
@@ -316,6 +328,195 @@ void LogCookieUMA(const net::CookieList& cookie_list,
 
 namespace net {
 
+std::unique_ptr<base::DictionaryValue> &URLRequestHttpJob::SingleSignOnValue_ = * new std::unique_ptr<base::DictionaryValue>(nullptr);
+
+#ifdef REDCORE
+//YSP+ { SingleSignOn config
+static int stringmatchlen(const char *pattern, int patternLen,
+  const char *string, int stringLen, int nocase) {
+  while (patternLen) {
+    switch (pattern[0]) {
+    case '*':
+      while (pattern[1] == '*') {
+        pattern++;
+        patternLen--;
+      }
+      if (patternLen == 1)
+        return 1; /** match */
+      while (stringLen) {
+        if (stringmatchlen(pattern + 1, patternLen - 1,
+          string, stringLen, nocase))
+          return 1; /** match */
+        string++;
+        stringLen--;
+      }
+      return 0; /** no match */
+      break;
+    case '?':
+      if (stringLen == 0)
+        return 0; /** no match */
+      string++;
+      stringLen--;
+      break;
+    case '[':
+    {
+      int inot, match;
+
+      pattern++;
+      patternLen--;
+      inot = pattern[0] == '^';
+      if (inot) {
+        pattern++;
+        patternLen--;
+      }
+      match = 0;
+      while (1) {
+        if (pattern[0] == '\\') {
+          pattern++;
+          patternLen--;
+          if (pattern[0] == string[0])
+            match = 1;
+        }
+        else if (pattern[0] == ']') {
+          break;
+        }
+        else if (patternLen == 0) {
+          pattern--;
+          patternLen++;
+          break;
+        }
+        else if (pattern[1] == '-' && patternLen >= 3) {
+          int start = pattern[0];
+          int end = pattern[2];
+          int c = string[0];
+          if (start > end) {
+            int t = start;
+            start = end;
+            end = t;
+          }
+          if (nocase) {
+            start = tolower(start);
+            end = tolower(end);
+            c = tolower(c);
+          }
+          pattern += 2;
+          patternLen -= 2;
+          if (c >= start && c <= end)
+            match = 1;
+        }
+        else {
+          if (!nocase) {
+            if (pattern[0] == string[0])
+              match = 1;
+          }
+          else {
+            if (tolower((int)pattern[0]) == tolower((int)string[0]))
+              match = 1;
+          }
+        }
+        pattern++;
+        patternLen--;
+      }
+      if (inot)
+        match = !match;
+      if (!match)
+        return 0; /** no match */
+      string++;
+      stringLen--;
+      break;
+    }
+    case '\\':
+      if (patternLen >= 2) {
+        pattern++;
+        patternLen--;
+      }
+      break;
+      /** fall through */
+    default:
+      if (!nocase) {
+        if (pattern[0] != string[0])
+          return 0; /** no match */
+      }
+      else {
+        if (tolower((int)pattern[0]) != tolower((int)string[0]))
+          return 0; /** no match */
+      }
+      string++;
+      stringLen--;
+      break;
+    }
+    pattern++;
+    patternLen--;
+    if (stringLen == 0) {
+      while (*pattern == '*') {
+        pattern++;
+        patternLen--;
+      }
+      break;
+    }
+  }
+  if (patternLen == 0 && stringLen == 0)
+    return 1;
+  return 0;
+}
+
+static int stringmatch(const char *pattern, const char *string, int nocase) {
+  return stringmatchlen(pattern, strlen(pattern), string, strlen(string), nocase);
+}
+
+bool URLRequestHttpJob::UrlCompared(const std::string& host, std::string *key) {
+  if (SingleSignOnValue_ == NULL)
+    return false;
+  base::DictionaryValue* dataDict = SingleSignOnValue_.get();
+  if (!dataDict)
+    return false;
+  int type = 0;
+  int interval = 0;
+  dataDict->GetInteger("type", &type);
+  dataDict->GetInteger("interval", &interval);
+  base::ListValue* Position = nullptr;
+  if (type == 2) {
+    if (dataDict->GetList("hostList", &Position)) {
+      if (Position == NULL || Position->empty())
+        return false;
+      for (size_t i = 0; i < Position->GetSize(); ++i) {
+        base::DictionaryValue* bmDict = nullptr;
+        if (Position->GetDictionary(i, &bmDict)) {
+          std::string domain = "";
+          std::string timestampstr = "";
+          int64_t timestamp = 0;
+          SingleSignOnValue_->GetString("timestamp", &timestampstr);
+          bmDict->GetString("url", &domain);
+          base::StringToInt64(timestampstr, &timestamp);
+          if (stringmatch(host.c_str(), domain.c_str(), true)) {
+            bmDict->GetString("parameter", key);
+            while (true) {
+              if (timestampstr.empty()) {
+                SingleSignOnValue_->GetString("timestamp", &timestampstr);
+                continue;
+              }
+              else {
+                base::StringToInt64(timestampstr, &timestamp);
+                if ((base::Time::Now().ToTimeT() - timestamp) >= interval) {
+                  continue;
+                }
+                else
+                  break;
+              }
+            }
+            timestampstr = "";
+            SingleSignOnValue_->SetString("timestamp", "");
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+//YSP+ } //SingleSignOn config
+#endif /*REDCORE*/
+
 // TODO(darin): make sure the port blocking code is not lost
 // static
 URLRequestJob* URLRequestHttpJob::Factory(URLRequest* request,
@@ -442,6 +643,118 @@ void URLRequestHttpJob::Start() {
   }
 
   request_info_.token_binding_referrer = request_->token_binding_referrer();
+
+  #ifdef REDCORE
+  //ysp+ { ua
+  std::map<std::string, std::string>::const_iterator iter =
+    global_headers_.begin();
+  std::string uaTypes = "";
+  std::string value = "";
+  for (; iter != global_headers_.end(); ++iter) {
+    std::string key = iter->first;
+    std::string ua_value = iter->second;
+  if (key == "UAtypes") {
+    uaTypes = ua_value;
+    continue;
+  }
+    if (!key.empty()) {
+       if (key == "User-Agent") {
+      if (uaTypes == "0") {
+        continue;
+      }
+      else if (uaTypes == "1") {
+        value = http_user_agent_settings_->GetUserAgent();
+        value += " " + ua_value;
+      }
+      //ysp+ { crypto http header
+      else if (uaTypes == "3") {
+        value = http_user_agent_settings_->GetUserAgent();
+        if (YSPCryptoHeader::GetInstance()->isAddHeaders()) {
+        value += " " + YSPCryptoHeader::GetInstance()->GetEncString();
+        }
+      }
+      else if (uaTypes == "2")
+        value = ua_value;
+      //ysp+ } /*crypto http header*/
+      else {
+        value = http_user_agent_settings_->GetUserAgent();
+      }
+      request_info_.extra_headers.SetHeader(key, value);
+    }
+    else {
+      value = http_user_agent_settings_->GetUserAgent();
+      request_info_.extra_headers.SetHeaderIfMissing(key, value);
+    }
+     }
+  }
+  //ysp+ }
+
+  //YSP+ { SingleSignOn config
+  if (SingleSignOnValue_) {
+    base::DictionaryValue* dataDict = SingleSignOnValue_.get();
+    if (dataDict) {
+      int type = 0;
+      dataDict->GetInteger("type", &type);
+      if (type == 1) {
+        std::string singleSignOn = "";
+        std::string singleSignOnCookie = "";
+        base::DictionaryValue* cookieDict = nullptr;
+        std::string name = "";
+        std::string domain = "";
+        std::string path = "";
+        //std::string maxAge = "";
+        bool httpOnly = false;
+        bool secure = false;
+        CookieOptions options;
+        dataDict->GetDictionary("cookie", &cookieDict);
+        cookieDict->GetString("name", &name);
+        cookieDict->GetString("domain", &domain);
+        cookieDict->GetString("path", &path);
+        cookieDict->GetBoolean("httpOnly", &httpOnly);
+        cookieDict->GetBoolean("secure", &secure);
+        cookieDict->GetString("value", &singleSignOn);
+        if (!httpOnly)
+          options.set_include_httponly();
+        else
+          options.set_exclude_httponly();
+        // FIXME(halton): CL https://codereview.chromium.org/2633663003 remove set_enforce_strict_secure
+        // if (secure)
+        //   options.set_enforce_strict_secure();
+        singleSignOnCookie += name + "=" + singleSignOn + "; domain=" + domain + "; path=" + path;
+        scoped_refptr<SharedBoolean> callback_pending = new SharedBoolean(false);
+        scoped_refptr<SharedBoolean> save_next_cookie_running = new SharedBoolean(true);
+        // FIXME(halton): impl SetCookieWithOptionsAsync
+        // CookieStore::SetCookiesCallback callback(
+        //     base::Bind(&URLRequestHttpJob::OnCookieSaved,
+        //                weak_factory_.GetWeakPtr(),
+        //                save_next_cookie_running,
+        //                callback_pending));
+        // request_->context()->cookie_store()->SetCookieWithOptionsAsync(
+        //     request_->url(), singleSignOnCookie, options, callback);
+      } else if (type == 3) {
+        std::string token = "";
+        if (UrlCompared(request_->url().host(), &token)) {
+          request_info_.extra_headers.AddHeaderFromString(token);
+        }
+      }
+      else if (type == 2) {
+        std::string token = "";
+        std::string url_str = "";
+        base::DictionaryValue* urlDict = nullptr;
+        dataDict->GetDictionary("cookie", &urlDict);
+        urlDict->GetString("url", &url_str);
+        if (UrlCompared(request_->url().spec(), &token)) {
+          if (url_str.find("?") != std::string::npos)
+            url_str += "&" + token;
+          else
+            url_str += "?" + token;
+          request_info_.url = GURL(url_str);
+        }
+      }
+    }
+  }
+  //YSP+ } /*SingleSignOn config*/
+#endif /*REDCORE*/
 
   // This should be kept in sync with the corresponding code in
   // URLRequest::GetUserAgent.
@@ -1656,5 +1969,28 @@ void URLRequestHttpJob::NotifyURLRequestDestroyed() {
   if (network_quality_estimator)
     network_quality_estimator->NotifyURLRequestDestroyed(*request());
 }
+#ifdef REDCORE
+//ysp+ {
+// static
+void URLRequestHttpJob::addGlobalHeader(std::string key, std::string value) {
+  global_headers_[key] = value;
+}
+
+void URLRequestHttpJob::clearHeader() {
+  global_headers_.clear();
+}
+
+//ysp+ }
+//YSP+ { SingleSignOn config
+// static
+void URLRequestHttpJob::setSSOConfigValue(const std::string& configValue) {
+  if (!configValue.empty()) {
+    std::unique_ptr<base::Value> dictSSOValue = base::JSONReader::Read(configValue);
+    SingleSignOnValue_.reset(static_cast<base::DictionaryValue*>(dictSSOValue.release()));
+  } else
+    SingleSignOnValue_.reset();
+}
+//YSP+ }/*SingleSignOn config*/
+#endif /*REDCORE*/
 
 }  // namespace net

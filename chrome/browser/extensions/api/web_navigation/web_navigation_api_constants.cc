@@ -21,6 +21,19 @@ const char kTimeStampKey[] = "timeStamp";
 const char kTransitionTypeKey[] = "transitionType";
 const char kTransitionQualifiersKey[] = "transitionQualifiers";
 const char kUrlKey[] = "url";
+#ifdef REDCORE
+#ifdef IE_REDCORE
+const char kUserName[] = "userName";
+const char kUserPassword[] = "userPassword";
+#endif /*IE_REDCORE*/
+//TODO(matianzhi) ysp+{push server api}
+const char kLoginStatusKey[] = "loginStatus";
+const char kLoginManagerUrlKey[] = "managerServer";
+const char kLoginDeviceIdKey[] = "deviceId";
+const char kLoginUserIdKey[] = "userId";
+const char kLoginCompanyIdKey[] = "companyId";
+//YSP+ }
+#endif /*REDCORE*/
 
 }  // namespace web_navigation_api_constants
 

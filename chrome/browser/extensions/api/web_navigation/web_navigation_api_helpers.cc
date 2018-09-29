@@ -281,6 +281,62 @@ void DispatchOnTabReplaced(
   DispatchEvent(browser_context, std::move(event), GURL());
 }
 
+#ifdef REDCORE
+//TODO(matianzhi) ysp+{push server api}
+void DispathOnYspManager(content::WebContents* web_contents,
+                         content::RenderFrameHost* frame_host,
+                         const std::string& status,
+                         const std::string& manager_server,
+                         const std::string& device_id,
+                         const std::string& user_id,
+                         const std::string& company_id) {
+  if (web_contents == NULL || frame_host == NULL ||
+      status.empty() || manager_server.empty() ||
+      device_id.empty() || user_id.empty() || company_id.empty())
+    return;
+
+  web_navigation::OnYspManager::Details details;
+  details.login_status = status;
+  details.device_id = device_id;
+  details.manager_server = manager_server;
+  details.user_id = user_id;
+  details.company_id = company_id;
+
+  content::BrowserContext* browser_context = web_contents->GetBrowserContext();
+  auto event = std::make_unique<Event>(
+      events::WEB_NAVIGATION_ON_YSP_MANAGER,
+      web_navigation::OnYspManager::kEventName,
+      web_navigation::OnYspManager::Create(details), browser_context);
+
+  DispatchEvent(browser_context, std::move(event), GURL());
+}
+#endif /*REDCORE*/
+
+#ifdef IE_REDCORE
+void DispathOnLogin(content::WebContents* web_contents,    //ysp+{IE SWA}
+                    content::RenderFrameHost* frame_host,
+                    const std::string& login_url,
+                    const std::string& user_name,
+                    const std::string& user_pwd) {
+  if (web_contents == NULL || frame_host == NULL ||
+      login_url.empty() || user_name.empty() || user_pwd.empty())
+    return;
+
+  web_navigation::OnLogin::Info details;
+  details.url = login_url;
+  details.user_name = user_name;
+  details.user_password = user_pwd;
+
+  content::BrowserContext* browser_context = web_contents->GetBrowserContext();
+  auto event = std::make_unique<Event>(
+      events::WEB_NAVIGATION_ON_LOGIN,
+      web_navigation::OnLogin::kEventName,
+      web_navigation::OnLogin::Create(details), browser_context);
+
+  DispatchEvent(browser_context, std::move(event), GURL());
+}
+#endif /*IE_REDCORE*/
+
 }  // namespace web_navigation_api_helpers
 
 }  // namespace extensions

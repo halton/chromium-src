@@ -36,6 +36,9 @@
 #include "base/android/scoped_java_ref.h"
 #endif
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "content\common\IE\IEVersion.h"
+#endif
 class GURL;
 
 namespace base {
@@ -99,6 +102,11 @@ class CONTENT_EXPORT WebContentsDelegate {
   // opened immediately.
   virtual WebContents* OpenURLFromTab(WebContents* source,
                                       const OpenURLParams& params);
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  virtual bool UrlCompared(const GURL& host, RendererMode& mode); //YSP+ { Kernel switching
+  virtual void DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* userPwd);
+#endif
 
   // Allows the delegate to optionally cancel navigations that attempt to
   // transfer to a different process between the start of the network load and

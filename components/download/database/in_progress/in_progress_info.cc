@@ -23,6 +23,9 @@ bool InProgressInfo::operator==(const InProgressInfo& other) const {
          original_mime_type == other.original_mime_type &&
          current_path == other.current_path &&
          target_path == other.target_path &&
+#ifdef REDCORE
+         YSPUserName == other.YSPUserName &&
+#endif
          received_bytes == other.received_bytes &&
          start_time == other.start_time && end_time == other.end_time &&
          received_slices == other.received_slices && hash == other.hash &&

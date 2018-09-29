@@ -278,4 +278,6 @@ Chromium 无法恢复您的设置。</translation>
 <translation id="93478295209880648">Chromium 可能无法正常运行，因为它不再支持 Windows XP 和 Windows Vista</translation>
 <translation id="95514773681268843"><ph name="DOMAIN" /> 要求您必须先阅读并接受以下服务条款，才能使用此设备。这些条款不会扩大、修改或限制 Chromium 操作系统条款。</translation>
 <translation id="985602178874221306">The Chromium Authors</translation>
+<!-- //ysp+ { terms } -->
+<translation id="5204098752394657250">Google Chrome　<ph name="TERMS_OF_SERVICE_LINK" />服务条款<ph name="END_TERMS_OF_SERVICE_LINK" /></translation>
 </translationbundle>

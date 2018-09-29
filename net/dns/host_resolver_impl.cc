@@ -76,6 +76,7 @@
 #include "net/socket/client_socket_factory.h"
 #include "net/socket/datagram_client_socket.h"
 #include "url/url_canon_ip.h"
+#include "base/json/json_reader.h" //ysp+ { private DNS }
 
 #if defined(OS_WIN)
 #include "net/base/winsock_init.h"
@@ -2102,6 +2103,40 @@ HostResolverImpl::~HostResolverImpl() {
   NetworkChangeNotifier::RemoveConnectionTypeObserver(this);
   NetworkChangeNotifier::RemoveDNSObserver(this);
 }
+
+#ifdef REDCORE //ysp+ { private DNS
+std::unique_ptr<base::DictionaryValue> &HostResolverImpl::privateDNSDict_ = *(new std::unique_ptr<base::DictionaryValue>);
+void HostResolverImpl::SetPrivateDNSValue(const std::string & privateDNSString)
+{
+	if (!privateDNSString.empty()) {
+		std::unique_ptr<base::Value> privateDNSValue = base::JSONReader::Read(privateDNSString);
+		privateDNSDict_.reset(static_cast<base::DictionaryValue*>(privateDNSValue.release()));
+	}
+	else
+		privateDNSDict_.reset();
+}
+base::ListValue* HostResolverImpl::privateDNSCompared(const std::string& Host)
+{
+	base::ListValue* privateDNSList = nullptr;
+	if (privateDNSDict_.get() && privateDNSDict_->GetList("list", &privateDNSList))
+		if (privateDNSList && !privateDNSList->empty()) {
+			for (size_t i = 0; i < privateDNSList->GetSize(); ++i) {
+				base::DictionaryValue* bmDict = nullptr;
+				if (privateDNSList->GetDictionary(i, &bmDict)) {
+					std::string domain;
+					bmDict->GetString("domain", &domain);
+					if (Host == domain) {
+						base::ListValue* addressList = nullptr;
+						if (bmDict->GetList("ip", &addressList)) {
+							return addressList;
+						}
+					}
+				}
+			}
+		}
+	return nullptr;
+}
+#endif //ysp+ }
 
 void HostResolverImpl::SetDnsClient(std::unique_ptr<DnsClient> dns_client) {
   // DnsClient and config must be updated before aborting DnsTasks, since doing

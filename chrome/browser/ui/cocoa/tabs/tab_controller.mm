@@ -618,10 +618,18 @@ constexpr CGFloat kPinnedTabWidth = kDefaultTabHeight * 2;
   NSColor* titleColor = nil;
   const ui::ThemeProvider* theme = [[[self view] window] themeProvider];
   if (theme && ![self selected])
+#ifdef REDCORE // unselected tab
+    titleColor = theme->GetNSColor(ThemeProperties::COLOR_TAB_TEXT);
+#else
     titleColor = theme->GetNSColor(ThemeProperties::COLOR_BACKGROUND_TAB_TEXT);
+#endif
   // Default to the selected text color unless told otherwise.
   if (theme && !titleColor)
+#ifdef REDCORE // selected tab
+    titleColor = theme->GetNSColor(ThemeProperties::COLOR_FOCUSED_TAB_TEXT);
+#else
     titleColor = theme->GetNSColor(ThemeProperties::COLOR_TAB_TEXT);
+#endif
   [[self tabView] setTitleColor:titleColor ? titleColor : [NSColor textColor]];
 }
 

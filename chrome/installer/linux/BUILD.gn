@@ -25,10 +25,19 @@ declare_args() {
 
 assert(is_linux)
 
-packaging_files_executables = [
-  "$root_out_dir/chrome",
-  "$root_out_dir/chrome_sandbox",
-]
+packaging_files_executables = []
+
+if (is_redcore) {
+  packaging_files_executables += [
+    "$root_out_dir/redcore",
+  ]
+} else {
+  packaging_files_executables += [
+    "$root_out_dir/chrome",
+    "$root_out_dir/chrome_sandbox",
+  ]
+}
+
 packaging_files_shlibs = []
 
 if (enable_nacl) {
@@ -156,12 +165,19 @@ action("merge_rpm_dependencies") {
 }
 
 action("strip_chrome_binary") {
-  prog_name = "$root_out_dir/chrome"
+  if (is_redcore) {
+    prog_name = "$root_out_dir/redcore"
+  } else {
+    prog_name = "$root_out_dir/chrome"
+  }
   debug_file = prog_name + ".debug"
   stripped_file = prog_name + ".stripped"
-  deps = [
-    "//chrome",
-  ]
+
+  if (is_redcore) {
+    deps = [ "//chrome:redcore" ]
+  } else {
+    deps = [ "//chrome" ]
+  }
   script = "//build/gn_run_binary.py"
   sources = [
     prog_name,
@@ -240,6 +256,11 @@ copy("common_packaging_files") {
     sources += [
       "common/google-chrome/google-chrome.appdata.xml.template",
       "common/google-chrome/google-chrome.info",
+    ]
+  } else if (is_redcore) {
+    sources += [
+      "common/redcore/redcore-browser.appdata.xml",
+      "common/redcore/redcore-browser.info",
     ]
   } else {
     sources += [
@@ -370,6 +391,10 @@ group("installer_deps") {
   if (!is_chromeos) {
     public_deps += [ ":rpm_packaging_files" ]
   }
+
+  if (is_redcore) {
+    public_deps += [ "//chrome:redcore" ]
+  }
 }
 
 # Creates .deb and .rpm (RPM for non-ChromeOS only) installer packages.
@@ -411,6 +436,8 @@ template("linux_package") {
     inputs = packaging_files
     if (is_chrome_branded) {
       package = "google-chrome"
+    } else if (is_redcore) {
+      package = "redcore-browser"
     } else {
       package = "chromium-browser"
     }
@@ -427,7 +454,7 @@ template("linux_package") {
       "-c",
       invoker.channel,
       "-d",
-      branding_path_component,
+      "redcore",
       "-o",
       rebase_path(root_out_dir, root_build_dir),
       "-s",
@@ -469,6 +496,8 @@ template("linux_package") {
       inputs = packaging_files
       if (is_chrome_branded) {
         package = "google-chrome"
+      } else if (is_redcore) {
+        package = "redcore-browser"
       } else {
         package = "chromium-browser"
       }

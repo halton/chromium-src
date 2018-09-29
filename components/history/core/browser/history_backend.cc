@@ -54,6 +54,10 @@
 #include "base/ios/scoped_critical_action.h"
 #endif
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif
+
 using base::Time;
 using base::TimeDelta;
 using base::TimeTicks;
@@ -871,8 +875,15 @@ std::pair<URLID, VisitID> HistoryBackend::AddPageVisit(
   }
 
   // Add the visit with the time to the database.
+#ifdef REDCORE
+  std::string uuidKey = "onlyid";
+  std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+  VisitRow visit_info(url_id, time, username, referring_visit, transition, 0,
+                      should_increment_typed_count);
+#else
   VisitRow visit_info(url_id, time, referring_visit, transition, 0,
                       should_increment_typed_count);
+#endif
   VisitID visit_id = db_->AddVisit(&visit_info, visit_source);
 
   if (visit_info.visit_time < first_recorded_time_)
@@ -923,12 +934,23 @@ void HistoryBackend::AddPagesWithDetails(const URLRows& urls,
     // Sync code manages the visits itself.
     if (visit_source != SOURCE_SYNCED) {
       // Make up a visit to correspond to the last visit to the page.
+#ifdef REDCORE
+      std::string uuidKey = "onlyid";
+      std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+      VisitRow visit_info(
+          url_id, i->last_visit(), username, 0,
+          ui::PageTransitionFromInt(ui::PAGE_TRANSITION_LINK |
+                                    ui::PAGE_TRANSITION_CHAIN_START |
+                                    ui::PAGE_TRANSITION_CHAIN_END),
+          0, false);
+#else
       VisitRow visit_info(
           url_id, i->last_visit(), 0,
           ui::PageTransitionFromInt(ui::PAGE_TRANSITION_LINK |
                                     ui::PAGE_TRANSITION_CHAIN_START |
                                     ui::PAGE_TRANSITION_CHAIN_END),
           0, false);
+#endif
       if (!db_->AddVisit(&visit_info, visit_source)) {
         NOTREACHED() << "Adding visit failed.";
         return;
@@ -1334,6 +1356,10 @@ void HistoryBackend::QueryHistoryBasic(const QueryOptions& options,
     // transition type.
     url_result.set_blocked_visit(
         (visit.transition & ui::PAGE_TRANSITION_BLOCKED) != 0);
+
+#ifdef REDCORE
+    url_result.set_YSPUserName(visit.YSPUserName);
+#endif
 
     // We don't set any of the query-specific parts of the URLResult, since
     // snippets and stuff don't apply to basic querying.
@@ -2830,5 +2856,20 @@ bool HistoryBackend::ClearAllMainHistory(const URLRows& kept_urls) {
 
   return true;
 }
+
+#ifdef REDCORE
+//TODO (matianzhi): YSP+ { clear user data
+void HistoryBackend::ClearHistoryForUser(const std::string& userid) {
+  if (!db_)
+    return;
+
+  expirer_.ExpireHistoryForUserId(userid);
+
+  // Force a commit, if the user is deleting something for privacy reasons,
+  // we want to get it on disk ASAP.
+  Commit();
+}
+//ysp+ }
+#endif
 
 }  // namespace history

@@ -11,12 +11,20 @@
 #include "base/macros.h"
 #include "components/download/content/public/all_download_item_notifier.h"
 
+#ifdef REDCORE
+#include "components/ysp_doc_view/ysp_doc_view_manager.h"   //ysp+
+#endif /*REDCORE*/
+
 // This class handles the task of observing a single DownloadManager for
 // notifying the UI when a new download should be displayed in the UI.
 // It invokes the OnNewDownloadReady() method of hte Delegate when the
 // target path is available for a new download.
-class DownloadUIController
-    : public download::AllDownloadItemNotifier::Observer {
+#ifdef REDCORE
+class DownloadUIController : public download::AllDownloadItemNotifier::Observer,
+                             public YSPDocViewManagerDelegate {   //ysp+
+#else
+class DownloadUIController : public download::AllDownloadItemNotifier::Observer {
+#endif /*REDCORE*/
  public:
   // The delegate is responsible for figuring out how to notify the UI.
   class Delegate {
@@ -40,6 +48,11 @@ class DownloadUIController
 
   ~DownloadUIController() override;
 
+#ifdef REDCORE
+  // YSPDocViewManagerDelegate:
+  void OnDocViewRequestFailure() override;
+  void OnDocViewRequestSuccess(download::DownloadItem* download, const std::string& doc_url) override;
+#endif /*REDCORE*/
  private:
   void OnDownloadCreated(content::DownloadManager* manager,
                          download::DownloadItem* item) override;

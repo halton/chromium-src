@@ -72,6 +72,7 @@
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/render_widget_host_view.h"
 #include "content/public/browser/web_contents.h"
+#include "content/browser/web_contents/web_contents_ie.h"
 #include "content/public/common/url_constants.h"
 #include "extensions/browser/app_window/app_window.h"
 #include "extensions/browser/extension_api_frame_id_map.h"
@@ -2231,5 +2232,113 @@ ExtensionFunction::ResponseAction TabsDiscardFunction::Run() {
 
 TabsDiscardFunction::TabsDiscardFunction() {}
 TabsDiscardFunction::~TabsDiscardFunction() {}
+
+#ifdef REDCORE
+bool TabsSetIEAutoLoginInfoFunction::RunAsync() {
+#ifdef IE_REDCORE
+ std::unique_ptr<tabs::SetIEAutoLoginInfo::Params> params(
+   tabs::SetIEAutoLoginInfo::Params::Create(*args_));
+ EXTENSION_FUNCTION_VALIDATE(params);
+ int tabID = params->tab_id;
+ std::wstring frameXpath = base::UTF8ToUTF16(params->frame_xpath);
+ std::wstring nameXpath = base::UTF8ToUTF16(params->name_xpath);
+ std::wstring nameValue = base::UTF8ToUTF16(params->name_value);
+ std::wstring pwdXpath = base::UTF8ToUTF16(params->pwd_xpath);
+ std::wstring pwdValue = base::UTF8ToUTF16(params->pwd_value);
+ std::wstring loginXpath = base::UTF8ToUTF16(params->login_xpath);
+ if (tabID < 0)
+   return false;
+ WebContents* web_contents = GetWebContents(tabID);
+ if (web_contents) {
+   RendererMode mode= web_contents->GetRendererMode();
+   if (mode.core == IE_CORE) {
+     content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
+     pIEContent->SetIEAutoLoginInfo(frameXpath, nameXpath, nameValue, pwdXpath, pwdValue, loginXpath);
+   }
+ }
+#endif /*IE_REDCORE*/
+ return true;
+}
+
+content::WebContents * TabsSetIEAutoLoginInfoFunction::GetWebContents(int tab_id)
+{
+ content::WebContents* pWebContent = NULL;
+#ifdef IE_REDCORE
+ if (tab_id != -1)   {
+   // We assume this call leaves web_contents unchanged if it is unsuccessful.
+   GetTabById(tab_id,
+     GetProfile(),
+     include_incognito_information(),
+     NULL /* ignore Browser* output */,
+     NULL /* ignore TabStripModel* output */,
+     &pWebContent,
+     NULL /* ignore int tab_index output */,
+     &error_);
+ }
+ else {
+   Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();;
+   if (!browser)
+     error_ = keys::kNoCurrentWindowError;
+   else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
+     error_ = keys::kNoSelectedTabError;
+ }
+#endif /*IE_REDCORE*/
+ return pWebContent;
+}
+
+
+bool TabsStartListenIELoginFunction::RunAsync() {
+#ifdef IE_REDCORE
+ std::unique_ptr<tabs::StartListenIELogin::Params> params(
+   tabs::StartListenIELogin::Params::Create(*args_));
+ EXTENSION_FUNCTION_VALIDATE(params);
+
+ int tabID = params->tab_id;
+ std::wstring url = base::UTF8ToUTF16(params->url);
+ std::wstring frameXpath = base::UTF8ToUTF16(params->frame_xpath);
+ std::wstring nameXpath = base::UTF8ToUTF16(params->name_xpath);
+ std::wstring pwdXpath = base::UTF8ToUTF16(params->pwd_xpath);
+std::wstring loginXpath = base::UTF8ToUTF16(params->login_xpath);
+ if (tabID < 0)
+   return false;
+ WebContents* web_contents = GetWebContents(tabID);
+ if (web_contents) {
+   RendererMode mode = web_contents->GetRendererMode();
+   if (mode.core == IE_CORE) {
+     content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
+     pIEContent->SetListenLoginXPath(url, frameXpath, nameXpath, pwdXpath, loginXpath);
+   }
+ }
+#endif /*IE_REDCORE*/
+ return true;
+}
+
+content::WebContents * TabsStartListenIELoginFunction::GetWebContents(int tab_id)
+{
+ content::WebContents* pWebContent = NULL;
+#ifdef IE_REDCORE
+ if (tab_id != -1) {
+   // We assume this call leaves web_contents unchanged if it is unsuccessful.
+   GetTabById(tab_id,
+     GetProfile(),
+     include_incognito_information(),
+     NULL /* ignore Browser* output */,
+     NULL /* ignore TabStripModel* output */,
+     &pWebContent,
+     NULL /* ignore int tab_index output */,
+     &error_);
+ }
+ else {
+   Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();
+   if (!browser)
+     error_ = keys::kNoCurrentWindowError;
+   else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
+     error_ = keys::kNoSelectedTabError;
+ }
+#endif /*IE_REDCORE*/
+ return pWebContent;
+}
+//ysp+ }
+#endif /*REDCORE*/
 
 }  // namespace extensions

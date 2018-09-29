@@ -18,16 +18,24 @@ VisitRow::VisitRow() {}
 
 VisitRow::VisitRow(URLID arg_url_id,
                    base::Time arg_visit_time,
+#ifdef REDCORE
+                   const std::string& arg_YSPUserName,
+#endif
                    VisitID arg_referring_visit,
                    ui::PageTransition arg_transition,
                    SegmentID arg_segment_id,
                    bool arg_incremented_omnibox_typed_score)
     : url_id(arg_url_id),
       visit_time(arg_visit_time),
+#ifdef REDCORE
+      YSPUserName(arg_YSPUserName),
+#endif
       referring_visit(arg_referring_visit),
       transition(arg_transition),
       segment_id(arg_segment_id),
       incremented_omnibox_typed_score(arg_incremented_omnibox_typed_score) {}
+
+VisitRow::VisitRow(const VisitRow& other) = default;
 
 VisitRow::~VisitRow() {
 }

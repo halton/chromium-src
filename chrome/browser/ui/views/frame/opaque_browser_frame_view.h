@@ -19,11 +19,19 @@
 #include "ui/views/linux_ui/linux_ui.h"
 #include "ui/views/window/non_client_view.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/browser.h"
+#endif
+
 class BrowserView;
 class OpaqueBrowserFrameViewLayout;
 class HostedAppButtonContainer;
 class OpaqueBrowserFrameViewPlatformSpecific;
 class TabIconView;
+#ifdef REDCORE
+class YSPLockScreenView;
+class YSPLoginManagerObserver;
+#endif
 
 namespace chrome {
 enum class FrameButtonDisplayType;
@@ -109,6 +117,12 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   gfx::Size GetNewTabButtonPreferredSize() const override;
   int GetTopAreaHeight() const override;
   bool UseCustomFrame() const override;
+  #ifdef REDCORE
+  bool OnMousePressed(const ui::MouseEvent& event) override;
+  base::string16 GetLoginInfo() const override;
+  void LockScreen(Browser::YSPLockStatus status);
+  #endif
+
   bool IsFrameCondensed() const override;
   bool EverHasVisibleBackgroundTabShapes() const override;
 
@@ -188,6 +202,12 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
                            SkColor color,
                            gfx::Canvas* canvas) const;
 
+#ifdef REDCORE
+  void SetControlButtonImage(views::ImageButton* button, 
+                             int normal_image_id,
+                             int hover_image_id,
+                             int pressed_image_id);
+#endif
   // Our layout manager also calculates various bounds.
   OpaqueBrowserFrameViewLayout* layout_;
 
@@ -200,6 +220,12 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   // The window icon and title.
   TabIconView* window_icon_;
   views::Label* window_title_;
+#ifdef REDCORE
+  views::Label* hello_;
+  views::Label* login_info_;
+  views::ImageButton* lock_button_;
+  YSPLockScreenView* locked_view_;
+#endif
 
   HostedAppButtonContainer* hosted_app_button_container_ = nullptr;
 

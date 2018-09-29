@@ -782,13 +782,23 @@ void ResourceBundle::LoadChromeResources() {
   // 2x images. The 1x data pack only has 1x images, thus passes in an accurate
   // scale factor to gfx::ImageSkia::AddRepresentation.
   if (IsScaleFactorSupported(SCALE_FACTOR_100P)) {
+//#ifdef REDCORE
+//    AddDataPackFromPath(GetResourcesPakFilePath(
+//        "redcore_100_percent.pak"), SCALE_FACTOR_100P);
+//#else
     AddDataPackFromPath(GetResourcesPakFilePath(
         "chrome_100_percent.pak"), SCALE_FACTOR_100P);
+//#endif
   }
 
   if (IsScaleFactorSupported(SCALE_FACTOR_200P)) {
+//#ifdef REDCORE
+//    AddOptionalDataPackFromPath(GetResourcesPakFilePath(
+//        "redcore_200_percent.pak"), SCALE_FACTOR_200P);
+//#else
     AddOptionalDataPackFromPath(GetResourcesPakFilePath(
         "chrome_200_percent.pak"), SCALE_FACTOR_200P);
+//#endif
   }
 }
 

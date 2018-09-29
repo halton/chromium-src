@@ -264,4 +264,31 @@ void ContentFaviconDriver::DocumentOnLoadCompletedInMainFrame() {
   document_on_load_completed_ = true;
 }
 
+#ifdef REDCORE
+#ifdef IE_REDCORE
+//ysp+{IE Embedded}
+void ContentFaviconDriver::DidCommitProvisionalLoadForFrame(
+	content::RenderFrameHost* render_frame_host,
+	const GURL& url,
+	ui::PageTransition transition_type)
+{
+	if (web_contents()->GetRendererMode().core == IE_CORE)
+	{
+		favicon_urls_->clear();
+
+		content::NavigationEntry* entry =
+			web_contents()->GetController().GetLastCommittedEntry();
+		if (!entry)
+			return;
+
+		if (url != bypass_cache_page_url_)
+			bypass_cache_page_url_ = GURL();
+
+		FetchFavicon(url,true);
+	}
+}
+//ysp+
+#endif
+#endif
+
 }  // namespace favicon

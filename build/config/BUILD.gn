@@ -10,6 +10,7 @@ import("//build/config/coverage/coverage.gni")
 import("//build/config/crypto.gni")
 import("//build/config/dcheck_always_on.gni")
 import("//build/config/features.gni")
+import("//build/config/redcore.gni")
 
 # Subprojects need to override arguments in {mac,ios}_sdk_overrides.gni in their
 # .gn config, but those arguments are only used on macOS. Including
@@ -146,6 +147,12 @@ config("feature_flags") {
   # ==============================================
   #
   # See the comment at the top.
+  if (is_redcore) {
+    defines += [ "REDCORE=1" ]
+    if (is_ie_redcore) {
+      defines += [ "IE_REDCORE=1" ]
+    }
+  }
 }
 
 # Debug/release ----------------------------------------------------------------

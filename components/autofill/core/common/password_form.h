@@ -362,6 +362,12 @@ struct PasswordForm {
 
   PasswordForm& operator=(const PasswordForm& form);
   PasswordForm& operator=(PasswordForm&& form);
+
+#ifdef REDCORE
+  base::string16 YSPAppName_value;
+  base::string16 YSPUserName_value;
+  std::string YSPLoginType_value;
+#endif
 };
 
 // True if the unique keys for the forms are the same. The unique key is

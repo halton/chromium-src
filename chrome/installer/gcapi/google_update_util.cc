@@ -11,6 +11,17 @@
 
 namespace gcapi_internals {
 
+#ifdef REDCORE
+const wchar_t kChromeRegClientsKey[] =
+    L"Software\\AllMobilize\\Update\\Clients\\"
+    L"{5DF08BA8-7F6D-45C7-AC85-7AA6A02EF89A}";
+const wchar_t kChromeRegClientStateKey[] =
+    L"Software\\AllMobilize\\Update\\ClientState\\"
+    L"{5DF08BA8-7F6D-45C7-AC85-7AA6A02EF89A}";
+const wchar_t kChromeRegClientStateMediumKey[] =
+    L"Software\\AllMobilize\\Update\\ClientStateMedium\\"
+    L"{5DF08BA8-7F6D-45C7-AC85-7AA6A02EF89A}";
+#else
 const wchar_t kChromeRegClientsKey[] =
     L"Software\\Google\\Update\\Clients\\"
     L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
@@ -20,6 +31,7 @@ const wchar_t kChromeRegClientStateKey[] =
 const wchar_t kChromeRegClientStateMediumKey[] =
     L"Software\\Google\\Update\\ClientStateMedium\\"
     L"{8A69D345-D564-463c-AFF1-A69D9E530F96}";
+#endif
 
 // Mirror the strategy used by GoogleUpdateSettings::GetBrand.
 bool GetBrand(base::string16* value) {

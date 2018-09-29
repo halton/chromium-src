@@ -18,6 +18,15 @@
 #include "chrome/browser/ui/views/tab_contents/chrome_web_contents_view_focus_helper.h"
 #include "content/public/browser/web_contents.h"
 #include "ui/views/widget/widget.h"
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h" //ysp+{disable rbutton menu}
+
+//ysp+{IE Watermark}
+#include "ui/gfx/native_widget_types.h"
+#include "ui/aura/window_tree_host.h"
+
+#define WM_WEBCONTENTSIZED WM_USER + 8889
+#endif
 
 ChromeWebContentsViewDelegateViews::ChromeWebContentsViewDelegateViews(
     content::WebContents* web_contents)
@@ -98,6 +107,11 @@ void ChromeWebContentsViewDelegateViews::ShowMenu(
 void ChromeWebContentsViewDelegateViews::ShowContextMenu(
     content::RenderFrameHost* render_frame_host,
     const content::ContextMenuParams& params) {
+#ifdef REDCORE  //ysp+{disable rbutton menu}
+  if (YSPLoginManager::GetInstance()->GetMouseRightButtonEnabled()==false)
+      return;
+#endif
+
   ShowMenu(
       BuildMenu(content::WebContents::FromRenderFrameHost(render_frame_host),
                 params));

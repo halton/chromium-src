@@ -187,6 +187,13 @@ class NET_EXPORT HostResolverImpl
   // Only allowed when the queue is empty.
   void SetMaxQueuedJobsForTesting(size_t value);
 
+#if defined(REDCORE)
+  static void SetPrivateDNSValue(const std::string & privateDNSString);
+
+  static base::ListValue* privateDNSCompared(const std::string& Host);
+  static std::unique_ptr<base::DictionaryValue> &privateDNSDict_;
+#endif
+
  protected:
   // Callback from HaveOnlyLoopbackAddresses probe.
   void SetHaveOnlyLoopbackAddresses(bool result);

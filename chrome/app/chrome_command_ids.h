@@ -92,6 +92,10 @@
 #define IDC_WINDOW_PIN_TAB              35013
 #define IDC_MIGRATE_LOCAL_CREDIT_CARD_FOR_PAGE 35014
 
+#ifdef REDCORE
+#define IDC_RENDERER_MODE_SWITCH        35015
+#endif
+
 // Clipboard commands
 #define IDC_CUT                         36000
 #define IDC_COPY                        36001

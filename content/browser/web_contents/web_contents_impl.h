@@ -107,6 +107,9 @@ struct AXEventNotificationDetails;
 struct FaviconURL;
 struct LoadNotificationDetails;
 struct MHTMLGenerationParams;
+#if defined(REDCORE) && defined(IE_REDCORE)
+class WebContentsIE;	//ysp+ {IE Embedded}
+#endif
 
 namespace mojom {
 class CreateNewWindowParams;
@@ -363,7 +366,8 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   WebContentsImpl* GetOutermostWebContents() override;
   void DidChangeVisibleSecurityState() override;
   void NotifyPreferencesChanged() override;
-
+  bool IsAutoSelect() override;
+  RendererMode GetRendererMode() override;
   void Stop() override;
   void SetPageFrozen(bool frozen) override;
   std::unique_ptr<WebContents> Clone() override;
@@ -623,6 +627,9 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   void OnIgnoredUIEvent() override;
   void Activate() override;
   void UpdatePreferredSize(const gfx::Size& pref_size) override;
+#if defined(REDCORE) && defined(IE_REDCORE)
+  void CreateNewIEWindow(const GURL& url, RendererMode mode); //ysp+ { Kernel switching
+#endif
   void CreateNewWidget(int32_t render_process_id,
                        int32_t route_id,
                        mojom::WidgetPtr widget,
@@ -990,7 +997,11 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
  private:
   friend class WebContentsObserver;
   friend class WebContents;  // To implement factory methods.
-
+#if defined(REDCORE) && defined(IE_REDCORE)
+  friend class WebContentsIE; //ysp+ {IE Embedded}
+  RendererMode rendererMode_; //ysp+ {IE Embedded}
+  bool auto_seclect_; //YSP+ { Kernel switching }
+#endif
   friend class RenderFrameHostImplBeforeUnloadBrowserTest;
   friend class WebContentsImplBrowserTest;
 

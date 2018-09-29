@@ -24,6 +24,12 @@ std::string GetVersionNumber() {
   return PRODUCT_VERSION;
 }
 
+#ifdef REDCORE
+std::string GetYSPVersionNumber() {
+ return YSP_PRODUCT_VERSION;
+}
+#endif
+
 const base::Version& GetVersion() {
   static const base::NoDestructor<base::Version> version(GetVersionNumber());
   return *version;

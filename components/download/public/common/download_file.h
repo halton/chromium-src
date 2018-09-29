@@ -106,6 +106,10 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadFile {
 
   virtual void Pause() = 0;
   virtual void Resume() = 0;
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  virtual bool IsIEDownload() = 0;
+#endif
 };
 
 }  // namespace download

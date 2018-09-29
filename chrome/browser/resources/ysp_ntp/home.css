@@ -1,0 +1,397 @@
+@charset "utf-8";
+/*
+@名称: home
+@功能: 首页样式
+*/
+.home-body{
+    display: none;
+    height: 100%;
+}
+.content{
+    /*position: relative;*/
+    /*min-height: 600px;*/
+    height: 100%;
+    background: #fff;
+}
+/**** user info ****/
+.user-info{
+    padding: 35px 50px 35px;
+}
+.user-info h2{
+    font-size: 24px;
+    color: #ffa800;
+}
+.user-info .username{
+    color: #333;
+}
+.user-info p{
+    margin-top: 5px;
+    font-size: 12px;
+    color: #aeb2b6;
+}
+
+.main-container{
+    position: absolute;
+    top: 28.2%;
+    left: 50%;
+    width: 840px;
+    margin-left: -420px;
+    text-align: center;
+}
+.company_logo{
+    max-height: 70px;
+    margin-bottom: 35px;
+}
+
+#company_logo_default{
+    display: none;
+}
+/** search box**/
+.search-box{
+    position: relative;
+    width: 100%;
+    height: 46px;
+    border: 1px solid #a7c4d9;
+    border-radius: 23px;
+    background:#fff url('images/icon_baidu.png') 20px center no-repeat;
+    background-size: 23px 25px;
+}
+.search-box input{
+    display: block;
+    float: left;
+    height: 44px;
+    margin-left: 62px;
+    width: calc(100% - 110px);
+    font-size: 18px;
+    border: none;
+}
+.search-box .search-btn, .search-box .logined-search-btn{
+    display: block;
+    width: 36px;
+    height: 36px;
+    margin: 4px;
+    border-radius: 50%;
+    background: #4393F0 url("images/icon_search.png") center center no-repeat;
+    background-size: 20px 20px;
+    cursor: pointer;
+}
+
+.search-box .logined-search-btn{
+    background-size: 15px 15px;
+}
+.search-box .search-btn:hover, .search-box .logined-search-btn:hover{
+    background: #367CFA url("images/icon_search.png") center center no-repeat;
+}
+.search-box .logined-search-btn:hover{
+    background-size: 17px 17px;
+}
+.search-box .search-btn:hover{
+    background-size: 22px 22px;
+}
+
+/**** groups ****/
+.groups{
+    width: 100%;
+    margin-top: 30px;
+    padding: 15px 0 0;
+}
+.groups .am-tabs-bd, .groups .am-nav-tabs{
+    border: none;
+}
+.groups .am-nav-tabs{
+    font-size: 0;
+}
+.groups .am-nav-tabs>li{
+    padding: 0 1rem;
+}
+.groups .am-nav-tabs>li a{
+    margin-right: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 34px;
+    color: #373737;
+    border: none;
+}
+.groups .am-nav-tabs>li.am-active>a, .groups .am-nav-tabs>li a:hover{
+    background: transparent;
+    color: #FFBA00;
+    border: none;
+}
+.groups .am-nav-tabs>li.am-active>a{
+    border-bottom: 2px solid #FFBA00;
+}
+
+.groups .apps{
+    margin-bottom: 35px;
+    padding: 20px 0 0;
+}
+.apps li{
+    display: inline-block;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.apps li img, .groups li a{
+    display: block;
+}
+.apps li img{
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 5px;
+    border-radius: 8px;
+}
+.apps li span{
+    overflow:hidden;
+    display: block;
+    width: 100%;
+    font-size: 14px;
+    color: #666;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+/**** card ****/
+.card{
+    overflow: hidden;
+    width: 100%;
+    padding: 67px 50px 51px;
+    text-align: center;
+    font-size: 0;
+    background: #f6f8fc;
+}
+
+.card-item{
+    width: 270px;
+    height: 270px;
+    display: inline-block;
+    margin:0 16px 16px 0;
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.18);
+    -webkit-transition : transform 0.3s ease-in-out 0s, box-shadow 0.3s ease-in-out 0s;
+       -moz-transition : transform 0.3s ease-in-out 0s, box-shadow 0.3s ease-in-out 0s;
+         -ms-transform : transform 0.3s ease-in-out 0s, box-shadow 0.3s ease-in-out 0s;
+         -o-transition : transform 0.3s ease-in-out 0s, box-shadow 0.3s ease-in-out 0s;
+            transition : transform 0.3s ease-in-out 0s, box-shadow 0.3s ease-in-out 0s;
+}
+.card-item:hover{
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+    transform: translate3d(0px, -5px, 0px);
+}
+.card-item .card-header{
+    overflow: hidden;
+    width: 100%;
+    height: 30px;
+    text-align: center;
+    background: #edf2f8;
+    border-radius: 4px 4px 0 0;
+}
+.card-header span{
+    display: block;
+    font-size: 14px;
+    line-height: 30px;
+    color: #2d557d;
+}
+.card-item .card-body{
+    overflow: hidden;
+    height: 240px;
+    text-align: left;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 0 0 4px 4px ;
+}
+
+/*** weather card ***/
+.card-weather .card-body{
+    padding: 0 10px;
+}
+.icon-weather{
+    background: url("images/icon_weather.png") no-repeat;
+}
+.weather-body{
+    height: 170px;
+    padding: 25px 0 0;
+    color: #2d557d;
+}
+.weather-body>div{
+    overflow: hidden;
+}
+
+.weather_temperature{
+    font-size: 44px;
+    line-height: 50px;
+}
+.icon-wind{
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 14px 5px;
+    background: url("images/icon_wind.png") no-repeat;
+    background-size: 16px;
+}
+.weather_wind{
+    margin-right: 5px;
+    line-height: 40px;
+}
+.weather-line2{
+    margin: 35px 0 15px;
+    font-size: 0;
+}
+.weather-line2 span{
+    font-size: 12px;
+    line-height: 12px;
+}
+.weather_weather_icon{
+    display: block;
+    width: 12px;
+    margin-right: 10px;
+}
+.weather_qlty{
+    display: inline-block;
+    height: 16px;
+    margin-right: 10px;
+    padding: 0 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 14px;
+    background: #fcca1d;
+    color: #fff;
+    border-radius: 10px;
+}
+.board{
+    overflow: hidden;
+    padding: 15px 0 0 0;
+    border-top: 1px solid #a7bdd2;
+}
+.icon-board{
+    display: block;
+    width: 15px;
+    height: 16px;
+    margin-right: 10px;
+    background: url("images/icon_board.png") center center no-repeat;
+}
+.board-text{
+    width: 225px;
+    font-size: 12px;
+    color: #2d557d;
+}
+
+/*** news card ***/
+.icon-news{
+    background: url("images/icon_news.png") center center no-repeat;
+}
+.card-news ul{
+    padding: 15px 10px;
+}
+.card-news li a{
+    overflow: hidden;
+    display: block;
+    margin-bottom: 25px;
+}
+.card-news li img{
+    display: block;
+    float: left;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+.card-news li .news-con{
+    display: table-cell;
+    height: 50px;
+    vertical-align: middle;
+    font-size: 13px;
+    color: #2d557d;
+}
+
+/*** visit card ***/
+.icon-visit{
+    background: url("images/icon_visit.png") center center no-repeat;
+}
+.card-visit li{
+    height: 80px;
+    padding: 0 10px;
+    border-bottom: 1px solid #eef0f7;
+}
+.card-visit li:last-child{
+    border-bottom: none;
+}
+.card-visit li a{
+    overflow: hidden;
+    display: block;
+    padding-top: 15px;
+}
+.card-visit li span{
+    display: block;
+    font-size: 13px;
+    color: #2d557d;
+}
+.card-visit li .visit-company{
+    font-size: 16px;
+    color: #2d557d;
+}
+/*.card-visit li .visit-date{
+    color: #2d557d;
+}*/
+.visit-name{
+    text-align: right;
+}
+.visit-name,.visit-company{
+    margin-bottom: 10px;
+}
+
+.icon-cart{
+    background: url("images/icon_cart.png") center center no-repeat;
+}
+.icon-ranking{
+    background: url("images/icon_ranking.png")center center no-repeat;
+}
+.icon-sale{
+    background: url("images/icon_sale.png") center center no-repeat;
+}
+.icon-oa{
+    background: url("images/icon_oa.png") center center no-repeat;
+}
+
+/***** notLoggined *****/
+.notLogined-body{
+    display: none;
+}
+.notLogined-content{
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    margin-left: -375px;
+    text-align: center;
+}
+.logo-enterplorer{
+    max-width: 340px;
+}
+.notLogined-content .search-box{
+    width: 750px;
+    height: 48px;
+    margin: 53px auto 0;
+    border-radius: 24px;
+    background-size: 25px 25px;
+    background-position: 24px center;
+}
+.notLogined-content .search-box:before{
+    display: none;
+}
+.notLogined-content .search-input{
+    width: calc(100% - 120px);
+    height: 46px;
+    margin-left: 70px;
+    font-size: 16px;
+    line-height: 46px;
+}
+
+/***** 小屏 *****/
+@media screen and (max-width: 1835px) and (min-width: 1260px){
+    .card-container{
+        width: 1144px;
+        text-align: left;
+        margin: auto;
+    }
+}
+@media screen and (max-width: 1400px){
+    /*.content{
+        height: auto !important;
+    }*/
+}

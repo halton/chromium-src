@@ -31,6 +31,11 @@ class PasswordStoreMac : public password_manager::PasswordStoreDefault {
   password_manager::LoginDatabase* login_metadata_db() { return login_db(); }
 #endif
 
+#ifdef REDCORE
+  password_manager::PasswordStoreChangeList SaveLoginForEnterplorerImpl(
+      const autofill::PasswordForm& form) override;
+#endif
+
  private:
   ~PasswordStoreMac() override;
 

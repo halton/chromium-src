@@ -34,6 +34,11 @@ generated_json_strings("generated_api_json_strings") {
     "tts_engine.json",
     "webstore.json",
   ]
+
+  if (is_redcore) {
+    sources += [ "yspmanager.json" ]
+  }
+
   if (is_chromeos) {
     sources += [ "file_browser_handler.json" ]
   } else {

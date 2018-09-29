@@ -337,6 +337,12 @@ class CONTENT_EXPORT RenderProcessHost : public IPC::Sender,
   // Returns true if this process currently has backgrounded priority.
   virtual bool IsProcessBackgrounded() const = 0;
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+ {IE Embedded}
+  virtual void SetTridentCore(bool useIE) = 0;
+  virtual bool UseTridentCore() = 0 ;
+#endif
+
   enum class KeepAliveClientType {
     kServiceWorker = 0,
     kSharedWorker = 1,

@@ -25,6 +25,19 @@ extern const char kTimeStampKey[];
 extern const char kTransitionTypeKey[];
 extern const char kTransitionQualifiersKey[];
 extern const char kUrlKey[];
+#ifdef REDCORE
+#ifdef IE_REDCORE
+extern const char kUserName[];
+extern const char kUserPassword[];
+#endif /*IE_REDCORE*/
+//TODO(matianzhi) ysp+{push server api}
+extern const char kLoginStatusKey[];
+extern const char kLoginManagerUrlKey[];
+extern const char kLoginDeviceIdKey[];
+extern const char kLoginUserIdKey[];
+extern const char kLoginCompanyIdKey[];
+//YSP+ }
+#endif /*REDCORE*/
 
 // Events.
 extern const char kOnBeforeNavigate[];

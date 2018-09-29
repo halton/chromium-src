@@ -63,6 +63,10 @@ class UI_BASE_EXPORT UIATextProvider
   string16 value_;
 };
 
+UI_BASE_EXPORT bool CreateTextProviderInstance(const string16& value,
+                                              bool editable,
+                                              IUnknown** provider);
+
 }  // win
 }  // base
 

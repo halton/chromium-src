@@ -59,6 +59,12 @@
 #include "ui/views/win/scoped_fullscreen_visibility.h"
 #include "ui/views/win/windows_session_change_observer.h"
 
+#ifdef IE_REDCORE
+//ysp+{IE Embedded}
+#define WM_IE_MOUSEACTIVATE WM_USER+5255
+#define WM_CLEARFOCUS WM_USER+5256
+#endif
+
 namespace views {
 namespace {
 
@@ -798,7 +804,9 @@ void HWNDMessageHandler::ClearNativeFocus() {
 }
 
 void HWNDMessageHandler::SetCapture() {
-  DCHECK(!HasCapture());
+#ifndef REDCORE
+  DCHECK(!HasCapture());    //ysp+
+#endif
   ::SetCapture(hwnd());
 }
 

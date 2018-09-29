@@ -893,6 +893,89 @@
           }
         ]
       },
+      //ysp+ {
+      {
+        "name": "setIEAutoLoginInfo",
+        "type": "function",
+        "description": "setIEAutoLoginInfo",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0,
+            "description": "Tab ID"
+          },
+		  {
+			"type": "string",
+			"name": "frameXpath",
+			"description": "iframe xpath string."
+		  },
+          {
+            "type": "string",
+            "name": "nameXpath",
+            "description": "name input xpath string."
+          },
+          {
+            "type": "string",
+            "name": "nameValue",
+            "description": "name input value."
+          },
+          {
+            "type": "string",
+            "name": "pwdXpath",
+            "description": "password input xpath."
+          },
+          {
+            "type": "string",
+            "name": "pwdValue",
+            "description": "password input value."
+          },
+          {
+            "type": "string",
+            "name": "loginXpath",
+            "description": "login button xpath."
+          }
+        ]
+      },
+      {
+        "name": "startListenIELogin",
+        "type": "function",
+        "description": "startListenIELogin if login web.navigation.onLogin event will send",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "tabId",
+            "minimum": 0,
+            "description": "Tab ID"
+          },
+          {
+            "type": "string",
+            "name": "url",
+            "description": "login webpage url."
+          },
+		  {
+            "type": "string",
+            "name": "frameXpath",
+            "description": "iframe xpath string."
+          },
+          {
+            "type": "string",
+            "name": "nameXpath",
+            "description": "name input xpath string."
+          },
+          {
+            "type": "string",
+            "name": "pwdXpath",
+            "description": "password input xpath."
+          },
+          {
+            "type": "string",
+            "name": "loginXpath",
+            "description": "login button xpath."
+          }
+        ]
+      },
+      //ysp+ }
       {
         "name": "getZoomSettings",
         "type": "function",

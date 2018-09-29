@@ -931,6 +931,22 @@ extern const char kNotificationNextPersistentId[];
 
 extern const char kTabLifecyclesEnabled[];
 
+#ifdef REDCORE
+//ysp+ {
+extern const char kYSPAutoLogin[];
+extern const char kYSPServerAddress[];
+extern const char kYSPUserSetServerAddress[];
+extern const char kYSPLoginLastCID[];
+extern const char kYSPLoginLastUID[];
+extern const char kYSPLoginLastPWD[];
+extern const char kYSPDeviceID[];
+extern const char kYSPAccessToken[];
+extern const char kYSPRefreshToken[];
+extern const char kYSPFirstLogin[];
+extern const char kYSPExtensionInstallVersion[];
+extern const char kYSPActivexNoPromptInfo[];
+extern const char kYSPLockScreen[];
+#endif
 }  // namespace prefs
 
 #endif  // CHROME_COMMON_PREF_NAMES_H_

@@ -44,6 +44,11 @@ default_apps\external_extensions.json: %(VersionDir)s\default_apps\
 Extensions\*.*: %(VersionDir)s\Extensions\
 locales\*.dll: %(VersionDir)s\Locales
 locales\*.pak: %(VersionDir)s\Locales
+# //ysp+ {
+PepperFlash\manifest.json: %(VersionDir)s\PepperFlash\
+PepperFlash\pepflashplayer.dll: %(VersionDir)s\PepperFlash\
+# //ysp+ }
+
 
 #
 # VisualElements sub-dir.

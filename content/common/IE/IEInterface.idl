@@ -1,0 +1,112 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+  object,
+  uuid(DB1BC009-56ED-4A59-B410-1D69AFE40950),
+  dual,
+  nonextensible,
+  helpstring("IBrowserContainer"),
+  pointer_default(unique)
+]
+interface IBrowserContainer : IDispatch
+{
+  [id(1), helpstring("Create IE Browser as child window")] HRESULT CreateBrowser([in] long hWnd, [in]int browserEmulation,[in]VARIANT_BOOL isNewWindow);
+  [propget, id(2), helpstring("Get IWebBrowser2")] HRESULT WebBrowser([out] IDispatch** pVal);
+  [id(3), helpstring("Close IE Browser")] HRESULT CloseBrowser(void);
+  [id(4), helpstring("Set Browser Rect")]HRESULT SetRect([in]int left, [in]int top, [in]int right, [in]int bottom);
+  [propputref, id(5), helpstring("Set Host App IDispatch")] HRESULT HostApp([in] IDispatch* app);
+  [id(6), helpstring("ExcuteJavaScript")] HRESULT ExcuteJS([in] BSTR src, [in, out]VARIANT* result);
+  [id(7), helpstring("ShowBrowser")] HRESULT Show([in]VARIANT_BOOL bShow);
+  [id(8), helpstring("GetDocumentMode")]HRESULT GetDocumentMode([out]int* mode);
+  [id(9), helpstring("SetDocumentMode")]HRESULT SetDocumentMode([in]int mode);
+  [id(11), helpstring("SetCookie")]HRESULT SetCookie([in]BSTR json, [in]int flag);
+  [id(12), helpstring("SetUserAgent")]HRESULT SetUserAgent([in]BSTR usStr);
+  [id(13), helpstring("FinishDownload")]HRESULT FinishDownload([in]VARIANT_BOOL isCancel);
+  [id(14), helpstring("SetFunctionControl")]HRESULT SetFunctionControl([in]BSTR jsonStr);
+  [id(15), helpstring("AutoLogin")]HRESULT AutoLogin([in]BSTR frameXPath, [in]BSTR userNameXPath, [in]BSTR userNameValue, [in]BSTR pwdXPath, [in]BSTR pwdValue, [in]BSTR loginBtnXPath);
+  [id(16), helpstring("SetListenLoginXPath")]HRESULT SetListenLoginXPath([in]BSTR url, [in]BSTR frameXPath, [in]BSTR userNameXPath, [in]BSTR pwdXPath, [in]BSTR loginbtnXPath);
+  [id(17), helpstring("NotifyCommand")]HRESULT NotifyCommand([in]BSTR command);
+  [id(18), helpstring("GetDevToolsOpenStatus")]HRESULT GetDevToolsOpenStatus([in,out]VARIANT_BOOL* isOpen);
+  [id(19), helpstring("ShowDevTools")]HRESULT ShowDevTools([in]VARIANT_BOOL show);
+}
+
+[
+  object,
+  uuid(E74F8824-D752-48A2-82E0-7DF0FDAAB786),
+  dual,
+  nonextensible,
+  helpstring("IBrowserEventHandler"),
+  pointer_default(unique)
+]
+interface IBrowserEventHandler : IDispatch
+{
+  [id(1), helpstring("OnBeforeNavigate")] HRESULT OnBeforeNavigate([in] BSTR url, [in] VARIANT_BOOL navNewUrl, [in, out] VARIANT_BOOL* cancel);
+  [id(2), helpstring("OnFinishNavigate")] HRESULT OnFinishNavigate([in] BSTR url, [in] BSTR faviconUrls);
+  [id(3), helpstring("OnTitleChange")] HRESULT OnTitleChange([in] BSTR title);
+  [id(4), helpstring("OnLoadUrlNewWindow")] HRESULT OnLoadUrlNewWnd([in] BSTR url, [in] int flag, [in, out] VARIANT_BOOL* cancel, [out]IDispatch** pDisp);
+  [id(6), helpstring("window.close called")] HRESULT OnBrowserClosing();
+  [id(7), helpstring("OnBeforeBrowserClose")] HRESULT OnBeforeBrowserClose(void);
+  [id(8), helpstring("OnShowContextMenu")] HRESULT OnShowContextMenu([in] int dwID, [in] int x, [in] int y);
+  [id(9), helpstring("OnIEServerWndCreated")]HRESULT OnIEServerWndCreated([in]int hwnd);
+  [id(10), helpstring("OnIEDownLoadFile")] HRESULT OnDownLoadFile([in] BSTR url, [in] int status, [in] VARIANT* variant);
+  [id(11), helpstring("OnCanGoBackOrForward")]HRESULT OnCanGoBackOrForward([in, out]VARIANT_BOOL* back, [in, out]VARIANT_BOOL* forward);
+  [id(12), helpstring("OnGoBack")]HRESULT OnGoBack();
+  [id(13), helpstring("OnGoForward")]HRESULT OnGoForward();
+  [id(14), helpstring("OnRequestChangePos")]HRESULT OnRequestChangePos([in]int left, [in]int top, [in]int width, [in]int height);
+  [id(15), helpstring("OnGetMainWndPos")]HRESULT OnGetMainWndPos([in, out]int* left, [in, out]int* top, [in, out]int* width, [in, out]int* height);
+  [id(16), helpstring("OnUpdateCookie")]HRESULT OnUpdateCookie([in]BSTR cookie);
+  [id(17), helpstring("OnGetLoginInfo")]HRESULT OnGetLoginInfo([in]BSTR url, [in]BSTR userName, [in]BSTR userPwd);
+  [id(18), helpstring("OnRequestAcceleratorFromKeyboard")]HRESULT OnRequestAcceleratorFromKeyboard([in]int keyCode, [in]int modifiers);
+  [id(19), helpstring("OnRequestAcceleratorFromMouseWheel")]HRESULT OnRequestAcceleratorFromMouseWheel([in]int delta, [in]int Pt_x, [in]int Pt_y, [in]int modifiers);
+  [id(20), helpstring("OnWinDomainAuthenticate")]HRESULT OnWinDomainAuthenticate([in, out]BSTR* userName, [in, out]BSTR* userPwd);
+}
+
+
+[
+  object,
+  uuid(8C11DD57-767B-480E-A72B-920A78D06D73),
+  dual,
+  nonextensible,
+  helpstring("IHttpMonitor"),
+  pointer_default(unique)
+]
+interface IHttpMonitor : IDispatch
+{
+
+}
+
+[
+  uuid(BD1246AA-9706-435F-9C5C-86F177850F9E),
+  version(1.0),
+  helpstring("BrowserContainerLib")
+]
+library IEBrowserLib
+{
+  importlib("stdole32.tlb");
+  importlib("stdole2.tlb");
+  [
+    uuid(5C304C78-AD5B-4674-BADA-C96683423219),
+    helpstring("BrowserContainer Class")
+  ]
+  coclass BrowserContainer
+  {
+    [default] interface IBrowserContainer;
+  };
+  [
+    uuid(44EC5D79-21E6-45E3-BB21-C363BA401190),
+    helpstring("BrowserHost Class")
+  ]
+  coclass BrowserHost
+  {
+    [default] interface IBrowserEventHandler;
+  };
+  [
+    uuid(1144F1D5-3CDB-4525-83D4-78D4A40A3901),
+    helpstring("HttpMonitor Class")
+  ]
+  coclass HttpMonitor
+  {
+    [default] interface IHttpMonitor;
+  };
+};

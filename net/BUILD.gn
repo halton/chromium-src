@@ -378,6 +378,13 @@ component("net") {
     defines += [ "NET_DISABLE_BROTLI" ]
   }
 
+  if (is_ie_redcore) {
+    sources += [
+      # YSP
+      "http/gm_sangfor_interface.cc",
+      "http/gm_sangfor_interface.h",
+    ]
+  }
   deps = [
     ":net_deps",
   ]

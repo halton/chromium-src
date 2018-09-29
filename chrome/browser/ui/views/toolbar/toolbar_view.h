@@ -73,6 +73,9 @@ class ToolbarView : public views::AccessiblePaneView,
   // Create the contents of the Browser Toolbar.
   void Init();
 
+#ifdef REDCORE
+  views::View* GetRendererModeBubbleAnchor();
+#endif
   // Forces the toolbar (and transitively the location bar) to update its
   // current state.  If |tab| is non-NULL, we're switching (back?) to this tab
   // and should restore any previous location bar state (such as user editing)

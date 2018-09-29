@@ -592,6 +592,13 @@ class CC_EXPORT LayerTreeImpl {
 
   LayerTreeLifecycle& lifecycle() { return lifecycle_; }
 
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+  YSPWatermarkLayerImpl* watermark_layer() { return watermark_layer_; }
+  void set_watermark_layer(YSPWatermarkLayerImpl* layer_impl) {
+    watermark_layer_ = layer_impl;
+  }
+#endif
+
  protected:
   float ClampPageScaleFactorToLimits(float page_scale_factor) const;
   void PushPageScaleFactorAndLimits(const float* page_scale_factor,
@@ -602,6 +609,10 @@ class CC_EXPORT LayerTreeImpl {
   void DidUpdatePageScale();
   void PushBrowserControls(const float* top_controls_shown_ratio);
   bool ClampBrowserControlsShownRatio();
+
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+  YSPWatermarkLayerImpl* watermark_layer_;
+#endif
 
  private:
   TransformNode* PageScaleTransformNode();

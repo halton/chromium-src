@@ -72,6 +72,9 @@
 #include "ui/views/widget/root_view.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/window/non_client_view.h"
+#ifdef REDCORE
+#include "ui/views/background.h"
+#endif
 
 #if defined(OS_WIN)
 #include "base/win/windows_version.h"
@@ -335,6 +338,12 @@ void TabStrip::SetBackgroundOffset(int offset) {
 }
 
 bool TabStrip::IsRectInWindowCaption(const gfx::Rect& rect) {
+
+#ifdef REDCORE
+  if(rect.x() < 75)
+    return false;
+#endif
+
   // If there is no control at this location, the hit is in the caption area.
   const views::View* v = GetEventHandlerForRect(rect);
   if (v == this)

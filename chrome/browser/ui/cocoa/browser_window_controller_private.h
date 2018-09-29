@@ -50,6 +50,10 @@ enum class FullscreenSource {
 // fullscreen behavior.
 - (void)updateFullscreenCollectionBehavior;
 
+#ifdef REDCORE
+- (void)createYspAccountContronller;
+#endif
+
 // Saves the window's position in the local state preferences.
 - (void)saveWindowPositionIfNeeded;
 

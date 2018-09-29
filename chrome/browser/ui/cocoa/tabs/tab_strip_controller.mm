@@ -188,6 +188,7 @@ NSRect FlipRectInView(NSView* view, NSRect rect) {
                  haveAlertState:(TabAlertState)state;
 @end
 
+#ifndef REDCORE
 // A simple view class that contains the traffic light buttons. This class
 // ensures that the buttons display the icons when the mouse hovers over
 // them by overriding the _mouseInGroup method.
@@ -220,6 +221,7 @@ NSRect FlipRectInView(NSView* view, NSRect rect) {
 }
 
 @end
+#endif
 
 // A simple view class that prevents the Window Server from dragging the area
 // behind tabs. Sometimes core animation confuses it. Unfortunately, it can also
@@ -1051,7 +1053,12 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     BOOL isPlaceholder = [[tab view] isEqual:placeholderTab_];
     NSRect tabFrame = [[tab view] frame];
     tabFrame.size.height = [[self class] defaultTabHeight];
+#ifdef REDCORE
+    // To avoid override the tabstrip bottom border
+    tabFrame.origin.y = 1;
+#else
     tabFrame.origin.y = 0;
+#endif
     tabFrame.origin.x = offset;
 
     // If the tab is hidden, we consider it a new tab. We make it visible
@@ -1908,9 +1915,13 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     mouseInside_ = YES;
     [self setTabTrackingAreasEnabled:YES];
     [self mouseMoved:event];
+#ifdef REDCORE
+  }
+#else
   } else if ([area isEqual:customWindowControlsTrackingArea_]) {
     [customWindowControls_ setMouseInside:YES];
   }
+#endif
 }
 
 // Called when the tracking area is in effect which means we're tracking to
@@ -1930,9 +1941,13 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     // Since this would result in the new tab button incorrectly staying in the
     // hover state, disable the hover image on every mouse exit.
     [self setNewTabButtonHoverState:NO];
+#ifdef REDCORE
+  }
+#else
   } else if ([area isEqual:customWindowControlsTrackingArea_]) {
     [customWindowControls_ setMouseInside:NO];
   }
+#endif
 }
 
 - (TabViewCocoa*)hoveredTab {
@@ -2281,7 +2296,7 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     return nil;
   return [tabContentsArray_ objectAtIndex:index];
 }
-
+#ifndef REDCORE
 - (void)addCustomWindowControls {
   BOOL shouldFlipWindowControls =
       cocoa_l10n_util::ShouldFlipWindowControlsInRTL();
@@ -2354,6 +2369,7 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     [self regenerateSubviewList];
   }
 }
+#endif //REDCORE
 
 - (void)removeCustomWindowControls {
   if (customWindowControls_)

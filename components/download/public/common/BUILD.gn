@@ -61,6 +61,10 @@ component("public") {
     "url_download_request_handle.h",
   ]
 
+  if(is_win) {
+    sources += ["download_file_ie.h",]
+  }
+  
   configs += [ ":components_download_implementation" ]
 
   public_deps = [

@@ -1,0 +1,10 @@
+@charset "utf-8";
+
+/*未登录页面样式*/
+.nologined-content {
+    text-align: center;
+    margin-top: 20%;
+}
+.nologined-content span {
+    color: #8c8d94;
+}

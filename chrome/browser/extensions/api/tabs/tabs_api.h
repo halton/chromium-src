@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "base/compiler_specific.h"
+#include "chrome/browser/extensions/chrome_extension_function.h"
 #include "chrome/browser/extensions/chrome_extension_function_details.h"
 #include "chrome/common/extensions/api/tabs.h"
 #include "components/zoom/zoom_controller.h"
@@ -335,6 +336,31 @@ class TabsDiscardFunction : public UIThreadExtensionFunction {
 
   DISALLOW_COPY_AND_ASSIGN(TabsDiscardFunction);
 };
+
+
+#if defined(REDCORE)
+//ysp+ {
+class TabsSetIEAutoLoginInfoFunction : public ChromeAsyncExtensionFunction {
+ protected:
+  ~TabsSetIEAutoLoginInfoFunction() override {}
+
+  bool RunAsync() override;
+
+  content::WebContents* GetWebContents(int tab_id);
+  DECLARE_EXTENSION_FUNCTION("tabs.setIEAutoLoginInfo", TABS_SETIEAUTOLOGININFO)
+};
+
+class TabsStartListenIELoginFunction : public ChromeAsyncExtensionFunction {
+ protected:
+  ~TabsStartListenIELoginFunction() override {}
+
+  bool RunAsync() override;
+
+  content::WebContents* GetWebContents(int tab_id);
+  DECLARE_EXTENSION_FUNCTION("tabs.startListenIELogin", TABS_STARTLISTENIELOGIN)
+};
+//ysp+ }
+#endif // defined(REDCORE)
 
 }  // namespace extensions
 

@@ -7,6 +7,9 @@
 #include "build/build_config.h"
 #include "chrome/app/chrome_command_ids.h"
 #include "chrome/grit/generated_resources.h"
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"   //ysp+ { bookmark }
+#endif
 
 // For views and cocoa, we have complex delegate systems to handle
 // injecting the bookmarks to the bookmark submenu. This is done to support
@@ -21,6 +24,10 @@ BookmarkSubMenuModel::BookmarkSubMenuModel(
 BookmarkSubMenuModel::~BookmarkSubMenuModel() {}
 
 void BookmarkSubMenuModel::Build(Browser* browser) {
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->HasManagedBookmarks())
+    return;
+#endif
   bool is_submenu_visible =
       delegate()->IsCommandIdVisible(IDC_BOOKMARK_PAGE) ||
       delegate()->IsCommandIdVisible(IDC_BOOKMARK_ALL_TABS);

@@ -56,6 +56,10 @@
 #include "storage/browser/blob/blob_url_request_job_factory.h"
 #include "storage/browser/fileapi/file_system_url_request_job_factory.h"
 
+#ifdef REDCORE
+#include "content/browser/ysp_resource_replace_interceptor.h"
+#endif
+
 using storage::FileSystemContext;
 using storage::BlobStorageContext;
 
@@ -421,6 +425,9 @@ StoragePartitionImpl* StoragePartitionImplMap::Get(
   request_interceptors.push_back(ServiceWorkerRequestHandler::CreateInterceptor(
       browser_context_->GetResourceContext()));
   request_interceptors.push_back(std::make_unique<AppCacheInterceptor>());
+#ifdef REDCORE
+  request_interceptors.push_back(std::make_unique<YSPResourceReplaceInterceptor>());
+#endif
 
   // These calls must happen after StoragePartitionImpl::Create().
   if (partition_domain.empty()) {

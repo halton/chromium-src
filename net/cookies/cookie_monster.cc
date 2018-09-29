@@ -74,6 +74,10 @@
 #include "net/ssl/channel_id_service.h"
 #include "url/origin.h"
 
+#ifdef REDCORE
+#include "crypto/ysp_crypto_encryption.h" //YSP+ { User information isolation }
+#endif
+
 using base::Time;
 using base::TimeDelta;
 using base::TimeTicks;
@@ -1880,5 +1884,41 @@ void CookieMonster::DoCookieCallbackForHostOrDomain(
 
   std::move(callback).Run();
 }
+
+#if defined(REDCORE)
+void CookieMonster::DeleteAllForUserId(const std::string& userid,
+                                       DeleteCallback callback) {
+  DCHECK(thread_checker_.CalledOnValidThread());
+
+  uint32_t num_deleted = 0;
+  for (CookieMap::iterator it = cookies_.begin(); it != cookies_.end();) {
+    CookieMap::iterator curit = it;
+    CanonicalCookie* cc = curit->second.get();
+    ++it;
+
+    if (cc->YSPUserName() == userid) {
+      InternalDeleteCookie(curit, true, /*sync_to_store*/
+                           DELETE_COOKIE_EXPLICIT);
+      ++num_deleted;
+    }
+  }
+
+  FlushStore(
+      base::BindOnce(&MaybeRunDeleteCallback, weak_ptr_factory_.GetWeakPtr(),
+                     callback ? base::BindOnce(std::move(callback), num_deleted)
+                              : base::OnceClosure()));
+}
+
+void CookieMonster::DeleteAllForUserIdAsync(const std::string& userid,
+                                            DeleteCallback callback) {
+  DoCookieCallback(base::BindOnce(
+      // base::Unretained is safe as DoCookieCallbackForURL stores
+      // the callback on |*this|, so the callback will not outlive
+      // the object.
+      &CookieMonster::DeleteAllForUserId, base::Unretained(this), userid,
+      std::move(callback)));
+}
+//ysp+
+#endif
 
 }  // namespace net

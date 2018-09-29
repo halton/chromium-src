@@ -117,6 +117,12 @@ translate::TranslateInfoBarDelegate*
   return nullptr;
 }
 
+#ifdef IE_REDCORE
+DownloadActivexInfobarDelegate* InfoBarDelegate::AsDownloadActivexInfobarDelegate() {
+	return nullptr;
+}
+#endif
+
 #if defined(OS_ANDROID)
 offline_pages::OfflinePageInfoBarDelegate*
 InfoBarDelegate::AsOfflinePageInfoBarDelegate() {
@@ -125,6 +131,10 @@ InfoBarDelegate::AsOfflinePageInfoBarDelegate() {
 #endif
 
 InfoBarDelegate::InfoBarDelegate() : nav_entry_id_(0) {
+}
+
+InfoBarDelegate::Type InfoBarDelegate::GetInfoBarType() const {
+  return WARNING_TYPE;
 }
 
 }  // namespace infobars

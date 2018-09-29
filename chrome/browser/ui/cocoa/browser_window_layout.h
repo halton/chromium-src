@@ -92,7 +92,7 @@ struct TabStripLayout {
   // The frame of the avatar in window coordinates.
   NSRect avatarFrame;
 };
-
+  
 // The output frames of the views managed by the BrowserWindowController. All
 // frames are in the coordinate system of the window. The lower-left corner of
 // the contentView coincides with the lower-left corner of the window, so these
@@ -106,6 +106,9 @@ struct LayoutOutput {
   NSRect infoBarFrame;
   NSRect downloadShelfFrame;
   NSRect contentAreaFrame;
+#ifdef REDCORE
+  NSRect titleBarFrame;
+#endif
 };
 
 }  // namespace chrome

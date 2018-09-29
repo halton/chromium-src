@@ -121,6 +121,10 @@ class WebContentsView {
   // Invoked to enable/disable overscroll gesture navigation.
   virtual void SetOverscrollControllerEnabled(bool enabled) = 0;
 
+#if defined(IE_REDCORE)
+  virtual void OnWebContentDestroying() = 0;
+#endif
+
 #if defined(OS_MACOSX)
   // Allowing other views disables optimizations which assume that only a single
   // WebContents is present.

@@ -301,6 +301,33 @@ bool EntryImpl::UserBuffer::GrowBuffer(int required, int limit) {
 
 // ------------------------------------------------------------------------
 
+#ifdef REDCORE
+//YSP+ { cache encryption
+bool EntryImpl::cache_crypt_status_ = false;
+const char key[] = "WFMxTBb4EODsRgyMibiERdMnT6qpyGDZ";
+
+static void EncryptValueFormFile(int64_t offset, const char* data, int size, char* enc_data) {
+	int i = 0;
+	int key_len = strlen(key);
+	char ckey;
+	for (i = 0; i < size; i++) {
+		ckey = key[(offset + i) % key_len];
+		enc_data[i] = data[i] ^ ckey;
+	}
+}
+
+void DecryptValueFormFile(int64_t offset, char* data, int size, const char* dec_data) {
+	int i = 0;
+	int key_len = strlen(key);
+	char ckey;
+	for (i = 0; i < size; i++) {
+		ckey = key[(offset + i) % key_len];
+		data[i] = dec_data[i] ^ ckey;
+	}
+}
+//YSP+ }
+#endif
+
 EntryImpl::EntryImpl(BackendImpl* backend, Addr address, bool read_only)
     : entry_(NULL, Addr(0)), node_(NULL, Addr(0)),
       backend_(backend->GetWeakPtr()), doomed_(false), read_only_(read_only),
@@ -1079,14 +1106,33 @@ int EntryImpl::InternalReadData(int index,
   }
 
   TimeTicks start_async = TimeTicks::Now();
-
   bool completed;
-  if (!file->Read(buf->data(), buf_len, file_offset, io_callback, &completed)) {
-    if (io_callback)
-      io_callback->Discard();
-    DoomImpl();
-    return net::ERR_CACHE_READ_FAILURE;
+#ifdef REDCORE
+  //YSP+ { cache encryption
+  if (cache_crypt_status_ && address.is_separate_file() && !backend_->GetFileName(address).empty()) {
+	  char* enc_data = new char[buf_len];
+	  memset(enc_data, 0, buf_len);
+	  if (!file->Read(enc_data, buf_len, file_offset, io_callback, &completed)) {
+		  if (io_callback)
+			  io_callback->Discard();
+		  DoomImpl();
+		  return net::ERR_CACHE_READ_FAILURE;
+	  }
+	  DecryptValueFormFile(offset, buf->data(), buf_len, enc_data);
+	  delete[] enc_data;
   }
+  else {
+  //YSP+ }
+#endif
+	  if (!file->Read(buf->data(), buf_len, file_offset, io_callback, &completed)) {
+		  if (io_callback)
+			  io_callback->Discard();
+		  DoomImpl();
+		  return net::ERR_CACHE_READ_FAILURE;
+	  }
+#ifdef REDCORE
+  } //YSP+ { cache encryption }
+#endif
 
   if (io_callback && completed)
     io_callback->Discard();
@@ -1515,9 +1561,26 @@ bool EntryImpl::Flush(int index, int min_len) {
   File* file = GetBackingFile(address, index);
   if (!file)
     return false;
-
-  if (!file->Write(user_buffers_[index]->Data(), len, offset, NULL, NULL))
-    return false;
+#ifdef REDCORE
+  //YSP+ { cache encryption
+  if (cache_crypt_status_ && address.is_separate_file() && !backend_->GetFileName(address).empty()) {
+	  char* enc_data = new char[len];
+	  memset(enc_data, 0, len);
+	  EncryptValueFormFile(offset, user_buffers_[index]->Data(), len, enc_data);
+	  if (!file->Write(enc_data, len, offset, NULL, NULL)) {
+		  delete[] enc_data;
+		  return false;
+	  }
+	  delete[] enc_data;
+  }
+  else {
+  //YSP+ }
+#endif
+	  if (!file->Write(user_buffers_[index]->Data(), len, offset, NULL, NULL))
+		  return false;
+#ifdef REDCORE
+  } //YSP+ { cache encryption }
+#endif
   user_buffers_[index]->Reset();
 
   return true;

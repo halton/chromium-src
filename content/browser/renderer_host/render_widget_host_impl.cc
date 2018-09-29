@@ -139,6 +139,10 @@ using blink::WebMouseEvent;
 using blink::WebMouseWheelEvent;
 using blink::WebTextDirection;
 
+#ifdef REDCORE
+bool content::RenderWidgetHostImpl::disable_drag_ = false;
+#endif
+
 namespace content {
 namespace {
 
@@ -326,6 +330,13 @@ class UnboundWidgetInputHandler : public mojom::WidgetInputHandler {
 base::LazyInstance<UnboundWidgetInputHandler>::Leaky g_unbound_input_handler =
     LAZY_INSTANCE_INITIALIZER;
 }  // namespace
+
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+//bool RenderWidgetHostImpl::watermark_init_ = false;
+//base::string16 watermark_string_;
+//uint32_t watermark_color_ = 0;
+//int watermark_font_size_ = 0;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // RenderWidgetHostImpl
@@ -1813,6 +1824,12 @@ void RenderWidgetHostImpl::OnStartDragging(
     const SkBitmap& bitmap,
     const gfx::Vector2d& bitmap_offset_in_dip,
     const DragEventSourceInfo& event_info) {
+#ifdef REDCORE  //ysp+ { disable drag
+  if(disable_drag_) {
+    DragSourceSystemDragEnded();
+    return;
+  }
+#endif
   RenderViewHostDelegateView* view = delegate_->GetDelegateView();
   if (!view || !GetView()) {
     // Need to clear drag and drop state in blink.
@@ -3117,5 +3134,21 @@ void RenderWidgetHostImpl::OnLocalSurfaceIdChanged(
     const cc::RenderFrameMetadata& metadata) {
   DidUpdateVisualProperties(metadata);
 }
+
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+void RenderWidgetHostImpl::SetWatermarkString(const std::vector<base::string16>& str, const uint32_t color, const int font_size) {
+  watermark_string_ = str;
+  watermark_color_ = color;
+  watermark_font_size_ = font_size;
+  watermark_init_ = true;
+  UpdateWatermark();
+}
+
+void RenderWidgetHostImpl::UpdateWatermark() {
+  if (!watermark_init_)
+    return;
+  Send(new ViewMsg_SetWatermarkString(GetRoutingID(), watermark_string_, watermark_color_, watermark_font_size_));
+}
+#endif
 
 }  // namespace content

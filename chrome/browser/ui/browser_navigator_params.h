@@ -21,6 +21,9 @@
 #include "ui/base/window_open_disposition.h"
 #include "ui/gfx/geometry/rect.h"
 #include "url/gurl.h"
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "content/common/IE/IEVersion.h"	//ysp+{IE Embedded}
+#endif
 
 class Browser;
 class Profile;
@@ -252,6 +255,14 @@ struct NavigateParams {
   // Indicates that the navigation should happen in an pwa window if
   // possible, i.e. if the is a PWA installed for the target URL.
   bool open_pwa_window_if_possible = false;
+
+  #if defined(REDCORE) && defined(IE_REDCORE)
+  //ysp+ {IE Embedded}
+  RendererMode renderer_mode;
+  //ysp+
+  bool auto_select; //YSP+ { Kernel switching }
+  #endif
+
 
  private:
   NavigateParams();

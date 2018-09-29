@@ -29,6 +29,8 @@ WebContentsViewChildFrame::WebContentsViewChildFrame(
 
 WebContentsViewChildFrame::~WebContentsViewChildFrame() {}
 
+void WebContentsViewChildFrame::OnWebContentDestroying() {}
+
 WebContentsView* WebContentsViewChildFrame::GetOuterView() {
   return web_contents_->GetOuterWebContents()->GetView();
 }

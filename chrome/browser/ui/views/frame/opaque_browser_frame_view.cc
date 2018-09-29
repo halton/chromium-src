@@ -53,11 +53,24 @@
 #include "ui/display/win/screen_win.h"
 #endif
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "chrome/browser/ui/views/ysp_login_view.h"
+#include "chrome/browser/ui/views/ysp_lock_screen_view.h"
+#include "ui/base/resource/resource_bundle.h"
+#endif
+
 using content::WebContents;
 
 namespace {
 
 constexpr SkColor kTitleBarFeatureColor = SK_ColorWHITE;
+
+#ifdef REDCORE
+const int kWindowTitleFontSize = 14; // ysp size in pixel
+
+const SkColor kLockScreenBackgroundColor = SkColorSetRGB(160, 160, 160);
+#endif
 
 }  // namespace
 
@@ -78,6 +91,9 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
       close_button_(nullptr),
       window_icon_(nullptr),
       window_title_(nullptr),
+#ifdef REDCORE
+      locked_view_(nullptr),
+#endif
       frame_background_(new views::FrameBackground()) {
   layout_->set_delegate(this);
   SetLayoutManager(std::unique_ptr<views::LayoutManager>(layout_));
@@ -122,13 +138,59 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
   }
 
   window_title_ = new views::Label(browser_view->GetWindowTitle());
+#ifdef REDCORE
+  const gfx::FontList& small_font =
+      ui::ResourceBundle::GetSharedInstance().GetFontList(
+          ui::ResourceBundle::SmallFont);
+  window_title_->SetFontList(small_font.DeriveWithSizeDelta(
+      kWindowTitleFontSize - small_font.GetFontSize()));
+#endif
   window_title_->SetVisible(browser_view->ShouldShowWindowTitle());
   // Readability is ensured by |GetReadableFrameForegroundColor()|.
   window_title_->SetAutoColorReadabilityEnabled(false);
   window_title_->SetSubpixelRenderingEnabled(false);
+#ifdef REDCORE
+  window_title_->SetHorizontalAlignment(gfx::ALIGN_CENTER);
+#else
   window_title_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+#endif
   window_title_->set_id(VIEW_ID_WINDOW_TITLE);
   AddChildView(window_title_);
+
+#ifdef REDCORE  // TODO: (Liu Wei) Add login info label
+  login_info_ = new views::Label(base::string16());
+  login_info_->SetFontList(small_font.DeriveWithSizeDelta(
+      kWindowTitleFontSize - small_font.GetFontSize()));
+  login_info_->SetBounds(80, 10, 42, 14);
+  login_info_->SetVisible(false);
+  login_info_->SetEnabledColor(0xFF333333);
+  login_info_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+  login_info_->set_id(VIEW_ID_LOGIN_LABLE);
+  AddChildView(login_info_);
+
+  hello_ = new views::Label(l10n_util::GetStringUTF16(IDS_YSP_LOGIN_HELLO));
+  hello_->SetFontList(small_font.DeriveWithSizeDelta(
+      kWindowTitleFontSize - small_font.GetFontSize()));
+  hello_->SetBounds(80, 10, 42, 14);
+  hello_->SetVisible(false);
+  hello_->SetEnabledColor(0xFF333333);
+  hello_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+  hello_->set_id(VIEW_ID_WELCOME_LABLE);
+  AddChildView(hello_);
+
+  lock_button_ = InitWindowCaptionButton(IDR_YSP_LOCK_SCREEN,
+                                         IDR_YSP_LOCK_SCREEN_H,
+                                         IDR_YSP_LOCK_SCREEN_P,
+                                         IDR_YSP_LOCK_SCREEN_MASK,
+                                         IDS_ACCNAME_YSP_LOCK_SCREEN,
+                                         VIEW_ID_LOCK_SCREEN_BUTTON);
+
+  locked_view_ = new YSPLockScreenView(this, browser_view);
+  locked_view_->SetBackground(views::CreateSolidBackground(kLockScreenBackgroundColor));
+  locked_view_->SetVisible(false);
+  locked_view_->set_id(VIEW_ID_LOCK_SCREEN_VIEW);
+  AddChildViewAt(locked_view_, 0);
+#endif
 
   if (extensions::HostedAppBrowserController::IsForExperimentalHostedAppBrowser(
           browser_view->browser())) {
@@ -176,9 +238,13 @@ gfx::Rect OpaqueBrowserFrameView::GetBoundsForTabStrip(
 }
 
 int OpaqueBrowserFrameView::GetTopInset(bool restored) const {
+#ifdef REDCORE // we have moved tabstrip to the bottom of toolbar, so we don't have to consider tabstrip
+  return layout_->NonClientTopHeight(restored);
+#else
   return browser_view()->IsTabStripVisible()
              ? layout_->GetTabStripInsetsTop(restored)
              : layout_->NonClientTopHeight(restored);
+#endif
 }
 
 int OpaqueBrowserFrameView::GetThemeBackgroundXInset() const {
@@ -212,6 +278,28 @@ gfx::Rect OpaqueBrowserFrameView::GetWindowBoundsForClientBounds(
 
 bool OpaqueBrowserFrameView::IsWithinAvatarMenuButtons(
     const gfx::Point& point) const {
+
+#ifdef REDCORE
+  {
+    if (lock_button_)
+      return lock_button_->GetMirroredBounds().Contains(point);
+    else
+      return false;
+  }
+  return false;
+  gfx::Rect accountRect(0, 0, 70, 60);
+  accountRect.set_x(GetMirroredXForRect(accountRect));
+  // DLOG(INFO) << "IsWithinAvatarMenuButtons: " 
+  // << point.x() 
+  // << ", " << point.y()
+  // << ". (" << accountRect.x() << ", " << accountRect.y()
+  // << ", " << accountRect.width() << ", " << accountRect.height()
+  // << ")";
+  bool ret = accountRect.Contains(point);
+  //DLOG(INFO) << "IsWithinAvatarMenuButtons ret: " << ret;
+  return ret;
+#endif
+
   if (profile_indicator_icon() &&
       profile_indicator_icon()->GetMirroredBounds().Contains(point)) {
     return true;
@@ -266,7 +354,11 @@ int OpaqueBrowserFrameView::NonClientHitTest(const gfx::Point& point) {
   if (minimize_button_ && minimize_button_->visible() &&
       minimize_button_->GetMirroredBounds().Contains(point))
     return HTMINBUTTON;
-
+#ifdef REDCORE
+  if (lock_button_ && lock_button_->visible() &&
+      lock_button_->GetMirroredBounds().Contains(point))
+    return HTCLIENT;
+#endif
   if (hosted_app_button_container_) {
     // TODO(alancutter): Assign hit test components to all children and refactor
     // this entire function call to just be GetHitTestComponent(this, point).
@@ -295,12 +387,15 @@ int OpaqueBrowserFrameView::NonClientHitTest(const gfx::Point& point) {
 void OpaqueBrowserFrameView::GetWindowMask(const gfx::Size& size,
                                            gfx::Path* window_mask) {
   DCHECK(window_mask);
-
+#ifdef REDCORE
+  return;
+#else
   if (IsFrameCondensed())
     return;
 
   views::GetDefaultWindowMask(
       size, frame()->GetCompositor()->device_scale_factor(), window_mask);
+#endif      
 }
 
 void OpaqueBrowserFrameView::ResetWindowControls() {
@@ -369,6 +464,15 @@ void OpaqueBrowserFrameView::ButtonPressed(views::Button* sender,
   } else if (sender == close_button_) {
     frame()->Close();
   }
+#ifdef REDCORE
+  else if (sender == lock_button_) {
+    // TODO: (LIUWEI)
+    if (locked_view_ && !locked_view_->IsLocked()) {
+      locked_view_->Lock(Browser::SCREEN_LOCKED);
+      Layout();
+    }
+  }
+#endif  
 }
 
 void OpaqueBrowserFrameView::OnMenuButtonClicked(views::MenuButton* source,
@@ -416,9 +520,13 @@ bool OpaqueBrowserFrameView::ShouldShowWindowTitle() const {
   // |delegate| may be null if called from callback of InputMethodChanged while
   // a window is being destroyed.
   // See more discussion at http://crosbug.com/8958
+#ifdef REDCORE
+  return false;
+#else
   views::WidgetDelegate* delegate = frame()->widget_delegate();
   return ShouldShowWindowTitleBar() && delegate &&
          delegate->ShouldShowWindowTitle();
+#endif
 }
 
 base::string16 OpaqueBrowserFrameView::GetWindowTitle() const {
@@ -519,7 +627,17 @@ void OpaqueBrowserFrameView::OnPaint(gfx::Canvas* canvas) {
 
   SkColor frame_color = GetFrameColor();
   window_title_->SetEnabledColor(GetReadableFrameForegroundColor(kUseCurrent));
+#ifdef REDCORE
+  if (locked_view_ && locked_view_->IsLocked()) {
+    frame_background_->set_frame_color(kLockScreenBackgroundColor);
+  }
+  else {
+    frame_background_->set_frame_color(frame_color);
+  }
+#else
   frame_background_->set_frame_color(frame_color);
+#endif
+
   frame_background_->set_use_custom_frame(frame()->UseCustomFrame());
   frame_background_->set_is_active(ShouldPaintAsActive());
   frame_background_->set_incognito(browser_view()->IsIncognito());
@@ -531,6 +649,21 @@ void OpaqueBrowserFrameView::OnPaint(gfx::Canvas* canvas) {
   frame_background_->set_theme_image_y_inset(y_inset);
   frame_background_->set_theme_overlay_image(GetFrameOverlayImage());
   frame_background_->set_top_area_height(GetTopAreaHeight());
+
+#ifdef REDCORE
+  if (locked_view_ && locked_view_->IsLocked()) {
+    SetControlButtonImage(minimize_button_, IDR_LOCK_SCREEN_MINIMIZE, IDR_LOCK_SCREEN_MINIMIZE_H, IDR_LOCK_SCREEN_MINIMIZE_P);
+    SetControlButtonImage(maximize_button_, IDR_LOCK_SCREEN_MAXIMIZE, IDR_LOCK_SCREEN_MAXIMIZE_H, IDR_LOCK_SCREEN_MAXIMIZE_P);
+    SetControlButtonImage(close_button_, IDR_LOCK_SCREEN_CLOSE, IDR_LOCK_SCREEN_CLOSE_H, IDR_LOCK_SCREEN_CLOSE_P);
+    SetControlButtonImage(restore_button_, IDR_LOCK_SCREEN_RESTORE, IDR_LOCK_SCREEN_RESTORE_H, IDR_LOCK_SCREEN_RESTORE_P);
+  }
+  else {
+    SetControlButtonImage(minimize_button_, IDR_MINIMIZE, IDR_MINIMIZE_H, IDR_MINIMIZE_P);
+    SetControlButtonImage(maximize_button_, IDR_MAXIMIZE, IDR_MAXIMIZE_H, IDR_MAXIMIZE_P);
+    SetControlButtonImage(close_button_, IDR_CLOSE, IDR_CLOSE_H, IDR_CLOSE_P);
+    SetControlButtonImage(restore_button_, IDR_RESTORE, IDR_RESTORE_H, IDR_RESTORE_P);
+  }
+#endif
 
   if (IsFrameCondensed())
     PaintMaximizedFrameBorder(canvas);
@@ -748,3 +881,35 @@ void OpaqueBrowserFrameView::FillClientEdgeRects(int x,
   side.Offset(w + kClientEdgeThickness, 0);
   canvas->FillRect(side, color);
 }
+
+#ifdef REDCORE
+base::string16 OpaqueBrowserFrameView::GetLoginInfo() const {
+  return browser_view()->GetUserNameString();
+}
+
+void OpaqueBrowserFrameView::LockScreen(Browser::YSPLockStatus status) {
+	if (locked_view_ && !locked_view_->IsLocked()) {
+		locked_view_->Lock(Browser::SCREEN_LOCKED);
+		Layout();
+	}
+}
+
+void OpaqueBrowserFrameView::SetControlButtonImage(
+    views::ImageButton* button, int normal_image_id,
+    int hover_image_id, int pressed_image_id) {
+  const ui::ThemeProvider* tp = frame()->GetThemeProvider();
+  button->SetImage(views::Button::STATE_NORMAL,
+    tp->GetImageSkiaNamed(normal_image_id));
+  button->SetImage(views::Button::STATE_HOVERED,
+    tp->GetImageSkiaNamed(hover_image_id));
+  button->SetImage(views::Button::STATE_PRESSED,
+    tp->GetImageSkiaNamed(pressed_image_id));
+}
+
+bool OpaqueBrowserFrameView::OnMousePressed(const ui::MouseEvent& event)
+{
+  if (locked_view_ && locked_view_->IsLocked() && event.IsRightMouseButton())
+    return true;
+  return parent()->OnMousePressed(event);
+}
+#endif

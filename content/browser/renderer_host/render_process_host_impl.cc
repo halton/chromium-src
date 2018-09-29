@@ -1646,6 +1646,22 @@ void RenderProcessHostImpl::ShutDownInProcessRenderer() {
   }
 }
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+// ysp+ {IE Embedded}
+void RenderProcessHostImpl::SetTridentCore(bool useIE) {
+  useIE_ = useIE;
+}
+
+bool RenderProcessHostImpl::UseTridentCore() {
+  return useIE_;
+}
+
+ResourceMessageFilter * RenderProcessHostImpl::GetResMsgFilter()
+{
+	return resMsgFilter;
+}
+#endif
+
 void RenderProcessHostImpl::RegisterRendererMainThreadFactory(
     RendererMainThreadFactoryFunction create) {
   g_renderer_main_thread_factory = create;

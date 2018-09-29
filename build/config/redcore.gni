@@ -1,0 +1,13 @@
+# Copyright (c) 2018 The AllMobilize Incorporation. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # Set to true to enable redcore builds.
+  is_redcore = true
+}
+
+declare_args() {
+  # Set to true to enable IE in Windows builds.
+  is_ie_redcore = is_redcore && is_win
+}

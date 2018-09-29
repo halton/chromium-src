@@ -26,6 +26,8 @@
 
 namespace {
 
+extern void check_update(bool);
+
 typedef int (*ChromeMainPtr)(int, char**);
 
 }  // namespace
@@ -99,7 +101,9 @@ __attribute__((visibility("default"))) int main(int argc, char* argv[]) {
     abort();
   }
   rv = chrome_main(argc, argv);
-
+#if defined(REDCORE) && !defined(HELPER_EXECUTABLE)
+  check_update(false);
+#endif
   // exit, don't return from main, to avoid the apparent removal of main from
   // stack backtraces under tail call optimization.
   exit(rv);

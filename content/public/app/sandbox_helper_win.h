@@ -16,7 +16,9 @@ namespace content {
 // sandbox library); it will not work correctly if it is exported from a
 // DLL and linked in.
 void InitializeSandboxInfo(sandbox::SandboxInterfaceInfo* sandbox_info);
-
+#if defined(REDCORE) && defined(IE_REDCORE)
+void InitializeSandboxInfo(sandbox::SandboxInterfaceInfo* sandbox_info, bool enableDEP);	//ysp+ {IE Embedded}
+#endif
 }  // namespace content
 
 #endif  // CONTENT_PUBLIC_APP_SANDBOX_HELPER_WIN_H_

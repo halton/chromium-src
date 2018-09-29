@@ -16,7 +16,7 @@
 namespace chrome {
 
 // The height of the tab strip.
-const CGFloat kTabStripHeight = 37;
+const CGFloat kTabStripHeight = 30; //37;
 
 bool ShouldUseFullSizeContentView() {
   // Chrome historically added a subview to the window's frame view
@@ -54,6 +54,10 @@ const CGFloat kGenericAvatarRightOffset = 5;
 // be aligned when there are extension buttons).
 const CGFloat kLocationBarRightOffset = 35;
 
+#ifdef REDCORE
+const CGFloat kTitleBarHeight = 38;
+#endif
+
 }  // namespace
 
 @interface BrowserWindowLayout ()
@@ -72,6 +76,11 @@ const CGFloat kLocationBarRightOffset = 35;
 // fullscreen mode.
 - (CGFloat)fullscreenBackingBarHeight;
 
+// ysp+ lay out title bar
+#ifdef REDCORE
+- (void)computeTitleBarLayout;
+#endif
+
 @end
 
 @implementation BrowserWindowLayout
@@ -87,7 +96,11 @@ const CGFloat kLocationBarRightOffset = 35;
   memset(&output_, 0, sizeof(chrome::LayoutOutput));
 
   [self computeFullscreenYOffset];
+#ifdef REDCORE
+  [self computeTitleBarLayout];
+#else
   [self computeTabStripLayout];
+#endif
   [self computeContentViewLayout];
 
   return output_;
@@ -188,12 +201,13 @@ const CGFloat kLocationBarRightOffset = 35;
     yOffset += std::floor((1 - parameters_.toolbarFraction) *
                           [self fullscreenBackingBarHeight]);
   }
+
   fullscreenYOffset_ = yOffset;
 }
 
 - (void)computeTabStripLayout {
   if (!parameters_.hasTabStrip) {
-    maxY_ = parameters_.contentViewSize.height + fullscreenYOffset_;
+    //maxY_ = parameters_.contentViewSize.height + fullscreenYOffset_;
     return;
   }
 
@@ -201,7 +215,7 @@ const CGFloat kLocationBarRightOffset = 35;
   chrome::TabStripLayout layout = {};
 
   // Lay out the tab strip.
-  maxY_ = parameters_.windowSize.height + fullscreenYOffset_;
+  //maxY_ = parameters_.windowSize.height + fullscreenYOffset_;
   CGFloat width = parameters_.contentViewSize.width;
   layout.frame = NSMakeRect(
       0, maxY_ - chrome::kTabStripHeight, width, chrome::kTabStripHeight);
@@ -282,7 +296,6 @@ const CGFloat kLocationBarRightOffset = 35;
 - (void)computeContentViewLayout {
   chrome::LayoutParameters parameters = parameters_;
   CGFloat maxY = maxY_;
-
   // Sanity-check |maxY|.
   DCHECK_GE(maxY, 0);
   DCHECK_LE(maxY, parameters_.contentViewSize.height + fullscreenYOffset_);
@@ -324,7 +337,14 @@ const CGFloat kLocationBarRightOffset = 35;
     output_.fullscreenBackingBarFrame =
         NSMakeRect(0, maxY, width, [self fullscreenBackingBarHeight]);
   }
-
+#ifdef REDCORE
+  // ysp: lay out tabstrip
+  maxY_ = maxY;
+  //maxY -= chrome::kTabStripHeight;
+  
+  [self computeTabStripLayout];
+  maxY = maxY_;
+#endif
   // Place the find bar immediately below the toolbar/attached bookmark bar.
   output_.findBarMaxY = maxY;
 
@@ -377,6 +397,9 @@ const CGFloat kLocationBarRightOffset = 35;
     // menu bar.
     maxY = parameters_.windowSize.height;
     maxY -= NSHeight(output_.toolbarFrame) +
+#ifdef REDCORE
+            NSHeight(output_.titleBarFrame) +
+#endif
             NSHeight(output_.tabStripLayout.frame) +
             NSHeight(output_.bookmarkFrame) + parameters.infoBarHeight;
   }
@@ -389,7 +412,7 @@ const CGFloat kLocationBarRightOffset = 35;
   if (!parameters_.inAnyFullscreen)
     return 0;
 
-  CGFloat totalHeight = 0;
+  CGFloat totalHeight = kTitleBarHeight;
   if (parameters_.hasTabStrip)
     totalHeight += chrome::kTabStripHeight;
 
@@ -406,6 +429,19 @@ const CGFloat kLocationBarRightOffset = 35;
 
   return totalHeight;
 }
+
+#ifdef REDCORE
+- (void)computeTitleBarLayout {
+  maxY_ = parameters_.windowSize.height + fullscreenYOffset_;
+  maxY_ -= kTitleBarHeight;
+
+  // TODO: compute title
+  // TODO: compute position of avatar button
+  // TODO: compute position of lock-screen button
+
+  output_.titleBarFrame = NSMakeRect(0, maxY_, parameters_.windowSize.width, kTitleBarHeight);
+}
+#endif
 
 @end
 

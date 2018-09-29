@@ -44,6 +44,12 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
                                 NetworkDelegate* network_delegate,
                                 const std::string& scheme);
 
+#ifdef REDCORE
+  static void addGlobalHeader(std::string key, std::string value);
+  static void clearHeader();
+  static void setSSOConfigValue(const std::string& configValue);//YSP+ { SingleSignOn config }
+#endif /*REDCORE*/
+
   void SetRequestHeadersCallback(RequestHeadersCallback callback) override;
   void SetResponseHeadersCallback(ResponseHeadersCallback callback) override;
 
@@ -176,10 +182,16 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
   // overridden by |override_response_headers_|.
   HttpResponseHeaders* GetResponseHeaders() const;
 
+#ifdef REDCORE
+  bool UrlCompared(const std::string& host, std::string *key);//YSP+ { SingleSignOn config }
+#endif /*REDCORE*/
+
   RequestPriority priority_;
 
   HttpRequestInfo request_info_;
   const HttpResponseInfo* response_info_;
+
+  static std::unique_ptr<base::DictionaryValue> &SingleSignOnValue_; //YSP+ { SingleSignOn config }
 
   // Auth states for proxy and origin server.
   AuthState proxy_auth_state_;

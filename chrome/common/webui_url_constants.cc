@@ -16,7 +16,63 @@ namespace chrome {
 // Note: Add hosts to |kChromePaths| in browser_about_handler.cc to be listed by
 // chrome://chrome-urls (about:about) and the built-in AutocompleteProvider.
 
-const char kChromeUIAboutHost[] = "about";
+#ifdef REDCORE
+// Note: Add hosts to |kChromePaths| in browser_about_handler.cc to be listed by
+// redcore://redcore-urls (about:about) and the built-in AutocompleteProvider.
+const char kChromeUIAboutURL[] = "redcore://about/";
+const char kChromeUIAppListStartPageURL[] = "redcore://app-list/";
+const char kChromeUIAppsURL[] = "redcore://apps/";
+const char kChromeUIBookmarksURL[] = "redcore://bookmarks/";
+const char kChromeUICertificateViewerDialogURL[] = "redcore://view-cert-dialog/";
+const char kChromeUICertificateViewerURL[] = "redcore://view-cert/";
+const char kChromeUIChromeSigninURL[] = "redcore://chrome-signin/";
+const char kChromeUIChromeURLsURL[] = "redcore://chrome-urls/";
+const char kChromeUIConflictsURL[] = "redcore://conflicts/";
+const char kChromeUIConstrainedHTMLTestURL[] = "redcore://constrained-test/";
+const char kChromeUICreditsURL[] = "redcore://credits/";
+const char kChromeUIContentSettingsURL[] = "redcore://settings/content";
+const char kChromeUIDevicesURL[] = "redcore://devices/";
+const char kChromeUIDownloadsURL[] = "redcore://downloads/";
+const char kChromeUIExtensionIconURL[] = "redcore://extension-icon/";
+const char kChromeUIExtensionsFrameURL[] = "redcore://extensions-frame/";
+const char kChromeUIExtensionsURL[] = "redcore://extensions/";
+const char kChromeUIFaviconURL[] = "redcore://favicon/";
+const char kChromeUIFlagsURL[] = "redcore://flags/";
+const char kChromeUIHelpURL[] = "redcore://help/";
+const char kChromeUIHistoryURL[] = "redcore://history/";
+const char kChromeUIInspectURL[] = "redcore://inspect/";
+const char kChromeUIInterstitialURL[] = "redcore://interstitials/";
+const char kChromeUIMdUserManagerUrl[] = "redcore://md-user-manager/";
+const char kChromeUIMediaRouterURL[] = "redcore://media-router/";
+const char kChromeUINetInternalsURL[] = "redcore://net-internals/";
+const char kChromeUINewTabURL[] = "redcore://newtab/";
+const char kChromeUIOmniboxURL[] = "redcore://omnibox/";
+const char kChromeUIPolicyURL[] = "redcore://policy/";
+const char kChromeUIPrintURL[] = "redcore://print/";
+const char kChromeUIQuitURL[] = "redcore://quit/";
+const char kChromeUIResetPasswordURL[] = "redcore://reset-password/";
+const char kChromeUIRestartURL[] = "redcore://restart/";
+const char kChromeUISettingsURL[] = "redcore://settings/";
+const char kChromeUISigninEmailConfirmationURL[] =
+    "redcore://signin-email-confirmation";
+const char kChromeUISigninErrorURL[] = "redcore://signin-error/";
+const char kChromeUISiteDetailsPrefixURL[] =
+    "redcore://settings/content/siteDetails?site=";
+const char kChromeUISuggestionsURL[] = "redcore://suggestions/";
+const char kChromeUISyncConfirmationURL[] = "redcore://sync-confirmation/";
+const char kChromeUISyncConsentBumpURL[] =
+    "redcore://sync-confirmation/?consent-bump";
+const char kChromeUITermsURL[] = "redcore://terms/";
+const char kChromeUIThemeURL[] = "redcore://theme/";
+const char kChromeUIThumbnailURL[] = "redcore://thumb/";
+const char kChromeUIWelcomeURL[] = "redcore://welcome/";
+const char kChromeUIVersionURL[] = "redcore://version/";
+const char kChromeUIWelcomeWin10URL[] = "redcore://welcome-win10/";
+const char kDeprecatedChromeUIHistoryFrameURL[] = "redcore://history-frame/";
+const char kChromeUIShowConfigHost[] = "show-config";//ysp+ { show config }
+
+#else
+
 const char kChromeUIAboutURL[] = "chrome://about/";
 const char kChromeUIAccessibilityHost[] = "accessibility";
 const char kChromeUIAppLauncherPageHost[] = "apps";
@@ -170,6 +226,8 @@ const char kChromeUIWelcomeWin10URL[] = "chrome://welcome-win10/";
 const char kDeprecatedChromeUIHistoryFrameHost[] = "history-frame";
 const char kDeprecatedChromeUIHistoryFrameURL[] = "chrome://history-frame/";
 
+#endif // REDCORE
+
 #if defined(OS_ANDROID)
 const char kChromeUIEocInternalsHost[] = "eoc-internals";
 const char kChromeUIJavaCrashURL[] = "chrome://java-crash/";
@@ -234,17 +292,29 @@ const char kChromeUIAssistantOptInURL[] = "chrome://assistant-optin/";
 
 #if defined(OS_WIN)
 const char kChromeUIMetroFlowHost[] = "make-metro";
+#ifdef REDCORE
+const char kChromeUIMetroFlowURL[] = "redcore://make-metro/";
+#else
 const char kChromeUIMetroFlowURL[] = "chrome://make-metro/";
+#endif
 #endif
 
 #if defined(OS_WIN) || defined(OS_MACOSX) || defined(OS_CHROMEOS)
 const char kChromeUICastHost[] = "cast";
+#ifdef REDCORE
+const char kChromeUICastURL[] = "redcore://cast/";
+#else
 const char kChromeUICastURL[] = "chrome://cast/";
+#endif
 #endif
 
 #if defined(OS_WIN) || defined(OS_MACOSX) || defined(OS_LINUX)
 const char kChromeUIDiscardsHost[] = "discards";
+#ifdef REDCORE
+const char kChromeUIDiscardsURL[] = "redcore://discards/";
+#else
 const char kChromeUIDiscardsURL[] = "chrome://discards/";
+#endif
 #endif
 
 #if defined(OS_POSIX) && !defined(OS_MACOSX) && !defined(OS_ANDROID)
@@ -312,8 +382,13 @@ const char kCleanupSubPage[] = "cleanup";
 // Extension sub pages.
 const char kExtensionConfigureCommandsSubPage[] = "configureCommands";
 
+#ifdef REDCORE
+// Add hosts here to be included in redcore://redcore-urls (about:about).
+// These hosts will also be suggested by BuiltinProvider.
+#else
 // Add hosts here to be included in chrome://chrome-urls (about:about).
 // These hosts will also be suggested by BuiltinProvider.
+#endif
 const char* const kChromeHostURLs[] = {
     kChromeUIAboutHost,
     kChromeUIAccessibilityHost,

@@ -1,0 +1,15 @@
+#!/bin/sh
+# This file is copied and modifed from make_zip
+
+outdir=$1
+cfg=chrome/tools/build/linux/FILES_redcore.cfg
+archive=$outdir/redcore-linux.zip
+
+if [ -z $outdir ]; then
+  echo 'usage: make_zip.sh builddir'
+  echo
+  echo '  builddir   build output directory (e.g., out/Release)'
+  exit 1
+fi
+
+chrome/tools/build/make_zip.py $outdir $cfg $archive

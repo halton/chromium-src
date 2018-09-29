@@ -20,8 +20,13 @@ const char kMasterPreferencesDirectory[] = "Google";
 const char kMasterPreferencesFileName[] = "Google Chrome Master Preferences";
 #else
 const NSSearchPathDirectory kSearchPath = NSApplicationSupportDirectory;
+#ifdef REDCORE
+const char kMasterPreferencesDirectory[] = "Redcore";
+const char kMasterPreferencesFileName[] = "Redcore Master Preferences";
+#else
 const char kMasterPreferencesDirectory[] = "Chromium";
 const char kMasterPreferencesFileName[] = "Chromium Master Preferences";
+#endif //REDCORE
 #endif  // GOOGLE_CHROME_BUILD
 
 }  // namespace

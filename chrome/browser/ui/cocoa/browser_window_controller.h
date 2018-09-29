@@ -31,6 +31,9 @@
 #include "components/translate/core/common/translate_errors.h"
 #include "ui/base/accelerators/accelerator_manager.h"
 #include "ui/gfx/geometry/rect.h"
+#ifdef REDCORE
+#import "chrome/browser/ui/cocoa/ysp/ysp_account_controller.h"
+#endif
 
 @class AvatarBaseController;
 class BookmarkBubbleObserverCocoa;
@@ -95,6 +98,10 @@ constexpr const gfx::Size kMinCocoaPopupWindowSize(100, 122);
   base::scoped_nsobject<BrowserWindowFullscreenTransition>
       fullscreenTransition_;
   base::scoped_nsobject<BrowserWindowTouchBarController> touchBarController_;
+
+#ifdef REDCORE
+  base::scoped_nsobject<yspAccountController> yspAccountController_;
+#endif
 
   // Strong. StatusBubble is a special case of a strong reference that
   // we don't wrap in a scoped_ptr because it is acting the same

@@ -26,6 +26,7 @@ enum MessageBoxResult {
 };
 
 enum MessageBoxType {
+  MESSAGE_BOX_TYPE_INFORMATION,  // Shows an OK button.
   MESSAGE_BOX_TYPE_WARNING,      // Shows an OK button.
   MESSAGE_BOX_TYPE_QUESTION,     // Shows YES and NO buttons.
 };

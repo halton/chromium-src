@@ -20,6 +20,23 @@
 #import "ui/base/cocoa/focus_tracker.h"
 #include "ui/base/material_design/material_design_controller.h"
 #include "ui/base/theme_provider.h"
+#ifdef REDCORE
+#import "chrome/browser/ui/cocoa/ysp/ysp_account_controller.h"
+#import "chrome/browser/ui/cocoa/ysp/ysp_lock_view.h"
+#import <CoreImage/CoreImage.h>
+#endif
+
+@interface NSColor (Partial)
++ (NSColor *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;
++ (NSColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
+@property (readonly) CGColorRef CGColor;
+@end
+
+@interface NSView (Partial)
+//@property (readwrite) BOOL layerUsesCoreImageFilters;
+@property BOOL layerUsesCoreImageFilters;
+@end
+
 
 // As of macOS 10.13 NSWindow lifetimes after closing are unpredictable. Chrome
 // frees resources on window close so this new behavior created problems such as
@@ -285,6 +302,25 @@
 - (NSView*)chromeContentView {
   return chromeContentView_;
 }
+
+#ifdef REDCORE
+- (NSView*)yspTitleView {
+  return yspTitleView_;
+}
+
+- (NSView*)yspLockView {
+  return yspLockView_;
+}
+#if 0
+- (NSTextField*)userNameLabel {
+  return userNameLabel_;
+}
+
+- (NSButton*)yspAvatarButton {
+  return yspAvatarButton_;
+}
+#endif
+#endif
 
 - (void)removeOverlay {
   [self setUseOverlay:NO];

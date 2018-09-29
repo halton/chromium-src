@@ -23,6 +23,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/common/safe_browsing/file_type_policies.h"
+#include "chrome/grit/chromium_strings.h"
 #include "chrome/grit/generated_resources.h"
 #include "components/download/public/common/download_interrupt_reasons.h"
 #include "components/history/core/browser/history_service.h"
@@ -52,6 +53,19 @@
 #if defined(OS_WIN)
 #include "chrome/browser/ui/pdf/adobe_reader_info_win.h"
 #endif
+
+#ifdef REDCORE
+//ysp+ {
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "base/strings/utf_string_conversions.h"   //ysp+
+#include "chrome/browser/ui/simple_message_box.h"
+#include "chrome/grit/generated_resources.h"
+#include "ui/base/l10n/l10n_util.h"
+#include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_finder.h"
+#include "chrome/browser/ui/browser_window.h"
+//ysp+ }
+#endif /*REDCORE*/
 
 using content::BrowserThread;
 using download::DownloadItem;
@@ -480,6 +494,23 @@ DownloadTargetDeterminer::Result
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(local_path_.empty());
+
+#ifdef REDCORE
+  //ysp+ {
+  if (!download_->is_update() &&
+      !YSPLoginManager::GetInstance()->GetDownloadFileAllowed(virtual_path_)) {
+    ScheduleCallbackAndDeleteSelf(
+        download::DOWNLOAD_INTERRUPT_REASON_FILE_BLOCKED);
+
+    chrome::ShowWarningMessageBox(
+      NULL,
+      l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
+      l10n_util::GetStringUTF16(IDS_YSP_FILE_FILTERED_MESSAGE));
+
+    return QUIT_DOLOOP;
+  }
+  //ysp+ }
+#endif /*REDCORE*/
 
   next_state_ = STATE_DETERMINE_MIME_TYPE;
 

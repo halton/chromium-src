@@ -1024,6 +1024,52 @@ jumbo_split_static_library("ui") {
     ]
   }
 
+  if (is_redcore) {
+    if (is_mac) {
+      cocoa_browser_sources += [
+        "cocoa/ysp/ysp_account_controller.h",
+        "cocoa/ysp/ysp_account_controller.mm",
+        "cocoa/ysp/ysp_lock_view.h",
+        "cocoa/ysp/ysp_lock_view.mm",
+        "cocoa/ysp/ysp_lock_view_controller.h",
+        "cocoa/ysp/ysp_lock_view_controller.mm",
+        "cocoa/ysp/ysp_login_manager_bridge.h",
+      ]
+    }
+    sources += [
+      "views/frame/YSPTransparentWnd.cpp",
+      "views/frame/YSPTransparentWnd.h",
+      "views/infobars/ysp_download_activex_infobar_view.cc",
+      "views/infobars/ysp_download_activex_infobar_view.h",
+      "views/location_bar/ysp_renderer_mode_view.cpp",
+      "views/location_bar/ysp_renderer_mode_view.h",
+      "views/ysp_account_view.cc",
+      "views/ysp_account_view.h",
+      "views/ysp_ie_login_view.cpp",
+      "views/ysp_ie_login_view.h",
+      "views/ysp_lock_screen_view.cc",
+      "views/ysp_lock_screen_view.h",
+      "views/ysp_login_view.cc",
+      "views/ysp_login_view.h",
+      "views/ysp_renderer_mode_bubble_view.cpp",
+      "views/ysp_renderer_mode_bubble_view.h",
+      # FIXME(halton):
+      # "webui/options/ysp_password_manager_handler.cc",
+      # "webui/options/ysp_password_manager_handler.h",
+      "webui/ysp_ntp/ep_newtab_ui.cc",
+      "webui/ysp_ntp/ep_newtab_ui.h",
+      "webui/ysp_show_config/ep_show_config_ui.cc",
+      "webui/ysp_show_config/ep_show_config_ui.h",
+      "ysp_download_activex_infobar_delegate.cpp",
+      "ysp_download_activex_infobar_delegate.h",
+      "ysp_password_manager.cc",
+      "ysp_password_manager.h",
+    ]
+    deps += [
+      "//chrome/browser/ysp_login",
+    ]
+  }
+
   if (!is_fuchsia) {
     # TODO(crbug.com/753619): Enable crash reporting on Fuchsia.
     deps += [

@@ -28,6 +28,10 @@ BuiltinProvider::BuiltinProvider(AutocompleteProviderClient* client)
 void BuiltinProvider::Start(const AutocompleteInput& input,
                             bool minimal_changes) {
   matches_.clear();
+#ifdef REDCORE
+  // FIXME(halton): Disable autocomplete for demo
+  return;
+#endif
   if (input.from_omnibox_focus() ||
       (input.type() == metrics::OmniboxInputType::INVALID) ||
       (input.type() == metrics::OmniboxInputType::QUERY))

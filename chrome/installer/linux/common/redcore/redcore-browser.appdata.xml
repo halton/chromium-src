@@ -1,0 +1,28 @@
+<!-- Copyright 2018 The Redcore -->
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>redcore-browser.desktop</id>
+  <update_contact>support@redcore.cn</update_contact>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-3-Clause and LGPL-2.1+ and Apache-2.0 and IJG and MIT and GPL-2.0+ and ISC and OpenSSL and (MPL-1.1 or GPL-2.0 or LGPL-2.0)</project_license>
+  <name>Redcore Web Browser</name>
+  <summary>The web browser from Redcore</summary>
+  <description>
+    <p>
+    Redcore is an browser project that aims to build a safer, faster,
+    and more stable way to experience the web.
+    </p>
+    <p>
+    We invite you to join our effort to build a powerful platform for developing a
+    new generation of web applications.
+    </p>
+    <p>
+    Redcore supports Vorbis, Theora, WebM and HTML5 audio and video standards, but
+    does not include the non-free AAC, H.264, MP3 or Adobe Flash code that is found
+    in Chrome.
+    </p>
+  </description>
+  <url type="homepage">https://www.redcore.cn/</url>
+  <translation/>
+  <developer_name>The Redcore</developer_name>
+</component>

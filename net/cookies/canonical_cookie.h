@@ -178,6 +178,10 @@ class NET_EXPORT CanonicalCookie {
   // greater than the last access time.
   bool IsCanonical() const;
 
+#ifdef REDCORE
+  const std::string& YSPUserName() const { return YSPUserName_; } //YSP+ { User information isolation }
+#endif
+
   // Returns the cookie line (e.g. "cookie1=value1; cookie2=value2") represented
   // by |cookies|. The string is built in the same order as the given list.
   static std::string BuildCookieLine(
@@ -223,6 +227,9 @@ class NET_EXPORT CanonicalCookie {
   bool secure_;
   bool httponly_;
   CookieSameSite same_site_;
+#ifdef REDCORE
+  std::string YSPUserName_; //YSP+ { User information isolation }
+#endif
   CookiePriority priority_;
 };
 

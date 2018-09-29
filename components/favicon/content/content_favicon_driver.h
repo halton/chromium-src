@@ -19,6 +19,7 @@
 namespace content {
 struct FaviconURL;
 class WebContents;
+class RenderFrameHost;
 }
 
 namespace favicon {
@@ -84,6 +85,16 @@ class ContentFaviconDriver
   void DidFinishNavigation(
       content::NavigationHandle* navigation_handle) override;
   void DocumentOnLoadCompletedInMainFrame() override;
+  #ifdef REDCORE
+#ifdef IE_REDCORE
+//ysp+{IE Embedded}
+void DidCommitProvisionalLoadForFrame(
+	content::RenderFrameHost* render_frame_host,
+	const GURL& url,
+	ui::PageTransition transition_type);
+//ysp+
+#endif
+#endif
 
   bool document_on_load_completed_;
   GURL bypass_cache_page_url_;

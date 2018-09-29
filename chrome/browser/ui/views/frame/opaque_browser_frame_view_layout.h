@@ -205,6 +205,10 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
   void ViewAdded(views::View* host, views::View* view) override;
   void ViewRemoved(views::View* host, views::View* view) override;
 
+#ifdef REDCORE
+  void LayoutLoginMessage(views::View* host);
+#endif
+
   // The bounds of the ClientView.
   gfx::Rect client_view_bounds_;
 
@@ -236,6 +240,13 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
   HostedAppButtonContainer* hosted_app_button_container_ = nullptr;
 
   views::View* incognito_icon_;
+
+#ifdef REDCORE
+  views::Label* hello_;
+  views::Label* login_info_;
+  views::ImageButton* lock_button_;
+  YSPLockScreenView* locked_view_;
+#endif
 
   std::vector<views::FrameButton> leading_buttons_;
   std::vector<views::FrameButton> trailing_buttons_;

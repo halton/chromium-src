@@ -57,6 +57,10 @@
 #include "net/http/http_status_code.h"
 #include "net/traffic_annotation/network_traffic_annotation.h"
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "components/download/public/common/download_file_ie.h"
+#endif
+
 namespace download {
 
 namespace {
@@ -286,6 +290,9 @@ DownloadItemImpl::DownloadItemImpl(
     uint32_t download_id,
     const base::FilePath& current_path,
     const base::FilePath& target_path,
+#ifdef REDCORE
+    const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
     const GURL& site_url,
@@ -341,6 +348,16 @@ DownloadItemImpl::DownloadItemImpl(
       etag_(etag),
       received_slices_(received_slices),
       is_updating_observers_(false),
+#ifdef REDCORE
+      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
+      is_doc_view_(false),    //ysp+
+      is_update_(false),      //ysp+
+#endif
+#if defined(IE_REDCORE)
+      is_ie_download_(false), //ysp+
+      // render_process_host_id_(-1), //ysp+
+      // render_frame_host_id_(-1), //ysp+
+#endif
       weak_ptr_factory_(this) {
   delegate_->Attach();
   DCHECK(state_ == COMPLETE_INTERNAL || state_ == INTERRUPTED_INTERNAL ||
@@ -352,6 +369,9 @@ DownloadItemImpl::DownloadItemImpl(
 // Constructing for a regular download:
 DownloadItemImpl::DownloadItemImpl(DownloadItemImplDelegate* delegate,
                                    uint32_t download_id,
+#ifdef REDCORE
+                                   const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
                                    const DownloadCreateInfo& info)
     : request_info_(info.url_chain,
                     info.referrer_url,
@@ -387,6 +407,16 @@ DownloadItemImpl::DownloadItemImpl(DownloadItemImplDelegate* delegate,
       fetch_error_body_(info.fetch_error_body),
       request_headers_(info.request_headers),
       download_source_(info.download_source),
+#ifdef REDCORE
+      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
+      is_doc_view_(false),    //ysp+
+      is_update_(false),      //ysp+
+#endif
+#if defined(IE_REDCORE)
+      is_ie_download_(false), //ysp+
+      // render_process_host_id_(info.render_process_id), //ysp+
+      // render_frame_host_id_(info.render_frame_id), //ysp+
+#endif
       weak_ptr_factory_(this) {
   delegate_->Attach();
   Init(true /* actively downloading */, TYPE_ACTIVE_DOWNLOAD);
@@ -398,6 +428,9 @@ DownloadItemImpl::DownloadItemImpl(DownloadItemImplDelegate* delegate,
 DownloadItemImpl::DownloadItemImpl(
     DownloadItemImplDelegate* delegate,
     uint32_t download_id,
+#ifdef REDCORE
+    const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
     const base::FilePath& path,
     const GURL& url,
     const std::string& mime_type,
@@ -412,6 +445,16 @@ DownloadItemImpl::DownloadItemImpl(
       delegate_(delegate),
       destination_info_(path, path, 0, false, std::string(), base::Time()),
       is_updating_observers_(false),
+#ifdef REDCORE
+      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
+      is_doc_view_(false),    //ysp+
+      is_update_(false),      //ysp+
+#endif
+#if defined(IE_REDCORE)
+      is_ie_download_(false), //ysp+
+      // render_process_host_id_(-1), //ysp+
+      // render_frame_host_id_(-1), //ysp+
+#endif
       weak_ptr_factory_(this) {
   job_ = DownloadJobFactory::CreateJob(this, std::move(request_handle),
                                        DownloadCreateInfo(), true, nullptr,
@@ -515,6 +558,13 @@ void DownloadItemImpl::StealDangerousDownload(
 void DownloadItemImpl::Pause() {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+  if (is_ie_download_) {
+	  //Cancel(true);
+	  return;
+  }
+#endif
+
   // Ignore irrelevant states.
   if (IsPaused())
     return;
@@ -583,6 +633,10 @@ void DownloadItemImpl::Resume() {
 void DownloadItemImpl::Cancel(bool user_cancel) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DVLOG(20) << __func__ << "() download = " << DebugString(true);
+#if defined(REDCORE) && defined(IE_REDCORE)
+  if (!is_ie_download_) return;
+#endif
+
   InterruptAndDiscardPartialState(
       user_cancel ? DOWNLOAD_INTERRUPT_REASON_USER_CANCELED
                   : DOWNLOAD_INTERRUPT_REASON_USER_SHUTDOWN);
@@ -673,6 +727,9 @@ bool DownloadItemImpl::CanResume() const {
     case TARGET_PENDING_INTERNAL:
     case TARGET_RESOLVED_INTERNAL:
     case IN_PROGRESS_INTERNAL:
+#if defined(REDCORE) && defined(IE_REDCORE)
+      if (is_ie_download_) return false;
+#endif
       return IsPaused();
 
     case INTERRUPTED_INTERNAL: {
@@ -765,7 +822,6 @@ std::string DownloadItemImpl::GetContentDisposition() const {
 std::string DownloadItemImpl::GetMimeType() const {
   return mime_type_;
 }
-
 std::string DownloadItemImpl::GetOriginalMimeType() const {
   return original_mime_type_;
 }
@@ -871,6 +927,10 @@ bool DownloadItemImpl::IsDangerous() const {
 }
 
 DownloadDangerType DownloadItemImpl::GetDangerType() const {
+#ifdef REDCORE
+  if(is_update_ || is_doc_view_)
+    return DOWNLOAD_DANGER_TYPE_NOT_DANGEROUS;
+#endif
   return danger_type_;
 }
 
@@ -1408,6 +1468,10 @@ void DownloadItemImpl::Start(
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DCHECK(!download_file_);
   DVLOG(20) << __func__ << "() this=" << DebugString(true);
+#if defined(REDCORE) && defined(IE_REDCORE)
+  is_ie_download_ = file->IsIEDownload();
+  if(file->IsIEDownload()==false)
+#endif
   RecordDownloadCountWithSource(START_COUNT, download_source_);
 
   download_file_ = std::move(file);
@@ -2242,6 +2306,12 @@ void DownloadItemImpl::TransitionTo(DownloadInternalState new_state) {
 }
 
 void DownloadItemImpl::SetDangerType(DownloadDangerType danger_type) {
+#if defined(REDCORE)
+  if(is_update_ || is_doc_view_) {
+    danger_type_ = DOWNLOAD_DANGER_TYPE_NOT_DANGEROUS;
+    return;
+  }
+#endif
   if (danger_type != danger_type_) {
     TRACE_EVENT_INSTANT1("download", "DownloadItemSaftyStateUpdated",
                          TRACE_EVENT_SCOPE_THREAD, "danger_type",
@@ -2574,5 +2644,34 @@ const char* DownloadItemImpl::DebugResumeModeString(ResumeMode mode) {
   NOTREACHED() << "Unknown resume mode " << static_cast<int>(mode);
   return "unknown";
 }
+
+#ifdef REDCORE
+std::string DownloadItemImpl::GetYSPUserName() const {
+  return YSPUserName_;
+}
+
+bool DownloadItemImpl::is_doc_view() {
+  return is_doc_view_;
+}
+
+void DownloadItemImpl::set_is_doc_view(bool doc_view) {
+  is_doc_view_ = doc_view;
+}
+
+bool DownloadItemImpl::is_update() {
+  return is_update_;
+}
+
+void DownloadItemImpl::set_is_update(bool update) {
+  is_update_ = update;
+}
+#endif
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+bool DownloadItemImpl::IsIEDownload() {
+    return is_ie_download_;
+}
+#endif
+
 
 }  // namespace download

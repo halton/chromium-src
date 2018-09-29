@@ -2650,4 +2650,22 @@ const char kNotificationNextPersistentId[] = "persistent_notifications.next_id";
 // (throttling/freezing/discarding) are enabled.
 const char kTabLifecyclesEnabled[] = "tab_lifecycles_enabled";
 
+#ifdef REDCORE
+//ysp+ {
+const char kYSPAutoLogin[] = "enterplorer.auto_login";
+const char kYSPServerAddress[] = "enterplorer.server_address";
+const char kYSPUserSetServerAddress[] = "enterplorer.user_set_server_address";
+const char kYSPLoginLastCID[] = "enterplorer.last_id1";
+const char kYSPLoginLastUID[] = "enterplorer.last_id2";
+const char kYSPLoginLastPWD[] = "enterplorer.last_id3";
+const char kYSPDeviceID[] = "enterplorer.device_id";
+const char kYSPAccessToken[] = "enterplorer.access_token";
+const char kYSPRefreshToken[] = "enterplorer.refresh_token";
+const char kYSPFirstLogin[] = "enterplorer.first_login";
+const char kYSPExtensionInstallVersion[] = "enterplorer.extension_install_version";
+const char kYSPLockScreen[] ="enterplorer.lock_screen_flag"; 
+#ifdef IE_REDCORE
+const char kYSPActivexNoPromptInfo[] = "enterplorer.activex_no_prompt_info";
+#endif
+#endif
 }  // namespace prefs

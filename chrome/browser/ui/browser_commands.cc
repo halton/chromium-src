@@ -1275,4 +1275,104 @@ bool CanCreateBookmarkApp(const Browser* browser) {
 }
 #endif  // BUILDFLAG(ENABLE_EXTENSIONS)
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+ {IE Embedded}
+void OpenCurrentURLUseIE(Browser* browser, const GURL& ysp_url, IE::IEVersion ver, IE::IEEmulation emu, bool auto_select) {
+	LocationBar* location_bar = browser->window()->GetLocationBar();
+	if (!location_bar)
+		return;
+
+	WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
+	NavigationEntry* entry = contents->GetController().GetLastCommittedEntry();
+
+	GURL url;
+	if (ysp_url.is_empty()) {
+		if (entry)
+			url = entry->GetURL();
+		else
+			return;
+	}
+	else {
+		url = ysp_url;
+	}
+
+	//WindowOpenDisposition open_disposition =
+	//	location_bar->GetWindowOpenDisposition();
+
+	ui::PageTransition page_transition = location_bar->GetPageTransition();
+	NavigateParams params(browser, url, page_transition);
+	RendererMode mode;
+	mode.core = IE_CORE;
+	mode.emulation = emu;
+	mode.ver = ver;
+	params.renderer_mode = mode;
+	params.auto_select = auto_select;
+
+	params.disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
+	params.transition = ui::PAGE_TRANSITION_TYPED;
+
+	// Use ADD_INHERIT_OPENER so that all pages opened by the omnibox at least
+	// inherit the opener. In some cases the tabstrip will determine the group
+	// should be inherited, in which case the group is inherited instead of the
+	// opener.
+	params.tabstrip_add_types = TabStripModel::ADD_ACTIVE |
+		TabStripModel::ADD_FORCE_INDEX | TabStripModel::ADD_INHERIT_OPENER;
+	Navigate(&params);
+}
+
+void OpenCurrentURLUseChrome(Browser* browser, const GURL& ysp_url, bool auto_select) {
+	LocationBar* location_bar = browser->window()->GetLocationBar();
+	if (!location_bar)
+		return;
+
+	WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
+	NavigationEntry* entry = contents->GetController().GetLastCommittedEntry();
+	GURL url;
+	if (ysp_url.is_empty()) {
+		if (entry)
+			url = entry->GetURL();
+		else
+			return;
+	}
+	else {
+		url = ysp_url;
+	}
+
+	ui::PageTransition page_transition = location_bar->GetPageTransition();
+	NavigateParams params(browser, url, page_transition);
+	params.renderer_mode.core = BLINK_CORE;
+	params.auto_select = auto_select;//YSP+ { Kernel switching }
+	params.transition = ui::PAGE_TRANSITION_TYPED;
+	params.disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
+	params.tabstrip_add_types = TabStripModel::ADD_ACTIVE |
+		TabStripModel::ADD_FORCE_INDEX | TabStripModel::ADD_INHERIT_OPENER;
+	Navigate(&params);
+}
+
+void SwitchRendererMode(Browser * browser, const GURL& url, const RendererMode& mode, bool auto_select)
+{
+	if (browser == NULL)
+		return;
+	WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
+	if(mode.core==BLINK_CORE)
+		OpenCurrentURLUseChrome(browser, url, auto_select);
+	else if(mode.core==IE_CORE)
+		OpenCurrentURLUseIE(browser, url, mode.ver, mode.emulation, auto_select);
+	int index = browser->tab_strip_model()->GetIndexOfWebContents(contents);
+	if (index != -1)
+		browser->tab_strip_model()->CloseWebContentsAt(index, TabStripModel::CLOSE_NONE);
+}
+
+void ShowRendererModeSwitchBubble(Browser * browser, RendererMode mode)
+{
+	WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
+	NavigationEntry* entry = contents->GetController().GetLastCommittedEntry();
+	if (entry == NULL)
+		return;
+	GURL url = entry->GetURL();
+	browser->window()->ShowRendererModeBubble(url, mode);
+}
+#endif
+
+
 }  // namespace chrome

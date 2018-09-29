@@ -48,6 +48,9 @@ std::unique_ptr<DownloadItemImpl> CreateDownloadItemImpl(
   return std::make_unique<DownloadItemImpl>(
       delegate, entry.download_info->guid, entry.download_info->id,
       in_progress_info->current_path, in_progress_info->target_path,
+#ifdef REDCORE
+      in_progress_info->YSPUserName,
+#endif
       in_progress_info->url_chain, in_progress_info->referrer_url,
       in_progress_info->site_url, in_progress_info->tab_url,
       in_progress_info->tab_referrer_url, in_progress_info->mime_type,

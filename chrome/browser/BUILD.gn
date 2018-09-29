@@ -3491,6 +3491,36 @@ jumbo_split_static_library("browser") {
     deps += [ "//ui/views" ]
   }
 
+  if (is_redcore) {
+    sources += [
+      "ysp_update/mac/AppKitPrevention.h",
+      "ysp_update/mac/SUDiskImageUnarchiver.h",
+      "ysp_update/mac/SUDiskImageUnarchiver.m",
+      "ysp_update/mac/SUErrors.h",
+      "ysp_update/mac/SUExport.h",
+      "ysp_update/mac/SULocalizations.h",
+      "ysp_update/mac/SULog.h",
+      "ysp_update/mac/SULog.m",
+      "ysp_update/mac/SUOperatingSystem.h",
+      "ysp_update/mac/SUUnarchiverNotifier.h",
+      "ysp_update/mac/SUUnarchiverNotifier.m",
+      "ysp_update/mac/SUUnarchiverProtocol.h",
+      "ysp_update/mac/build_ut.sh",
+      "ysp_update/mac/unit_test.m",
+      "ysp_update/ysp_pac_manager.cc",
+      "ysp_update/ysp_pac_manager.h",
+      "ysp_update/ysp_update_fetcher.cc",
+      "ysp_update/ysp_update_fetcher.h",
+      "ysp_update/ysp_update_manager.cc",
+      "ysp_update/ysp_update_manager.h",
+      "ysp_update/ysp_update_manager_mac.mm",
+    ]
+    deps += [
+      "//chrome/browser/ysp_login",   # //ysp+ { login }
+      "//components/ysp_doc_view",   # //ysp+
+    ]
+  }
+
   if (use_aura) {
     # Cross-platform Aura files.
     sources += [

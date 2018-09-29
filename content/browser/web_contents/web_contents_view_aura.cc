@@ -567,6 +567,13 @@ void WebContentsViewAura::EndDrag(RenderWidgetHost* source_rwh,
   web_contents_->SystemDragEnded(source_rwh);
 }
 
+void WebContentsViewAura::OnWebContentDestroying() {}
+
+WebContentsImpl* WebContentsViewAura::getWebContents()
+{
+  return web_contents_;
+}
+
 void WebContentsViewAura::InstallOverscrollControllerDelegate(
     RenderWidgetHostViewAura* view) {
   const OverscrollConfig::HistoryNavigationMode mode =

@@ -158,6 +158,7 @@
 #include "chrome/common/ssl_insecure_content.h"
 #include "chrome/common/url_constants.h"
 #include "chrome/grit/chromium_strings.h"
+#include "chrome/grit/generated_resources.h"
 #include "components/bookmarks/browser/bookmark_model.h"
 #include "components/bookmarks/browser/bookmark_utils.h"
 #include "components/bookmarks/common/bookmark_pref_names.h"
@@ -186,6 +187,13 @@
 #include "content/public/browser/keyboard_event_processing_result.h"
 #include "content/public/browser/navigation_controller.h"
 #include "content/public/browser/navigation_entry.h"
+
+#ifdef REDCORE
+#include "content/browser/frame_host/navigation_handle_impl.h"
+#include "content/public/browser/navigation_throttle.h"
+#include "chrome/browser/ui/simple_message_box.h"
+#endif
+
 #include "content/public/browser/notification_details.h"
 #include "content/public/browser/notification_service.h"
 #include "content/public/browser/overscroll_configuration.h"
@@ -224,6 +232,64 @@
 #include "extensions/browser/process_manager.h"
 #endif
 
+#if defined(REDCORE)
+#include "chrome/browser/ysp_login/ysp_login_manager.h"   //ysp+ {}
+#include "chrome/browser/ysp_update/ysp_update_manager.h"   //ysp+
+#include "chrome/browser/ui/webui/settings/settings_startup_pages_handler.h"
+#include "chrome/browser/extensions/api/web_navigation/web_navigation_api.h" //ysp+{push server api}
+#include "crypto/ysp_crypto_header.h"
+#include "base/timer/timer.h"
+#include "chrome/browser/ui/views/frame/browser_view.h"
+#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
+#include "net/dns/host_resolver_impl.h" //ysp+ { private DNS }
+
+#ifdef SANGFOR_GM_SSL
+#include "net/http/http_stream_parser.h" //YSP+ { sangfor GM ssl }
+#endif
+#include "net/url_request/url_request_http_job.h" //YSP+ { SingleSignOn config }
+#include "content/browser/renderer_host/render_widget_host_impl.h" //YSP+ { disable drag }
+
+//YSP+ { passwords AD manager
+#include "chrome/browser/password_manager/password_store_factory.h"
+#include "components/password_manager/core/browser/password_store_factory_util.h"
+#include "base/json/json_reader.h"
+//YSP+ } /*passwords AD manager*/
+#include "crypto/ysp_crypto_encryption.h"  //ysp+ { AES DES and SMS4 crypt }
+//TODO (matianzhi): YSP+ { startup and home pages
+#include "chrome/browser/ui/browser_commands.h"
+#include "chrome/browser/ui/webui/settings/settings_startup_pages_handler.h"
+#include "chrome/browser/prefs/session_startup_pref.h"
+//YSP+ }
+#include "net/disk_cache/blockfile/entry_impl.h" //YSP+ { cache encryption }
+#include "base/json/json_writer.h"  //ysp+{Function Control}
+//TODO (matianzhi): YSP+ { clear user data }
+#include "chrome/browser/history/history_service_factory.h"
+#include "chrome/browser/safe_browsing/safe_browsing_service.h"
+#include "chrome/browser/download/download_prefs.h"
+#include "components/nacl/browser/nacl_browser.h"
+#include "components/nacl/browser/pnacl_host.h"
+#include "components/user_prefs/user_prefs.h"
+#include "components/web_cache/browser/web_cache_manager.h"
+#include "content/browser/browsing_data/storage_partition_http_cache_data_remover.h"
+#include "content/browser/ysp_resource_replace_interceptor.h" //YSP+ { Resource Replace }
+#include "content/public/browser/download_manager.h"
+#include "content/public/browser/browser_thread.h"
+#include "content/public/browser/browser_context.h"
+//YSP+ }
+#endif
+
+#if defined(IE_REDCORE)
+#include "base/win/win_util.h" //ysp+ {Kernel switching}
+#include "content/browser/web_contents/web_contents_ie.h" //ysp+{IE Function Control}
+
+#include "chrome/browser/password_manager/password_store_factory.h"
+#include "components/password_manager/core/browser/password_store.h"
+#include "components/password_manager/core/browser/password_store_consumer.h"
+#include "components/autofill/core/common/password_form.h"
+#include "chrome/browser/ui/views/ysp_ie_login_view.h"
+
+#endif
+
 #if defined(OS_WIN)
 #include <windows.h>
 #include <shellapi.h>
@@ -231,6 +297,9 @@
 #include "components/autofill/core/browser/autofill_ie_toolbar_import_win.h"
 #include "ui/base/touch/touch_device.h"
 #include "ui/base/win/shell.h"
+#ifdef REDCORE
+#include "base/win/registry.h"  //ysp+{window popup}
+#endif
 #endif  // OS_WIN
 
 #if defined(OS_CHROMEOS)
@@ -261,8 +330,33 @@ using web_modal::WebContentsModalDialogManager;
 
 namespace {
 
+#if defined(IE_REDCORE)
+  class PwdConsumer :public password_manager::PasswordStoreConsumer
+  {
+  public:
+    PwdConsumer(Browser* browser)
+      :pBrower(browser) {
+
+    }
+     ~PwdConsumer() override {};
+
+     void OnGetPasswordStoreResults(
+      std::vector<std::unique_ptr<autofill::PasswordForm>> results) override
+    {
+      if (pBrower)
+        pBrower->OnFindWindowsDomainUserInfoEnd(std::move(results));
+    }
+  private:
+    Browser * pBrower;
+  };
+#endif
+
 // How long we wait before updating the browser chrome while loading a page.
 const int kUIUpdateCoalescingTimeMS = 200;
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+const uint32_t kDefaultColor = 0x0c0f1116;
+const int kDefaultFontSize = 36;
+#endif
 
 BrowserWindow* CreateBrowserWindow(Browser* browser, bool user_gesture) {
   return BrowserWindow::CreateBrowserWindow(browser, user_gesture);
@@ -308,6 +402,129 @@ MaybeCreateHostedAppController(Browser* browser) {
 
 }  // namespace
 
+#ifdef REDCORE //YSP+ { SingleSignOn config
+static int stringmatch(const char *pattern, const char *string, int nocase);
+std::string getHostForDomain(std::string domain) {
+  std::string host = "*" + domain;
+
+  return host;
+}
+bool isUpdateSingleSignOnConfig(GURL& url) {
+  int interval;
+  int type = 0;
+  int frequencyType = 0;
+  std::string singlesignon_interval = "";
+  base::DictionaryValue* rootDict =
+    YSPLoginManager::GetInstance()->GetManagedSingleSignOnConfig();
+  if (rootDict) {
+    rootDict->GetInteger("interval", &interval);
+    rootDict->GetInteger("frequencyType", &frequencyType);
+    rootDict->GetInteger("type", &type);
+    if (type != 0) {
+      if (type == 1) {
+        base::DictionaryValue *positionDict = nullptr;
+        rootDict->GetDictionary("cookie", &positionDict);
+        if (!positionDict)
+          return false;
+        std::string cookieDomain = "";
+        positionDict->GetString("domain", &cookieDomain);
+        rootDict->GetString("timestamp", &singlesignon_interval);
+        int64_t timestamp = 0;
+        base::StringToInt64(singlesignon_interval, &timestamp);
+        if (stringmatch(getHostForDomain(cookieDomain).c_str(), url.host().c_str(), true)) {
+          if (frequencyType == 1) //only once
+            return false;
+          else if (frequencyType == 2) //each
+            return true;
+          else if (frequencyType == 3) {
+            if ((base::Time::Now().ToTimeT() - timestamp) >= interval)
+              return true;
+            return false;
+          }
+        }
+      }
+      else {
+        base::ListValue* positionList = nullptr;
+        rootDict->GetList("urls", &positionList);
+        if (positionList == NULL || positionList->empty())
+          return false;
+        for (size_t i = 0; i < positionList->GetSize(); ++i) {
+          base::DictionaryValue *positionDict = nullptr;
+          positionList->GetDictionary(i, &positionDict);
+          std::string SSOHost = "";
+          positionDict->GetString("url", &SSOHost);
+          rootDict->GetString("timestamp", &singlesignon_interval);
+          int64_t timestamp = 0;
+          base::StringToInt64(singlesignon_interval, &timestamp);
+          if (stringmatch(SSOHost.c_str(), url.spec().c_str(), true)) {
+            if (frequencyType == 1) //only once
+              return false;
+            else if (frequencyType == 2) //each
+              return true;
+            else if (frequencyType == 3) {
+              if ((base::Time::Now().ToTimeT() - timestamp) >= interval)
+                return true;
+              return false;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+namespace {
+void startAndRedirectNavigation(Browser* browser, content::WebContents* web_contents, GURL url)
+{
+#ifdef IE_REDCORE
+  RendererMode mode; //YSP+ { Kernel switching }
+#endif
+  //ysp+ { URL Blacklist And Whitelist
+  //DLOG(INFO) << "URLhost:[" << url << "] url_host:[" << url.host() << ']';
+  if (!YSPLoginManager::GetInstance()->GetLoadURLAllowed(url)) {
+    std::string type = YSPLoginManager::GetInstance()->GetWebsiteListType();
+    if (type == "black") {
+      if (browser->BlackUrlCompared(url)) {
+        web_contents->Stop();
+        chrome::ShowWarningMessageBox(
+          browser->window()->GetNativeWindow(),
+          l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
+          l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_MESSAGE));
+        return;
+      }
+    }
+    else if (type == "white") {
+      if (browser->WhiteUrlCompared(url)) {
+        web_contents->Stop();
+        chrome::ShowWarningMessageBox(
+          browser->window()->GetNativeWindow(),
+          l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
+          l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_MESSAGE));
+        return;
+      }
+    }
+  }
+  //YSP+  }  /*URL Blacklist And Whitelist*/
+#ifdef IE_REDCORE
+  //YSP+ { Kernel switching
+  if (web_contents->IsAutoSelect() &&
+    browser->UrlCompared(url, mode)) {
+    if (web_contents->GetRendererMode() != mode) {
+      web_contents->Stop();
+      content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
+        base::Bind(&chrome::SwitchRendererMode, browser, url, mode, true));
+    }
+  }
+  //YSP+ } /*Kernel switching*/
+#endif
+  //YSP+ { SingleSignOn config
+  if (isUpdateSingleSignOnConfig(url)) {
+    YSPLoginManager::GetInstance()->GetSingleSignOnConfig();
+  }
+  //YSP+ } /*SingleSignOn config*/
+}
+}
+#endif //YSP+ } /*SingleSignOn config*/
 ////////////////////////////////////////////////////////////////////////////////
 // Browser, CreateParams:
 
@@ -365,6 +582,16 @@ class Browser::InterstitialObserver : public content::WebContentsObserver {
     browser_->UpdateBookmarkBarState(BOOKMARK_BAR_STATE_CHANGE_TAB_STATE);
   }
 
+#ifdef REDCORE
+  void DidStartNavigation(content::NavigationHandle* navigation_handle) override {
+    GURL url = navigation_handle->GetURL();
+    startAndRedirectNavigation(browser_, web_contents(), url);
+  }
+  void DidRedirectNavigation(content::NavigationHandle* navigation_handle) override {
+    GURL url = navigation_handle->GetURL();
+    startAndRedirectNavigation(browser_, web_contents(), url);
+  }
+#endif
  private:
   Browser* browser_;
 
@@ -400,7 +627,13 @@ Browser::Browser(const CreateParams& params)
       bookmark_bar_state_(BookmarkBar::HIDDEN),
       command_controller_(new chrome::BrowserCommandController(this)),
       window_has_shown_(false),
+#if defined(IE_REDCORE)
+      ie_crypto_ua_timer_(new base::Timer(false,false)),
+#endif
       chrome_updater_factory_(this),
+#if defined(REDCORE)
+      crypto_ua_factory_(this),
+#endif
       weak_factory_(this) {
   // If this causes a crash then a window is being opened using a profile type
   // that is disallowed by policy. The crash prevents the disabled window type
@@ -1010,6 +1243,16 @@ void Browser::TabInsertedAt(TabStripModel* tab_strip_model,
       session_service->SetSelectedTabInWindow(session_id(),
                                               new_active_index);
   }
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+{IE Function Control}
+  if (contents->GetRendererMode().core == IE_CORE) {
+    content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(contents);
+    std::wstring jsonStr = GetIEFunctionControlJsonString();
+    pIEContent->SendFunctionControl(jsonStr);
+  }
+#endif //ysp+
+
 }
 
 void Browser::TabClosingAt(TabStripModel* tab_strip_model,
@@ -1036,6 +1279,11 @@ void Browser::TabClosingAt(TabStripModel* tab_strip_model,
       chrome::NOTIFICATION_TAB_CLOSING,
       content::Source<NavigationController>(&contents->GetController()),
       content::NotificationService::NoDetails());
+#if defined(REDCORE)
+  YSPLoginManager::GetInstance()->Init();
+  YSPLoginManager::GetInstance()->AddObserver(this);
+  YSPLoginManager::GetInstance()->Restore();
+#endif
 }
 
 void Browser::TabDetachedAt(WebContents* contents, int index, bool was_active) {
@@ -1180,6 +1428,13 @@ void Browser::TabReplacedAt(TabStripModel* tab_strip_model,
     session_service->TabRestored(new_contents,
                                  tab_strip_model_->IsTabPinned(index));
   }
+
+#if defined(REDCORE)
+  YSPLoginManager::GetInstance()->RemoveObserver(this); //ysp+{IE Function Control}
+#if defined(IE_REDCORE)
+  ie_crypto_ua_timer_.reset();
+#endif
+#endif
 }
 
 void Browser::TabPinnedStateChanged(TabStripModel* tab_strip_model,
@@ -2506,6 +2761,13 @@ void Browser::UpdateWindowForLoadingStateChanged(content::WebContents* source,
                                        ->GetStatusText());
     }
   }
+  #ifdef REDCORE
+    #ifdef IE_REDCORE
+      //ysp+{IE Embedded}
+      TrySetIEConetentZoom(source);
+      //ysp+
+    #endif
+  #endif
 }
 
 bool Browser::SupportsLocationBar() const {
@@ -2529,7 +2791,13 @@ bool Browser::SupportsWindowFeatureImpl(WindowFeature feature,
                                         bool check_fullscreen) const {
   bool hide_ui_for_fullscreen = check_fullscreen && ShouldHideUIForFullscreen();
 
+#if defined(REDCORE) && !defined(OS_MACOSX)
+  // ysp: enable system title bar on Windows and Linux, on MAC, we use custom title bar
+  // instead of system title bar
+  unsigned int features = FEATURE_INFOBAR | FEATURE_DOWNLOADSHELF | FEATURE_TITLEBAR;
+#else
   unsigned int features = FEATURE_INFOBAR | FEATURE_DOWNLOADSHELF;
+#endif
 
   // Bookmark bar could be present even if the top UI is hidden in fullscreen
   // mode, such as when it is in 'detached' mode on NTP. Therefore we
@@ -2539,8 +2807,11 @@ bool Browser::SupportsWindowFeatureImpl(WindowFeature feature,
     features |= FEATURE_BOOKMARKBAR;
 
   if (!hide_ui_for_fullscreen) {
-    if (!is_type_tabbed())
-      features |= FEATURE_TITLEBAR;
+
+    #if !defined(REDCORE) || !defined(OS_MACOSX)
+        if (!is_type_tabbed())
+          features |= FEATURE_TITLEBAR;
+    #endif
 
     if (is_type_tabbed())
       features |= FEATURE_TABSTRIP;
@@ -2702,3 +2973,1330 @@ bool Browser::MaybeCreateBackgroundContents(
 
   return contents != NULL;
 }
+
+#ifdef REDCORE //ysp+ { app auto update
+void Browser::AppAutoUpdate() {
+  content::WebContents* contents =
+    tab_strip_model_->GetActiveWebContents();
+  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+  std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+  std::string manager_server = YSPLoginManager::GetInstance()->GetManageServer();
+  std::string access_token = YSPLoginManager::GetInstance()->GetAccessToken();
+  YSPUpdateManager::GetInstance()->RequestUpdate(contents, manager_server, user_id, company_id, access_token);
+}
+//ysp+ } /*app auto update*/
+
+#if defined(WATERMARK) && !defined(IE_REDCORE)
+void Browser::SetWatermarkString(const std::vector<base::string16>& str, const uint32_t color, const int font_size) {
+  if (str.size())
+    DLOG(INFO) << "Browser::SetWatermarkString:" << str[0] << ", color:" << color << ", size:" << font_size;
+  else
+    DLOG(INFO) << "Browser::SetWatermarkString: null" << ", color" << color << ", size:" << font_size;
+  watermark_str_ = str;
+  watermark_color_ = (color == 0 ? kDefaultColor : color);
+  watermark_font_size_ = (font_size == 0 ? kDefaultFontSize : font_size);
+  watermark_init_ = true;
+  UpdateWatermark();
+}
+
+void Browser::UpdateWatermark() {
+  if (!watermark_init_)
+    return;
+  if (watermark_str_.size())
+    DLOG(INFO) << "watermark_str_[0]: " << watermark_str_[0];
+  else
+    DLOG(INFO) << "watermark_str_[0]: null.";
+
+  content::WebContents* activeContents =
+    tab_strip_model_->GetActiveWebContents();
+  if (activeContents) {
+    const GURL& url = activeContents->GetURL();
+    bool show_watermark = (url != GURL(chrome::kChromeUINewTabURL));
+    content::RenderViewHost* rvh = activeContents->GetRenderViewHost();
+    if (rvh) {
+      content::RenderWidgetHost* rwh = rvh->GetWidget();
+      if (rwh) {
+        std::vector<base::string16> str_null;
+        rwh->SetWatermarkString(
+          show_watermark ? watermark_str_ : str_null,
+          watermark_color_,
+          watermark_font_size_);
+      }
+    }
+  }
+}
+#endif
+
+//YSP+ { window popup
+void Browser::SetPopup()
+{
+#ifdef IE_REDCORE
+  std::vector<std::wstring> exceptions; //for config ie popup manager
+#endif
+  int defaultPopup = 0;
+  base::ListValue* hostList = nullptr;
+  base::DictionaryValue* popupRootDict =
+    YSPLoginManager::GetInstance()->GetPopupSetting();
+  if (popupRootDict) {
+    popupRootDict->GetInteger("popupBlock", &defaultPopup);
+    popupRootDict->GetList("popupException", &hostList);
+  }
+  if (defaultPopup == 2)
+    SetExceptionForPopup(2, "", "allow");
+  else if (defaultPopup == 3) {
+    SetExceptionForPopup(2, "", "block");
+    if (hostList && !hostList->empty()) {
+      for (size_t i = 0; i < hostList->GetSize(); ++i) {
+        std::string old_host, host = "";
+        hostList->GetString(i, &old_host);
+        if (!old_host.empty()) {
+#ifdef IE_REDCORE
+          exceptions.push_back(base::ASCIIToUTF16(old_host));
+#endif
+          if (old_host.find('*') != std::string::npos) {
+            if ((old_host.find("*.") != std::string::npos) && (old_host.c_str()[0] == '*')) {
+              int offset = strcmp(old_host.c_str(), "*.") + 1;
+              host = '[';
+              host.append(old_host, 0, offset);
+              host = host + ']';
+              host.append(old_host, offset, old_host.length() - offset);
+            }
+          }
+          else
+            host = old_host;
+          SetExceptionForPopup(3, host, "allow");
+          DLOG(INFO) << "popup exception host: " << host;
+        }
+      }
+    }
+  }
+#ifdef IE_REDCORE
+  ConfigIEPopupManager(defaultPopup, exceptions); //config IE popup window manager
+#endif
+}
+
+#ifdef IE_REDCORE
+void Browser::ConfigIEPopupManager(
+                const int & enableBlockPopup,
+                const std::vector<std::wstring>& exceptions) {
+  //enableBlockPopup, 3: enable popup manager, 2:disable popup manager, other: not modify
+
+  const wchar_t* enableBlockPopupSubKey = L"Software\\Microsoft\\Internet Explorer\\New Windows";
+  base::win::RegKey blockPopupKey;
+  long ret = blockPopupKey.Open(HKEY_CURRENT_USER, enableBlockPopupSubKey, KEY_ALL_ACCESS);
+  if (ret == ERROR_SUCCESS) {
+    if (enableBlockPopup == 3)
+      ret = blockPopupKey.WriteValue(L"PopupMgr", (DWORD)1);  //enable IE Popup Manager
+    else if (enableBlockPopup == 2)
+      ret = blockPopupKey.WriteValue(L"PopupMgr", (DWORD)0);  //disable IE Popup Manager
+    if (ret != ERROR_SUCCESS)
+      LOG(WARNING) << L"modify IE popup manager failed, error code is  " << ret;
+    blockPopupKey.Close();
+  }
+  if (exceptions.empty() || enableBlockPopup != 3)
+    return;
+
+  //add exceptions
+  const wchar_t* allowSubKey = L"Software\\Microsoft\\Internet Explorer\\New Windows\\Allow";
+  base::win::RegKey allowKey;
+  ret = allowKey.Open(HKEY_CURRENT_USER, allowSubKey, KEY_ALL_ACCESS);
+  if (ret == ERROR_FILE_NOT_FOUND)
+    ret = allowKey.Create(HKEY_CURRENT_USER, allowSubKey, KEY_ALL_ACCESS);
+  if (ret == ERROR_SUCCESS) {
+    unsigned char buff[2] = { 0 };
+    std::vector<std::wstring>::const_iterator iter = exceptions.begin();
+    for (; iter != exceptions.end(); iter++) {
+      ret = allowKey.WriteValue(iter->c_str(), buff, 2, REG_BINARY);
+      if (ret != ERROR_SUCCESS)
+        LOG(WARNING) << L"add IE popup window exception failed, url is "
+        << *iter << L" error code is " << ret;
+    }
+    allowKey.Close();
+  }
+}
+
+//ysp+{IE CryptoUA}
+void Browser::OnTimerSetIEEncUA(base::Time postTaskTime) {
+}
+#endif
+//YSP+ } /*window popup*/
+
+void Browser::SetExceptionForPopup(int type, std::string host, std::string setting) {
+  // content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
+  // options::ContentSettingsHandler contentSetting;
+  // contentSetting.YSPContentSettingsException(contents, type, host, setting);
+}
+//YSP+ } /*window popup*/
+
+#ifdef IE_REDCORE
+//ysp+{IE Embedded}
+void Browser::TrySetIEConetentZoom(content::WebContents * web_content) {
+  if (web_content == NULL)
+    return;
+  RendererMode mode = web_content->GetRendererMode();
+  if (mode.core == IE_CORE && web_content->IsLoading() == false) {
+    zoom::ZoomController* pZoomCtr = zoom::ZoomController::FromWebContents(web_content);
+    if (pZoomCtr) {
+      int zoomPercent = pZoomCtr->GetZoomPercent();
+      content::WebContentsIE* pIEContent = static_cast<content::WebContentsIE*>(web_content);
+      pIEContent->SetBrowserZoom(zoomPercent);
+    }
+  }
+}
+
+void Browser::ClearIECookies() {
+  ShellExecute(NULL, L"open", L"rundll32.exe", L" InetCpl.cpl,ClearMyTracksByProcess 2", NULL, SW_HIDE);
+}
+
+void Browser::ClearIECache() {
+  ShellExecute(NULL, L"open", L"rundll32.exe", L" InetCpl.cpl,ClearMyTracksByProcess 8", NULL, SW_HIDE);
+}
+//ysp+
+#endif
+
+//YSP+ { Kernel switching
+static int stringmatchlen(const char *pattern, int patternLen,
+  const char *string, int stringLen, int nocase) {
+  while (patternLen) {
+    switch (pattern[0]) {
+    case '*':
+      while (pattern[1] == '*') {
+        pattern++;
+        patternLen--;
+      }
+      if (patternLen == 1)
+        return 1; /** match */
+      while (stringLen) {
+        if (stringmatchlen(pattern + 1, patternLen - 1,
+          string, stringLen, nocase))
+          return 1; /** match */
+        string++;
+        stringLen--;
+      }
+      return 0; /** no match */
+      break;
+    case '[':
+    {
+      int inot, match;
+
+      pattern++;
+      patternLen--;
+      inot = pattern[0] == '^';
+      if (inot) {
+        pattern++;
+        patternLen--;
+      }
+      match = 0;
+      while (1) {
+        if (pattern[0] == '\\') {
+          pattern++;
+          patternLen--;
+          if (pattern[0] == string[0])
+            match = 1;
+        }
+        else if (pattern[0] == ']') {
+          break;
+        }
+        else if (patternLen == 0) {
+          pattern--;
+          patternLen++;
+          break;
+        }
+        else if (pattern[1] == '-' && patternLen >= 3) {
+          int start = pattern[0];
+          int end = pattern[2];
+          int c = string[0];
+          if (start > end) {
+            int t = start;
+            start = end;
+            end = t;
+          }
+          if (nocase) {
+            start = tolower(start);
+            end = tolower(end);
+            c = tolower(c);
+          }
+          pattern += 2;
+          patternLen -= 2;
+          if (c >= start && c <= end)
+            match = 1;
+        }
+        else {
+          if (!nocase) {
+            if (pattern[0] == string[0])
+              match = 1;
+          }
+          else {
+            if (tolower((int)pattern[0]) == tolower((int)string[0]))
+              match = 1;
+          }
+        }
+        pattern++;
+        patternLen--;
+      }
+      if (inot)
+        match = !match;
+      if (!match)
+        return 0; /** no match */
+      string++;
+      stringLen--;
+      break;
+    }
+    case '\\':
+      if (patternLen >= 2) {
+        pattern++;
+        patternLen--;
+      }
+      break;
+      /** fall through */
+    default:
+      if (!nocase) {
+        if (pattern[0] != string[0])
+          return 0; /** no match */
+      }
+      else {
+        if (tolower((int)pattern[0]) != tolower((int)string[0]))
+          return 0; /** no match */
+      }
+      string++;
+      stringLen--;
+      break;
+    }
+    pattern++;
+    patternLen--;
+    if (stringLen == 0) {
+      while (*pattern == '*') {
+        pattern++;
+        patternLen--;
+      }
+      break;
+    }
+  }
+  if (patternLen == 0 && stringLen == 0)
+    return 1;
+  return 0;
+}
+
+static int stringmatch(const char *pattern, const char *string, int nocase) {
+  return stringmatchlen(pattern, strlen(pattern), string, strlen(string), nocase);
+}
+
+#ifdef IE_REDCORE
+// comment unused code by webb
+
+// static void GetHostToString(std::string url_string, std::string* url_host, std::string* url_port)
+// {
+//   if (url_string.empty())
+//     return;
+//   std::string url_string_noscheme, url_string_host;
+//   if (url_string.find("://") != std::string::npos) {
+//     int schemeOffset = url_string.find("://");
+//     url_string_noscheme.assign(url_string, schemeOffset + 3, url_string.length() - schemeOffset - 3);
+//   }
+//   if (url_string_noscheme.find_first_of("/") != std::string::npos) {
+//     int hostOffset = url_string_noscheme.find_first_of("/");
+//     url_string_host.assign(url_string_noscheme, 0, hostOffset);
+//   } else {
+//     url_string_host.assign(url_string_noscheme);
+//   }
+//   if (url_string_host.find(":") != std::string::npos) {
+//     int portOffset = url_string_host.find(":");
+//     url_port->assign(url_string_host, portOffset + 1, url_host->length() - portOffset - 1);
+//     url_host->assign(url_string_host, 0, portOffset);
+//   } else {
+//     url_host->assign(url_string_host);
+//     url_port->assign("");
+//   }
+// }
+
+// static void GetPathToString(std::string url_string, std::string* url_path)
+// {
+//   if (url_string.empty())
+//     return;
+//   std::string url_string_noscheme;
+//   if (url_string.find("://") != std::string::npos) {
+//     int schemeOffset = url_string.find("://");
+//     url_string_noscheme.assign(url_string, schemeOffset + 3, url_string.length() - schemeOffset - 3);
+//   }
+//   if (url_string_noscheme.find_first_of("/") != std::string::npos) {
+//     int hostOffset = url_string_noscheme.find_first_of("/");
+//     url_path->assign(url_string_noscheme, hostOffset, url_string_noscheme.length() - hostOffset);
+//   }
+// }
+
+static void ParseStringToUrl(std::string string_str, std::string* url_string)
+{
+  if (string_str.empty())
+    return;
+  std::string string_str_noscheme = "";
+  if (string_str.find("://") != std::string::npos) {
+    int schemeOffset = string_str.find("://");
+    string_str_noscheme.assign(string_str, schemeOffset + 3, string_str.length() - schemeOffset - 3);
+  }
+  int length = string_str_noscheme.length();
+  if (string_str_noscheme.find_first_of("/") == std::string::npos && string_str_noscheme.find_first_of("?") == std::string::npos) {
+    if (string_str_noscheme.c_str()[length] != '*') {
+      *url_string = string_str + '/';
+      return;
+    }
+  }
+  *url_string = string_str;
+}
+
+static void DoGetKernelFromUrl(base::ListValue* kernelList, std::string& coreVersion, std::string& coreEmulation)
+{
+  if (kernelList->empty())
+    return;
+  int maxLength = 0;
+  std::string version, emulation;
+  for (size_t i = 0; i < kernelList->GetSize(); ++i) {
+    base::DictionaryValue* bmDict = nullptr;
+    kernelList->GetDictionary(i, &bmDict);
+    if (bmDict == NULL)
+      continue;
+    std::string url = "";
+    bmDict->GetString("url", &url);
+    int len = url.length();
+    if (maxLength < len) {
+      maxLength = len;
+      bmDict->GetString("kernel", &coreVersion);
+      bmDict->GetString("ieEmulation", &coreEmulation);
+    }
+    else if (maxLength == len) {
+      if ((url.find('*') == std::string::npos) || (url.find('?') == std::string::npos)) {
+        if (coreVersion.empty() && coreEmulation.empty()) {
+          bmDict->GetString("kernel", &coreVersion);
+          bmDict->GetString("ieEmulation", &coreEmulation);
+        }
+      }
+    }
+  }
+}
+
+void Browser::GetKernelFromUrl(const GURL & host, std::string& coreVersion, std::string& coreEmulation)
+{
+  base::DictionaryValue* rootDict =
+    YSPLoginManager::GetInstance()->GetManagedKernels();
+  if (rootDict == NULL)
+    return;
+  base::ListValue* iecore = nullptr;
+  rootDict->GetList("coreSelect", &iecore);
+  if (iecore == NULL || iecore->empty())
+    return;
+  base::ListValue listKernel;
+  for (size_t i = 0; i < iecore->GetSize(); ++i) {
+    base::DictionaryValue* bmDict = nullptr;
+    iecore->GetDictionary(i, &bmDict);
+    if (bmDict == NULL)
+      continue;
+    std::string url_string, string_str;
+    bmDict->GetString("url", &string_str);
+    if (string_str.empty())
+      return;
+    ParseStringToUrl(string_str, &url_string);
+    DLOG(INFO) << " url_string: " << url_string << " url: " << host.spec();
+    if (stringmatch(url_string.c_str(), host.spec().c_str(), true)) {
+      std::string core_version, core_emulation;
+      std::unique_ptr<base::DictionaryValue> coreDict = std::unique_ptr<base::DictionaryValue>(new base::DictionaryValue);
+      bmDict->GetString("kernel", &core_version);
+      bmDict->GetString("ieEmulation", &core_emulation);
+      coreDict->SetString("url", string_str);
+      coreDict->SetString("kernel", core_version);
+      coreDict->SetString("ieEmulation", core_emulation);
+      listKernel.Append(std::move(coreDict));
+    }
+  }
+  DoGetKernelFromUrl(&listKernel, coreVersion, coreEmulation);
+}
+
+void Browser::MatchSystemIEVersion(RendererMode & mode)
+{
+  if (mode.core != IE_CORE)
+    return;
+  int sysIEVer = base::win::GetSystemIEVersion();
+  if (sysIEVer < 8)
+  {
+    mode.ver = IE::DOCNONE;
+    mode.emulation = IE::EMULATION7;
+    return;
+  }
+  if ((int)mode.emulation > sysIEVer)
+    mode.emulation = (IE::IEEmulation)sysIEVer;
+  if ((int)mode.ver > sysIEVer)
+    mode.ver = (IE::IEVersion)sysIEVer;
+}
+
+bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
+  std::string coreVer = "";
+  std::string coreEmulation = "";
+  GetKernelFromUrl(host, coreVer, coreEmulation);
+  DLOG(INFO) << "host: " << host.spec() << " coreVer: " << coreVer << " coreEmulation: " << coreEmulation;
+  if (coreEmulation.empty() == false) {
+    mode.core = IE_CORE;
+    if (coreEmulation == "emulation7")
+      mode.emulation = IE::EMULATION7;
+    else if (coreEmulation == "emulation8")
+      mode.emulation = IE::EMULATION8;
+    else if (coreEmulation == "emulation9")
+      mode.emulation = IE::EMULATION9;
+    else if (coreEmulation == "emulation10")
+      mode.emulation = IE::EMULATION10;
+    else if (coreEmulation == "emulation11")
+      mode.emulation = IE::EMULATION11;
+    else if (coreEmulation == "chrome")
+      mode.core = BLINK_CORE;
+
+    if (mode.core == IE_CORE && coreVer.empty()==false) {
+      if (coreVer == "IE6")
+        mode.ver = IE::DOC6;
+      else if (coreVer == "IE7")
+        mode.ver = IE::DOC7;
+      else if (coreVer == "IE8")
+        mode.ver = IE::DOC8;
+      else if (coreVer == "IE9")
+        mode.ver = IE::DOC9;
+      else if (coreVer == "IE10")
+        mode.ver = IE::DOC10;
+      else if (coreVer == "IE11")
+        mode.ver = IE::DOC11;
+      else if (coreVer == "Auto")
+        mode.ver = IE::DOCSYS;
+
+      MatchSystemIEVersion(mode);
+      }
+      return true;
+    }
+  return false;
+}
+//YSP+ }//Kernel switching
+
+void Browser::DidGetWindowsDomainUserInfo(base::string16 * userName,
+  base::string16 * userPwd) {
+  if (userName == NULL || userPwd == NULL)
+    return;
+  scoped_refptr<password_manager::PasswordStore> pPasswordStore;
+  pPasswordStore = PasswordStoreFactory::GetForProfile(profile(), ServiceAccessType::EXPLICIT_ACCESS);
+  if (pPasswordStore == NULL)
+    return;
+
+  btn_infos_.clear();
+  PwdConsumer* pConsumer = new PwdConsumer(this);
+  pPasswordStore->GetAutofillableLogins(pConsumer);
+  // comment just for compiling by webb
+  // (base::MessageLoop)(base::MessageLoop::current())->Run(true);
+  delete pConsumer;
+  pConsumer = NULL;
+
+  LoginBtnInfo info;
+  if (btn_infos_.size() > 1) {
+    YspPopupView* loginView = NULL;
+    loginView = new YspPopupView(this, btn_infos_);
+    info = loginView->DoModel();
+    delete loginView;
+  }
+  else if (btn_infos_.size() == 1) {
+    info = btn_infos_.at(0);
+  }
+  *userName = info.loginName;
+  *userPwd = info.loginPwd;
+  btn_infos_.clear();
+}
+
+void Browser::OnFindWindowsDomainUserInfoEnd(std::vector<std::unique_ptr<autofill::PasswordForm>> results) {
+
+  std::vector<std::unique_ptr<autofill::PasswordForm>>::const_iterator iter = results.begin();
+  for (; iter != results.end(); iter++) {
+    if ((*iter)->YSPAppName_value.empty() ||
+      (*iter)->username_value.empty() ||
+      (*iter)->password_value.empty() ||
+      (*iter)->YSPUserName_value.empty())
+      continue;
+
+    std::string key = "onlyid";
+    std::string userID = YSPLoginManager::GetInstance()->GetValueForKey(key);
+    if ( base::UTF8ToUTF16(userID) == (*iter)->YSPUserName_value) {
+      LoginBtnInfo info;
+      info.appName = (*iter)->YSPAppName_value;
+      info.appUrl = base::UTF8ToUTF16((*iter)->signon_realm);
+      info.loginName = (*iter)->username_value;
+      info.loginPwd = (*iter)->password_value;
+      btn_infos_.push_back(info);
+    }
+  }
+
+  // base::MessageLoop::current()->QuitWhenIdle();
+}
+#endif
+
+//ysp+ { URL Blacklist And Whitelist
+bool Browser::BlackUrlCompared(const GURL& host) {
+  base::DictionaryValue* rootDict =
+    YSPLoginManager::GetInstance()->GetWebsiteListEnabled();
+  base::ListValue* urllist = nullptr;
+  if (rootDict && rootDict->GetList("websiteList", &urllist)) {
+    if (urllist && !urllist->empty()) {
+      for (size_t i = 0; i < urllist->GetSize(); ++i) {
+        std::string url;
+        urllist->GetString(i, &url);
+        std::string url_host, url_port;
+        int num = url.find(':');
+        if (num == -1) {
+          url_host.assign(url);
+          url_port = "";
+        }
+        else {
+          url_host.assign(url, 0, num);
+          url_port.assign(url, num + 1, url.length() - num - 1);
+        }
+        if (stringmatch(url_host.c_str(), host.host().c_str(), true)) {
+          if (url_port.empty() && !host.has_port()) {
+            return true;
+          }
+          else if (!url_port.empty() && host.has_port()) {
+            if (url_port == host.port())
+              return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+bool Browser::WhiteUrlCompared(const GURL& host) {
+  base::DictionaryValue* rootDict =
+    YSPLoginManager::GetInstance()->GetWebsiteListEnabled();
+  base::ListValue* urllist = nullptr;
+  if (rootDict && rootDict->GetList("websiteList", &urllist)) {
+    if (urllist && !urllist->empty()) {
+      for (size_t i = 0; i < urllist->GetSize(); ++i) {
+        std::string url;
+        urllist->GetString(i, &url);
+        std::string url_host, url_port;
+        int num = url.find(':');
+        if (num == -1) {
+          url_host.assign(url);
+          url_port = "";
+        }
+        else {
+          url_host.assign(url, 0, num);
+          url_port.assign(url, num + 1, url.length() - num - 1);
+        }
+        if (stringmatch(url_host.c_str(), host.host().c_str(), true)) {
+          if (url_port.empty() && !host.has_port()) {
+            return false;
+          }
+          else if (!url_port.empty() && host.has_port()) {
+            if (url_port == host.port())
+              return false;
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+//YSP+ }//URL Blacklist And Whitelist
+
+void Browser::OnTokenStatusChanged(const std::string & type)
+{
+  //TODO(matianzhi) ysp+{push server api}
+  if (type == "TokenExpired") {
+    std::string deviceId = "deviceId";
+    std::string server_url = YSPLoginManager::GetInstance()->GetManageServer();
+    std::string device_id = YSPLoginManager::GetInstance()->GetValueForKey(deviceId);
+    std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+    std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+    content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
+    extensions::WebNavigationTabObserver* tab_observer = extensions::WebNavigationTabObserver::Get(contents);
+    if (tab_observer) {
+      tab_observer->OnLoginSuccessNotice(contents->GetMainFrame(), "TokenExpired", server_url, device_id, user_id, company_id);
+    }
+  }
+  //ysp+
+}
+
+void Browser::OnAutoLockScreenTimer(int64_t timeOutSec) {
+#ifdef OS_WIN
+  LASTINPUTINFO info;
+  info.cbSize = sizeof(LASTINPUTINFO);
+  if (::GetLastInputInfo(&info) == TRUE) {
+    base::TimeDelta timeNoInput = base::TimeDelta::FromMilliseconds(::GetTickCount() - info.dwTime);
+    int64_t sec = timeNoInput.InSeconds();
+    if (sec > timeOutSec) {
+      BrowserView* browserView = BrowserView::GetBrowserViewForBrowser(this);
+      views::View* view = browserView->frame()->GetFrameView();
+      OpaqueBrowserFrameView* opaqueView = static_cast<OpaqueBrowserFrameView*>(view);
+      if (opaqueView)
+        opaqueView->LockScreen(SCREEN_LOCKED);
+    }
+  }
+#endif // OS_WIN
+  if (auto_lock_timer_.get()) {
+    base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+    auto_lock_timer_->Stop();
+    if(timeOutSec>0)
+      auto_lock_timer_->Start(FROM_HERE, delayTime,
+        base::Bind(&Browser::OnAutoLockScreenTimer, crypto_ua_factory_.GetWeakPtr(), timeOutSec));
+  }
+}
+
+void Browser::OnConfigDataUpdated(const std::string & type, const std::string & data) {
+  if (type == "pc") {
+    setStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+    if (auto_lock_timer_.get()) {
+      int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
+      base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+      auto_lock_timer_->Stop();
+      if (time > 0)
+        auto_lock_timer_->Start(FROM_HERE, delayTime,
+          base::Bind(&Browser::OnAutoLockScreenTimer, crypto_ua_factory_.GetWeakPtr(), time));
+    }
+  }
+  else if (type == "strategy") {
+    UpdateStrategy();
+  }
+  //TODO (matianzhi): YSP+ { clear user data
+  else if (type == "removeDevice") {
+    std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+    ClearUserDataForBrowser(user_id);
+    chrome::ShowWarningMessageBox(window()->GetNativeWindow(),
+      base::string16(),
+      l10n_util::GetStringUTF16(IDS_YSP_REMOVE_DEVICE_DESC));
+  }
+  //ysp+ }
+}
+
+//ysp+{IE Function Control}
+//YSPLoginManagerObserver
+void Browser::OnLoginRequestFailure(const std::string& error)
+{
+#ifdef IE_REDCORE
+  NotifyIEFunctionControl();
+#endif
+  clearStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, "")); //ysp+ { private DNS }
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(""); //ysp+ { Resource Replace }
+#ifdef SANGFOR_GM_SSL
+  //YSP+ { sangfor GM ssl
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+  //YSP+ } //sangfor GM ssl
+#endif
+  content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
+  if (auto_lock_timer_.get())
+    auto_lock_timer_->Stop();
+}
+
+void Browser::OnLoginResponseParseFailure(const std::string& error)
+{
+#ifdef IE_REDCORE
+  NotifyIEFunctionControl();
+#endif
+  clearStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, "")); //ysp+ { private DNS }
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(""); //ysp+ { Resource Replace }
+#ifdef SANGFOR_GM_SSL
+  //YSP+ { sangfor GM ssl
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+  //YSP+ } //sangfor GM ssl
+#endif
+  content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
+  if (auto_lock_timer_.get())
+    auto_lock_timer_->Stop();
+}
+
+void Browser::OnLoginFailure(base::string16 message)
+{
+#ifdef IE_REDCORE
+  NotifyIEFunctionControl();
+#endif
+  clearStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, "")); //ysp+ { private DNS }
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(""); //ysp+ { Resource Replace }
+#ifdef SANGFOR_GM_SSL
+  //YSP+ { sangfor GM ssl
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+  //YSP+ } //sangfor GM ssl
+#endif
+  content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
+  if (auto_lock_timer_.get())
+    auto_lock_timer_->Stop();
+}
+
+void Browser::OnLoginSuccess(const base::string16 & name, const std::string & head_image_url)
+{
+  //TODO(matianzhi) ysp+{push server api}
+  std::string deviceId = "deviceId";
+  std::string server_url = YSPLoginManager::GetInstance()->GetManageServer();
+  std::string device_id = YSPLoginManager::GetInstance()->GetValueForKey(deviceId);
+  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+  std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+  content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
+  extensions::WebNavigationTabObserver* tab_observer = extensions::WebNavigationTabObserver::Get(contents);
+  if (tab_observer) {
+    tab_observer->OnLoginSuccessNotice(contents->GetMainFrame(), "login", server_url, device_id, user_id, company_id);
+  }
+  //ysp+
+#ifdef IE_REDCORE
+  NotifyIEFunctionControl();
+#endif
+  UpdateStrategy();
+
+  int64_t time= YSPLoginManager::GetInstance()->GetLockScreenTime();
+  if (auto_lock_timer_.get()) {
+      base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+      auto_lock_timer_->Stop();
+      if(time>0)
+          auto_lock_timer_->Start(FROM_HERE, delayTime, base::Bind(&Browser::OnAutoLockScreenTimer, crypto_ua_factory_.GetWeakPtr(), time));
+  }
+
+  AppAutoUpdate();
+  setStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+  //ysp+ { private DNS
+  std::string privateDNSString = "";
+  base::DictionaryValue* privateDNSDict =
+    YSPLoginManager::GetInstance()->GetPrivateDNS();
+  if (privateDNSDict)
+    base::JSONWriter::Write(*privateDNSDict, &privateDNSString);
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, privateDNSString));
+  //ysp+ }
+
+  //ysp+ { AES DES and SMS4 crypt
+  std::string cryptkey = YSPLoginManager::GetInstance()->GetEncryptionAndKey();
+  std::string uuidKey = "onlyid"; //YSP+ { User information isolation }
+  std::string userId = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey); //YSP+ { User information isolation }
+  if (!cryptkey.empty()) {
+    YSPCryptoCSingleton::GetInstance()->Init(cryptkey);
+  }
+  YSPCryptoCSingleton::GetInstance()->SetUserId(userId); //YSP+ { User information isolation }
+  //ysp+ } /*AES DES and SMS4 crypt*/
+
+  disk_cache::EntryImpl::SetCacheStatus(YSPLoginManager::GetInstance()->GetCacheEncryption()); //YSP+ { cache encryption }
+
+  //ysp+ { Resource Replace
+  std::string stringRootDict = "";
+  base::DictionaryValue* rootDict =
+    YSPLoginManager::GetInstance()->GetManagedResourceReplace();
+  if (rootDict)
+    base::JSONWriter::Write(*rootDict, &stringRootDict);
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(stringRootDict);
+  //YSP+ } //Resource Replace
+#ifdef SANGFOR_GM_SSL
+  //YSP+ { sangfor GM ssl
+  std::string stringGMrootDict = "";
+  base::DictionaryValue* GMrootDict =
+    YSPLoginManager::GetInstance()->GetManagedGMStream();
+  if (GMrootDict)
+    base::JSONWriter::Write(*GMrootDict, &stringGMrootDict);
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HttpStreamParser::SetGMStreamValue, stringGMrootDict));
+  //YSP+ } //sangfor GM ssl
+#endif
+
+  //YSP+ { disable drag
+  bool enable = YSPLoginManager::GetInstance()->GetCutCopyEnabled();
+  content::RenderWidgetHostImpl::setDisableDrag(!enable);
+  //YSP+ } /* disable drag */
+
+  //ysp+ { passwords AD manager
+  std::string formListString = "";
+  base::ListValue* formList =
+    YSPLoginManager::GetInstance()->GetManagedADProxyAuth();
+  std::string passwdFlag = "password";
+  std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+  std::string password = YSPLoginManager::GetInstance()->GetValueForKey(passwdFlag);
+  if (formList)
+    base::JSONWriter::Write(*formList, &formListString);
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&Browser::GetAllLoginForms, base::Unretained(this), formListString, username, password));
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&Browser::GetManagerLoginForms, base::Unretained(this), formListString, username, password));
+  //YSP+ } /*passwords AD manager*/
+}
+
+void Browser::OnLogout()
+{
+  //TODO(matianzhi) ysp+{push server api}
+  std::string deviceId = "deviceId";
+  std::string server_url = YSPLoginManager::GetInstance()->GetManageServer();
+  std::string device_id = YSPLoginManager::GetInstance()->GetValueForKey(deviceId);
+  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+  std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+  content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
+  extensions::WebNavigationTabObserver* tab_observer = extensions::WebNavigationTabObserver::Get(contents);
+  if (tab_observer) {
+    tab_observer->OnLoginSuccessNotice(contents->GetMainFrame(), "logout", server_url, device_id, user_id, company_id);
+  }
+  //ysp+
+#ifdef IE_REDCORE
+  NotifyIEFunctionControl();
+#endif
+  clearStartupAndHomePages(); //TODO (matianzhi): YSP+ { startup and home pages }
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, "")); //ysp+ { private DNS }
+  YSPCryptoCSingleton::GetInstance()->SetUserId(""); //YSP+ { User information isolation }
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(""); //ysp+ { Resource Replace }
+#ifdef SANGFOR_GM_SSL
+  //YSP+ { sangfor GM ssl
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+  //YSP+ } //sangfor GM ssl
+#endif
+  content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
+  if (auto_lock_timer_.get())
+    auto_lock_timer_->Stop();
+#if defined(WATERMARK) && !defined(IE_REDCORE)
+  std::vector<base::string16> str;
+  SetWatermarkString(str, 0x00000000, 0);
+#endif
+
+}
+
+#ifdef IE_REDCORE
+//json 串格式如下：
+//{
+//  "ieFunctionContorl":
+//  {
+//    "mouseRightButtonEnable": true,
+//    "cutAndCopyEnable" : true
+//    }
+//}
+std::wstring Browser::GetIEFunctionControlJsonString()
+{
+  base::DictionaryValue rootDict;
+  std::unique_ptr<base::DictionaryValue> FunctionControl = std::unique_ptr<base::DictionaryValue>(new base::DictionaryValue);
+  FunctionControl->SetBoolean("mouseRightButtonEnabled",
+    YSPLoginManager::GetInstance()->GetMouseRightButtonEnabled());
+  FunctionControl->SetBoolean("cutCopyEnabled",
+    YSPLoginManager::GetInstance()->GetCutCopyEnabled());
+  FunctionControl->SetBoolean("printEnabled",
+    YSPLoginManager::GetInstance()->GetPrintEnabled());
+  FunctionControl->SetBoolean("saveFileEnabled",
+    YSPLoginManager::GetInstance()->GetSaveFileEnabled());
+  std::string uaType = "";
+  std::string uaStr = "";
+  YSPLoginManager::GetInstance()->GetUserAgent(&uaType, &uaStr);
+  if (uaType == "1")
+    FunctionControl->SetString("userAgentString", uaStr);
+  else if (uaType == "3") {
+    FunctionControl->SetString("userAgentString", YSPCryptoHeader::GetInstance()->GetEncString());
+    base::TimeDelta delayTime = base::TimeDelta::FromSeconds(60);
+    if (ie_crypto_ua_timer_.get()) {
+      ie_crypto_ua_timer_->Stop();
+      ie_crypto_ua_timer_->Start(FROM_HERE, delayTime, base::Bind(&Browser::NotifyIEFunctionControl, crypto_ua_factory_.GetWeakPtr()));
+    }
+  }
+  else
+    FunctionControl->SetString("userAgentString", "");
+  rootDict.Set("ieFunctionControl", std::move(FunctionControl));
+  std::string buff = "";
+  base::JSONWriter::Write(rootDict, &buff);
+  std::wstring jsonStr = base::UTF8ToUTF16(buff);
+  return jsonStr;
+}
+
+void Browser::NotifyIEFunctionControl()
+{
+  std::wstring jsonStr = GetIEFunctionControlJsonString();
+  int count = tab_strip_model_->count();
+  int i = 0;
+  for (i = 0; i < count; i++)
+  {
+    WebContents* pContent = tab_strip_model_->GetWebContentsAt(i);
+    if (pContent == NULL || pContent->GetRendererMode().core != IE_CORE)
+      continue;
+    content::WebContentsIE* pIEContent = static_cast<content::WebContentsIE*>(pContent);
+    if (pIEContent == NULL)
+      continue;
+    pIEContent->SendFunctionControl(jsonStr);
+  }
+}
+
+#endif
+
+//YSP+ { passwords AD manager
+static void SaveLoginForms(Browser* browser, const autofill::PasswordForm& form)
+{
+  scoped_refptr<password_manager::PasswordStore> password_store =
+    PasswordStoreFactory::GetForProfile(browser->profile(), ServiceAccessType::EXPLICIT_ACCESS);
+
+  std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
+  if (password_store) {
+    password_store->GetYSPLogins(form, &matched_forms);
+    for (auto& login : matched_forms) {
+      if (form.signon_realm == login->signon_realm && form.origin == login->origin && form.YSPUserName_value == login->YSPUserName_value) {
+        if ((form.username_value != login->username_value) && !form.username_value.empty()) {
+          password_store->RemoveLogin(*login);
+          break;
+        }
+        return;
+      }
+    }
+    password_store->AddLogin(form);
+    matched_forms.clear();
+  }
+}
+
+static void RemoveLoginForms(password_manager::PasswordStore* password_store,
+  const autofill::PasswordForm& form, const std::string& formListString,
+  const std::string& username, const std::string& password)
+{
+  base::ListValue* formList = nullptr;
+  if (!formListString.empty()) {
+    std::unique_ptr<base::Value> formValue = base::JSONReader::Read(formListString);
+    formList = (static_cast<base::ListValue*>(formValue.release()));
+  }
+  if (formList && !formList->empty()) {
+    for (size_t i = 0; i < formList->GetSize(); ++i) {
+      autofill::PasswordForm forms;
+      base::DictionaryValue* bmDict = nullptr;
+    if (formList->GetDictionary(i, &bmDict)) {
+      int type = 1;
+      if (bmDict && !bmDict->empty()) {
+        bmDict->GetInteger("type", &type);
+        if (type == 1)
+          continue;
+        int userLoginType;
+        std::string uuidKey = "onlyid";
+        std::string appName, url, icon_url;
+        bmDict->GetString("name", &appName);
+        bmDict->GetString("url", &url);
+        bmDict->GetString("logoUrl", &icon_url);
+        bmDict->GetInteger("loginType", &userLoginType);
+        if (url.find("://") == std::string::npos)
+          url = "http://" + url;
+        if (userLoginType == 1) {
+          std::string loginName;
+          bmDict->GetString("alias", &loginName);
+          if (!loginName.empty()) {
+            forms.username_value = base::UTF8ToUTF16(loginName);
+            forms.password_value = base::UTF8ToUTF16(password);
+          }
+        }
+        forms.signon_realm = GURL(url).GetOrigin().spec();
+        forms.YSPAppName_value = base::UTF8ToUTF16(appName);
+        forms.YSPUserName_value = base::UTF8ToUTF16(username);
+        forms.YSPLoginType_value = userLoginType;
+        forms.origin = GURL(url);
+        forms.icon_url = GURL(icon_url);
+        if (forms.YSPLoginType_value == form.YSPLoginType_value &&
+          forms.YSPUserName_value == form.YSPUserName_value &&
+          forms.signon_realm == form.signon_realm &&
+          forms.origin == form.origin &&
+          forms.YSPAppName_value == form.YSPAppName_value &&
+          forms.icon_url == form.icon_url) {
+          return;
+        }
+      }
+    }
+    }
+  if (!form.YSPAppName_value.empty() && !form.YSPLoginType_value.empty())
+    password_store->RemoveLogin(form);
+  }
+}
+
+void Browser::GetManagerLoginForms(const std::string& formListString, const std::string& username, const std::string& password)
+{
+  base::ListValue* formList = nullptr;
+  if (!formListString.empty()) {
+    std::unique_ptr<base::Value> formValue = base::JSONReader::Read(formListString);
+    formList = (static_cast<base::ListValue*>(formValue.release()));
+  }
+  if (formList && !formList->empty()) {
+    for (size_t i = 0; i < formList->GetSize(); ++i) {
+      autofill::PasswordForm forms;
+      base::DictionaryValue* bmDict = nullptr;
+    if (formList->GetDictionary(i, &bmDict)) {
+      int type = 1;
+      if (bmDict && !bmDict->empty()) {
+        bmDict->GetInteger("type", &type);
+        if (type == 1)
+          continue;
+        int userLoginType;
+        std::string uuidKey = "onlyid";
+        std::string appName, url, icon_url;
+        bmDict->GetString("name", &appName);
+        bmDict->GetString("url", &url);
+        bmDict->GetString("logoUrl", &icon_url);
+        bmDict->GetInteger("loginType", &userLoginType);
+        if (url.find("://") == std::string::npos)
+          url = "http://" + url;
+        if (userLoginType == 1) {
+          std::string loginName;
+          bmDict->GetString("alias", &loginName);
+          if (!loginName.empty()) {
+            forms.username_value = base::UTF8ToUTF16(loginName);
+            forms.password_value = base::UTF8ToUTF16(password);
+          }
+        }
+        forms.signon_realm = GURL(url).GetOrigin().spec();
+        forms.YSPAppName_value = base::UTF8ToUTF16(appName);
+        forms.YSPUserName_value = base::UTF8ToUTF16(username);
+        forms.YSPLoginType_value = userLoginType;
+        forms.origin = GURL(url);
+        forms.action = GURL(url);
+        forms.icon_url = GURL(icon_url);
+        if (!forms.signon_realm.empty() && !forms.YSPAppName_value.empty() && !forms.origin.is_empty()) {
+          SaveLoginForms(this, forms);
+        }
+      }
+    }
+    }
+  }
+}
+
+void Browser::GetAllLoginForms(const std::string& formListString, const std::string& username, const std::string& password)
+{
+  scoped_refptr<password_manager::PasswordStore> password_store =
+    PasswordStoreFactory::GetForProfile(profile(), ServiceAccessType::EXPLICIT_ACCESS);
+  std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
+  if (password_store) {
+    password_store->GetYSPAllLogins(&matched_forms);
+    for (auto& login : matched_forms) {
+      if (login->YSPUserName_value == base::UTF8ToUTF16(username)) {
+        RemoveLoginForms(password_store.get(), *login, formListString, username, password);
+      }
+    }
+    matched_forms.clear();
+  }
+}
+//YSP+ } /*passwords AD manager*/
+
+//TODO (matianzhi): YSP+ { startup and home pages
+void Browser::setStartupAndHomePages() {
+  base::ListValue* urlList = YSPLoginManager::GetInstance()->GetStartupPages();
+  bool defaultMainPage = YSPLoginManager::GetInstance()->isStartupPages();
+  PrefService* prefs = profile_->GetPrefs();
+  SessionStartupPref pref = SessionStartupPref::GetStartupPref(prefs);
+  if (urlList && defaultMainPage) {
+    // settings::StartupPagesHandler handler;
+    std::vector<GURL> startupPages;
+    for (size_t i = 0; i < urlList->GetSize(); ++i) {
+      base::DictionaryValue* urlDict = nullptr;
+      urlList->GetDictionary(i, &urlDict);
+      if (urlDict && !urlDict->empty()) {
+        std::string url;
+        urlDict->GetString("url", &url);
+        if (i == 0) {
+          prefs->SetBoolean(prefs::kHomePageIsNewTabPage, false);
+          prefs->SetString(prefs::kHomePage, GURL(url).spec());
+        }
+        startupPages.push_back(GURL(url));
+      }
+    }
+    pref.urls = startupPages;
+    if (pref.urls.empty())
+      pref.type = SessionStartupPref::DEFAULT;
+    SessionStartupPref::SetStartupPref(prefs, pref);
+    prefs->SetInteger(prefs::kRestoreOnStartup, 4);
+  }
+  else {
+    prefs->SetInteger(prefs::kRestoreOnStartup, 5);
+    pref.urls.clear();
+    pref.type = SessionStartupPref::DEFAULT;
+    SessionStartupPref::SetStartupPref(prefs, pref);
+    prefs->SetBoolean(prefs::kHomePageIsNewTabPage, true);
+    prefs->SetString(prefs::kHomePage, std::string());
+  }
+}
+
+void Browser::clearStartupAndHomePages()
+{
+  PrefService* prefs = profile_->GetPrefs();
+  prefs->SetInteger(prefs::kRestoreOnStartup, 5);
+  SessionStartupPref pref = SessionStartupPref::GetStartupPref(prefs);
+  pref.urls.clear();
+  pref.type = SessionStartupPref::DEFAULT;
+  SessionStartupPref::SetStartupPref(prefs, pref);
+  prefs->SetBoolean(prefs::kHomePageIsNewTabPage, true);
+  prefs->SetString(prefs::kHomePage, std::string());
+}
+//YSP+ } /*startup and home pages*/
+
+void Browser::UpdateStrategy()
+{
+  YSPLoginManager* manager = YSPLoginManager::GetInstance();
+
+  // access to address bar
+  bool enable = manager->GetAddressBarEnabled();
+  window_->GetLocationBar()->SetAddressBarEnable(enable);
+
+  // devtools
+  bool dev_enabled = manager->GetDevToolsEnabled();
+  PrefService* prefs = profile()->GetPrefs();
+  prefs->SetBoolean(prefs::kDevToolsAvailability, !dev_enabled);
+
+  if (!YSPLoginManager::GetInstance()->GetStatusBarEnabled()) {
+    StatusBubble *bubble = window_ ? window_->GetStatusBubble() : NULL;
+    if (bubble)
+      bubble->Hide();
+  }
+
+#if defined(WATERMARK) && !defined(IE_REDCORE)
+  std::vector<base::string16> watermark_text = YSPLoginManager::GetInstance()->GetWatermarkString();
+  uint32_t watermark_color = YSPLoginManager::GetInstance()->GetWatermarkColor();
+  int watermark_font_size = YSPLoginManager::GetInstance()->GetWatermarkFontSize();
+  SetWatermarkString(watermark_text, watermark_color, watermark_font_size);
+#endif
+
+}
+//TODO (matianzhi): YSP+ { clear user data
+template <typename T>
+void IgnoreArgumentHelper(const base::Closure& callback, T unused_argument) {
+  callback.Run();
+}
+
+// Another convenience method to turn a callback without arguments into one that
+// accepts (and ignores) a single argument.
+template <typename T>
+base::Callback<void(T)> IgnoreArgument(const base::Closure& callback) {
+  return base::Bind(&IgnoreArgumentHelper<T>, callback);
+}
+
+void UIThreadTrampolineHelper(const base::Closure& callback) {
+  content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE, callback);
+}
+
+// Convenience method to create a callback that can be run on any thread and
+// will post the given |callback| back to the UI thread.
+base::Closure UIThreadTrampoline(const base::Closure& callback) {
+  // We could directly bind &BrowserThread::PostTask, but that would require
+  // evaluating FROM_HERE when this method is called, as opposed to when the
+  // task is actually posted.
+  return base::Bind(&UIThreadTrampolineHelper, callback);
+}
+
+void ClearNaClCacheOnIOThread(const base::Closure& callback) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
+
+  // FIXME(halton): nacl call
+  // nacl::NaClBrowser::GetInstance()->ClearValidationCache(callback);
+}
+void ClearPnaclCacheOnIOThread(base::Time begin,
+    base::Time end,
+    const base::Closure& callback) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
+
+  // FIXME(halton): pnacl call
+  // pnacl::PnaclHost::GetInstance()->ClearTranslationCacheEntriesBetween(
+  //     begin, end, callback);
+}
+
+void Browser::ClearPasswordForUserId(){
+  std::string userid = YSPLoginManager::GetInstance()->GetUserId();
+  password_manager::PasswordStore* password_store =
+    PasswordStoreFactory::GetForProfile(
+      profile_, ServiceAccessType::EXPLICIT_ACCESS).get();
+  if (password_store) {
+    std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
+    password_store->GetYSPAllLogins(&matched_forms);
+    for (auto& login : matched_forms) {
+      if (login->YSPUserName_value == base::UTF8ToUTF16(userid)) {
+        password_store->RemoveLogin(*login);
+      }
+    }
+  }
+}
+
+// FIXME(halton): how to pass callback
+/*
+static void ClearCookiesOnIOThread(const std::string& userid, net::URLRequestContextGetter* rq_context, const base::Closure& callback) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
+  net::CookieStore* cookie_store =
+      rq_context->GetURLRequestContext()->cookie_store();
+  if (cookie_store) {
+    // FIXME(halton): how to pass callback
+    // cookie_store->DeleteAllForUserIdAsync(userid, IgnoreArgument<int>(callback));
+  }
+}
+*/
+
+void Browser::ClearUserDataForBrowser(std::string& userid)
+{
+  history::HistoryService* history_service =
+    HistoryServiceFactory::GetForProfile(
+      profile_, ServiceAccessType::EXPLICIT_ACCESS);
+  if (history_service) {
+    //清除历史记录
+    history_service->ClearHistoryForUser(userid);
+  }
+  content::DownloadManager* download_manager =
+    content::BrowserContext::GetDownloadManager(profile_);
+  if (download_manager) {
+    //清除下载记录
+    download_manager->RemoveDownloadsForUserid(userid);
+    DownloadPrefs* download_prefs = DownloadPrefs::FromDownloadManager(
+      download_manager);
+    download_prefs->SetSaveFilePath(download_prefs->DownloadPath());
+  }
+
+  //清除cookie
+  scoped_refptr<net::URLRequestContextGetter> sb_context =
+    profile()->GetRequestContext();
+  // FIXME(halton): how to pass callback
+  /*
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&ClearCookiesOnIOThread, userid, std::move(sb_context),
+      UIThreadTrampoline(
+        base::Bind(&Browser::ClearedUserData,
+          weak_factory_.GetWeakPtr()))));
+  */
+
+  //清除保存的密码信息
+  content::BrowserThread::PostTask(
+    content::BrowserThread::IO, FROM_HERE,
+    base::Bind(&Browser::ClearPasswordForUserId, base::Unretained(this)));
+
+  //清除缓存
+  web_cache::WebCacheManager::GetInstance()->ClearCache();
+  base::RecordAction(UserMetricsAction("ClearBrowsingData_Cache"));
+
+  // StoragePartitionHttpCacheDataRemover deletes itself when it is done.
+  content::StoragePartitionHttpCacheDataRemover::CreateForRange(
+    content::BrowserContext::GetDefaultStoragePartition(profile_), base::Time(),
+    base::Time())->Remove(base::Bind(&Browser::ClearedUserData, weak_factory_.GetWeakPtr()));
+
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO,
+      FROM_HERE,
+      base::Bind(&ClearNaClCacheOnIOThread,
+                 UIThreadTrampoline(
+                      base::Bind(&Browser::ClearedUserData,
+                                 weak_factory_.GetWeakPtr()))));
+
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&ClearPnaclCacheOnIOThread, base::Time(), base::Time(),
+                 UIThreadTrampoline(
+                    base::Bind(&Browser::ClearedUserData,
+                               weak_factory_.GetWeakPtr()))));
+}
+
+void Browser::ClearedUserData()
+{
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+  DLOG(INFO) << "clear user data success !";
+}
+//YSP+ }
+
+#endif //REDCORE

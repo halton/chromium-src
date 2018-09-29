@@ -1,0 +1,529 @@
+#ifdef REDCORE
+//ysp+
+
+#include "chrome/browser/ysp_update/ysp_update_manager.h"
+
+#if defined(OS_WIN)
+#include <comdef.h>
+#include <Iphlpapi.h>
+#include <shellapi.h>
+#include "setupapi.h"
+#endif
+
+#include <utility>
+#include "base/values.h"
+#include "base/path_service.h"
+#include "base/files/file_path.h"
+#include "base/files/file_util.h"
+#include "base/json/json_file_value_serializer.h"
+#include "base/run_loop.h"
+#include "base/strings/utf_string_conversions.h"
+#include "chrome/common/chrome_paths.h"
+#include "chrome/browser/browser_process.h"
+#include "content/public/browser/browser_thread.h"
+#include "components/prefs/pref_service.h"
+#include "chrome/common/pref_names.h"
+#include "base/native_library.h"
+#include "base/json/json_writer.h"
+#include "base/guid.h"
+#include "base/base64.h"
+#include "net/url_request/url_request_context.h"
+#include "base/version.h"
+#include "components/version_info/version_info.h"
+#include "content/public/browser/browser_context.h"
+#include "components/download/public/common/download_url_parameters.h"
+#include "content/public/browser/web_contents.h"
+#include "content/public/browser/download_manager.h"
+#include "chrome/browser/ui/simple_message_box.h"
+#include "ui/base/l10n/l10n_util.h"
+#include "ui/views/window/dialog_delegate.h"
+#include "ui/views/controls/message_box_view.h"
+#include "chrome/grit/generated_resources.h"
+#include "components/strings/grit/components_strings.h"
+#include "base/run_loop.h"
+#include "components/startup_metric_utils/browser/startup_metric_utils.h"
+#include "components/constrained_window/constrained_window_views.h"
+#include "chrome/browser/ui/simple_message_box_internal.h"
+#include "ui/base/resource/resource_bundle.h"
+#include "ui/views/widget/widget.h"
+#include "base/json/json_reader.h"
+#include "base/json/json_writer.h"
+
+#if defined(OS_WIN)
+#include "ui/base/win/message_box_win.h"
+#include "ui/views/win/hwnd_util.h"
+
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment (lib,"netapi32")
+#pragma comment(lib, "setupapi")
+#endif
+
+class YSPAutoUpdateShowMessageBoxViews : public views::DialogDelegate {
+ public:
+  YSPAutoUpdateShowMessageBoxViews(
+    content::WebContents* contents,
+    const base::string16& title,
+    const base::string16& message,
+    const base::string16& yes_text,
+    const base::string16& no_text,
+    chrome::MessageBoxType type,
+    bool is_system_modal,
+    std::unique_ptr<base::DictionaryValue> response_data);
+  ~YSPAutoUpdateShowMessageBoxViews() override;
+
+  chrome::MessageBoxResult RunDialogAndGetResult();
+
+  // Overridden from views::DialogDelegate:
+  int GetDialogButtons() const override;
+  base::string16 GetDialogButtonLabel(ui::DialogButton button) const override;
+  bool Cancel() override;
+  bool Accept() override;
+
+  // Overridden from views::WidgetDelegate:
+  base::string16 GetWindowTitle() const override;
+  void DeleteDelegate() override;
+  ui::ModalType GetModalType() const override;
+  views::View* GetContentsView() override;
+  views::Widget* GetWidget() override;
+  const views::Widget* GetWidget() const override;
+
+private:
+  void Done();
+  std::unique_ptr<base::DictionaryValue> response_data_;
+  const base::string16 window_title_;
+  const chrome::MessageBoxType type_;
+  base::string16 yes_text_;
+  base::string16 no_text_;
+  chrome::MessageBoxResult* result_;
+  bool is_system_modal_;
+  views::MessageBoxView* message_box_view_;
+  base::Closure quit_runloop_;
+};
+
+YSPAutoUpdateShowMessageBoxViews::YSPAutoUpdateShowMessageBoxViews(
+    content::WebContents* contents,
+    const base::string16 & title,
+    const base::string16 & message,
+    const base::string16 & yes_text,
+    const base::string16 & no_text,
+    chrome::MessageBoxType type,
+    bool is_system_modal,
+    std::unique_ptr<base::DictionaryValue> response_data)
+    :response_data_(std::unique_ptr<base::DictionaryValue>(
+        static_cast<base::DictionaryValue*>(response_data.release()))),
+    window_title_(title),
+    type_(type),
+    yes_text_(yes_text),
+    no_text_(no_text),
+    result_(NULL),
+    is_system_modal_(is_system_modal),
+    message_box_view_(new views::MessageBoxView(
+        views::MessageBoxView::InitParams(message))) {
+  if (yes_text_.empty()) {
+    if (type_ == chrome::MESSAGE_BOX_TYPE_QUESTION)
+      yes_text_ =
+      l10n_util::GetStringUTF16(IDS_CONFIRM_MESSAGEBOX_YES_BUTTON_LABEL);
+    else if (type_ == chrome::MESSAGE_BOX_TYPE_WARNING)
+      yes_text_ = l10n_util::GetStringUTF16(IDS_OK);
+    else
+      yes_text_ = l10n_util::GetStringUTF16(IDS_OK);
+  }
+
+  if (no_text_.empty()) {
+    if (type_ == chrome::MESSAGE_BOX_TYPE_QUESTION)
+      no_text_ =
+      l10n_util::GetStringUTF16(IDS_CONFIRM_MESSAGEBOX_NO_BUTTON_LABEL);
+    else if (type_ == chrome::MESSAGE_BOX_TYPE_WARNING)
+      no_text_ = l10n_util::GetStringUTF16(IDS_CANCEL);
+  }
+}
+
+YSPAutoUpdateShowMessageBoxViews::~YSPAutoUpdateShowMessageBoxViews() {
+}
+
+chrome::MessageBoxResult YSPAutoUpdateShowMessageBoxViews::RunDialogAndGetResult() {
+  chrome::MessageBoxResult result = chrome::MESSAGE_BOX_RESULT_NO;
+  result_ = &result;
+  // TODO(pkotwicz): Exit message loop when the dialog is closed by some other
+  // means than |Cancel| or |Accept|. crbug.com/404385
+  // FIXME(halton): Use new way to run
+  // base::MessageLoopForUI* loop = base::MessageLoopCurrent::Get();
+  // base::MessageLoopForUI::ScopedNestableTaskAllower allow_nested(loop);
+  // base::RunLoop run_loop;
+  // quit_runloop_ = run_loop.QuitClosure();
+  // run_loop.Run();
+  return result;
+}
+
+int YSPAutoUpdateShowMessageBoxViews::GetDialogButtons() const {
+  if (type_ == chrome::MESSAGE_BOX_TYPE_QUESTION ||
+    type_ == chrome::MESSAGE_BOX_TYPE_WARNING) {
+    return ui::DIALOG_BUTTON_OK | ui::DIALOG_BUTTON_CANCEL;
+  }
+
+  return ui::DIALOG_BUTTON_OK;
+}
+
+base::string16
+YSPAutoUpdateShowMessageBoxViews::GetDialogButtonLabel(
+    ui::DialogButton button) const {
+  if (button == ui::DIALOG_BUTTON_CANCEL)
+    return no_text_;
+  return yes_text_;
+}
+
+bool YSPAutoUpdateShowMessageBoxViews::Cancel() {
+  *result_ = chrome::MESSAGE_BOX_RESULT_NO;
+  Done();
+  return true;
+}
+
+bool YSPAutoUpdateShowMessageBoxViews::Accept() {
+  YSPUpdateManager::GetInstance()->OnAutoUpdateDownload(
+      std::unique_ptr<base::DictionaryValue>(
+          static_cast<base::DictionaryValue*>(response_data_.release())), false);
+
+  *result_ = chrome::MESSAGE_BOX_RESULT_YES;
+  Done();
+  return true;
+}
+
+base::string16 YSPAutoUpdateShowMessageBoxViews::GetWindowTitle() const {
+  return window_title_;
+}
+
+void YSPAutoUpdateShowMessageBoxViews::DeleteDelegate() {
+  delete this;
+}
+
+ui::ModalType YSPAutoUpdateShowMessageBoxViews::GetModalType() const {
+  return is_system_modal_ ? ui::MODAL_TYPE_SYSTEM : ui::MODAL_TYPE_WINDOW;
+}
+
+views::View * YSPAutoUpdateShowMessageBoxViews::GetContentsView() {
+  return message_box_view_;
+}
+
+views::Widget * YSPAutoUpdateShowMessageBoxViews::GetWidget() {
+  return message_box_view_->GetWidget();
+}
+
+const views::Widget * YSPAutoUpdateShowMessageBoxViews::GetWidget() const {
+  return message_box_view_->GetWidget();
+}
+
+void YSPAutoUpdateShowMessageBoxViews::Done() {
+  CHECK(!quit_runloop_.is_null());
+  quit_runloop_.Run();
+}
+
+#if defined(OS_WIN)
+UINT GetMessageBoxFlagsFromType(chrome::MessageBoxType type) {
+  UINT flags = MB_SETFOREGROUND;
+  switch (type) {
+  case chrome::MESSAGE_BOX_TYPE_INFORMATION:
+    return flags | MB_OK | MB_ICONINFORMATION;
+  case chrome::MESSAGE_BOX_TYPE_WARNING:
+    return flags | MB_OK | MB_ICONWARNING;
+  case chrome::MESSAGE_BOX_TYPE_QUESTION:
+    return flags | MB_YESNO | MB_ICONQUESTION;
+  // case chrome::MESSAGE_BOX_TYPE_WARNING:
+  //   return flags | MB_OKCANCEL | MB_ICONWARNING;
+  }
+  NOTREACHED();
+  return flags | MB_OK | MB_ICONWARNING;
+}
+#endif
+chrome::MessageBoxResult YSPShowMessageBox(
+    content::WebContents* contents,
+    const base::string16& title,
+    const base::string16& message,
+    chrome::MessageBoxType type,
+    const base::string16& yes_text,
+    const base::string16& no_text,
+    std::unique_ptr<base::DictionaryValue> response_data) {
+  //gfx::NativeWindow parent = contents->GetContentNativeView();
+  gfx::NativeWindow parent = contents->GetTopLevelNativeWindow();
+  startup_metric_utils::SetNonBrowserUIDisplayed();
+  if (chrome::internal::g_should_skip_message_box_for_test)
+    return chrome::MESSAGE_BOX_RESULT_YES;
+
+  // Views dialogs cannot be shown outside the UI thread message loop or if the
+  // ResourceBundle is not initialized yet.
+  // Fallback to logging with a default response or a Windows MessageBox.
+#if defined(OS_WIN)
+  if (!base::MessageLoopForUI::IsCurrent() ||
+    !base::RunLoop::IsRunningOnCurrentThread() ||
+    !ui::ResourceBundle::HasSharedInstance()) {
+    int result = ui::MessageBox(views::HWNDForNativeWindow(parent), message,
+      title, GetMessageBoxFlagsFromType(type));
+    return (result == IDYES || result == IDOK) ?
+      chrome::MESSAGE_BOX_RESULT_YES : chrome::MESSAGE_BOX_RESULT_NO;
+  }
+#else
+  if (!base::MessageLoopForUI::IsCurrent() ||
+    !ui::ResourceBundle::HasSharedInstance()) {
+    LOG(ERROR) << "Unable to show a dialog outside the UI thread message loop: "
+      << title << " - " << message;
+    return chrome::MESSAGE_BOX_RESULT_NO;
+  }
+#endif
+
+  YSPAutoUpdateShowMessageBoxViews* dialog =
+      new YSPAutoUpdateShowMessageBoxViews(
+          contents,
+          title,
+          message,
+          yes_text,
+          no_text,
+          type,
+          parent == NULL,  // is_system_modal
+          std::unique_ptr<base::DictionaryValue>(
+            static_cast<base::DictionaryValue*>(response_data.release()))
+      );
+  constrained_window::CreateBrowserModalDialogViews(dialog, parent)->Show();
+
+  // NOTE: |dialog| may have been deleted by the time |RunDialogAndGetResult()|
+  // returns.
+  return dialog->RunDialogAndGetResult();
+}
+
+namespace {
+YSPUpdateManager* g_instance = nullptr;
+}  // namespace
+
+YSPUpdateManager::YSPUpdateManager()
+    :started_(false),
+     update_fetcher_(nullptr) {
+}
+
+YSPUpdateManager::~YSPUpdateManager() {
+  if (update_fetcher_) {
+    delete update_fetcher_;
+    update_fetcher_ = nullptr;
+  }
+}
+
+//static
+YSPUpdateManager* YSPUpdateManager::GetInstance() {
+  if (!g_instance) {
+    g_instance = new YSPUpdateManager;
+  }
+  return g_instance;
+}
+
+void YSPUpdateManager::RequestUpdate(
+    content::WebContents* webContents,
+    const std::string& server_url,
+    const std::string& userId,
+    const std::string& companyId,
+    const std::string& accessToken) {
+  DLOG(INFO) << "YSPUpdateManager::RequestUpdate";
+  if(started_)
+    return;
+  started_ = true;
+
+  web_contents_ = webContents;
+  if (!update_fetcher_) {
+    update_fetcher_ =
+      new YSPUpdateFetcher(this,
+        g_browser_process->system_request_context());
+  }
+  if (update_fetcher_)
+    update_fetcher_->StartCheck(server_url, userId, companyId, accessToken);
+}
+
+// YSPUpdateFetcherDelegate:
+void YSPUpdateManager::OnUpdateRequestFailure() {
+  DLOG(INFO) << "YSPUpdateManager::OnUpdateRequestFailure";
+}
+
+void YSPUpdateManager::OnUpdateResponseParseSuccess(
+  std::unique_ptr<base::DictionaryValue> response_data) {
+  DLOG(INFO) << "YSPUpdateManager::OnUpdateResponseParseSuccess";
+  if (response_data) {
+    std::string status_code = "-1";
+    response_data->GetString("errCode", &status_code);
+    if(status_code != "0")
+      return;
+
+  OnAutoUpdateDownload(std::unique_ptr<base::DictionaryValue>(
+      static_cast<base::DictionaryValue*>(response_data.release())));
+  }
+}
+
+void YSPUpdateManager::OnUpdateResponseParseFailure(
+    const std::string& error) {
+  DLOG(INFO) << "YSPUpdateManager::OnUpdateResponseParseFailure";
+}
+
+// download::DownloadItem::Observer:
+void YSPUpdateManager::OnDownloadUpdated(download::DownloadItem* download) {
+  DLOG(INFO) << "YSPUpdateManager::OnDownloadUpdated";
+  download::DownloadItem::DownloadState state = download->GetState();
+  switch (state) {
+    case download::DownloadItem::IN_PROGRESS:
+      return;
+    case download::DownloadItem::COMPLETE: {
+      base::FilePath filePath = download->GetTargetFilePath();
+      DLOG(INFO) << "YSPUpdateManager::OnDownloadUpdated file: " << filePath.value();
+      // Start install here...
+#if defined(OS_MACOSX)
+      PrepareUpdate(filePath.value());
+#endif
+      break;
+    }
+    case download::DownloadItem::CANCELLED: {
+      break;
+    }
+    case download::DownloadItem::INTERRUPTED: {
+      break;
+    }
+    case download::DownloadItem::MAX_DOWNLOAD_STATE: {
+      NOTREACHED();
+      return;
+    }
+  }
+  download->RemoveObserver(this);
+}
+
+void YSPUpdateManager::OnDownloadRemoved(download::DownloadItem* download) {
+  if(download)
+    download->RemoveObserver(this);
+}
+
+void YSPUpdateManager::OnAutoUpdateDownload(
+    std::unique_ptr<base::DictionaryValue> response_data, bool enable) {
+  if (response_data) {
+    base::DictionaryValue* dataDict = nullptr;
+    response_data->GetDictionary("data.autoUpgrade", &dataDict);
+    if (!dataDict)
+      return;
+    bool enable_autoUpdate = false;
+    int updateType = 2;
+    std::string fileName = "";
+    std::string fileMD5 = "";
+    std::string version_str = "";
+    std::string fileUrl = "";
+    std::string md5 = "";
+    base::FilePath path;
+    dataDict->GetBoolean("Enable_ClientAutoUpdate", &enable_autoUpdate);
+    dataDict->GetString("ClientFileName", &fileName);
+    dataDict->GetString("ClientFileMd5", &fileMD5);
+    dataDict->GetString("ClientVersion", &version_str);
+    dataDict->GetString("ClientFileUrl", &fileUrl);
+    dataDict->GetInteger("ClientUpdateType", &updateType);
+    DLOG(INFO) << "YSPUpdateManager enable_autoUpdate: "
+               << enable_autoUpdate
+               << ", fileName: " << fileName
+               << ", fileMD5:" << fileMD5
+               << ", version_str:" << version_str
+               << ", fileUrl:" << fileUrl
+               << ", updateType:" << updateType;
+
+    if (enable_autoUpdate == 0)
+      return;
+    base::PathService::Get(chrome::DIR_DEFAULT_DOWNLOADS, &path);
+    std::string lver_string = version_info::GetYSPVersionNumber();
+    DLOG(INFO) << "path: " << path.value();
+    path = path.AppendASCII(fileName);
+
+    if (!version_str.empty()) {
+      base::Version remote_version(version_str);
+      base::Version local_version(lver_string);
+      if (!remote_version.IsValid())
+        return;
+      if (local_version.CompareTo(remote_version) < 0) {
+        LOG(INFO) << "Should update from " << lver_string << " to " << version_str;
+        if (updateType == 1 && enable) {
+          YSPShowMessageBox(
+              web_contents_,
+              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_TITLE),
+              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_MESSAGE),
+              chrome::MESSAGE_BOX_TYPE_QUESTION,
+              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_OK),
+              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_CANCEL),
+              std::unique_ptr<base::DictionaryValue>(
+                static_cast<base::DictionaryValue*>(response_data.release())));
+        } else {
+          FILE* file = fopen(path.AsUTF8Unsafe().c_str(), "rb");
+          if (NULL == file) {
+            StartDownload(GURL(fileUrl), path);
+            return;
+          }
+          fseek(file, 0L, SEEK_END);
+          int sz = ftell(file);
+          fseek(file, 0L, SEEK_SET);
+          if (sz == 0) {
+            StartDownload(GURL(fileUrl), path);
+            return;
+          }
+          char* buff = new char[sz];
+          memset(buff, 0, sz);
+          size_t nmemb;
+          nmemb = fread(buff, 1, sz, file);
+          fclose(file);
+          base::MD5Digest  digest = { {0} };
+          base::MD5Sum(buff, sz, &digest);
+          delete[] buff;
+          md5 = base::MD5DigestToBase16(digest);
+          if (md5 != fileMD5) {
+            StartDownload(GURL(fileUrl), path);
+          } else {
+#if defined(OS_WIN) // TODO (ysp) : Fix it on Mac
+            std::wstring wPath = path.value();
+            HINSTANCE num = ShellExecute(NULL, L"open", wPath.c_str(), NULL, NULL, SW_SHOWNORMAL);
+            if ((int)(num) <= 32) {
+              DLOG(INFO) << "File execute failure!";
+            }
+#elif defined(OS_MACOSX)
+            PrepareUpdate(path.value());
+#endif
+          }
+        }
+      }
+    }
+  }
+}
+
+void YSPUpdateManager::StartDownload(const GURL& package_url,
+                                     base::FilePath updateFilePath) {
+  if(!package_url.is_valid())
+    return;
+
+  DLOG(INFO) << "YSPUpdateManager::StartDownload";
+
+  // FIXME(halton):
+  // content::DownloadManager* download_manager =
+  //     content::BrowserContext::GetDownloadManager(
+  //         web_contents_->GetBrowserContext());
+  //
+  // std::unique_ptr<download::DownloadUrlParameters> download_parameters(
+  //     download::DownloadUrlParameters::FromWebContents(web_contents_,
+  //                                                      package_url));
+  // download_parameters->set_file_path(base::FilePath(updateFilePath));
+  // download_parameters->set_callback(
+  //     base::Bind(&YSPUpdateManager::DownloadStarted, base::Unretained(this)));
+  // //RecordDownloadSource(DOWNLOAD_INITIATED_BY_PLUGIN_INSTALLER);
+  // download_manager->DownloadUrl(std::move(download_parameters));
+}
+
+void YSPUpdateManager::DownloadStarted(
+    download::DownloadItem* item,
+    download::DownloadInterruptReason interrupt_reason) {
+  if (interrupt_reason != download::DOWNLOAD_INTERRUPT_REASON_NONE) {
+    return;
+  }
+
+  item->set_is_update(true);
+#if defined(OS_WIN)
+  item->SetOpenWhenComplete(true);
+#elif defined(OS_MACOSX)
+  item->SetOpenWhenComplete(false);
+#endif
+  // FIXME(halton): no SetIsTempory, still need to set?
+  // item->SetIsTemporary(false);
+  item->AddObserver(this);
+}
+
+#endif

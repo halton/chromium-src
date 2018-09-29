@@ -643,4 +643,17 @@ void ExpireHistoryBackend::ParanoidExpireHistory() {
   // TODO(brettw): Bug 1067331: write this to clean up any errors.
 }
 
+#ifdef REDCORE
+//TODO (matianzhi): YSP+ { clear user data
+void ExpireHistoryBackend::ExpireHistoryForUserId(const std::string & userid) {
+ if (!main_db_)
+   return;
+ // Find the affected visits and delete them.
+ VisitVector visits;
+ main_db_->GetVisitsForUserId(userid, &visits);
+ ExpireVisits(visits);
+}
+//ysp+ }
+#endif
+
 }  // namespace history

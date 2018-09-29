@@ -44,7 +44,12 @@ SystemThemeX11::SystemThemeX11(PrefService* pref_service)
       pref_service_(pref_service) {}
 
 void SystemThemeX11::StartUsingTheme() {
+/* Redcore has the same UI style on Windows and Linux.*/
+#ifdef REDCORE
+  pref_service_->SetBoolean(prefs::kUsesSystemTheme, false);
+#else
   pref_service_->SetBoolean(prefs::kUsesSystemTheme, true);
+#endif
   // Have the former theme notify its observers of change.
   ui::NativeTheme::GetInstanceForNativeUi()->NotifyObservers();
 }

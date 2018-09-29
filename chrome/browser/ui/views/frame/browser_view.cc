@@ -157,6 +157,10 @@
 #include "ui/views/widget/widget.h"
 #include "ui/views/window/dialog_delegate.h"
 
+#if defined(REDCORE)
+#include "chrome/browser/ui/views/ysp_renderer_mode_bubble_view.h"
+#endif // defined(REDCORE)
+
 #if defined(OS_CHROMEOS)
 #include "ash/public/cpp/window_pin_type.h"
 #include "chrome/browser/ui/ash/ash_util.h"
@@ -192,6 +196,11 @@
 #include "chrome/browser/ui/sync/one_click_signin_links_delegate_impl.h"
 #include "chrome/browser/ui/views/sync/one_click_signin_dialog_view.h"
 #endif
+
+#if defined(REDCORE)
+#include "chrome/browser/ui/views/ysp_account_view.h"    //ysp+ { custom ui }
+#include "chrome/browser/ysp_login/ysp_login_manager.h"   //ysp+ { disable rbutton menu }
+#endif // defined(REDCORE)
 
 using base::TimeDelta;
 using base::UserMetricsAction;
@@ -477,6 +486,9 @@ BrowserView::~BrowserView() {
   // OffTheRecordProfile's PrefService which gets deleted by ~Browser.
   RemoveAllChildViews(true);
   toolbar_ = nullptr;
+#if defined(REDCORE)
+  account_view_ = nullptr;    //ysp+ { custom ui }
+#endif // defined(REDCORE)
 }
 
 void BrowserView::Init(Browser* browser) {
@@ -556,6 +568,14 @@ gfx::Point BrowserView::OffsetPointForToolbarBackgroundImage(
                       -frame_->GetTopInset());
   return window_point;
 }
+
+#if defined(REDCORE)
+base::string16 BrowserView::GetUserNameString() {
+  if (account_view_)
+    return account_view_->GetUserName();
+  return base::string16();
+}
+#endif // defined(REDCORE)
 
 bool BrowserView::IsTabStripVisible() const {
   // Return false if this window does not normally display a tabstrip.
@@ -784,6 +804,12 @@ void BrowserView::SetTranslateIconToggled(bool is_lit) {
   // Translate icon is never active on Views.
 }
 
+#if defined(IE_REDCORE)
+void BrowserView::SetRendererModeIconToggled(RendererMode mode) {
+  GetLocationBarView()->SetRendererModeToggled(mode);
+}
+#endif // defined(IE_REDCORE)
+
 void BrowserView::OnActiveTabChanged(content::WebContents* old_contents,
                                      content::WebContents* new_contents,
                                      int index,
@@ -875,6 +901,13 @@ void BrowserView::OnActiveTabChanged(content::WebContents* old_contents,
 
   TranslateBubbleView::CloseCurrentBubble();
 }
+
+#if defined(IE_REDCORE)
+void BrowserView::ShowRendererModeBubble(const GURL &url, RendererMode mode) {
+  RendererModeBubbleView::ShowBubble(toolbar()->GetRendererModeBubbleAnchor(),
+      gfx::Rect(), nullptr, browser_.get(), url, mode);
+}
+#endif // defined(IE_REDCORE)
 
 void BrowserView::ZoomChangedForActiveTab(bool can_show_bubble) {
   const AppMenuButton* app_menu_button =
@@ -1407,6 +1440,18 @@ content::KeyboardEventProcessingResult BrowserView::PreHandleKeyboardEvent(
   if (focus_manager->shortcut_handling_suspended())
     return content::KeyboardEventProcessingResult::NOT_HANDLED;
 
+#if defined(REDCORE) // {disable rbutton menu}
+  if (!YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+    if (event.windows_key_code == ui::VKEY_C &&
+       (event.GetModifiers() & blink::WebInputEvent::kControlKey) == blink::WebInputEvent::kControlKey)
+      return content::KeyboardEventProcessingResult::HANDLED;
+
+    if (event.windows_key_code == ui::VKEY_X &&
+       (event.GetModifiers() & blink::WebInputEvent::kControlKey) == blink::WebInputEvent::kControlKey)
+      return content::KeyboardEventProcessingResult::HANDLED;
+  }
+#endif // defined(REDCORE)
+
   ui::Accelerator accelerator =
       ui::GetAcceleratorFromNativeWebKeyboardEvent(event);
 
@@ -1669,6 +1714,13 @@ bool BrowserView::CanActivate() const {
 base::string16 BrowserView::GetWindowTitle() const {
   base::string16 title =
       browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
+
+#if defined(REDCORE) // ysp (LIUWEI) TODO: find a better place for setting?
+  title = base::string16(l10n_util::GetStringUTF16(IDS_YSP_REDCORE_ENTERPRISE_BROWSER));
+#else
+  title = browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
+#endif // defined(REDCORE)
+
 #if defined(OS_MACOSX)
   TabAlertState state =
       chrome::GetTabAlertStateForContents(GetActiveWebContents());
@@ -1869,8 +1921,12 @@ gfx::ImageSkia BrowserView::GetWindowIcon() {
 }
 
 bool BrowserView::ShouldShowWindowIcon() const {
+#if defined(REDCORE) // don't show window icon when titble bar is enabled.
+  return false;
+#else
   // Currently the icon and title are always shown together.
   return ShouldShowWindowTitle();
+#endif // defined(REDCORE)
 }
 
 bool BrowserView::ExecuteWindowsCommand(int command_id) {
@@ -2335,6 +2391,12 @@ void BrowserView::InitViews() {
   top_container_->AddChildView(toolbar_);
   toolbar_->Init();
 
+#if defined(REDCORE) // custom ui
+  account_view_ = new YSPAccountView(this);
+  top_container_->AddChildView(account_view_);
+  account_view_->Init();
+#endif // defined(REDCORE)
+
   // This browser view may already have a custom button provider set (e.g the
   // hosted app frame).
   if (!toolbar_button_provider_)
@@ -2342,6 +2404,12 @@ void BrowserView::InitViews() {
 
   infobar_container_ = new InfoBarContainerView(this);
   AddChildView(infobar_container_);
+
+#if defined(REDCORE) // custom ui
+  account_view_ = new YSPAccountView(this);
+  top_container_->AddChildView(account_view_);
+  account_view_->Init();
+#endif // defined(REDCORE)
 
   InitStatusBubble();
 
@@ -2360,6 +2428,9 @@ void BrowserView::InitViews() {
                             top_container_,
                             tabstrip_,
                             toolbar_,
+#if defined(REDCORE)
+                            account_view_,    //ysp+ { custom ui }
+#endif // defined(REDCORE)
                             infobar_container_,
                             contents_container_,
                             GetContentsLayoutManager(),

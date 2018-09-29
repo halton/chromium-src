@@ -25,6 +25,10 @@ std::string GetProductName();
 // Returns the version number, e.g. "6.0.490.1".
 std::string GetVersionNumber();
 
+#ifdef REDCORE
+std::string GetYSPVersionNumber(); //YSP+ {YSP product version}
+#endif
+
 // Returns the result of GetVersionNumber() as a base::Version.
 const base::Version& GetVersion();
 

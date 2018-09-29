@@ -46,7 +46,8 @@ bool VisitDatabase::InitVisitTable() {
             // Some old DBs may have an "is_indexed" field here, but this is no
             // longer used and should NOT be read or written from any longer.
             "visit_duration INTEGER DEFAULT 0 NOT NULL,"
-            "incremented_omnibox_typed_score BOOLEAN DEFAULT FALSE NOT NULL)"))
+            "incremented_omnibox_typed_score BOOLEAN DEFAULT FALSE NOT NULL,"
+	        "YSPUserName varchar(100))"))
       return false;
   }
 
@@ -731,5 +732,24 @@ bool VisitDatabase::GetAllVisitedURLRowidsForMigrationToVersion40(
   }
   return statement.Succeeded();
 }
+
+#ifdef REDCORE
+//TODO (matianzhi): YSP+ { clear user data
+bool VisitDatabase::GetVisitsForUserId(const std::string & userid, VisitVector * visits) {
+ visits->clear();
+
+ sql::Statement statement(GetDB().GetCachedStatement(SQL_FROM_HERE,
+   "SELECT" HISTORY_VISIT_ROW_FIELDS "FROM visits "
+   "WHERE YSPUserName == ?"));
+
+ statement.BindString(0, userid);
+
+ if (!FillVisitVector(statement, visits))
+   return false;
+
+ return true;
+}
+//ysp+ }
+#endif
 
 }  // namespace history

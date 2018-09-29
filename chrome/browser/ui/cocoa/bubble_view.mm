@@ -96,7 +96,11 @@ const float kWindowEdge = 0.7f;
   // Text
   NSColor* textColor = [NSColor blackColor];
   if (themeProvider)
+#ifdef REDCORE
+    textColor = themeProvider->GetNSColor(ThemeProperties::COLOR_BACKGROUND_TAB_TEXT);
+#else
     textColor = themeProvider->GetNSColor(ThemeProperties::COLOR_TAB_TEXT);
+#endif
   NSFont* textFont = [self font];
   base::scoped_nsobject<NSShadow> textShadow([[NSShadow alloc] init]);
   [textShadow setShadowBlurRadius:0.0f];

@@ -195,6 +195,10 @@ class VisitDatabase {
       base::Time begin_time,
       base::Time end_time);
 
+#ifdef REDCORE
+  bool GetVisitsForUserId(const std::string& userid, VisitVector* visits); //TODO (matianzhi): YSP+ { clear user data }
+#endif
+
  protected:
   // Returns the database for the functions in this interface.
   virtual sql::Database& GetDB() = 0;
@@ -237,10 +241,14 @@ class VisitDatabase {
 };
 
 // Columns, in order, of the visit table.
-#define HISTORY_VISIT_ROW_FIELDS                                        \
+#ifdef REDCORE
+#define HISTORY_VISIT_ROW_FIELDS \
+    " id,url,visit_time,from_visit,transition,segment_id,visit_duration,YSPUserName "
+#else
+#define HISTORY_VISIT_ROW_FIELDS \
   " id,url,visit_time,from_visit,transition,segment_id,visit_duration," \
   "incremented_omnibox_typed_score "
-
+#endif
 }  // namespace history
 
 #endif  // COMPONENTS_HISTORY_CORE_BROWSER_VISIT_DATABASE_H_

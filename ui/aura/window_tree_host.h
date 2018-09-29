@@ -218,6 +218,12 @@ class AURA_EXPORT WindowTreeHost : public ui::internal::InputMethodDelegate,
   // Returns a map of KeyboardEvent code to KeyboardEvent key values.
   virtual base::flat_map<std::string, std::string> GetKeyboardLayoutMap() = 0;
 
+#if defined(REDCORE) && defined(WATERMARK) && defined(IE_REDCORE)
+  //ysp+{}
+  virtual void OnLockScreenChanged(bool isLock);
+  //
+#endif
+
  protected:
   friend class ScopedKeyboardHook;
   friend class TestScreen;  // TODO(beng): see if we can remove/consolidate.

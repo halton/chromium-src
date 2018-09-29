@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="">
+<head>
+	<meta charset="utf-8">
+	<!-- <title>PC</title> -->
+	<link rel="stylesheet" href="base.css" />
+	<link rel="stylesheet" href="home.css" />
+	<script src="jquery.min.js"></script>
+	<script src="jquery.json-2.4.js"></script>
+	<script src="HomeBrowser.js"></script>
+	<script src="Server.js"></script>
+	<script src="Header.js"></script>
+	<script src="Card.js"></script>
+	<script src="GroupApp.js"></script>
+	<script src="HomeData.js"></script>
+	<script src="home.js"></script>
+</head>
+<body class="body">
+	<div class="notLogined-body">
+		<div class="notLogined-content">
+			<img src="images/logo_enterplorer.png" class ="logo-enterplorer" />
+			<div class="search-box">
+				<input type="text" placeholder="搜索" class="search-input notLogined-search-input" />
+				<span class="search-btn fr" ></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="home-body">
+		<div class="content">
+			<!-- userInfo begin -->
+			<div class="user-info">
+				<h2><span>Hello ! </span><span class="username" id="username"></span></h2>
+				<p>欢迎来到<span id="company_name"></span>专用办公浏览器</p>
+			</div>
+			<!-- userInfo end -->
+
+			<!-- main-container begin -->
+			<div class="main-container">
+				<img src="images/logo_enterplorer.png" id="company_logo_default" class="company_logo" />
+				<img src="images/logo_enterplorer.png" id="company_logo" class="company_logo" />
+				<div class="search-box">
+					<input type="text" class="search-input logined-input" placeholder="搜索" />
+					<span class="logined-search-btn fr" ></span>
+				</div>
+				<div id="groups" class="groups">
+				</div>
+			</div>
+			<!-- main-container end -->
+		</div>
+	</div>
+</body>
+</html>

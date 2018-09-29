@@ -213,6 +213,9 @@ class BASE_EXPORT ScopedDeviceRegisteredWithManagementForTesting {
   DISALLOW_COPY_AND_ASSIGN(ScopedDeviceRegisteredWithManagementForTesting);
 };
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+BASE_EXPORT int GetSystemIEVersion();
+#endif
 }  // namespace win
 }  // namespace base
 

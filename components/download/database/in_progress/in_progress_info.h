@@ -76,6 +76,10 @@ struct InProgressInfo {
   // The target path where the download will go when it's complete.
   base::FilePath target_path;
 
+#ifdef REDCORE
+ std::string YSPUserName; //YSP+ { User information isolation }
+#endif
+
   // The number of bytes received (so far).
   int64_t received_bytes = 0;
 

@@ -36,6 +36,9 @@ bool WebContentsDelegate::ShouldTransferNavigation(
 
 bool WebContentsDelegate::CanOverscrollContent() const { return false; }
 
+
+void WebContentsDelegate::DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* userPwd){}
+
 bool WebContentsDelegate::ShouldSuppressDialogs(WebContents* source) {
   return false;
 }
@@ -65,6 +68,11 @@ bool WebContentsDelegate::ShouldFocusLocationBarByDefault(WebContents* source) {
 
 bool WebContentsDelegate::ShouldFocusPageAfterCrash() {
   return true;
+}
+
+//YSP+ { Kernel switching
+bool WebContentsDelegate::UrlCompared(const GURL& host, RendererMode& mode) {
+	return false;
 }
 
 bool WebContentsDelegate::ShouldResumeRequestsForCreatedWindow() {

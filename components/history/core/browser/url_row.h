@@ -59,6 +59,18 @@ class URLRow {
     }
   }
 
+#ifdef REDCORE
+  const std::string& YSPUserName() const {
+    return YSPUserName_;
+  }
+
+  void set_YSPUserName(const std::string& YSPUserName) {
+    if (YSPUserName != YSPUserName_) {
+      YSPUserName_ = YSPUserName;
+    }
+  }
+#endif
+
   // The number of times this URL has been visited. This will often match the
   // number of entries in the visit table for this URL, but won't always. It's
   // really designed for autocomplete ranking, so some "useless" transitions
@@ -131,6 +143,10 @@ class URLRow {
   GURL url_;
 
   base::string16 title_;
+
+#ifdef REDCORE
+  std::string YSPUserName_; //YSP+ { User information isolation }
+#endif
 
   // Total number of times this URL has been visited.
   int visit_count_ = 0;

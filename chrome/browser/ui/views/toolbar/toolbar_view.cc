@@ -71,6 +71,9 @@
 #include "ui/views/widget/tooltip_manager.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/window/non_client_view.h"
+#ifdef REDCORE
+#include "chrome/browser/ui/views/location_bar/ysp_renderer_mode_view.h"
+#endif
 
 #if defined(OS_WIN) || defined(OS_MACOSX)
 #include "chrome/browser/recovery/recovery_install_global_error_factory.h"
@@ -106,6 +109,10 @@ int GetToolbarHorizontalPadding() {
 
 // static
 const char ToolbarView::kViewClassName[] = "ToolbarView";
+
+#ifdef REDCORE
+const int kAppMenuButtonRightPadding = 10;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // ToolbarView, public:
@@ -478,6 +485,13 @@ gfx::Size ToolbarView::GetMinimumSize() const {
   return GetSizeInternal(&View::GetMinimumSize);
 }
 
+#ifdef IE_REDCORE
+views::View* ToolbarView::GetRendererModeBubbleAnchor() {
+  views::View* renderer_mode_view = location_bar()->renderer_mode_view();
+  return (renderer_mode_view && renderer_mode_view->visible()) ? renderer_mode_view : app_menu_button_;
+}
+#endif
+
 void ToolbarView::Layout() {
   // If we have not been initialized yet just do nothing.
   if (!initialized_)
@@ -504,13 +518,25 @@ void ToolbarView::Layout() {
   //                http://crbug.com/5540
   const bool maximized =
       browser_->window() && browser_->window()->IsMaximized();
+#ifdef REDCORE
+  const static int kAvatarSpace = 65;
+#endif
   // The padding at either end of the toolbar.
   const int end_padding = GetToolbarHorizontalPadding();
   back_->SetLeadingMargin(maximized ? end_padding : 0);
+#ifdef REDCORE
+  back_->SetBounds(maximized ? kAvatarSpace : kAvatarSpace + end_padding,
+                   toolbar_button_y,
+                   back_->GetPreferredSize().width(), toolbar_button_height);
+#else
   back_->SetBounds(maximized ? 0 : end_padding, toolbar_button_y,
                    back_->GetPreferredSize().width(), toolbar_button_height);
+#endif
   const int element_padding = GetLayoutConstant(TOOLBAR_ELEMENT_PADDING);
   int next_element_x = back_->bounds().right() + element_padding;
+#ifdef REDCORE
+  next_element_x += GetLayoutConstant(TOOLBAR_STANDARD_SPACING);    //ysp+
+#endif
 
   forward_->SetBounds(next_element_x, toolbar_button_y,
                       forward_->GetPreferredSize().width(),
@@ -535,6 +561,9 @@ void ToolbarView::Layout() {
   }
 
   next_element_x += GetLayoutConstant(TOOLBAR_STANDARD_SPACING);
+#ifdef REDCORE
+  next_element_x += GetLayoutConstant(TOOLBAR_STANDARD_SPACING);    //ysp+
+#endif
 
   int app_menu_width = app_menu_button_->GetPreferredSize().width();
   const int right_padding = GetLayoutConstant(TOOLBAR_STANDARD_SPACING);
@@ -545,7 +574,11 @@ void ToolbarView::Layout() {
   // value used to visually separate the location bar and app menu button.
   int available_width = std::max(
       0,
+#ifdef REDCORE
+      width() - end_padding - app_menu_width - kAppMenuButtonRightPadding -
+#else
       width() - end_padding - app_menu_width -
+#endif
       (browser_actions_->GetPreferredSize().IsEmpty() ? right_padding : 0) -
       next_element_x);
   if (cast_ && cast_->visible()) {
@@ -610,6 +643,10 @@ void ToolbarView::Layout() {
   app_menu_button_->SetTrailingMargin(maximized ? end_padding : 0);
   app_menu_button_->SetBounds(next_element_x, toolbar_button_y, app_menu_width,
                               toolbar_button_height);
+#ifdef REDCORE
+  // FIXME(mtz): disable the app menu
+  app_menu_button_->SetVisible(false);
+#endif                            
 }
 
 void ToolbarView::OnPaintBackground(gfx::Canvas* canvas) {
@@ -807,6 +844,17 @@ void ToolbarView::LoadImages() {
                   gfx::CreateVectorIcon(back_image, normal_color));
   back_->SetImage(views::Button::STATE_DISABLED,
                   gfx::CreateVectorIcon(back_image, disabled_color));
+#ifdef REDCORE
+  // FIXME(halton): Use right prop for hover and pressed.
+  const SkColor hover_color =
+      tp->GetColor(ThemeProperties::COLOR_TOOLBAR_BUTTON_ICON);
+  const SkColor pressed_color =
+      tp->GetColor(ThemeProperties::COLOR_TOOLBAR_BUTTON_ICON);
+  back_->SetImage(views::Button::STATE_HOVERED,
+                  gfx::CreateVectorIcon(back_image, hover_color));
+  back_->SetImage(views::Button::STATE_PRESSED,
+                  gfx::CreateVectorIcon(back_image, pressed_color));
+#endif
 
   const gfx::VectorIcon& forward_image =
       is_touch ? kForwardArrowTouchIcon : vector_icons::kForwardArrowIcon;
@@ -814,11 +862,23 @@ void ToolbarView::LoadImages() {
                      gfx::CreateVectorIcon(forward_image, normal_color));
   forward_->SetImage(views::Button::STATE_DISABLED,
                      gfx::CreateVectorIcon(forward_image, disabled_color));
+#ifdef REDCORE
+  forward_->SetImage(views::Button::STATE_HOVERED,
+                  gfx::CreateVectorIcon(forward_image, hover_color));
+  forward_->SetImage(views::Button::STATE_PRESSED,
+                  gfx::CreateVectorIcon(forward_image, pressed_color));
+#endif
 
   const gfx::VectorIcon& home_image =
       is_touch ? kNavigateHomeTouchIcon : kNavigateHomeIcon;
   home_->SetImage(views::Button::STATE_NORMAL,
                   gfx::CreateVectorIcon(home_image, normal_color));
+#ifdef REDCORE
+  home_->SetImage(views::Button::STATE_HOVERED,
+                  gfx::CreateVectorIcon(home_image, hover_color));
+  home_->SetImage(views::Button::STATE_PRESSED,
+                  gfx::CreateVectorIcon(home_image, pressed_color));
+#endif
 
   if (cast_)
     cast_->UpdateIcon();

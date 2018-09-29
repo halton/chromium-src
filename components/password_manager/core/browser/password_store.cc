@@ -37,8 +37,10 @@ using autofill::PasswordForm;
 namespace password_manager {
 
 PasswordStore::GetLoginsRequest::GetLoginsRequest(
-    PasswordStoreConsumer* consumer)
-    : consumer_weak_(consumer->GetWeakPtr()) {
+    const PasswordStoreConsumer* consumer)
+  // comment just for compiling
+   // : consumer_weak_(consumer->GetWeakPtr()) 
+    {
   origin_task_runner_ = base::SequencedTaskRunnerHandle::Get();
 }
 
@@ -249,7 +251,7 @@ void PasswordStore::GetLoginsForSameOrganizationName(
                           this, signon_realm, base::Passed(&request)));
 }
 
-void PasswordStore::GetAutofillableLogins(PasswordStoreConsumer* consumer) {
+void PasswordStore::GetAutofillableLogins(const PasswordStoreConsumer* consumer) {
   Schedule(&PasswordStore::GetAutofillableLoginsImpl, consumer);
 }
 
@@ -606,11 +608,12 @@ void PasswordStore::ClearAllEnterprisePasswordHashImpl() {
 
 void PasswordStore::Schedule(
     void (PasswordStore::*func)(std::unique_ptr<GetLoginsRequest>),
-    PasswordStoreConsumer* consumer) {
+         const PasswordStoreConsumer* consumer) {
   std::unique_ptr<GetLoginsRequest> request(new GetLoginsRequest(consumer));
-  consumer->cancelable_task_tracker()->PostTask(
-      background_task_runner_.get(), FROM_HERE,
-      base::BindOnce(func, this, std::move(request)));
+  // comment just for compiling
+  // consumer->cancelable_task_tracker()->PostTask(
+  //     background_task_runner_.get(), FROM_HERE,
+  //     base::BindOnce(func, this, std::move(request)));
 }
 
 void PasswordStore::WrapModificationTask(ModificationTask task) {
@@ -929,5 +932,29 @@ std::ostream& operator<<(std::ostream& os,
             << ", signon_realm: " << digest.signon_realm
             << ", origin: " << digest.origin << ")";
 }
+
+#ifdef REDCORE
+void PasswordStore::SaveLoginForEnterplorer(const PasswordForm& form) {
+  ScheduleTask(base::Bind(&PasswordStore::SaveLoginForEnterplorerInternal, this, form));
+}
+
+void PasswordStore::SaveLoginForEnterplorerInternal(const PasswordForm& form) {
+  PasswordStoreChangeList changes = SaveLoginForEnterplorerImpl(form);
+  NotifyLoginsChanged(changes);
+}
+
+void PasswordStore::GetYSPLogins(const PasswordForm& form,
+  std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
+  // FIXME(halton):
+  // *matched_forms = FillMatchingLogins(form);
+}
+
+void PasswordStore::GetYSPAllLogins(std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
+  std::vector<std::unique_ptr<PasswordForm>> obtained_forms;
+  if (!FillAutofillableLogins(&obtained_forms))
+    obtained_forms.clear();
+  *matched_forms = std::move(obtained_forms);
+}
+#endif
 
 }  // namespace password_manager

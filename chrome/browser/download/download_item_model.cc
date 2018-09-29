@@ -611,6 +611,18 @@ bool DownloadItemModel::ShouldShowDownloadStartedAnimation() const {
 }
 
 bool DownloadItemModel::ShouldShowInShelf() const {
+#ifdef REDCORE
+  //ysp+ {
+  if (download_ && download_->is_update())
+    return false;
+  
+  if (download_ && 
+    download_->GetFileExternallyRemoved() && 
+    download_->is_doc_view()) {
+    return false;
+  }
+  //ysp+ }
+#endif /*REDCORE*/
   const DownloadItemModelData* data = DownloadItemModelData::Get(download_);
   if (data)
     return data->should_show_in_shelf_;

@@ -85,6 +85,9 @@ class LocationBarViewMac : public LocationBar,
   const OmniboxView* GetOmniboxView() const override;
   OmniboxView* GetOmniboxView() override;
   LocationBarTesting* GetLocationBarForTesting() override;
+#ifdef REDCORE
+  void SetAddressBarEnable(bool) override;
+#endif
 
   // Overridden from LocationBarTesting:
   bool GetBookmarkStarVisibility() override;

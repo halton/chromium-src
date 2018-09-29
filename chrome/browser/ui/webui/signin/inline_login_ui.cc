@@ -35,7 +35,11 @@ namespace {
 content::WebUIDataSource* CreateWebUIDataSource() {
   content::WebUIDataSource* source =
         content::WebUIDataSource::Create(chrome::kChromeUIChromeSigninHost);
+#ifdef REDCORE
+  source->OverrideContentSecurityPolicyObjectSrc("object-src redcore:;");
+#else
   source->OverrideContentSecurityPolicyObjectSrc("object-src chrome:;");
+#endif
   source->SetJsonPath("strings.js");
 
   source->SetDefaultResource(IDR_INLINE_LOGIN_HTML);

@@ -12,6 +12,11 @@
 #include "components/password_manager/core/browser/password_store_change.h"
 #include "components/prefs/pref_service.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h" //YSP+ { passwords AD manager }
+#include "base/strings/utf_string_conversions.h" //YSP+ { passwords AD manager }
+#endif
+
 using autofill::PasswordForm;
 
 namespace password_manager {
@@ -171,7 +176,43 @@ PasswordStoreDefault::FillMatchingLogins(const FormDigest& form) {
   std::vector<std::unique_ptr<PasswordForm>> matched_forms;
   if (login_db_ && !login_db_->GetLogins(form, &matched_forms))
     return std::vector<std::unique_ptr<PasswordForm>>();
+#ifdef REDCORE
+  std::vector<std::unique_ptr<autofill::PasswordForm>> new_matched_forms;
+  std::string uuidKey = "onlyid";
+  std::string loggingstatus = "loggingStatus";
+  base::string16 username = base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
+  std::string loginstatus = YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
+  if (loginstatus != "100") username.clear();
+
+  new_matched_forms.clear();
+  for (auto& login : matched_forms) {
+    if (login->YSPUserName_value.empty() || (login->YSPUserName_value == username)) {
+      std::unique_ptr<PasswordForm> new_form(new PasswordForm());
+      new_form->action = login->action;
+      new_form->form_data = login->form_data;
+      new_form->icon_url = login->icon_url;
+      new_form->is_public_suffix_match = login->is_public_suffix_match;
+      new_form->origin = login->origin;
+      new_form->password_element = login->password_element;
+      new_form->password_value = login->password_value;
+      new_form->scheme = login->scheme;
+      new_form->signon_realm = login->signon_realm;
+      new_form->skip_zero_click = login->skip_zero_click;
+      new_form->submit_element = login->submit_element;
+      new_form->times_used = login->times_used;
+      new_form->type = login->type;
+      new_form->username_element = login->username_element;
+      new_form->username_value = login->username_value;
+      new_form->YSPAppName_value = login->YSPAppName_value;
+      new_form->YSPLoginType_value = login->YSPLoginType_value;
+      new_form->YSPUserName_value = login->YSPUserName_value;
+      new_matched_forms.push_back(std::move(new_form));
+    }
+  }
+  return new_matched_forms;
+#else
   return matched_forms;
+#endif
 }
 
 std::vector<std::unique_ptr<PasswordForm>>
@@ -239,5 +280,13 @@ void PasswordStoreDefault::SetLoginDB(std::unique_ptr<LoginDatabase> login_db) {
   login_db_ = std::move(login_db);
 }
 #endif  // defined(USE_X11)
+
+#ifdef REDCORE
+PasswordStoreChangeList PasswordStoreDefault::SaveLoginForEnterplorerImpl(
+    const PasswordForm& form) {
+  DCHECK(background_task_runner()->RunsTasksInCurrentSequence());
+  return login_db_ ? PasswordStoreChangeList() : login_db_->SelectLogins(form);
+}
+#endif
 
 }  // namespace password_manager

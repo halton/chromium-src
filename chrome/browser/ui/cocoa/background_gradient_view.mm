@@ -109,6 +109,9 @@
 }
 
 - (NSColor*)backgroundImageColor {
+#ifdef REDCORE // Set toolbar background to white color
+    return [NSColor colorWithCalibratedWhite:1.0 alpha:1.0];
+#else
   const ui::ThemeProvider* themeProvider = [[self window] themeProvider];
   if (!themeProvider)
     return [[self window] backgroundColor];
@@ -124,6 +127,7 @@
   }
 
   return themeProvider->GetNSImageColorNamed(IDR_THEME_TOOLBAR);
+#endif
 }
 
 - (void)viewDidMoveToWindow {

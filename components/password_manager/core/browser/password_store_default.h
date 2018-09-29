@@ -49,6 +49,9 @@ class PasswordStoreDefault : public PasswordStore {
                          bool custom_passphrase_sync_enabled) override;
   PasswordStoreChangeList AddLoginImpl(
       const autofill::PasswordForm& form) override;
+#ifdef REDCORE
+  PasswordStoreChangeList SaveLoginForEnterplorerImpl(const autofill::PasswordForm & form) override; //YSP+ { passwords AD manager }
+#endif
   PasswordStoreChangeList UpdateLoginImpl(
       const autofill::PasswordForm& form) override;
   PasswordStoreChangeList RemoveLoginImpl(

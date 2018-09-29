@@ -68,6 +68,12 @@ component("crypto") {
     "symmetric_key.cc",
     "symmetric_key.h",
     "wincrypt_shim.h",
+
+    # YSP
+    "ysp_crypto_encryption.cc",
+    "ysp_crypto_encryption.h",
+    "ysp_crypto_header.cc",
+    "ysp_crypto_header.h",
   ]
 
   # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.

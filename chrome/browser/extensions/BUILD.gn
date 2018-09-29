@@ -1055,6 +1055,16 @@ jumbo_static_library("extensions") {
     }
   }
 
+  if (is_redcore) {
+    sources += [
+      "api/yspmanager/yspmanager_api.cc",
+      "api/yspmanager/yspmanager_api.h",
+    ]
+    deps += [
+      "//chrome/browser/ysp_login",
+    ]
+  }
+
   if (use_x11) {
     sources += [
       "global_shortcut_listener_x11.cc",

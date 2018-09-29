@@ -50,6 +50,7 @@ WebContentsViewGuest::WebContentsViewGuest(
 WebContentsViewGuest::~WebContentsViewGuest() {
 }
 
+void WebContentsViewGuest::OnWebContentDestroying() {};
 gfx::NativeView WebContentsViewGuest::GetNativeView() const {
   return platform_view_->GetNativeView();
 }

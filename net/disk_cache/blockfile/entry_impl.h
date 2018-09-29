@@ -166,6 +166,9 @@ class NET_EXPORT_PRIVATE EntryImpl
 
   // Returns the number of blocks needed to store an EntryStore.
   static int NumBlocksForEntry(int key_size);
+#ifdef REDCORE
+  static void SetCacheStatus(bool status) { cache_crypt_status_ = status; } //YSP+ { cache encryption }
+#endif
 
   // Entry interface.
   void Doom() override;
@@ -310,6 +313,10 @@ class NET_EXPORT_PRIVATE EntryImpl
   std::unique_ptr<SparseControl> sparse_;  // Support for sparse entries.
 
   net::NetLogWithSource net_log_;
+
+#ifdef REDCORE
+  static bool cache_crypt_status_; //YSP+ { cache encryption }
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(EntryImpl);
 };

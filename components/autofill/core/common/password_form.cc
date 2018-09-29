@@ -74,6 +74,11 @@ void PasswordFormToJSON(const PasswordForm& form,
   target->SetBoolean("only_for_fallback_saving", form.only_for_fallback_saving);
   target->SetBoolean("is_gaia_with_skip_save_password_form",
                      form.is_gaia_with_skip_save_password_form);
+#ifdef REDCORE
+  target->SetString("YSPUserName_value", form.YSPUserName_value);
+  target->SetString("YSPAppName_value", form.YSPAppName_value);
+  target->SetString("YSPLoginType_value", form.YSPLoginType_value);
+#endif                     
 }
 
 }  // namespace

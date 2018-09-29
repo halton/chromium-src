@@ -206,7 +206,7 @@ class PasswordStore : protected PasswordStoreSync,
   // Gets the complete list of PasswordForms that are not blacklist entries--and
   // are thus auto-fillable. |consumer| will be notified on completion.
   // The request will be cancelled if the consumer is destroyed.
-  virtual void GetAutofillableLogins(PasswordStoreConsumer* consumer);
+  virtual void GetAutofillableLogins(const PasswordStoreConsumer* consumer);
 
   // Same as above, but also fills in affiliation and branding information for
   // Android credentials.
@@ -308,6 +308,14 @@ class PasswordStore : protected PasswordStoreSync,
 
 #endif
 
+#ifdef REDCORE
+  void GetYSPLogins(const autofill::PasswordForm& form,
+     std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
+  void GetYSPAllLogins(std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
+  virtual void SaveLoginForEnterplorer(const autofill::PasswordForm & form); //YSP+ { passwords AD manager }
+  virtual PasswordStoreChangeList SaveLoginForEnterplorerImpl(const autofill::PasswordForm& form) = 0;
+#endif
+
  protected:
   friend class base::RefCountedThreadSafe<PasswordStore>;
 
@@ -317,7 +325,7 @@ class PasswordStore : protected PasswordStoreSync,
   // results and send them to the consumer on the consumer's message loop.
   class GetLoginsRequest {
    public:
-    explicit GetLoginsRequest(PasswordStoreConsumer* consumer);
+    explicit GetLoginsRequest(const PasswordStoreConsumer* consumer);
     ~GetLoginsRequest();
 
     // Removes any credentials in |results| that were saved before the cutoff,
@@ -524,7 +532,7 @@ class PasswordStore : protected PasswordStoreSync,
   // Schedule the given |func| to be run in the PasswordStore's own sequence
   // with responses delivered to |consumer| on the current sequence.
   void Schedule(void (PasswordStore::*func)(std::unique_ptr<GetLoginsRequest>),
-                PasswordStoreConsumer* consumer);
+                const PasswordStoreConsumer* consumer);
 
   // Wrapper method called on the destination sequence that invokes |task| and
   // then calls back into the source sequence to notify observers that the
@@ -649,6 +657,10 @@ class PasswordStore : protected PasswordStoreSync,
   // Deletes object that should be destroyed on the background sequence.
   // WARNING: this method can be skipped on shutdown.
   void DestroyOnBackgroundSequence();
+
+#ifdef REDCORE
+  void SaveLoginForEnterplorerInternal(const autofill::PasswordForm & form); //YSP+ { passwords AD manager }
+#endif
 
   // TaskRunner for tasks that run on the main sequence (usually the UI thread).
   scoped_refptr<base::SequencedTaskRunner> main_task_runner_;

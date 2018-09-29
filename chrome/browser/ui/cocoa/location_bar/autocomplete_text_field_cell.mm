@@ -29,7 +29,11 @@ using extensions::FeatureSwitch;
 namespace {
 
 // Matches the clipping radius of |GradientButtonCell|.
-const CGFloat kCornerRadius = 3.0;
+#ifdef REDCORE
+  const CGFloat kCornerRadius = 13.0;
+#else
+  const CGFloat kCornerRadius = 3.0;
+#endif
 
 // How far to inset the left- and right-hand decorations from the field's
 // bounds.

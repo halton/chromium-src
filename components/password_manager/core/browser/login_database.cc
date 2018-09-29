@@ -104,6 +104,11 @@ enum LoginDatabaseTableColumns {
   COLUMN_SKIP_ZERO_CLICK,
   COLUMN_GENERATION_UPLOAD_STATUS,
   COLUMN_POSSIBLE_USERNAME_PAIRS,
+#ifdef REDCORE
+  COLUMN_YSP_APPNAME_VALUE, //YSP+ { passwords AD manager }
+  COLUMN_YSP_USERNAME_VALUE, //YSP+ { passwords AD manager }
+  COLUMN_YSP_LOGINTYPE_VALUE, //YSP+ { passwords AD manager }
+#endif
   COLUMN_NUM  // Keep this last.
 };
 
@@ -161,6 +166,11 @@ void BindAddStatement(const PasswordForm& form,
       SerializeValueElementPairs(form.other_possible_usernames);
   s->BindBlob(COLUMN_POSSIBLE_USERNAME_PAIRS, usernames_pickle.data(),
               usernames_pickle.size());
+#ifdef REDCORE
+  s->BindString16(COLUMN_YSP_APPNAME_VALUE, form.YSPAppName_value);
+  s->BindString16(COLUMN_YSP_USERNAME_VALUE, form.YSPUserName_value);
+  s->BindString(COLUMN_YSP_LOGINTYPE_VALUE, form.YSPLoginType_value);
+#endif
 }
 
 void AddCallback(int err, sql::Statement* /*stmt*/) {
@@ -364,6 +374,11 @@ void InitializeBuilder(SQLTableBuilder* builder) {
   builder->AddColumn("blacklisted_by_user", "INTEGER NOT NULL");
   builder->AddColumn("scheme", "INTEGER NOT NULL");
   builder->AddIndex("logins_signon", {"signon_realm"});
+#ifdef REDCORE
+  builder->AddColumn("YSPAppName_value", "VARCHAR");
+  builder->AddColumn("YSPUserName_value", "VARCHAR");
+  builder->AddColumn("YSPLoginType_value", "VARCHAR");
+#endif
   builder->SealVersion();
   unsigned version = builder->SealVersion();
   DCHECK_EQ(1u, version);
@@ -1454,6 +1469,7 @@ void LoginDatabase::InitializeStatementStrings(const SQLTableBuilder& builder) {
   std::string all_nonunique_key_column_names =
       builder.ListAllNonuniqueKeyNames();
 
+  // FIXME(halton): Consider the REDCORE added columns.
   add_statement_ = "INSERT INTO logins (" + all_column_names + ") VALUES " +
                    right_amount_of_placeholders;
   DCHECK(add_replace_statement_.empty());
@@ -1508,5 +1524,57 @@ void LoginDatabase::InitializeStatementStrings(const SQLTableBuilder& builder) {
   encrypted_statement_ =
       "SELECT password_value FROM logins WHERE " + all_unique_key_column_names;
 }
+
+#ifdef REDCORE
+PasswordStoreChangeList LoginDatabase::SelectLogins(const PasswordForm& form) {
+  PasswordStoreChangeList list;
+  if (!DoesMatchConstraints(form))
+    return list;
+  std::string encrypted_password;
+  if (EncryptedString(form.password_value, &encrypted_password) !=
+      ENCRYPTION_RESULT_SUCCESS)
+    return list;
+
+  // FIXME(halton): Impl with new login database
+  /*
+  // You *must* change LoginTableColumns if this query changes.
+  sql::Statement s(db_.GetCachedStatement(
+    SQL_FROM_HERE,
+    "INSERT OR IGNORE INTO logins "
+    "(origin_url, action_url, username_element, username_value, "
+    " password_element, password_value, submit_element, "
+    " signon_realm, ssl_valid, preferred, date_created, blacklisted_by_user, "
+    " scheme, password_type, possible_usernames, times_used, form_data, "
+    " date_synced, display_name, icon_url,"
+    " federation_url, skip_zero_click, generation_upload_status, YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+  BindAddStatement(form, encrypted_password, &s);
+  db_.set_error_callback(base::Bind(&AddCallback));
+  const bool success = s.Run();
+  db_.reset_error_callback();
+  if (success) {
+    list.push_back(PasswordStoreChange(PasswordStoreChange::ADD, form));
+    return list;
+  }
+  // Repeat the same statement but with REPLACE semantic.
+  s.Assign(db_.GetCachedStatement(
+    SQL_FROM_HERE,
+    "INSERT OR IGNORE INTO logins "
+    "(origin_url, action_url, username_element, username_value, "
+    " password_element, password_value, submit_element, "
+    " signon_realm, ssl_valid, preferred, date_created, blacklisted_by_user, "
+    " scheme, password_type, possible_usernames, times_used, form_data, "
+    " date_synced, display_name, icon_url,"
+    " federation_url, skip_zero_click, generation_upload_status, YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+  BindAddStatement(form, encrypted_password, &s);
+  if (s.Run()) {
+    list.push_back(PasswordStoreChange(PasswordStoreChange::REMOVE, form));
+    list.push_back(PasswordStoreChange(PasswordStoreChange::ADD, form));
+  }
+  */
+  return list;
+}
+#endif
 
 }  // namespace password_manager

@@ -15,6 +15,13 @@
 #include "components/download/public/common/download_export.h"
 #include "components/download/public/common/input_stream.h"
 #include "url/gurl.h"
+#include "net/log/net_log_with_source.h"
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+namespace IE {
+	class IEDownloader;
+}
+#endif
 
 namespace download {
 class DownloadDestinationObserver;
@@ -32,6 +39,23 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadFileFactory {
       uint32_t download_id,
       base::WeakPtr<DownloadDestinationObserver> observer);
 };
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+class COMPONENTS_DOWNLOAD_EXPORT IEDownloadFileFactory {
+public:
+	virtual ~IEDownloadFileFactory();
+
+	virtual DownloadFile* CreateFile(
+		std::unique_ptr<DownloadSaveInfo> save_info,
+		const base::FilePath& default_downloads_directory,
+		const GURL& url,
+		const GURL& referrer_url,
+		bool calculate_hash,
+		base::WeakPtr<IE::IEDownloader> pDownloader,
+		const net::NetLogWithSource& bound_net_log,
+		base::WeakPtr<DownloadDestinationObserver> observer);
+};
+#endif
 
 }  // namespace download
 

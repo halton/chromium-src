@@ -160,7 +160,28 @@ BASE_EXPORT extern NSString* const NSAppearanceNameVibrantLight;
 @property(readonly) NSInteger stage;
 @end
 
+@interface NSLayoutConstraint (YosemiteSDK)
+@property(getter=isActive) BOOL active;
+@end
+
+@interface NSWindow (YosemiteSDK)
+- (void)setTitlebarAppearsTransparent:(BOOL)flag;
+@end
+
 #endif  // MAC_OS_X_VERSION_10_10
+
+#if !defined(MAC_OS_X_VERSION_10_11) || \
+    MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11
+
+@interface NSView (ElCaptionSDK)
+@property(readonly, strong) NSLayoutXAxisAnchor* leftAnchor;
+@property(readonly, strong) NSLayoutXAxisAnchor* rightAnchor;
+@property(readonly, strong) NSLayoutYAxisAnchor* bottomAnchor;
+@property(readonly, strong) NSLayoutDimension *heightAnchor;
+@property(readonly, strong) NSLayoutDimension *widthAnchor;
+@end
+
+#endif // MAC_OS_X_VERSION_10_11
 
 // ----------------------------------------------------------------------------
 // Define NSStrings only available in newer versions of the OSX SDK to force

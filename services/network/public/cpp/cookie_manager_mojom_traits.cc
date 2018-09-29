@@ -175,7 +175,8 @@ bool StructTraits<
 
   *out = net::CanonicalCookie(name, value, domain, path, creation_time,
                               expiry_time, last_access_time, cookie.secure(),
-                              cookie.httponly(), site_restrictions, priority);
+                              cookie.httponly(), site_restrictions,
+                              priority);
   return out->IsCanonical();
 }
 

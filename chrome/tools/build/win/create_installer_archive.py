@@ -530,6 +530,16 @@ def main(options):
   """Main method that reads input file, creates archive file and writes
   resource input file.
   """
+  #ysp+{Auto Compile}
+  if os.environ.get('AutoCompile') == '1' :
+    ver=BuildVersion(options.build_dir)
+    buffstr='!define CHROME_VERSION  \"'+ver+'\"'
+    file_object = open(os.path.join(options.build_dir, '../../../dailybuild', 'version.nsh'),'wb')
+    file_object.write(buffstr)
+    file_object.close( )
+	  
+    os.system('D:\\CI_ui\\startSign.bat')
+  #ysp+
   current_version = BuildVersion(options.build_dir)
 
   config = Readconfig(options.input_file, current_version)

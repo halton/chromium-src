@@ -55,6 +55,13 @@
 #include "chrome/browser/ui/blocked_content/popunder_preventer.h"
 #endif
 
+#ifdef REDCORE //YSP+ { passwords AD manager
+#include "chrome/browser/password_manager/password_store_factory.h"
+#include "chrome/browser/profiles/profile.h"
+#include "components/password_manager/core/browser/password_store_factory_util.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif //YSP+ } /*passwords AD manager*/
+
 using autofill::PasswordForm;
 using content::BrowserThread;
 using content::NavigationController;
@@ -79,6 +86,46 @@ void RecordHttpAuthPromptType(AuthPromptType prompt_type) {
   UMA_HISTOGRAM_ENUMERATION("Net.HttpAuthPromptType", prompt_type,
                             AUTH_PROMPT_TYPE_ENUM_COUNT);
 }
+
+#ifdef REDCORE //YSP+ { passwords AD manager
+void SetAuthentication(LoginHandler* handler, const base::string16 username, const base::string16 password)
+{
+  handler->SetAuth(username, password);
+}
+
+void GetUsernameAndPassword(LoginHandler* handler, content::WebContents* web_contents, const autofill::PasswordForm& form)
+{
+  static int ADAutoLogin = 1; //YSP+ { passwords AD manager }
+  base::string16 username;// = L"";
+  base::string16 password;// = L"";
+    std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
+  if (web_contents) {
+    Profile* profile =
+        Profile::FromBrowserContext(web_contents->GetBrowserContext());
+    scoped_refptr<password_manager::PasswordStore> password_store =
+      PasswordStoreFactory::GetForProfile(profile, ServiceAccessType::EXPLICIT_ACCESS);
+    if (password_store) {
+      password_store->GetYSPLogins(form, &matched_forms);
+      for (auto& login : matched_forms) {
+        if (form.signon_realm == login->signon_realm && form.YSPUserName_value == login->YSPUserName_value) {
+          username = login->username_value;
+          password = login->password_value;
+          break;
+        }
+      }
+      matched_forms.clear();
+    }
+  }
+   if (ADAutoLogin && !username.empty() && !password.empty()) {
+    BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      base::Bind(&SetAuthentication, base::Unretained(handler), username, password));
+    ADAutoLogin = 0;
+  }
+  else
+    ADAutoLogin = 1;
+}
+#endif //YSP+ } /*passwords AD manager*/
 
 }  // namespace
 
@@ -122,7 +169,8 @@ LoginHandler::LoginHandler(
   AddRef();  // matched by LoginHandler::ReleaseSoon().
 
   BrowserThread::PostTask(BrowserThread::UI, FROM_HERE,
-                          base::BindOnce(&LoginHandler::AddObservers, this));
+                          // TODO (halton_): Understand why this change.
+                          base::BindOnce(&LoginHandler::AddObservers, base::Unretained(this)));
 }
 
 void LoginHandler::OnRequestCancelled() {
@@ -147,6 +195,12 @@ void LoginHandler::BuildViewWithPasswordManager(
   LoginHandler::LoginModelData model_data(password_manager, observed_form);
   has_shown_login_handler_ = true;
   BuildViewImpl(authority, explanation, &model_data);
+#ifdef REDCORE  //YSP+ { passwords AD manager
+  content::WebContents* web_contents = GetWebContentsForLogin();
+  BrowserThread::PostTask(
+      BrowserThread::IO, FROM_HERE,
+      base::Bind(&GetUsernameAndPassword, base::Unretained(this), web_contents, observed_form));
+#endif  //YSP+ } /*passwords AD manager*/
 }
 
 void LoginHandler::BuildViewWithoutPasswordManager(
@@ -591,6 +645,15 @@ void LoginHandler::ShowLoginPrompt(const GURL& request_url,
 
   PasswordForm observed_form(
       LoginHandler::MakeInputForPasswordManager(request_url, *auth_info));
+
+#ifdef REDCORE //YSP+ { passwords AD manager
+  std::string uuidKey = "onlyid";
+  std::string loggingstatus = "loggingStatus";
+  std::string loginstatus = YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
+  if (loginstatus == "100")
+    observed_form.YSPUserName_value = base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
+#endif  //YSP+ } /*passwords AD manager*/
+
   handler->BuildViewWithPasswordManager(authority, explanation,
                                         password_manager, observed_form);
 }

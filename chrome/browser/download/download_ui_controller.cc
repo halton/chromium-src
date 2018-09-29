@@ -34,6 +34,11 @@
 #include "chrome/browser/download/notification/download_notification_manager.h"
 #endif
 
+#ifdef REDCORE
+#include "chrome/browser/ui/browser_list.h"
+#include "components/ysp_doc_view/ysp_doc_view_manager.h"   //ysp+
+#endif /*REDCORE*/
+
 namespace {
 
 // DownloadShelfUIControllerDelegate{Android,} is used when a
@@ -200,4 +205,44 @@ void DownloadUIController::OnDownloadUpdated(content::DownloadManager* manager,
 
   DownloadItemModel(item).SetWasUINotified(true);
   delegate_->OnNewDownloadReady(item);
+
+#ifdef REDCORE
+  //ysp+ {
+  YSPDocViewManager* dvm = YSPDocViewManager::GetInstance();
+  if (item && dvm->IsDocViewType(item->GetTargetFilePath())) {
+    item->set_is_doc_view(true);
+    dvm->SetDelegate(this);
+    item->AddObserver(dvm);
+  }
+  else
+    item->set_is_doc_view(false);
+  //ysp+ }
+#endif /*REDCORE*/
 }
+
+#ifdef REDCORE
+//ysp+ {
+// YSPDocViewManagerDelegate:
+void DownloadUIController::OnDocViewRequestFailure() {
+  DLOG(INFO) << "DownloadUIController::OnDocViewRequestFailure";
+}
+
+void DownloadUIController::OnDocViewRequestSuccess(download::DownloadItem* download, const std::string& doc_url) {
+  if (!download)
+    return;
+
+  // TODO(halton): Get browser under current context
+  // Browser* browser = chrome::FindBrowserWithProfile(
+  //     Profile::FromBrowserContext(download->GetBrowserContext()),
+  //     chrome::HostDesktopType::HOST_DESKTOP_TYPE_NATIVE);
+  Browser* browser = BrowserList::GetInstance()->get(0);
+  if (browser) {
+    browser->window()->GetDownloadShelf()->Hide();
+    browser->OpenURL(content::OpenURLParams(
+        GURL(doc_url), content::Referrer(),
+        WindowOpenDisposition::NEW_FOREGROUND_TAB, ui::PAGE_TRANSITION_LINK,
+        false));
+  }
+}
+//ysp+ }
+#endif /*REDCORE*/

@@ -221,6 +221,11 @@
 #include "components/safe_browsing/features.h"
 #endif
 
+#ifdef REDCORE
+#include "chrome/browser/ui/webui/ysp_ntp/ep_newtab_ui.h"
+#include "chrome/browser/ui/webui/ysp_show_config/ep_show_config_ui.h"
+#endif
+
 using content::WebUI;
 using content::WebUIController;
 using ui::WebDialogUI;
@@ -300,10 +305,12 @@ WebUIController* NewWebUI<dom_distiller::DomDistillerUi>(WebUI* web_ui,
 }
 
 #if !defined(OS_ANDROID) && !defined(OS_CHROMEOS)
+#ifndef REDCORE
 template <>
 WebUIController* NewWebUI<WelcomeUI>(WebUI* web_ui, const GURL& url) {
   return new WelcomeUI(web_ui, url);
 }
+#endif
 #endif  // !defined(OS_ANDROID) && !defined(OS_CHROMEOS)
 
 #if defined(OS_WIN)
@@ -452,7 +459,13 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui,
   if (url.host_piece() == chrome::kChromeUIIdentityInternalsHost)
     return &NewWebUI<IdentityInternalsUI>;
   if (url.host_piece() == chrome::kChromeUINewTabHost)
+#ifdef REDCORE
+    return &NewWebUI<EPNewTabUI>;
+  if (url.host() == chrome::kChromeUIShowConfigHost)//ysp+ { show config }
+   return &NewWebUI<EPShowConfigUI>;       //ysp+ { show config }
+#else
     return &NewWebUI<NewTabUI>;
+#endif
   // Settings are implemented with native UI elements on Android.
   if (url.host_piece() == chrome::kChromeUISettingsHost)
     return &NewWebUI<settings::MdSettingsUI>;
@@ -558,7 +571,11 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui,
       !profile->IsOffTheRecord())
     return &NewWebUI<SigninEmailConfirmationUI>;
   if (url.host_piece() == chrome::kChromeUIWelcomeHost)
+#ifdef REDCORE
+    return &NewWebUI<EPNewTabUI>;
+#else
     return &NewWebUI<WelcomeUI>;
+#endif
 #endif
 #if defined(OS_WIN)
   if (url.host_piece() == chrome::kChromeUIWelcomeWin10Host)

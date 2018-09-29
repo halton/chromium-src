@@ -27,6 +27,14 @@
 #include "url/gurl.h"
 #include "url/origin.h"
 
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+{IE Embedded}
+namespace IE {
+	class IEDownloader;
+}
+#endif
+
 namespace download {
 
 class DownloadItem;
@@ -308,6 +316,15 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
 
   DownloadSource download_source() const { return download_source_; }
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+ {IE Embedded}
+  void SetIEDownloader(IE::IEDownloader* downloader);
+  IE::IEDownloader* IEDownloader();
+  bool IsUseIEDownloader();
+  void SetIEDownloadResponseheader(const std::wstring header);
+  std::wstring IEDownloadResponseheader();
+#endif
+
  private:
   OnStartedCallback callback_;
   bool content_initiated_;
@@ -338,7 +355,12 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
   const net::NetworkTrafficAnnotationTag traffic_annotation_;
   std::string request_origin_;
   DownloadSource download_source_;
-
+#if defined(REDCORE) && defined(IE_REDCORE)
+//ysp+ {IE Embedded}
+  bool useIeDownload;
+  IE::IEDownloader* pIEDownloader;
+  std::wstring ieResponseHeader;
+#endif
   DISALLOW_COPY_AND_ASSIGN(DownloadUrlParameters);
 };
 

@@ -71,10 +71,14 @@ class VisitRow {
   VisitRow();
   VisitRow(URLID arg_url_id,
            base::Time arg_visit_time,
+#ifdef REDCORE
+           const std::string& arg_YSPUserName, //YSP+ { User information isolation }
+#endif
            VisitID arg_referring_visit,
            ui::PageTransition arg_transition,
            SegmentID arg_segment_id,
            bool arg_incremented_omnibox_typed_score);
+  VisitRow(const VisitRow& other);
   ~VisitRow();
 
   // ID of this row (visit ID, used a a referrer for other visits).
@@ -84,6 +88,10 @@ class VisitRow {
   URLID url_id = 0;
 
   base::Time visit_time;
+
+#ifdef REDCORE
+  std::string YSPUserName; //YSP+ { User information isolation }
+#endif
 
   // Indicates another visit that was the referring page for this one.
   // 0 indicates no referrer.

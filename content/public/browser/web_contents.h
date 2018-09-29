@@ -38,7 +38,9 @@
 #include "ui/base/window_open_disposition.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/native_widget_types.h"
-
+#ifdef IE_REDCORE
+#include "content/common/IE/IEVersion.h" //ysp+{IE Embedded}
+#endif
 #if defined(OS_ANDROID)
 #include "base/android/scoped_java_ref.h"
 #endif
@@ -170,6 +172,10 @@ class WebContents : public PageNavigator,
     // RenderFrame, have already been created on the renderer side, and
     // WebContents construction should take this into account.
     bool renderer_initiated_creation;
+#ifdef IE_REDCORE
+	bool auto_select_content; //YSP+ { Kernel switching }
+	RendererMode renderer_mode; //YSP+ { Kernel switching }
+#endif
 
     // Used to specify how far WebContents::Create can initialize a renderer
     // process.
@@ -928,7 +934,10 @@ class WebContents : public PageNavigator,
   // renderer. This should be eventually merged into and accounted for in the
   // user activation work.
   virtual bool HasRecentInteractiveInputEvent() const = 0;
-
+#if defined(IE_REDCORE)
+  virtual bool IsAutoSelect() = 0; //YSP+ { Kernel switching }
+  virtual RendererMode GetRendererMode() = 0; //ysp+ {IE Embedded}
+#endif
   // Sets a flag that causes the WebContents to ignore input events.
   virtual void SetIgnoreInputEvents(bool ignore_input_events) = 0;
 
@@ -939,6 +948,9 @@ class WebContents : public PageNavigator,
  private:
   // This interface should only be implemented inside content.
   friend class WebContentsImpl;
+#if defined(IE_REDCORE)
+  friend class WebContentsIE;
+#endif
   WebContents() {}
 };
 

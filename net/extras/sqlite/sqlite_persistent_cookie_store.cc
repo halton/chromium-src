@@ -36,6 +36,12 @@
 #include "sql/transaction.h"
 #include "url/gurl.h"
 
+#ifdef REDCORE
+// AES DES and SMS4 crypt
+#include "chrome/browser/ysp_login/ysp_login_manager.h" //ysp+{disable rbutton menu}
+#include "crypto/ysp_crypto_encryption.h"
+#endif
+
 using base::Time;
 
 namespace {
@@ -560,6 +566,9 @@ bool CreateV10Schema(sql::Database* db) {
       "priority INTEGER NOT NULL DEFAULT %d,"
       "encrypted_value BLOB DEFAULT '',"
       "firstpartyonly INTEGER NOT NULL DEFAULT %d,"
+#ifdef REDCORE
+      "YSPUserName TEXT NOT NULL,"  //YSP+ { User information isolation }
+#endif
       "UNIQUE (host_key, name, path))",
       CookiePriorityToDBCookiePriority(COOKIE_PRIORITY_DEFAULT),
       CookieSameSiteToDBCookieSameSite(CookieSameSite::DEFAULT_MODE)));
@@ -880,13 +889,20 @@ bool SQLitePersistentCookieStore::Backend::LoadCookiesForDomains(
         "SELECT creation_utc, host_key, name, value, encrypted_value, path, "
         "expires_utc, is_secure, is_httponly, firstpartyonly, "
         "last_access_utc, has_expires, is_persistent, priority "
+#ifdef REDCORE
+        ", YSPUserName "
+#endif
         "FROM cookies WHERE host_key = ?"));
   } else {
     smt.Assign(db_->GetCachedStatement(
         SQL_FROM_HERE,
         "SELECT creation_utc, host_key, name, value, encrypted_value, path, "
         "expires_utc, is_secure, is_httponly, firstpartyonly, last_access_utc, "
-        "has_expires, is_persistent, priority FROM cookies WHERE host_key = ? "
+        "has_expires, is_persistent, priority"
+#ifdef REDCORE
+        ", YSPUserName "
+#endif
+        "FROM cookies WHERE host_key = ? "
         "AND is_persistent = 1"));
   }
   del_smt.Assign(db_->GetCachedStatement(
@@ -937,10 +953,16 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
   DCHECK(background_task_runner_->RunsTasksInCurrentSequence());
   sql::Statement& smt = *statement;
   bool ok = true;
+#ifdef REDCORE
+  std::string username = YSPCryptoCSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
+#endif
   while (smt.Step()) {
     ++num_cookies_read_;
     std::string value;
     std::string encrypted_value = smt.ColumnString(4);
+#ifdef REDCORE
+    std::string dec_value;
+#endif
     if (!encrypted_value.empty() && crypto_) {
       scoped_refptr<TimeoutTracker> timeout_tracker =
           TimeoutTracker::Begin(client_task_runner_);
@@ -954,9 +976,20 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
     } else {
       value = smt.ColumnString(3);
     }
+#ifdef REDCORE
+   //ysp+ { AES DES and SMS4 crypt
+   if (value.find("[[]]") != std::string::npos)
+      dec_value = YSPCryptoCSingleton::GetInstance()->DecryptString(smt.ColumnString(3));
+   else
+      dec_value = value;
+#endif
     std::unique_ptr<CanonicalCookie> cc(std::make_unique<CanonicalCookie>(
         smt.ColumnString(2),                           // name
+#ifdef REDCORE
+       dec_value,
+#else
         value,                                         // value
+#endif
         smt.ColumnString(1),                           // domain
         smt.ColumnString(5),                           // path
         Time::FromInternalValue(smt.ColumnInt64(0)),   // creation_utc
@@ -967,7 +1000,8 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
         DBCookieSameSiteToCookieSameSite(
             static_cast<DBCookieSameSite>(smt.ColumnInt(9))),  // samesite
         DBCookiePriorityToCookiePriority(
-            static_cast<DBCookiePriority>(smt.ColumnInt(13)))));  // priority
+            static_cast<DBCookiePriority>(smt.ColumnInt(13)))  // priority
+        ));
     DLOG_IF(WARNING, cc->CreationDate() > Time::Now())
         << L"CreationDate too recent";
     if (cc->IsCanonical()) {
@@ -976,6 +1010,9 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
       RecordCookieLoadProblem(COOKIE_LOAD_PROBLEM_NON_CANONICAL);
       ok = false;
     }
+#ifdef REDCORE
+    DLOG(INFO) << "cookiestore name: " <<smt.ColumnString(2) << " value: " << smt.ColumnString(3) << " dec: " << dec_value;
+#endif
   }
 
   return ok;
@@ -1306,8 +1343,13 @@ void SQLitePersistentCookieStore::Backend::Commit() {
       SQL_FROM_HERE,
       "INSERT INTO cookies (creation_utc, host_key, name, value, "
       "encrypted_value, path, expires_utc, is_secure, is_httponly, "
+#if defined(REDCORE)
+      "firstpartyonly, last_access_utc, has_expires, is_persistent, priority, YSPUserName) "
+      "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+#else
       "firstpartyonly, last_access_utc, has_expires, is_persistent, priority) "
       "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+#endif
   if (!add_smt.is_valid())
     return;
 
@@ -1334,13 +1376,25 @@ void SQLitePersistentCookieStore::Backend::Commit() {
        ++it) {
     // Free the cookies as we commit them to the database.
     std::unique_ptr<PendingOperation> po(std::move(*it));
+#ifdef REDCORE
+    std::string myenc_value;
+#endif
     switch (po->op()) {
       case PendingOperation::COOKIE_ADD:
         add_smt.Reset(true);
         add_smt.BindInt64(0, po->cc().CreationDate().ToInternalValue());
         add_smt.BindString(1, po->cc().Domain());
         add_smt.BindString(2, po->cc().Name());
+#ifdef REDCORE
+        if (YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt())
+          myenc_value = YSPCryptoCSingleton::GetInstance()->EncryptString(po->cc().Value());
+#endif
+#ifdef REDCORE
+        if (!YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt() &&
+            crypto_ && crypto_->ShouldEncrypt()) {
+#else
         if (crypto_ && crypto_->ShouldEncrypt()) {
+#endif
           std::string encrypted_value;
           if (!crypto_->EncryptString(po->cc().Value(), &encrypted_value)) {
             DLOG(WARNING) << "Could not encrypt a cookie, skipping add.";
@@ -1356,6 +1410,13 @@ void SQLitePersistentCookieStore::Backend::Commit() {
           add_smt.BindString(3, po->cc().Value());
           add_smt.BindBlob(4, "", 0);  // encrypted_value
         }
+#ifdef REDCORE
+        //ysp+ { AES DES and SMS4 crypt
+        if (YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt()) {
+           add_smt.BindString(3, myenc_value);
+           add_smt.BindBlob(4, "", 0);  // encrypted_value
+         }
+#endif
         add_smt.BindString(5, po->cc().Path());
         add_smt.BindInt64(6, po->cc().ExpiryDate().ToInternalValue());
         add_smt.BindInt(7, po->cc().IsSecure());
@@ -1367,11 +1428,17 @@ void SQLitePersistentCookieStore::Backend::Commit() {
         add_smt.BindInt(12, po->cc().IsPersistent());
         add_smt.BindInt(13,
                         CookiePriorityToDBCookiePriority(po->cc().Priority()));
+#ifdef REDCORE
+        add_smt.BindString(14, po->cc().YSPUserName()); //YSP+ { User information isolation }
+#endif
         if (!add_smt.Run()) {
           DLOG(WARNING) << "Could not add a cookie to the DB.";
           RecordCookieCommitProblem(COOKIE_COMMIT_PROBLEM_ADD);
           trouble = true;
         }
+#ifdef REDCORE
+        DLOG(INFO) << "cookiestore: " << po->cc().Value() << " enc: " << myenc_value;
+#endif
         break;
 
       case PendingOperation::COOKIE_UPDATEACCESS:

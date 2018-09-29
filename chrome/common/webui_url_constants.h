@@ -297,6 +297,10 @@ extern const char kStylusSubPage[];
 extern const char kCleanupSubPage[];
 #endif
 
+#ifdef REDCORE
+extern const char kChromeUIShowConfigHost[];//ysp+ { show config }
+#endif
+
 // Extensions sub pages.
 extern const char kExtensionConfigureCommandsSubPage[];
 

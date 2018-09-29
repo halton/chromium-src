@@ -1,0 +1,131 @@
+ul li{  
+  list-style-type:none;  
+  display:inline;
+  margin: 3px;
+  weight: 100px;
+  height: 100px; 
+  position: relative;
+} 
+
+.iphone-img{
+  background-image: url(./deviceImg/iphone.png);
+  width: 100px;
+  height: 100px;
+} 
+.macbook-img{
+  background-image: url(./deviceImg/macbook.png);
+  width: 100px;
+  height: 100px;
+}
+
+.android-img{
+  background-image: url(./deviceImg/android.png);
+  width: 100px;
+  height: 100px;
+}
+.windows-pc-img{
+  background-image: url(./deviceImg/windows_pc.png);
+  width: 100px;
+  height: 100px;
+}
+
+.pad-android-img{
+   background-image: url(./deviceImg/Pad_android.png);
+   width: 100px;
+   height: 100px;
+}
+
+.tip{
+    z-index: 90
+	width:300px;
+	border:1px solid #000;
+	border-radius:8px;
+	padding: 0px 20px;
+	position: absolute;
+    width: 300px;
+    z-index: 9999;
+    top: 25px;
+    background: #fff;
+    left: -119px;
+}
+.tip  .inner{
+	background-color:#FFF;
+	width:10px;
+	height:10px;
+	border:1px solid #000;
+	position:relative;
+	left:145px;
+	top:-7px;
+	transform:rotate(45deg);
+	border-right:0px;
+	border-bottom:0px;
+}
+.device-name{
+ border-bottom:thick solit #ff0000;
+}
+
+.device-delete-buttion{
+  border-top:thick solit #ff0000;
+}
+
+.delte-device-node{
+  height:42px;
+  border-width: 0;
+  font-size: 14px;
+  color: #FFFFFF;
+  font-weight: 500;
+  text-align: center;
+  border-top: 1px solid #000;
+  padding-top: 5px;
+}
+#device-data-bg-id{
+	display: none;
+}
+.device-data-bg{
+	position: absolute;
+    z-index: 99;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.device-data-model {
+	position: absolute;
+	z-index: 999;
+	top: 40%;
+	background: #ffffff;
+	box-shadow: 0 2px 20px 0 rgba(51,51,51,0.40);
+	border-radius: 2px;
+	width: 460px;
+	left: 34%;
+	height: 150px;
+	padding: 10px 20px;
+
+}
+.device-data-model p {}
+.device-data-model h3 {
+	font-size:18px;
+	color:#333333;
+	text-align: center;
+}
+.device-data-button {
+	text-align: right;
+}
+.device-data-button .default-button {
+	border-radius:2px;
+	width:76px;
+	height:30px;
+}
+#cancel-buttion-id{
+	border-radius:2px;
+	width:76px;
+	height:30px;
+}
+
+.default-button-left {
+	background:#464974;
+	color: #ffffff;
+	margin-right:20px;
+}

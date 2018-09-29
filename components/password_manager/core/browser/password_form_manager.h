@@ -222,6 +222,12 @@ class PasswordFormManager : public PasswordFormManagerInterface,
   void PermanentlyBlacklist() override;
   void OnPasswordsRevealed() override;
 
+#ifdef REDCORE
+  void GetFormsForLoginManager(); //YSP+ { passwords AD manager }
+  void SaveFormsForLoginManager(const std::string& formDict_str,
+                                const std::string& username,
+                                const std::string& password); //YSP+ { passwords AD manager }
+#endif
  protected:
   // FormFetcher::Consumer:
   void ProcessMatches(

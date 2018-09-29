@@ -66,6 +66,9 @@ class ToolbarButtonProvider;
 class ToolbarView;
 class TopContainerView;
 class WebContentsCloseHandler;
+#if defined(REDCORE)
+class YSPAccountView;    //ysp+ { custom ui }
+#endif // defined(REDCORE)
 
 namespace extensions {
 class ActiveTabPermissionGranter;
@@ -183,6 +186,11 @@ class BrowserView : public BrowserWindow,
   // Bookmark bar may be null, for example for pop-ups.
   BookmarkBarView* bookmark_bar() { return bookmark_bar_view_.get(); }
 
+#if defined(REDCORE)
+  YSPAccountView* account_view() { return account_view_; }
+  base::string16 GetUserNameString();
+#endif // defined(REDCORE)
+
   // Returns the do-nothing view which controls the z-order of the find bar
   // widget relative to views which paint into layers and views which have an
   // associated NativeView. The presence / visibility of this view is not
@@ -290,6 +298,9 @@ class BrowserView : public BrowserWindow,
   void UpdateLoadingAnimations(bool should_animate) override;
   void SetStarredState(bool is_starred) override;
   void SetTranslateIconToggled(bool is_lit) override;
+#if defined(IE_REDCORE)
+  void SetRendererModeIconToggled(RendererMode mode);
+#endif // defined(IE_REDCORE)
   void OnActiveTabChanged(content::WebContents* old_contents,
                           content::WebContents* new_contents,
                           int index,
@@ -344,6 +355,9 @@ class BrowserView : public BrowserWindow,
   void SetIntentPickerViewVisibility(bool visible) override;
 #endif  //  defined(OS_CHROMEOS)
   void ShowBookmarkBubble(const GURL& url, bool already_bookmarked) override;
+#if defined(IE_REDCORE)
+  void ShowRendererModeBubble(const GURL& url, RendererMode mode) override;
+#endif // defined(IE_REDCORE)
   autofill::SaveCardBubbleView* ShowSaveCreditCardBubble(
       content::WebContents* contents,
       autofill::SaveCardBubbleController* controller,
@@ -700,6 +714,10 @@ class BrowserView : public BrowserWindow,
   // during immersive reveal.
   std::unique_ptr<views::ViewTargeterDelegate> overlay_view_targeter_;
   views::View* overlay_view_ = nullptr;
+
+#if defined(REDCORE)
+  YSPAccountView* account_view_;    //ysp+ { custom ui }
+#endif // defined(REDCORE)
 
   // The Bookmark Bar View for this window. Lazily created. May be null for
   // non-tabbed browsers like popups. May not be visible.

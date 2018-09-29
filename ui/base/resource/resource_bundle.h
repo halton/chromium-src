@@ -441,6 +441,12 @@ class UI_BASE_EXPORT ResourceBundle {
 
   SEQUENCE_CHECKER(sequence_checker_);
 
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+  std::vector<base::string16> watermark_string_;
+  uint32_t watermark_color_;
+  int watermark_font_size_;
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(ResourceBundle);
 };
 

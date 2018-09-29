@@ -41,9 +41,12 @@ using web_modal::ModalDialogHostObserver;
 
 namespace {
 
+#ifndef REDCORE
 // The visible height of the shadow above the tabs. Clicks in this area are
 // treated as clicks to the frame, rather than clicks to the tab.
 const int kTabShadowSize = 2;
+#endif
+
 // The number of pixels the constrained window should overlap the bottom
 // of the omnibox.
 const int kConstrainedWindowOverlap = 3;
@@ -129,6 +132,9 @@ BrowserViewLayout::BrowserViewLayout()
       top_container_(nullptr),
       tab_strip_(nullptr),
       toolbar_(nullptr),
+#ifdef REDCORE
+      account_view_(nullptr),    //ysp+ { custom ui }
+#endif
       bookmark_bar_(nullptr),
       infobar_container_(nullptr),
       contents_container_(nullptr),
@@ -148,6 +154,9 @@ void BrowserViewLayout::Init(
     views::View* top_container,
     TabStrip* tab_strip,
     views::View* toolbar,
+#ifdef REDCORE
+    views::View* account_view,    //ysp+ { custom ui }
+#endif
     InfoBarContainerView* infobar_container,
     views::View* contents_container,
     ContentsLayoutManager* contents_layout_manager,
@@ -158,6 +167,9 @@ void BrowserViewLayout::Init(
   top_container_ = top_container;
   tab_strip_ = tab_strip;
   toolbar_ = toolbar;
+#ifdef REDCORE
+  account_view_ = account_view;
+#endif
   infobar_container_ = infobar_container;
   contents_container_ = contents_container;
   contents_layout_manager_ = contents_layout_manager;
@@ -269,12 +281,19 @@ int BrowserViewLayout::NonClientHitTest(const gfx::Point& point) {
   if (delegate_->IsTabStripVisible()) {
     // See if the mouse pointer is within the bounds of the TabStrip.
     gfx::Point test_point(point);
+#ifdef REDCORE
+    if (ConvertedHitTest(parent, account_view_, &test_point)) {
+      return HTCLIENT;
+    }
+#endif
     if (ConvertedHitTest(parent, tab_strip_, &test_point)) {
       if (tab_strip_->IsPositionInWindowCaption(test_point))
         return HTCAPTION;
       return HTCLIENT;
     }
 
+// Since we have moved tabstrip to the bottom of toolbar, we don't need this.
+#ifndef REDCORE
     // The top few pixels of the TabStrip are a drop-shadow - as we're pretty
     // starved of dragable area, let's give it to window dragging (this also
     // makes sense visually).
@@ -287,6 +306,7 @@ int BrowserViewLayout::NonClientHitTest(const gfx::Point& point) {
       // code is given the mouse position...
       return HTNOWHERE;
     }
+#endif
   }
 
   // If the point's y coordinate is below the top of the toolbar and otherwise
@@ -322,15 +342,36 @@ int BrowserViewLayout::NonClientHitTest(const gfx::Point& point) {
 void BrowserViewLayout::Layout(views::View* browser_view) {
   vertical_layout_rect_ = browser_view->GetLocalBounds();
   int top_inset = delegate_->GetTopInsetInBrowserView();
-  int top = LayoutTabStripRegion(top_inset);
+#ifdef REDCORE
+  int account_top = delegate_->GetTopInsetInBrowserView();    //ysp+ { custom ui }
+  // ysp (LIUWEI): new layout for UI part
+  int top = delegate_->GetTopInsetInBrowserView();
+
+  top = LayoutToolbar(top);
+
+  // ysp (LIUWEI) layout bookmark bar, and move info bar to the bottom of tab strip
+  //top = LayoutBookmarkAndInfoBars(top, browser_view->y());
+  web_contents_modal_dialog_top_y_ =
+      top + browser_view->y() - kConstrainedWindowOverlap;
+  if (bookmark_bar_)
+    top = LayoutBookmarkBar(top);
+
+  LayoutAccountView(account_top, top);    //ysp+ { custom ui }
+
+  top = LayoutTabStripRegion(top);
+#else
+   int top = LayoutTabStripRegion(top_inset);
+#endif
   if (delegate_->IsTabStripVisible()) {
     tab_strip_->SetBackgroundOffset(
         tab_strip_->GetMirroredX() + browser_view_->GetMirroredX() +
             delegate_->GetThemeBackgroundXInset());
   }
+#ifndef REDCORE
   top = LayoutToolbar(top);
 
   top = LayoutBookmarkAndInfoBars(top, browser_view->y());
+#endif
 
   // Top container requires updated toolbar and bookmark bar to compute bounds.
   UpdateTopContainerBounds();
@@ -382,6 +423,11 @@ int BrowserViewLayout::LayoutTabStripRegion(int top) {
   // anything to the left of it, like the incognito avatar.
   gfx::Rect tabstrip_bounds(delegate_->GetBoundsForTabStripInBrowserView());
 
+#ifdef REDCORE
+  tabstrip_bounds.set_x(0);
+  tabstrip_bounds.set_y(top);
+#endif
+
   tab_strip_->SetVisible(true);
   tab_strip_->SetBoundsRect(tabstrip_bounds);
 
@@ -391,6 +437,13 @@ int BrowserViewLayout::LayoutTabStripRegion(int top) {
 int BrowserViewLayout::LayoutToolbar(int top) {
   int browser_view_width = vertical_layout_rect_.width();
   bool toolbar_visible = delegate_->IsToolbarVisible();
+// FIXME(halton): check why below
+/*
+#ifndef REDCORE // remove
+  y -= (toolbar_visible && delegate_->IsTabStripVisible()) ?
+      GetLayoutConstant(TABSTRIP_TOOLBAR_OVERLAP) : 0;
+#endif
+*/
   int height = toolbar_visible ? toolbar_->GetPreferredSize().height() : 0;
   toolbar_->SetVisible(toolbar_visible);
   toolbar_->SetBounds(vertical_layout_rect_.x(), top, browser_view_width,
@@ -519,3 +572,25 @@ bool BrowserViewLayout::IsInfobarVisible() const {
   return browser_->SupportsWindowFeature(Browser::FEATURE_INFOBAR) &&
       (infobar_container->GetPreferredSize().height() != 0);
 }
+
+#ifdef REDCORE //ysp+ { custom ui
+void BrowserViewLayout::LayoutAccountView(int top, int bottom) {
+  if(!delegate_->IsTabStripVisible()) {
+    account_view_->SetVisible(false);
+    return;
+  }
+
+  account_view_->SetVisible(true);
+#if 0
+  account_view_->SetBounds(vertical_layout_rect_.x()-1,
+    top,
+    kOffsetForAccountView + kAccountViewOverlap+1,
+    bottom-top);
+#else // TODO: (LIUWEI) avoid hard code
+  account_view_->SetBounds(14,
+    14,
+    52,
+    52);
+#endif
+}
+#endif //ysp+ }

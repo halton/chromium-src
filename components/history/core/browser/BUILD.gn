@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/redcore.gni")
+
 static_library("browser") {
   sources = [
     "browsing_history_driver.h",
@@ -144,6 +146,12 @@ static_library("browser") {
       "android/urls_sql_handler.h",
       "android/visit_sql_handler.cc",
       "android/visit_sql_handler.h",
+    ]
+  }
+
+  if (is_redcore) {
+    deps += [
+     # "//chrome/browser/ysp_login",
     ]
   }
 

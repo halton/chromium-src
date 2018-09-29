@@ -441,6 +441,16 @@ enum HistogramValue {
   SYSTEM_POWER_SOURCE_ONPOWERCHANGED,
   WEB_REQUEST_ON_ACTION_IGNORED,
   ARC_APPS_PRIVATE_ON_INSTALLED,
+#ifdef REDCORE
+  TABS_SETIEAUTOLOGININFO,  //ysp+ {IE SWA}
+  TABS_STARTLISTENIELOGIN,  //ysp+ {IE SWA}
+  YSPMANAGER_GETENTERPLORERINFO,    //ysp+
+  YSPMANAGER_SETPUSHDATA, //ysp+ { push server api}
+  WEB_NAVIGATION_ON_YSP_MANAGER,  //ysp+{ push server api }
+#endif /*REDCORE*/
+#ifdef IE_REDCORE
+  WEB_NAVIGATION_ON_LOGIN,  //ysp+{IE SWA}
+#endif /*IE_REDCORE*/
   // Last entry: Add new entries above, then run:
   // python tools/metrics/histograms/update_extension_histograms.py
   ENUM_BOUNDARY

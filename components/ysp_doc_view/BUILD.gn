@@ -1,0 +1,24 @@
+# //ysp+ { login }
+
+import("//build/config/ui.gni")
+
+source_set("ysp_doc_view") {
+  sources = [
+    "ysp_doc_view_fetcher.cc",
+    "ysp_doc_view_fetcher.h",
+    "ysp_doc_view_manager.cc",
+    "ysp_doc_view_manager.h",
+  ]
+
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//components/pref_registry",
+    "//components/query_parser",
+    "//components/strings",
+    "//components/url_formatter",
+    "//net",
+    "//services/network/public/mojom",
+    "//url",
+  ]
+}

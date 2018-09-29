@@ -1056,6 +1056,17 @@ HistoryService::GetTypedURLSyncControllerDelegate() {
                           base::Unretained(history_backend_.get())));
 }
 
+#ifdef REDCORE
+//TODO (matianzhi): YSP+ { clear user data
+void HistoryService::ClearHistoryForUser(const std::string & userid) {
+	DCHECK(thread_) << "History service being called after cleanup";
+	DCHECK(thread_checker_.CalledOnValidThread());
+	ScheduleTask(PRIORITY_NORMAL, base::Bind(&HistoryBackend::ClearHistoryForUser,
+      history_backend_.get(), userid));
+}
+//ysp+ }
+#endif
+
 syncer::SyncError HistoryService::ProcessLocalDeleteDirective(
     const sync_pb::HistoryDeleteDirectiveSpecifics& delete_directive) {
   DCHECK(thread_checker_.CalledOnValidThread());

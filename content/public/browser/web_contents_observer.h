@@ -517,6 +517,14 @@ class CONTENT_EXPORT WebContentsObserver : public IPC::Listener {
   // focus.
   virtual void OnWebContentsFocused(RenderWidgetHost* render_widget_host) {}
 
+  #ifdef REDCORE
+  #ifdef IE_REDCORE
+      //ysp+{IE SWA}
+      virtual void OnGetLoginContext(RenderFrameHost* render_frame_host,
+	  const std::string& url, const std::string& userName, const std::string& userPwd) {}
+  #endif /*IE_REDCORE*/
+  #endif /*REDCORE*/
+
   // Notification that the |render_widget_host| for this WebContents has lost
   // focus.
   virtual void OnWebContentsLostFocus(RenderWidgetHost* render_widget_host) {}

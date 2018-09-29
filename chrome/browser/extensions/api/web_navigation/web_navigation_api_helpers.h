@@ -65,6 +65,25 @@ void DispatchOnTabReplaced(
     content::BrowserContext* browser_context,
     content::WebContents* new_web_contents);
 
+#ifdef REDCORE
+//TODO(matianzhi) ysp+{push server api}
+void DispathOnYspManager(content::WebContents* web_contents,
+                         content::RenderFrameHost* frame_host,
+                         const std::string& status,
+                         const std::string& manager_server,
+                         const std::string& device_id,
+                         const std::string& user_id,
+                         const std::string& company_id);
+//YSP+ }
+#endif /*REDCORE*/
+
+#ifdef IE_REDCORE
+void DispathOnLogin(content::WebContents* web_contents,    //ysp+{IE SWA}
+                    content::RenderFrameHost* frame_host,
+                    const std::string& login_url,
+                    const std::string& user_name,
+                    const std::string& user_pwd);
+#endif /*IE_REDCORE*/
 }  // namespace web_navigation_api_helpers
 
 }  // namespace extensions

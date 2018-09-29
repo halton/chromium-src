@@ -17,9 +17,19 @@
 #include "ui/views/controls/button/image_button.h"
 #include "ui/views/controls/label.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_lock_screen_view.h"
+#include "chrome/grit/generated_resources.h"
+#include "ui/base/l10n/l10n_util.h"
+#endif
+
 namespace {
 
+#ifdef REDCORE
+constexpr int kCaptionButtonHeight = 34;
+#else
 constexpr int kCaptionButtonHeight = 18;
+#endif
 
 #if defined(OS_LINUX) && !defined(OS_CHROMEOS)
 // Default spacing around window caption buttons.
@@ -230,7 +240,11 @@ gfx::Rect OpaqueBrowserFrameViewLayout::IconBounds() const {
 gfx::Rect OpaqueBrowserFrameViewLayout::CalculateClientAreaBounds(
     int width,
     int height) const {
+#ifdef REDCORE
+  int top_height = 0;
+#else
   int top_height = NonClientTopHeight(false);
+#endif
   int border_thickness = NonClientBorderThickness();
   return gfx::Rect(border_thickness, top_height,
                    std::max(0, width - (2 * border_thickness)),
@@ -296,6 +310,7 @@ int OpaqueBrowserFrameViewLayout::GetNonClientRestoredExtraThickness() const {
 // OpaqueBrowserFrameViewLayout, protected:
 
 void OpaqueBrowserFrameViewLayout::LayoutNewStyleAvatar(views::View* host) {
+  return;
   if (!new_avatar_button_)
     return;
 
@@ -375,6 +390,18 @@ void OpaqueBrowserFrameViewLayout::LayoutWindowControls(views::View* host) {
 
   for (const auto& button : buttons_not_shown)
     HideButton(button);
+
+#ifdef REDCORE
+  int caption_y = 5;//CaptionButtonY(GetButtonDisplayType(views::FRAME_BUTTON_CLOSE),false);
+  minimize_button_->SetY(caption_y);
+  maximize_button_->SetY(caption_y);
+  close_button_->SetY(caption_y);
+  restore_button_->SetY(caption_y);
+  minimize_button_->SetVisible(true);
+  // FIXME(halton):
+  // SetBoundsForButton(??, host, lock_button_, ALIGN_TRAILING);
+  // lock_button_->SetVisible(YSPLoginManager::GetInstance()->GetLoginStatus());
+#endif
 }
 
 void OpaqueBrowserFrameViewLayout::LayoutTitleBar(views::View* host) {
@@ -430,8 +457,12 @@ void OpaqueBrowserFrameViewLayout::LayoutTitleBar(views::View* host) {
           std::max(0, available_space_trailing_x_ - kCaptionSpacing -
                           available_space_leading_x_ - kIconTitleSpacing);
       window_title_->SetBounds(available_space_leading_x_ + kIconTitleSpacing,
-                               window_icon_bounds_.y(), text_width,
-                               window_icon_bounds_.height());
+                               window_icon_bounds_.y(), 
+#ifdef REDCORE
+                               text_width, 14);
+#else
+                               text_width, window_icon_bounds_.height());
+#endif
       available_space_leading_x_ += text_width + kIconTitleSpacing;
     }
   }
@@ -671,6 +702,20 @@ void OpaqueBrowserFrameViewLayout::SetView(int id, views::View* view) {
       hosted_app_button_container_ =
           static_cast<HostedAppButtonContainer*>(view);
       break;
+#ifdef REDCORE
+    case VIEW_ID_LOGIN_LABLE:
+      login_info_ = static_cast<views::Label*>(view);
+      break;
+    case VIEW_ID_WELCOME_LABLE:
+      hello_ = static_cast<views::Label*>(view);
+      break;
+    case VIEW_ID_LOCK_SCREEN_BUTTON:
+      lock_button_ = static_cast<views::ImageButton*>(view);
+	    break;
+    case VIEW_ID_LOCK_SCREEN_VIEW:
+      locked_view_ = static_cast<YSPLockScreenView *>(view);
+      break;
+#endif
     default:
       NOTREACHED() << "Unknown view id " << id;
       break;
@@ -692,7 +737,21 @@ void OpaqueBrowserFrameViewLayout::Layout(views::View* host) {
   has_trailing_buttons_ = false;
 
   LayoutWindowControls(host);
+#ifdef REDCORE
+  if (locked_view_->IsLocked()) {
+    window_title_->SetVisible(false);
+    login_info_->SetVisible(false);
+    hello_->SetVisible(false);
+    lock_button_->SetVisible(false);
+    // TODO: (LIUWEI) remove hard code
+    locked_view_->SetBounds(host->x(), host->y(), host->width(), host->height());
+    return;
+  }
+#endif
   LayoutTitleBar(host);
+#ifdef REDCORE
+  LayoutLoginMessage(host);
+#endif
 
   if (delegate_->IsRegularOrGuestSession())
     LayoutNewStyleAvatar(host);
@@ -719,3 +778,28 @@ void OpaqueBrowserFrameViewLayout::ViewRemoved(views::View* host,
                                                views::View* view) {
   SetView(view->id(), nullptr);
 }
+
+#ifdef REDCORE
+void OpaqueBrowserFrameViewLayout::LayoutLoginMessage(views::View * host)
+{
+  // ysp TODO (LIUWEI): implement
+  base::string16 user_name = delegate_->GetLoginInfo();
+  gfx::Size size;
+  int x = hello_->x();
+  if (user_name.empty()) {
+    // logout
+    hello_->SetVisible(false);
+    user_name.append(l10n_util::GetStringUTF16(IDS_YSP_LOGIN_STATE_NOT_LOGIN));
+  }
+  else {
+    size = hello_->GetPreferredSize();
+    hello_->SetVisible(true);
+    hello_->SetSize(size);
+    x += size.width();
+  }
+  login_info_->SetText(user_name);
+  size = login_info_->GetPreferredSize();
+  login_info_->SetBounds(x, login_info_->y(), size.width(), size.height());
+  login_info_->SetVisible(true);
+}
+#endif

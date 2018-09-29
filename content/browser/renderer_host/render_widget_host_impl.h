@@ -721,6 +721,10 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   // NotifyRendererResponsive.
   void RendererIsResponsive();
 
+#ifdef REDCORE
+  static void setDisableDrag(bool DisableDrag) { disable_drag_ = DisableDrag; } //YSP+ { disable drag }
+#endif
+
  protected:
   // ---------------------------------------------------------------------------
   // The following method is overridden by RenderViewHost to send upwards to
@@ -1185,6 +1189,10 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   std::unique_ptr<FlingSchedulerBase> fling_scheduler_;
 
   bool did_receive_first_frame_after_navigation_ = true;
+
+#ifdef REDCORE
+  static bool disable_drag_;
+#endif
 
   base::WeakPtrFactory<RenderWidgetHostImpl> weak_factory_;
 

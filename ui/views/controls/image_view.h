@@ -82,6 +82,13 @@ class VIEWS_EXPORT ImageView : public View {
   gfx::Size CalculatePreferredSize() const override;
   views::PaintInfo::ScaleType GetPaintScaleType() const override;
 
+#ifdef REDCORE
+  //ysp+ {
+  void SetDrawCircle(bool circle) {
+    draw_circle_ = circle;
+  }
+#endif
+
  private:
   friend class ImageViewTest;
 
@@ -126,6 +133,10 @@ class VIEWS_EXPORT ImageView : public View {
   // Address of bytes we last painted. This is used only for comparison, so its
   // safe to cache.
   void* last_painted_bitmap_pixels_;
+
+#ifdef REDCORE
+  bool draw_circle_;    //ysp+
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(ImageView);
 };

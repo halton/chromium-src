@@ -39,6 +39,7 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
   // May be constructed on any thread.  All other routines (including
   // destruction) must occur on the same sequence.
   BaseFile(uint32_t download_id);
+  BaseFile();
   ~BaseFile();
 
   // Returns DOWNLOAD_INTERRUPT_REASON_NONE on success, or a
@@ -101,6 +102,9 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
       std::unique_ptr<crypto::SecureHash> hash_state,
       bool is_sparse_file,
       int64_t* const bytes_wasted);
+
+  //just for compile
+  DownloadInterruptReason Initialize(const base::FilePath& default_directory);
 
   // Write a new chunk of data to the file. Returns a DownloadInterruptReason
   // indicating the result of the operation. Works only if |is_sparse_file| is

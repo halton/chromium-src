@@ -1,0 +1,57 @@
+# //ysp+ { login }
+
+import("//build/config/ui.gni")
+
+source_set("ysp_login") {
+  sources = [
+    "ysp_auto_config_fetcher.cc",
+    "ysp_auto_config_fetcher.h",
+    "ysp_company_info_fetcher.cc",
+    "ysp_company_info_fetcher.h",
+    "ysp_fetcher_resource.cc",
+    "ysp_fetcher_resource.h",
+    "ysp_hub_fetcher.cc",
+    "ysp_hub_fetcher.h",
+    "ysp_iplookup_fetcher.cc",
+    "ysp_iplookup_fetcher.h",
+    "ysp_login_fetcher.cc",
+    "ysp_login_fetcher.h",
+    "ysp_login_manager.cc",
+    "ysp_login_manager.h",
+    "ysp_replace_fetcher.cc",
+    "ysp_replace_fetcher.h",
+    "ysp_singlesignon_fetcher.cc",
+    "ysp_singlesignon_fetcher.h",
+    "ysp_us_report_fetcher.cc",
+    "ysp_us_report_fetcher.h",
+  ]
+
+  public_deps = [
+    "//components/bookmarks/common",
+    "//components/bookmarks/browser",
+  ]
+
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//components/favicon_base",
+    "//components/keyed_service/core",
+    "//components/pref_registry",
+    "//components/query_parser",
+    "//components/strings",
+    "//components/url_formatter",
+    "//net",
+    "//services/data_decoder/public/cpp:cpp",
+    "//third_party/icu",
+    "//ui/base",
+    "//ui/gfx",
+    "//url",
+  ]
+
+  if (is_mac) {
+    sources += [
+      "mac/ysp_sysinfo.h",
+      "mac/ysp_sysinfo.mm",
+    ]
+  }
+}

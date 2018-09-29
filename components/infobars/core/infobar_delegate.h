@@ -19,6 +19,9 @@ class RegisterProtocolHandlerInfoBarDelegate;
 class ScreenCaptureInfoBarDelegate;
 class ThemeInstalledInfoBarDelegate;
 class ThreeDAPIInfoBarDelegate;
+#ifdef IE_REDCORE
+class DownloadActivexInfobarDelegate;
+#endif
 
 #if defined(OS_ANDROID)
 namespace offline_pages {
@@ -155,8 +158,11 @@ class InfoBarDelegate {
     BLOATED_RENDERER_INFOBAR_DELEGATE = 84,
     SUPERVISED_USERS_DEPRECATED_INFOBAR_DELEGATE = 85,
     NEAR_OOM_REDUCTION_INFOBAR_ANDROID = 86,
+  #ifdef REDCORE
+    DOWNLOAD_ACTIVEX_INFOBAR_DELEGATE = 87, //ysp+ {Activex distribute}
+  #endif
   };
-
+  virtual Type GetInfoBarType() const;
   // Describes navigation events, used to decide whether infobars should be
   // dismissed.
   struct NavigationDetails {
@@ -233,6 +239,10 @@ class InfoBarDelegate {
 #if defined(OS_ANDROID)
   virtual offline_pages::OfflinePageInfoBarDelegate*
   AsOfflinePageInfoBarDelegate();
+#endif
+
+#ifdef IE_REDCORE
+  virtual DownloadActivexInfobarDelegate* AsDownloadActivexInfobarDelegate(); //ysp+ {Activex distribute}
 #endif
 
   void set_infobar(InfoBar* infobar) { infobar_ = infobar; }

@@ -122,6 +122,12 @@ class NET_EXPORT CookieStore {
 
   virtual void DeleteSessionCookiesAsync(DeleteCallback) = 0;
 
+#ifdef REDCORE
+  //TODO (matianzhi): YSP+ { clear user data }
+  virtual void DeleteAllForUserIdAsync(const std::string& userid,
+                                       const DeleteCallback callback) = 0;
+#endif
+
   // Deletes all cookies in the store.
   void DeleteAllAsync(DeleteCallback callback);
 

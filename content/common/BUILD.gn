@@ -388,6 +388,46 @@ source_set("common") {
     deps += [ "//sandbox/mac:seatbelt" ]
   }
 
+  if (is_ie_redcore) {
+    sources += [
+      # YSP
+      "IE/ATLInclude.h",
+      "IE/BrowserHostEventDelegant.cpp",
+      "IE/BrowserHostEventDelegant.h",
+      "IE/BrowserProcess.cpp",
+      "IE/BrowserProcess.h",
+      "IE/DevToolsHost.cpp",
+      "IE/DevToolsHost.h",
+      "IE/DocHostUIHandler.cpp",
+      "IE/DocHostUIHandler.h",
+      "IE/HttpMonitor.cpp",
+      "IE/HttpMonitor.h",
+      "IE/IEEvent.cpp",
+      "IE/IEEvent.h",
+      "IE/IEEventHandler.h",
+      "IE/IEInterface.idl",
+      "IE/IEInterface_h.h",
+      "IE/IEInterface_i.c",
+      "IE/IEInterface_p.c",
+      "IE/IEProcessModule.h",
+      "IE/IEVersion.h",
+      "IE/JavaScriptHandler.cpp",
+      "IE/JavaScriptHandler.h",
+      "IE/WebBrowser.cpp",
+      "IE/WebBrowser.h",
+      "IE/XPathNode.cpp",
+      "IE/XPathNode.h",
+      "IE/XPathNodePredicates.cpp",
+      "IE/XPathNodePredicates.h",
+      "IE/XPathParse.cpp",
+      "IE/XPathParse.h",
+      "IE/dlldata.c",
+      "../../third_party/minhook/src/buffer.c",
+      "../../third_party/minhook/src/hook.c",
+      "../../third_party/minhook/src/trampoline.c",
+      "../../third_party/minhook/src/hde/hde64.c",
+    ]
+  }
   if (is_android) {
     deps += [
       "//content/public/android:common_aidl",

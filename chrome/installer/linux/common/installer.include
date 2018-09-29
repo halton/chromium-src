@@ -116,7 +116,7 @@ prep_staging_common() {
 
 get_version_info() {
   source "${BUILDDIR}/installer/version.txt"
-  VERSION="${MAJOR}.${MINOR}.${BUILD}.${PATCH}"
+  VERSION="${REDCORE_MAJOR}.${REDCORE_MINOR}.${REDCORE_BUILD}"
   # TODO(phajdan.jr): Provide a mechanism to pass a different package
   # release number if needed. The meaning of it is to bump it for
   # packaging-only changes while the underlying software has the same version.
@@ -146,7 +146,10 @@ stage_install_common() {
   # we should flag all installer files in FILES.cfg and get them from there, so
   # there's only one place people need to keep track of such things (and in
   # only the public repository).
-  if [ -r "${BUILDDIR}/chrome_100_percent.pak" ]; then
+  if [ ${PACKAGE:0:7} = redcore ]; then
+    install -m 644 "${BUILDDIR}/redcore_100_percent.pak" "${STAGEDIR}/${INSTALLDIR}/"
+    install -m 644 "${BUILDDIR}/redcore_200_percent.pak" "${STAGEDIR}/${INSTALLDIR}/"
+  elif [ -r "${BUILDDIR}/chrome_100_percent.pak" ]; then
     install -m 644 "${BUILDDIR}/chrome_100_percent.pak" "${STAGEDIR}/${INSTALLDIR}/"
     install -m 644 "${BUILDDIR}/chrome_200_percent.pak" "${STAGEDIR}/${INSTALLDIR}/"
   else
@@ -296,7 +299,10 @@ stage_install_common() {
   install -m 755 "${BUILDDIR}/xdg-mime" "${STAGEDIR}${INSTALLDIR}/"
   install -m 755 "${BUILDDIR}/xdg-settings" "${STAGEDIR}${INSTALLDIR}/"
 
-  if [ ${PACKAGE:0:6} = google ]; then
+  if [ ${PACKAGE:0:7} = redcore ]; then
+    install -m 644 "${BUILDDIR}/installer/common/redcore-browser.appdata.xml" \
+      "${STAGEDIR}/usr/share/appdata/${PACKAGE}.appdata.xml"
+  elif [ ${PACKAGE:0:6} = google ]; then
     process_template "${BUILDDIR}/installer/common/google-chrome.appdata.xml.template" \
       "${STAGEDIR}/usr/share/appdata/${PACKAGE}.appdata.xml"
     chmod 644 "${STAGEDIR}/usr/share/appdata/${PACKAGE}.appdata.xml"
@@ -382,6 +388,8 @@ stage_install_common() {
       fi
       local expected_perms=777
     elif [ "${base_name}" = "chrome-sandbox" ]; then
+      local expected_perms=4755
+    elif [ "${base_name}" = "redcore-sandbox" ]; then
       local expected_perms=4755
     elif [[ "${base_name}" = "nacl_irt_"*".nexe" ]]; then
       local expected_perms=644

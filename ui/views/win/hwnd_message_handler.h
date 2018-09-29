@@ -747,12 +747,17 @@ class VIEWS_EXPORT HWNDMessageHandler : public gfx::WindowImpl,
   // CR_MSG_MAP_CLASS_DECLARATIONS macro and autohide_factory_) must
   // occur last in the class definition so they get destroyed last.
 
-  CR_MSG_MAP_CLASS_DECLARATIONS(HWNDMessageHandler)
-
-  // The factory used to lookup appbar autohide edges.
-  base::WeakPtrFactory<HWNDMessageHandler> autohide_factory_;
+#ifdef IE_REDCORE
+  bool notProcessActivateMessage;	//ysp+{IE Embedded}
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(HWNDMessageHandler);
+
+    // The factory used to lookup appbar autohide edges.
+
+  CR_MSG_MAP_CLASS_DECLARATIONS(HWNDMessageHandler);
+
+  base::WeakPtrFactory<HWNDMessageHandler> autohide_factory_;
 };
 
 }  // namespace views

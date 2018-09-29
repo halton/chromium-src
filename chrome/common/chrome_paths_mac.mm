@@ -54,11 +54,15 @@ char* ProductDirNameForBundle(NSBundle* chrome_bundle) {
   product_dir_name = [product_dir_name_ns fileSystemRepresentation];
 
   if (!product_dir_name) {
+#ifdef REDCORE
+    product_dir_name = "Redcore";
+#else
 #if defined(GOOGLE_CHROME_BUILD)
     product_dir_name = "Google/Chrome";
 #else
     product_dir_name = "Chromium";
 #endif
+#endif //REDCORE
   }
 
   // Leaked, but the only caller initializes a static with this result, so it

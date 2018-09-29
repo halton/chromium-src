@@ -1,0 +1,14 @@
+#pragma once
+#include <SDKDDKVer.h>
+#include <windows.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include <tchar.h>
+#include <atlbase.h>
+#include <atlstr.h>
+#include <atlcom.h>
+#include <atlctl.h>
+#include <atlcoll.h>
+#include <atlcomcli.h>
+#include <comdef.h>

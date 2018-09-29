@@ -459,6 +459,39 @@ void WebNavigationTabObserver::HandleError(
   web_navigation_api_helpers::DispatchOnErrorOccurred(navigation_handle);
 }
 
+
+#ifdef REDCORE
+#ifdef IE_REDCORE
+//ysp+{IE SWA}
+void WebNavigationTabObserver::OnGetLoginContext(content::RenderFrameHost * render_frame_host,
+ const std::string & url, const std::string & userName, const std::string & userPwd) {
+ DVLOG(2) << "OnGetLoginContext("
+   << "render_frame_host=" << render_frame_host
+   << ", login_url=" << url
+   << ", user_name=" << userName
+   << ", user_password=" << userPwd << ")";
+
+ helpers::DispathOnLogin(web_contents(), render_frame_host, url, userName, userPwd);
+}
+//ysp+
+#endif /*IE_REDCORE*/
+//TODO(matianzhi) ysp+{push server api}
+void WebNavigationTabObserver::OnLoginSuccessNotice(content::RenderFrameHost* render_frame_host,
+ const std::string& status, const std::string& manager_url, const std::string& device_id,
+ const std::string& user_id, const std::string& company_id) {
+ DVLOG(2) << "OnLoginSuccessNotice("
+   << "render_frame_host=" << render_frame_host
+   << ", login status=" << status
+   << ", manager_url=" << manager_url
+   << ", deviceId=" << device_id
+   << ", userId=" << user_id
+   << ", companyId=" << company_id << ")";
+
+ helpers::DispathOnYspManager(web_contents(), render_frame_host, status, manager_url, device_id, user_id, company_id);
+}
+//ysp+
+#endif /*REDCORE*/
+
 // See also NavigationController::IsURLSameDocumentNavigation.
 bool WebNavigationTabObserver::IsReferenceFragmentNavigation(
     content::RenderFrameHost* render_frame_host,

@@ -74,6 +74,9 @@ class LocationBar {
 
   // Returns a pointer to the testing interface.
   virtual LocationBarTesting* GetLocationBarForTesting() = 0;
+#ifdef REDCORE
+  virtual void SetAddressBarEnable(bool) = 0;
+#endif
 
   Profile* profile() { return profile_; }
 

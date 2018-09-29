@@ -101,7 +101,9 @@ class ExpireHistoryBackend {
   base::Time GetCurrentExpirationTime() const {
     return base::Time::Now() - expiration_threshold_;
   }
-
+#ifdef REDCORE
+  void ExpireHistoryForUserId(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
+#endif
  private:
   FRIEND_TEST_ALL_PREFIXES(ExpireHistoryTest, DeleteFaviconsIfPossible);
   FRIEND_TEST_ALL_PREFIXES(ExpireHistoryTest, ExpireSomeOldHistory);

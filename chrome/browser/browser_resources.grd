@@ -689,6 +689,171 @@
       <if expr="chromeos">
         <include name="IDR_SMART_DIM_EXAMPLE_PREPROCESSOR_CONFIG_PB" file="chromeos\power\ml\smart_dim\example_preprocessor_config.pb" type="BINDATA" />
       </if>
+      <!-- //ysp+ { ntp -->
+      <include name="IDR_YSP_NEWTAB_AMAZEUI_MIN_CSS" file="resources\ysp_ntp\amazeui.min.css" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_AMAZEUI_MIN_JS" file="resources\ysp_ntp\amazeui.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_BASE_CSS" file="resources\ysp_ntp\base.css" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_CARD_JS" file="resources\ysp_ntp\Card.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_GROUP_APP_JS" file="resources\ysp_ntp\GroupApp.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HEADER_JS" file="resources\ysp_ntp\Header.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HOME_CSS" file="resources\ysp_ntp\home.css" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HOME_HTML" file="resources\ysp_ntp\home.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HOME_JS" file="resources\ysp_ntp\home.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HOME_BROWSER_JS" file="resources\ysp_ntp\HomeBrowser.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_HOME_DATA_JS" file="resources\ysp_ntp\HomeData.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_JQUERY_JSON_JS" file="resources\ysp_ntp\jquery.json-2.4.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_JQUERY_MIN_JS" file="resources\ysp_ntp\jquery.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_SERVER_JS" file="resources\ysp_ntp\Server.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_BAIDU_PNG" file="resources\ysp_ntp\images\baidu.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_BG_JPG" file="resources\ysp_ntp\images\bg.jpg" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_CAIGOU_PNG" file="resources\ysp_ntp\images\caigou.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_CART_IMG_PNG" file="resources\ysp_ntp\images\cart_img.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_DEFAULT_ICON_PNG" file="resources\ysp_ntp\images\default_icon.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_DITU_PNG" file="resources\ysp_ntp\images\ditu.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_FANYI_PNG" file="resources\ysp_ntp\images\fanyi.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_AMAZEUI_PNG" file="resources\ysp_ntp\images\icon_amazeui.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_BAIDU_PNG" file="resources\ysp_ntp\images\icon_baidu.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_BOARD_PNG" file="resources\ysp_ntp\images\icon_board.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_CART_PNG" file="resources\ysp_ntp\images\icon_cart.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_GW_PNG" file="resources\ysp_ntp\images\icon_gw.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_NEWS_PNG" file="resources\ysp_ntp\images\icon_news.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_OA_PNG" file="resources\ysp_ntp\images\icon_oa.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_RANKING_PNG" file="resources\ysp_ntp\images\icon_ranking.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_SALE_PNG" file="resources\ysp_ntp\images\icon_sale.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_SEARCH_PNG" file="resources\ysp_ntp\images\icon_search.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_VISIT_PNG" file="resources\ysp_ntp\images\icon_visit.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_WEATHER_PNG" file="resources\ysp_ntp\images\icon_weather.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_WIND_PNG" file="resources\ysp_ntp\images\icon_wind.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ICON_XCLOUD_PNG" file="resources\ysp_ntp\images\icon_xcloud.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_LOGO_ENTERPLORER_PNG" file="resources\ysp_ntp\images\logo_enterplorer.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_LOGO_ZH_PNG" file="resources\ysp_ntp\images\logo_zh.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_NEWS_PIC_PNG" file="resources\ysp_ntp\images\news_pic.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_NEWS_PIC2_PNG" file="resources\ysp_ntp\images\news_pic2.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_NEWS_PIC3_PNG" file="resources\ysp_ntp\images\news_pic3.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_LOGO_JH_PNG" file="resources\ysp_ntp\images\logo_jh.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_RANKING_IMG_PNG" file="resources\ysp_ntp\images\ranking_img.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_SALE_IMG_PNG" file="resources\ysp_ntp\images\sale_img.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_BG_PNG" file="resources\ysp_ntp\images\weather_bg.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_XINWEN_PNG" file="resources\ysp_ntp\images\xinwen.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_YOUXIANG_PNG" file="resources\ysp_ntp\images\youxiang.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_YUNPAN_PNG" file="resources\ysp_ntp\images\yunpan.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_ZHUXING_PNG" file="resources\ysp_ntp\images\zhuxing.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_100_PNG" file="resources\ysp_ntp\images\weather\100.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_101_PNG" file="resources\ysp_ntp\images\weather\101.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_104_PNG" file="resources\ysp_ntp\images\weather\104.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_300_PNG" file="resources\ysp_ntp\images\weather\300.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_301_PNG" file="resources\ysp_ntp\images\weather\301.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_302_PNG" file="resources\ysp_ntp\images\weather\302.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_303_PNG" file="resources\ysp_ntp\images\weather\303.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_304_PNG" file="resources\ysp_ntp\images\weather\304.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_305_PNG" file="resources\ysp_ntp\images\weather\305.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_306_PNG" file="resources\ysp_ntp\images\weather\306.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_307_PNG" file="resources\ysp_ntp\images\weather\307.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_309_PNG" file="resources\ysp_ntp\images\weather\309.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_310_PNG" file="resources\ysp_ntp\images\weather\310.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_311_PNG" file="resources\ysp_ntp\images\weather\311.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_312_PNG" file="resources\ysp_ntp\images\weather\312.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_313_PNG" file="resources\ysp_ntp\images\weather\313.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_400_PNG" file="resources\ysp_ntp\images\weather\400.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_401_PNG" file="resources\ysp_ntp\images\weather\401.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_402_PNG" file="resources\ysp_ntp\images\weather\402.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_403_PNG" file="resources\ysp_ntp\images\weather\403.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_404_PNG" file="resources\ysp_ntp\images\weather\404.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_405_PNG" file="resources\ysp_ntp\images\weather\405.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_406_PNG" file="resources\ysp_ntp\images\weather\406.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_407_PNG" file="resources\ysp_ntp\images\weather\407.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_501_PNG" file="resources\ysp_ntp\images\weather\501.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_502_PNG" file="resources\ysp_ntp\images\weather\502.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_503_PNG" file="resources\ysp_ntp\images\weather\503.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_504_PNG" file="resources\ysp_ntp\images\weather\504.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_507_PNG" file="resources\ysp_ntp\images\weather\507.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_508_PNG" file="resources\ysp_ntp\images\weather\508.png" type="BINDATA" />
+      <include name="IDR_YSP_NEWTAB_WEATHER_999_PNG" file="resources\ysp_ntp\images\weather\999.png" type="BINDATA" />
+      <!-- //ysp+ } -->
+      <include name="IDR_REDCORE_NEWTAB_HOME_HTML" file="resources\redcore_ntp\Home.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HOME_JS" file="resources\redcore_ntp\Home.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HOMEBROWSER_JS" file="resources\redcore_ntp\HomeBrowser.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HOMEPROXY_JS" file="resources\redcore_ntp\HomeProxy.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_LOGIN_JS" file="resources\redcore_ntp\login.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SEARCH_JS" file="resources\redcore_ntp\search.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_QRCODE_MIN_JS" file="resources\redcore_ntp\qrcode.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_GENERATEHEADER_JS" file="resources\redcore_ntp\generateHeader.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_GENERATETAB_JS" file="resources\redcore_ntp\generateTab.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_AMAZEUI_MIN_JS" file="resources\redcore_ntp\amazeui.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_JQUERY_JS" file="resources\redcore_ntp\jquery.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_AMAZEUI_MIN_CSS" file="resources\redcore_ntp\amazeui.min.css" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_STYLES_CSS" file="resources\redcore_ntp\styles.css" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BACKICON_SVG" file="resources\redcore_ntp\imgs\backIcon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTBANNER_PNG" file="resources\redcore_ntp\imgs\defaultBanner.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTBG_PNG" file="resources\redcore_ntp\imgs\defaultBG.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTICON_SVG" file="resources\redcore_ntp\imgs\defaultIcon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_ERROR_ICON_PNG" file="resources\redcore_ntp\imgs\error_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_INVALID_PNG" file="resources\redcore_ntp\imgs\invalid.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTLOGO_PNG" file="resources\redcore_ntp\imgs\defaultLogo.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_ICON_SVG" file="resources\redcore_ntp\imgs\icon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SEARCH_ICON_SVG" file="resources\redcore_ntp\imgs\search_icon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SELECTICON_SVG" file="resources\redcore_ntp\imgs\selectIcon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SELECTICON_PNG" file="resources\redcore_ntp\imgs\selectIcon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_1_PNG" file="resources\redcore_ntp\imgs\background\bg-1.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BACKICON_PNG" file="resources\redcore_ntp\imgs\login\backIcon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BACKUSER_PNG" file="resources\redcore_ntp\imgs\login\back-user.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BG_PNG" file="resources\redcore_ntp\imgs\login\bg.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_GROUP_PNG" file="resources\redcore_ntp\imgs\login\Group.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_QRCODE_PNG" file="resources\redcore_ntp\imgs\login\qrcode.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_QRCODESUCCESS_PNG" file="resources\redcore_ntp\imgs\login\qrcodeSuccess.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_REDCORELOGO_PNG" file="resources\redcore_ntp\imgs\login\redcoreLogo.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SCAN_PNG" file="resources\redcore_ntp\imgs\login\scan.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_MOTION_CSS" file="resources\redcore_ntp\hello\motion.css" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_INDEX_CSS" file="resources\redcore_ntp\hello\index.css" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_SWIPER_MIN_CSS" file="resources\redcore_ntp\hello\swiper.min.css" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_SWIPER_MIN_JS" file="resources\redcore_ntp\hello\swiper.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_BG_PNG" file="resources\redcore_ntp\hello\img\bg.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_LOGO_PNG" file="resources\redcore_ntp\hello\img\logo.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_ROUND_PNG" file="resources\redcore_ntp\hello\img\round.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_UP_PNG" file="resources\redcore_ntp\hello\img\up.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_UP_RED_PNG" file="resources\redcore_ntp\hello\img\up-red.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_001_PNG" file="resources\redcore_ntp\hello\img\swiper1\001.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_1_PNG" file="resources\redcore_ntp\hello\img\swiper1\1.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_2_PNG" file="resources\redcore_ntp\hello\img\swiper1\2.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_3_PNG" file="resources\redcore_ntp\hello\img\swiper1\3.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_4_PNG" file="resources\redcore_ntp\hello\img\swiper1\4.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_5_PNG" file="resources\redcore_ntp\hello\img\swiper1\5.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_6_PNG" file="resources\redcore_ntp\hello\img\swiper1\6.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_7_PNG" file="resources\redcore_ntp\hello\img\swiper1\7.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_8_PNG" file="resources\redcore_ntp\hello\img\swiper1\8.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_19_PNG" file="resources\redcore_ntp\hello\img\swiper1\19.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER1_888_PNG" file="resources\redcore_ntp\hello\img\swiper1\888.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_1_PNG" file="resources\redcore_ntp\hello\img\swiper2\1.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_2_PNG" file="resources\redcore_ntp\hello\img\swiper2\2.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_2_2_PNG" file="resources\redcore_ntp\hello\img\swiper2\2-2.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_3_PNG" file="resources\redcore_ntp\hello\img\swiper2\3.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_3_3_PNG" file="resources\redcore_ntp\hello\img\swiper2\3-3.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_4_PNG" file="resources\redcore_ntp\hello\img\swiper2\4.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_4_4_PNG" file="resources\redcore_ntp\hello\img\swiper2\4-4.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_5_PNG" file="resources\redcore_ntp\hello\img\swiper2\5.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER2_6_PNG" file="resources\redcore_ntp\hello\img\swiper2\6.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_7_PNG" file="resources\redcore_ntp\hello\img\swiper3\7.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_8_PNG" file="resources\redcore_ntp\hello\img\swiper3\8.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_9_PNG" file="resources\redcore_ntp\hello\img\swiper3\9.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_10_PNG" file="resources\redcore_ntp\hello\img\swiper3\10.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_11_PNG" file="resources\redcore_ntp\hello\img\swiper3\11.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_12_PNG" file="resources\redcore_ntp\hello\img\swiper3\12.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_13_PNG" file="resources\redcore_ntp\hello\img\swiper3\13.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER3_21_PNG" file="resources\redcore_ntp\hello\img\swiper3\21.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_5_PNG" file="resources\redcore_ntp\hello\img\swiper4\5.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_6_PNG" file="resources\redcore_ntp\hello\img\swiper4\6.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_15_PNG" file="resources\redcore_ntp\hello\img\swiper4\15.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_16_PNG" file="resources\redcore_ntp\hello\img\swiper4\16.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_17_PNG" file="resources\redcore_ntp\hello\img\swiper4\17.png" type="BINDATA" />
+      <!-- //ysp+ { show config -->
+      <include name="IDR_YSP_CONFIG_BASE_CSS" file="resources\ysp_config\base.css" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_SHOW_CONFIG_HTML" file="resources\ysp_config\showConfig.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_SHOW_BROWSER_JS" file="resources\ysp_config\ShowBrowser.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_SHOW_DATA_JS" file="resources\ysp_config\ShowData.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_JQUERY_JSON_JS" file="resources\ysp_config\jquery.json-2.4.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_JQUERY_MIN_JS" file="resources\ysp_config\jquery.min.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_CONFIG_SHOW_JS" file="resources\ysp_config\show.js" flattenhtml="true" type="BINDATA" />
+      <!-- //ysp+ } /* show config */-->
     </includes>
   </release>
 </grit>

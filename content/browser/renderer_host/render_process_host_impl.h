@@ -208,6 +208,11 @@ class CONTENT_EXPORT RenderProcessHostImpl
       RenderProcessHost::KeepAliveClientType) override;
   void DecrementKeepAliveRefCount(
       RenderProcessHost::KeepAliveClientType) override;
+  #if defined(REDCORE) && defined(IE_REDCORE)
+    void SetTridentCore(bool useIE) override; 
+    bool UseTridentCore() override;
+    ResourceMessageFilter* GetResMsgFilter();
+  #endif    
   void DisableKeepAliveRefCount() override;
   bool IsKeepAliveRefCountDisabled() override;
   void PurgeAndSuspend() override;
@@ -851,6 +856,11 @@ class CONTENT_EXPORT RenderProcessHostImpl
   // Luckily Android never performs a clean shutdown. So explicitly
   // ignore this problem.
   base::WaitableEvent never_signaled_;
+#endif
+
+#ifdef IE_REDCORE
+  bool useIE_;  //ysp+ {IE Embedded}
+  ResourceMessageFilter* resMsgFilter;	//ysp+ {IE Embedded}
 #endif
 
   scoped_refptr<ResourceMessageFilter> resource_message_filter_;

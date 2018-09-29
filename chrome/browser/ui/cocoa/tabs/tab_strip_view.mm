@@ -37,7 +37,12 @@
   self = [super initWithFrame:frame];
   if (self) {
     newTabButton_.reset(
-        [[NewTabButtonCocoa alloc] initWithFrame:NSMakeRect(295, 0, 40, 27)]);
+        [[NewTabButtonCocoa alloc] initWithFrame:
+            #ifdef REDCORE
+                  NSMakeRect(295, 1, 34, 29)]);
+            #else
+                  NSMakeRect(295, 0, 40, 27)]);
+            #endif
     [newTabButton_ setToolTip:l10n_util::GetNSString(IDS_TOOLTIP_NEW_TAB)];
 
     // Set lastMouseUp_ = -1000.0 so that timestamp-lastMouseUp_ is big unless

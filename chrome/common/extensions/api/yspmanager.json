@@ -1,0 +1,41 @@
+//ysp+ { push server api}
+
+[
+  {
+    "namespace": "yspmanager",
+    "description": "Use the ysploginmanager API to receive data pushed by the server, such as user information or configuration information.",
+    "functions": [
+      {
+        "name": "getEnterplorerInfo",
+        "type": "function",
+        "description": "getEnterplorerInfo",
+        "parameters": [
+          {
+            "type": "function",
+            "name": "callback",
+            "description": "Called with enterplorer info.",
+            "parameters": [
+              {
+                "type": "string",
+                "name": "infoData",
+                "description": "json info data"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "setPushData",
+        "type": "function",
+        "description": "Received server pushed encrypted user data.",
+        "parameters": [
+          {
+            "name": "pushData",
+            "type": "string",
+            "description": "User encrypted data."
+          }
+        ]
+      }
+    ]
+  }
+]

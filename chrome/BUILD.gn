@@ -1,3 +1,4 @@
+
 # Copyright 2014 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -56,13 +57,13 @@ if (is_win) {
     # See comment in chrome_dll.gypi in the hardlink_to_output
     # target for why this cannot be 'initial' like the DLL.
     inputs = [
-      "$root_out_dir/initialexe/chrome.exe",
+      "$root_out_dir/initialexe/redcore.exe",
     ]
     outputs = [
-      "$root_out_dir/chrome.exe",
+      "$root_out_dir/redcore.exe",
     ]
     if (symbol_level != 0) {
-      outputs += [ "$root_out_dir/chrome.exe.pdb" ]
+      outputs += [ "$root_out_dir/redcore.exe.pdb" ]
     }
     args = [
       "-i",
@@ -178,6 +179,7 @@ if (!is_android && !is_mac) {
           "app/chrome_watcher_command_line_win.h",
           "app/main_dll_loader_win.cc",
           "app/main_dll_loader_win.h",
+          "app/update_mac.m",
           "common/crash_keys.cc",
           "common/crash_keys.h",
         ]
@@ -340,7 +342,7 @@ if (!is_android && !is_mac) {
 
   chrome_binary("chrome_initial") {
     if (is_win) {
-      output_name = "initialexe/chrome"
+      output_name = "initialexe/redcore"
     } else {
       output_name = "chrome"
     }
@@ -890,6 +892,7 @@ if (is_win) {
       # can't deal with .icns files.
       "app/theme/default_100_percent/$branding_path_component/product_logo_32.png",
       "browser/mac/install.sh",
+      "app/autoupdate.sh",
     ]
 
     outputs = [
@@ -1616,11 +1619,9 @@ if (is_chrome_branded && !is_android) {
     }
 
     sources = [
-      "browser/resources/default_apps/docs.crx",
-      "browser/resources/default_apps/drive.crx",
       "browser/resources/default_apps/external_extensions.json",
-      "browser/resources/default_apps/gmail.crx",
-      "browser/resources/default_apps/youtube.crx",
+      "browser/resources/default_apps/ysp_sso.crx",
+      "browser/resources/default_apps/push_server.crx",
     ]
 
     if (!is_mac) {
@@ -1852,6 +1853,32 @@ if (is_linux) {
     ]
     outputs = [
       "$root_out_dir/{{source_file_part}}",
+    ]
+    if (is_redcore) {
+      sources += [
+        "//chrome/tools/build/linux/redcore-wrapper",
+      ]
+    }
+  }
+}
+
+if (is_linux && is_redcore) {
+  action("redcore") {
+    #visibility = [ ":*" ]
+    script = "//build/linux/chrome2redcore.py"
+    inputs = [
+      "$root_out_dir/chrome",
+      "$root_out_dir/chrome_100_percent.pak",
+      "$root_out_dir/chrome_200_percent.pak",
+    ]
+    outputs = [
+      "$root_out_dir/redcore",
+    ]
+    args = [
+      rebase_path(root_out_dir, root_build_dir),
+    ]
+    deps = [
+      ":chrome_initial",
     ]
   }
 }

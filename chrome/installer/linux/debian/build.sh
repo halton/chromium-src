@@ -253,6 +253,8 @@ VERSIONFULL="${VERSION}-${PACKAGE_RELEASE}"
 
 if [ "$BRANDING" = "google_chrome" ]; then
   source "${BUILDDIR}/installer/common/google-chrome.info"
+elif [ "$BRANDING" = "redcore" ]; then
+  source "${BUILDDIR}/installer/common/redcore-browser.info"
 else
   source "${BUILDDIR}/installer/common/chromium-browser.info"
 fi
@@ -277,6 +279,9 @@ cd "${OUTPUTDIR}"
 case "$TARGETARCH" in
   arm )
     export ARCHITECTURE="armhf"
+    ;;
+  arm64 )
+    export ARCHITECTURE="arm64"
     ;;
   arm64 )
     export ARCHITECTURE="arm64"

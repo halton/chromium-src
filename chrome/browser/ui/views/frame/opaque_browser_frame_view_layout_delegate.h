@@ -70,6 +70,10 @@ class OpaqueBrowserFrameViewLayoutDelegate {
   // for either active or inactive windows.
   virtual bool EverHasVisibleBackgroundTabShapes() const = 0;
 
+#ifdef REDCORE
+  virtual base::string16 GetLoginInfo() const = 0;
+#endif
+
  protected:
   virtual ~OpaqueBrowserFrameViewLayoutDelegate() {}
 };

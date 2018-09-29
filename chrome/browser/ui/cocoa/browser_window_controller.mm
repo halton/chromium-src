@@ -1332,6 +1332,9 @@ bool IsTabDetachingInFullscreenEnabled() {
 }
 
 - (BOOL)shouldShowAvatar {
+#ifdef REDCORE
+    return NO;
+#else
   if (![self hasTabStrip])
     return NO;
   if (browser_->profile()->IsOffTheRecord())

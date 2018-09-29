@@ -38,6 +38,10 @@ int DesktopLinuxBrowserFrameViewLayout::GetWindowCaptionSpacing(
 
 void DesktopLinuxBrowserFrameViewLayout::LayoutNewStyleAvatar(
     views::View* host) {
+#ifdef REDCORE
+  // return directly to hide the Google login button
+  return;
+#endif
   if (!new_avatar_button_)
     return;
 

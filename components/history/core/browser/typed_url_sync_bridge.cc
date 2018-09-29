@@ -15,6 +15,10 @@
 #include "components/sync/model_impl/sync_metadata_store_change_list.h"
 #include "net/base/url_util.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif
+
 using sync_pb::TypedUrlSpecifics;
 using syncer::EntityChange;
 using syncer::EntityChangeList;
@@ -663,10 +667,16 @@ TypedURLSyncBridge::MergeResult TypedURLSyncBridge::MergeUrls(
              new_visit->first > visit_ix->visit_time) {
         ++visit_ix;
       }
-      visit_ix = visits->insert(
-          visit_ix,
-          VisitRow(url.id(), new_visit->first, 0, new_visit->second, 0,
-                   HistoryBackend::IsTypedIncrement(new_visit->second)));
+#ifdef REDCORE
+    std::string uuidKey = "onlyid";
+    std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+    VisitRow visit(url.id(), new_visit->first, username, 0, new_visit->second, 0,
+                   HistoryBackend::IsTypedIncrement(new_visit->second));
+#else
+    VisitRow visit(url.id(), new_visit->first, 0, new_visit->second, 0,
+                   HistoryBackend::IsTypedIncrement(new_visit->second));
+#endif
+      visit_ix = visits->insert(visit_ix, visit);
       ++visit_ix;
     }
   }
@@ -1112,8 +1122,15 @@ bool TypedURLSyncBridge::FixupURLAndGetVisits(URLRow* url,
       return false;
     }
 
+#ifdef REDCORE
+    std::string uuidKey = "onlyid";
+    std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+    VisitRow visit(url->id(), url->last_visit(), username, 0,
+                   ui::PAGE_TRANSITION_TYPED, 0, true);
+#else
     VisitRow visit(url->id(), url->last_visit(), 0, ui::PAGE_TRANSITION_TYPED,
                    0, true);
+#endif
     visits->push_back(visit);
   }
 

@@ -125,6 +125,10 @@ struct DownloadRow {
   // Data slices that have been downloaded so far. The slices must be ordered
   // by their offset.
   std::vector<DownloadSliceInfo> download_slice_info;
+
+#ifdef REDCORE
+  std::string YSPUserName;
+#endif
 };
 
 }  // namespace history

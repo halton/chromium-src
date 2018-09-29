@@ -283,11 +283,13 @@ class WebContents;
 // Returns the currently active TabContentsController.
 - (TabContentsController*)activeTabContentsController;
 
+#ifndef REDCORE
 // Adds custom traffic light buttons to the tab strip. Idempotent.
 - (void)addCustomWindowControls;
 
 // Removes custom traffic light buttons from the tab strip. Idempotent.
 - (void)removeCustomWindowControls;
+#endif
 
 // Gets the tab and the alert state to check whether the window
 // alert state should be updated or not. If the tab alert state is

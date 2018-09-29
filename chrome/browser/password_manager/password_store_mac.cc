@@ -30,6 +30,13 @@ void PasswordStoreMac::ShutdownOnUIThread() {
   // Unsubscribe the observer, otherwise it's too late in the destructor.
   migration_status_.Destroy();
 }
+#ifdef REDCORE 
+// TODO (ysp): implement
+PasswordStoreChangeList PasswordStoreProxyMac::SaveLoginForEnterplorerImpl(
+	const autofill::PasswordForm& form) {
+	return PasswordStoreChangeList();
+}
+#endif
 
 PasswordStoreMac::~PasswordStoreMac() = default;
 
@@ -54,6 +61,13 @@ void PasswordStoreMac::InitOnBackgroundSequence(
       static_cast<int>(initial_status_),
       static_cast<int>(MigrationStatus::MIGRATION_STATUS_COUNT));
 }
+#ifdef REDCORE
+PasswordStoreChangeList PasswordStoreMac::SaveLoginForEnterplorerImpl(
+	const autofill::PasswordForm& form) {
+	// TODO(ysp): implement it
+	return PasswordStoreChangeList();
+}	
+#endif
 
 void PasswordStoreMac::UpdateStatusPref(MigrationStatus status) {
   // The method can be called after ShutdownOnUIThread().

@@ -16,6 +16,7 @@
 
 import("//build/config/chrome_build.gni")
 import("//build/config/chromecast_build.gni")
+import("//build/config/redcore.gni")
 if (is_android) {
   import("//build/config/android/config.gni")
 }

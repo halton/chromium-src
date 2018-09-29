@@ -109,6 +109,9 @@
 #include "ui/views/controls/focus_ring.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/widget/widget.h"
+#ifdef IE_REDCORE
+#include "chrome/browser/ui/views/location_bar/ysp_renderer_mode_view.h"	//ysp+{}
+#endif
 
 #if defined(OS_CHROMEOS)
 #include "chrome/browser/ui/views/location_bar/intent_picker_view.h"
@@ -151,6 +154,12 @@ LocationBarView::LocationBarView(Browser* browser,
       browser_(browser),
       delegate_(delegate),
       is_popup_mode_(is_popup_mode),
+#ifdef REDCORE
+      address_bar_enabled_(true),     //ysp+ { function control }
+#endif
+#ifdef IE_REDCORE
+      renderer_mode_view_(nullptr),    //ysp+{}
+#endif
       tint_(GetTint()) {
   edit_bookmarks_enabled_.Init(
       bookmarks::prefs::kEditBookmarksEnabled, profile->GetPrefs(),
@@ -186,6 +195,12 @@ void LocationBarView::Init() {
       is_popup_mode_, this, font_list);
   omnibox_view_->Init();
   AddChildView(omnibox_view_);
+
+#ifdef IE_REDCORE
+  renderer_mode_view_ = new RendererModeView(command_updater(), browser_,this);
+  renderer_mode_view_->SetVisible(false);
+  AddChildView(renderer_mode_view_);
+#endif
 
   RefreshBackground();
 
@@ -275,6 +290,12 @@ void LocationBarView::Init() {
   RefreshClearAllButtonIcon();
   AddChildView(clear_all_button_);
 
+#ifdef IE_REDCORE
+  renderer_mode_view_ = new RendererModeView(command_updater(), browser_, this);
+  renderer_mode_view_->SetVisible(false);
+  AddChildView(renderer_mode_view_);
+#endif
+
   // Initialize the location entry. We do this to avoid a black flash which is
   // visible when the location entry has just been initialized.
   Update(nullptr);
@@ -336,6 +357,17 @@ void LocationBarView::SetStarToggled(bool on) {
   if (star_view_)
     star_view_->SetToggled(on);
 }
+
+#ifdef IE_REDCORE
+void LocationBarView::SetRendererModeToggled(RendererMode mode) {
+	if (!renderer_mode_view_)
+    return;
+
+  renderer_mode_view_->SetVisible(mode.core != NONE_CORE);
+  renderer_mode_view_->SetToggled(mode);
+  OnChanged();
+}
+#endif
 
 gfx::Point LocationBarView::GetOmniboxViewOrigin() const {
   gfx::Point origin(omnibox_view_->origin());
@@ -587,6 +619,14 @@ void LocationBarView::Layout() {
        i != content_setting_views_.rend(); ++i) {
     add_trailing_decoration(*i);
   }
+
+#ifdef IE_REDCORE
+  if (renderer_mode_view_->visible()) {
+    trailing_decorations.AddDecoration(vertical_padding, location_height,
+        renderer_mode_view_);
+  }
+#endif
+
   // Because IMEs may eat the tab key, we don't show "press tab to search" while
   // IME composition is in progress.
   if (HasFocus() && !keyword.empty() &&
@@ -616,7 +656,11 @@ void LocationBarView::Layout() {
   int available_width = entry_width - location_needed_width;
   // The bounds must be wide enough for all the decorations to fit.
   gfx::Rect location_bounds(edge_thickness, vertical_padding,
+#ifdef REDCORE
+                            std::max(full_width, full_width - entry_width) - 6,   //ysp* { custom ui }
+#else
                             std::max(full_width, full_width - entry_width),
+#endif
                             location_height);
   leading_decorations.LayoutPass3(&location_bounds, &available_width);
   trailing_decorations.LayoutPass3(&location_bounds, &available_width);
@@ -865,12 +909,14 @@ void LocationBarView::RefreshLocationIcon() {
       base::BindOnce(&LocationBarView::OnLocationIconFetched,
                      icon_fetch_weak_ptr_factory_.GetWeakPtr()));
 
-  location_icon_view_->SetImage(icon);
+  // FIXME(mtz): display redcore icon
+  // location_icon_view_->SetImage(icon);
   location_icon_view_->Update();
 }
 
 void LocationBarView::OnLocationIconFetched(const gfx::Image& image) {
-  location_icon_view_->SetImage(image.AsImageSkia());
+  // FIXME(mtz): display redcore icon
+  // location_icon_view_->SetImage(image.AsImageSkia());
 }
 
 bool LocationBarView::RefreshContentSettingViews() {
@@ -1094,6 +1140,9 @@ void LocationBarView::UpdateLocalCardMigrationIcon() {
 }
 
 void LocationBarView::UpdateBookmarkStarVisibility() {
+#ifdef REDCORE // disable star button
+  return;
+#else
   if (star_view_) {
     star_view_->SetVisible(
         browser_defaults::bookmarks_enabled && !is_popup_mode_ &&
@@ -1101,6 +1150,7 @@ void LocationBarView::UpdateBookmarkStarVisibility() {
         edit_bookmarks_enabled_.GetValue() &&
         !IsBookmarkStarHiddenByExtension());
   }
+#endif
 }
 
 void LocationBarView::UpdateLocationBarVisibility(bool visible, bool animate) {
@@ -1335,3 +1385,28 @@ int LocationBarView::GetTotalVerticalPadding() {
   return GetBorderThicknessDip() +
          GetLayoutConstant(LOCATION_BAR_ELEMENT_PADDING);
 }
+
+#ifdef REDCORE
+namespace {
+
+// The border color for MD windows, as well as non-MD popup windows.
+const SkColor kBorderColor = SkColorSetA(SK_ColorBLACK, 0x4D);
+
+}  // namespace
+
+void LocationBarView::SetAddressBarEnable(bool enable) {
+  if (address_bar_enabled_ == enable)
+    return;
+
+  address_bar_enabled_ = enable;
+  omnibox_view_->SetEnabled(address_bar_enabled_);
+  if (!is_popup_mode_) {
+    SetBackground(std::make_unique<BackgroundWith1PxBorder>(
+        GetColor(OmniboxPart::LOCATION_BAR_BACKGROUND),
+        kBorderColor));
+    omnibox_view_->SetBackgroundColor(GetColor(OmniboxPart::LOCATION_BAR_BACKGROUND));
+      //new BackgroundWith1PxBorder(GetColor(BACKGROUND), kBorderColor));
+  }
+  //SchedulePaint();
+}
+#endif

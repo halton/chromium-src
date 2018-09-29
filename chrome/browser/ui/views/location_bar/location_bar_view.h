@@ -34,6 +34,9 @@
 #include "ui/views/controls/button/button.h"
 #include "ui/views/controls/focus_ring.h"
 #include "ui/views/drag_controller.h"
+#ifdef IE_REDCORE
+#include "content/common/IE/IEVersion.h"
+#endif
 
 class CommandUpdater;
 class ContentSettingBubbleModelDelegate;
@@ -50,6 +53,9 @@ class Profile;
 class SelectedKeywordView;
 class StarView;
 class TranslateIconView;
+#ifdef IE_REDCORE
+class RendererModeView;		//ysp+{}
+#endif
 
 namespace autofill {
 class LocalCardMigrationIconView;
@@ -158,6 +164,14 @@ class LocationBarView : public LocationBar,
   // The star. It may not be visible.  It will be null when |browser_| is null.
   StarView* star_view() { return star_view_; }
 
+#ifdef IE_REDCORE
+  void SetRendererModeToggled(RendererMode mode);
+
+  RendererModeView* renderer_mode_view() {
+    return renderer_mode_view_;
+  }
+#endif
+
   // The save credit card icon. It may not be visible.  It will be null when
   // |browser_| is null.
   autofill::SaveCardIconView* save_credit_card_icon_view() {
@@ -225,6 +239,9 @@ class LocationBarView : public LocationBar,
   void FocusLocation(bool select_all) override;
   void Revert() override;
   OmniboxView* GetOmniboxView() override;
+#ifdef REDCORE
+  void SetAddressBarEnable(bool) override;
+#endif
 
   // views::View:
   bool HasFocus() const override;
@@ -465,6 +482,14 @@ class LocationBarView : public LocationBar,
   // Whether we're in popup mode. This value also controls whether the location
   // bar is read-only.
   const bool is_popup_mode_;
+
+#ifdef REDCORE
+  bool address_bar_enabled_;    //ysp+ { function control }
+#endif
+
+#ifdef IE_REDCORE
+  RendererModeView* renderer_mode_view_;
+#endif
 
   // The theme tint. Updated based on the profile and theme settings.
   OmniboxTint tint_;

@@ -56,9 +56,23 @@ using base::win::ScopedHandle;
 
 namespace {
 
+#ifdef REDCORE
+const wchar_t kGCAPITempKey[] = L"Software\\AllMobilize\\GCAPITemp";    //ysp* { change product ids. }
+#else
 const wchar_t kGCAPITempKey[] = L"Software\\Google\\GCAPITemp";
+#endif
 
 const wchar_t kChromeRegVersion[] = L"pv";
+
+#ifdef REDCORE
+const wchar_t kNoChromeOfferUntil[] =
+    L"SOFTWARE\\AllMobilize\\No Chrome Offer Until";    //ysp* { change product ids. }
+
+const wchar_t kC1FPendingKey[] =
+    L"Software\\AllMobilize\\Common\\Rlz\\Events\\C";    //ysp* { change product ids. }
+const wchar_t kC1FSentKey[] =
+    L"Software\\AllMobilize\\Common\\Rlz\\StatefulEvents\\C";    //ysp* { change product ids. }
+#else
 const wchar_t kNoChromeOfferUntil[] =
     L"SOFTWARE\\Google\\No Chrome Offer Until";
 
@@ -66,6 +80,8 @@ const wchar_t kC1FPendingKey[] =
     L"Software\\Google\\Common\\Rlz\\Events\\C";
 const wchar_t kC1FSentKey[] =
     L"Software\\Google\\Common\\Rlz\\StatefulEvents\\C";
+#endif
+
 const wchar_t kC1FKey[] = L"C1F";
 
 const wchar_t kRelaunchBrandcodeValue[] = L"RelaunchBrandcode";

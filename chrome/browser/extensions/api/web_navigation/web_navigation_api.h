@@ -73,6 +73,17 @@ class WebNavigationTabObserver
   // This method dispatches the already created onBeforeNavigate event.
   void DispatchCachedOnBeforeNavigate();
 
+#ifdef REDCORE
+#ifdef IE_REDCORE
+  void OnGetLoginContext(content::RenderFrameHost* render_frame_host,
+  const std::string& url, const std::string& userName, const std::string& userPwd) override;    //ysp+{IE SWA}
+#endif /*IE_REDCORE*/
+  void OnLoginSuccessNotice(content::RenderFrameHost* render_frame_host,
+   const std::string& status, const std::string& manager_url,
+   const std::string& device_id, const std::string& user_id,
+   const std::string& company_id);   //TODO(matianzhi) ysp+{push server api}
+#endif /*REDCORE*/
+
  private:
   explicit WebNavigationTabObserver(content::WebContents* web_contents);
   friend class content::WebContentsUserData<WebNavigationTabObserver>;

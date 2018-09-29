@@ -56,6 +56,10 @@
 #include "url/url_canon.h"
 #include "url/url_util.h"
 
+#ifdef REDCORE
+#include "crypto/ysp_crypto_encryption.h" //YSP+ { User information isolation }
+#endif
+
 using base::Time;
 using base::TimeDelta;
 
@@ -119,6 +123,9 @@ CanonicalCookie::CanonicalCookie(const std::string& name,
       secure_(secure),
       httponly_(httponly),
       same_site_(same_site),
+#ifdef REDCORE
+      YSPUserName_(YSPCryptoCSingleton::GetInstance()->GetUserId()),
+#endif
       priority_(priority) {}
 
 CanonicalCookie::~CanonicalCookie() = default;
@@ -297,7 +304,8 @@ std::unique_ptr<CanonicalCookie> CanonicalCookie::CreateSanitizedCookie(
 
   std::unique_ptr<CanonicalCookie> cc(std::make_unique<CanonicalCookie>(
       name, value, cookie_domain, cookie_path, creation_time, expiration_time,
-      last_access_time, secure, http_only, same_site, priority));
+      last_access_time, secure, http_only, same_site,
+      priority));
   DCHECK(cc->IsCanonical());
 
   return cc;

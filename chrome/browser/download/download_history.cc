@@ -157,6 +157,9 @@ history::DownloadRow GetDownloadRow(download::DownloadItem* item) {
   download.by_ext_id = by_ext_id;
   download.by_ext_name = by_ext_name;
   download.download_slice_info = history::GetHistoryDownloadSliceInfos(*item);
+#ifdef REDCORE
+  download.YSPUserName = item->GetYSPUserName();
+#endif /*REDCORE*/
   return download;
 }
 
@@ -317,7 +320,11 @@ void DownloadHistory::LoadHistoryDownloads(std::unique_ptr<InfoVector> infos) {
     download::DownloadItem::DownloadState history_download_state =
         history::ToContentDownloadState(it->state);
     download::DownloadItem* item = notifier_.GetManager()->CreateDownloadItem(
-        it->guid, loading_id_, it->current_path, it->target_path, it->url_chain,
+        it->guid, loading_id_, it->current_path, it->target_path,
+#ifdef REDCORE
+        it->YSPUserName, //YSP+ { User information isolation }
+#endif /*REDCORE*/
+        it->url_chain,
         it->referrer_url, it->site_url, it->tab_url, it->tab_referrer_url,
         it->mime_type, it->original_mime_type, it->start_time, it->end_time,
         it->etag, it->last_modified, it->received_bytes, it->total_bytes,

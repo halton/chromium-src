@@ -47,6 +47,7 @@ class CONTENT_EXPORT WebContentsViewAura
  public:
   WebContentsViewAura(WebContentsImpl* web_contents,
                       WebContentsViewDelegate* delegate);
+  ~WebContentsViewAura() override;
 
   // Allow the WebContentsViewDelegate to be set explicitly.
   void SetDelegateForTesting(WebContentsViewDelegate* delegate);
@@ -57,6 +58,8 @@ class CONTENT_EXPORT WebContentsViewAura
     init_rwhv_with_null_parent_for_testing_ = set;
   }
 
+  void SizeContents(const gfx::Size& size) override;
+
   using RenderWidgetHostViewCreateFunction =
       RenderWidgetHostViewAura* (*)(RenderWidgetHost*, bool);
 
@@ -64,10 +67,15 @@ class CONTENT_EXPORT WebContentsViewAura
   static void InstallCreateHookForTests(
       RenderWidgetHostViewCreateFunction create_render_widget_host_view);
 
+  WebContentsImpl* getWebContents();  
+
+  void OnBoundsChanged(const gfx::Rect& old_bounds,
+                    const gfx::Rect& new_bounds) override;  
+
+  void OnWebContentDestroying() override;
+
  private:
   class WindowObserver;
-
-  ~WebContentsViewAura() override;
 
   void SizeChangedCommon(const gfx::Size& size);
 
@@ -109,7 +117,6 @@ class CONTENT_EXPORT WebContentsViewAura
   gfx::NativeView GetContentNativeView() const override;
   gfx::NativeWindow GetTopLevelNativeWindow() const override;
   void GetContainerBounds(gfx::Rect* out) const override;
-  void SizeContents(const gfx::Size& size) override;
   void Focus() override;
   void SetInitialFocus() override;
   void StoreFocus() override;
@@ -170,8 +177,6 @@ class CONTENT_EXPORT WebContentsViewAura
   // Overridden from aura::WindowDelegate:
   gfx::Size GetMinimumSize() const override;
   gfx::Size GetMaximumSize() const override;
-  void OnBoundsChanged(const gfx::Rect& old_bounds,
-                       const gfx::Rect& new_bounds) override;
   gfx::NativeCursor GetCursor(const gfx::Point& point) override;
   int GetNonClientComponent(const gfx::Point& point) const override;
   bool ShouldDescendIntoChildForEventHandling(

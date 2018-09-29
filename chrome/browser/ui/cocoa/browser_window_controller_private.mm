@@ -121,6 +121,14 @@ enum WindowLocation {
   [window setCollectionBehavior:collectionBehavior];
 }
 
+#ifdef REDCORE
+- (void)createYspAccountContronller {
+  yspAccountController_.reset([[yspAccountController alloc] initWithView:[self yspTitleView]
+                                                                lockView:[self yspLockView]
+                                                                 browser:browser_.get()]);
+}
+#endif
+
 - (void)saveWindowPositionIfNeeded {
   if (!chrome::ShouldSaveWindowPlacement(browser_.get()))
     return;
@@ -252,11 +260,13 @@ willPositionSheet:(NSWindow*)sheet
 }
 
 - (void)applyTabStripLayout:(const chrome::TabStripLayout&)layout {
+#ifndef REDCORE
   // Update the presence of the window controls.
   if (layout.addCustomWindowControls)
     [tabStripController_ addCustomWindowControls];
   else
     [tabStripController_ removeCustomWindowControls];
+#endif
 
   // Update the layout of the avatar.
   if (!NSIsEmptyRect(layout.avatarFrame)) {
@@ -713,6 +723,7 @@ willPositionSheet:(NSWindow*)sheet
     DCHECK(bubbleWindow);
     [bubbleWindow orderFront:nil];
   }
+#endif
 
   // Ensure that the window is layout properly.
   [self layoutSubviews];
@@ -903,6 +914,19 @@ willPositionSheet:(NSWindow*)sheet
 
 - (void)applyLayout:(BrowserWindowLayout*)layout {
   chrome::LayoutOutput output = [layout computeLayout];
+#ifdef REDCORE
+  //NSLog(@"titleBarFrame: x:%f, y:%f, w:%f, h:%f", output.titleBarFrame.origin.x,
+  //                                                output.titleBarFrame.origin.y,
+  //                                                output.titleBarFrame.size.width,
+  //      output.titleBarFrame.size.height);
+  if ([self isInAnyFullscreenMode])
+    [yspAccountController_ addCustomWindowControls];
+  else
+    [yspAccountController_ removeCustomWindowControls];
+
+  [[yspAccountController_ titleView] setFrame:output.titleBarFrame];
+  [yspAccountController_ layout:output.contentAreaFrame];
+#endif
 
   if (!NSIsEmptyRect(output.tabStripLayout.frame))
     [self applyTabStripLayout:output.tabStripLayout];

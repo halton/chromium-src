@@ -22,6 +22,7 @@
 #include "base/synchronization/lock.h"
 #include "components/download/public/common/download_item_impl_delegate.h"
 #include "components/download/public/common/download_url_parameters.h"
+#include "components/download/public/common/download_file_factory.h"
 #include "components/download/public/common/in_progress_download_manager.h"
 #include "components/download/public/common/url_download_handler.h"
 #include "content/browser/loader/navigation_url_loader.h"
@@ -32,12 +33,16 @@
 #include "content/public/browser/ssl_status.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
 #include "services/network/public/mojom/url_loader.mojom.h"
+#include "net/log/net_log_with_source.h"
 
 namespace download {
 class DownloadFileFactory;
 class DownloadItemFactory;
 class DownloadItemImpl;
 class DownloadRequestHandleInterface;
+#if defined(REDCORE) && defined(IE_REDCORE)
+class IEDownloadFileFactory;  //ysp+{IE Embedded}
+#endif
 }
 
 namespace content {
@@ -100,6 +105,9 @@ class CONTENT_EXPORT DownloadManagerImpl
       uint32_t id,
       const base::FilePath& current_path,
       const base::FilePath& target_path,
+#ifdef REDCORE
+      const std::string& YSPUserName, //YSP+ { User information isolation }
+#endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
       const GURL& site_url,
@@ -172,6 +180,14 @@ class CONTENT_EXPORT DownloadManagerImpl
       network::mojom::URLLoaderClientEndpointsPtr url_loader_client_endpoints,
       net::CertStatus cert_status,
       int frame_tree_node_id);
+
+#ifdef REDCORE
+    void RemoveDownloadsForUserid(std::string& userid) override; //TODO (matianzhi): YSP+ { clear user data }
+#endif
+
+#ifdef IE_REDCORE
+    void RegisterCallbackSucceeded() override;
+#endif
 
  private:
   using DownloadSet = std::set<download::DownloadItem*>;
@@ -291,6 +307,11 @@ class CONTENT_EXPORT DownloadManagerImpl
   // Whether |next_download_id_| is initialized.
   bool IsNextIdInitialized() const;
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+  void OnGetNextidForIE(uint32_t id);
+  void DownloadUrlForIE(std::unique_ptr<download::DownloadUrlParameters> params, uint32_t id); //chjy test
+#endif
+
   // Factory for creation of downloads items.
   std::unique_ptr<download::DownloadItemFactory> item_factory_;
 
@@ -352,6 +373,11 @@ class CONTENT_EXPORT DownloadManagerImpl
   // Callbacks to run once download ID is determined.
   using IdCallbackVector = std::vector<std::unique_ptr<GetNextIdCallback>>;
   IdCallbackVector id_callbacks_;
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  std::unique_ptr<download::IEDownloadFileFactory> ie_file_factory_;  //ysp+ {IE Embedded}
+  bool download_file_init_flag_;  //ysp+ {IE Embedded}
+#endif
 
   base::WeakPtrFactory<DownloadManagerImpl> weak_factory_;
 
