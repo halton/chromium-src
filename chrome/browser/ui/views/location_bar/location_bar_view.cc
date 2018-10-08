@@ -622,8 +622,9 @@ void LocationBarView::Layout() {
 
 #ifdef IE_REDCORE
   if (renderer_mode_view_->visible()) {
-    trailing_decorations.AddDecoration(vertical_padding, location_height,
-        renderer_mode_view_);
+    trailing_decorations.AddDecoration(vertical_padding, location_height, false,
+                                       0, edge_padding, internal_padding,
+                                       renderer_mode_view_);
   }
 #endif
 

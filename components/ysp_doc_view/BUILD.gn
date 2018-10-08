@@ -19,6 +19,7 @@ source_set("ysp_doc_view") {
     "//components/url_formatter",
     "//net",
     "//services/network/public/mojom",
+    "//skia",
     "//url",
   ]
 }

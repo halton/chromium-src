@@ -43,6 +43,8 @@ source_set("ysp_login") {
     "//net",
     "//services/data_decoder/public/cpp:cpp",
     "//third_party/icu",
+    "//third_party/webrtc_overrides",
+    "//third_party/webrtc_overrides:init_webrtc",
     "//ui/base",
     "//ui/gfx",
     "//url",

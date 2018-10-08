@@ -80,8 +80,8 @@ void YSPLoginView::ShowBubble(
     anchor_view, browser, browser_view, user_name, head_image);
   views::Widget* widget =
       views::BubbleDialogDelegateView::CreateBubble(login_bubble_);
-  login_bubble_->SetAlignment(views::BubbleBorder::ALIGN_EDGE_TO_ANCHOR_EDGE);
-  login_bubble_->SetArrowPaintType(views::BubbleBorder::PAINT_NONE);
+  // login_bubble_->SetAlignment(views::BubbleBorder::ALIGN_EDGE_TO_ANCHOR_EDGE);
+  // login_bubble_->SetArrowPaintType(views::BubbleBorder::PAINT_NONE);
   widget->Show();
 }
 
@@ -312,7 +312,7 @@ views::View* YSPLoginView::CreateLoginSubview(views::View** focus_view, int* pre
   layout->StartRowWithPadding(1, 0, 0, kRowPaddingSmall);
   auto_login_checkbox_ = new views::Checkbox(l10n_util::GetStringUTF16(IDS_YSP_LOGIN_VIEW_AUTO_LOGIN));
   auto_login_checkbox_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  auto_login_checkbox_->set_listener(this);
+  // auto_login_checkbox_->set_listener(this);
   layout->AddView(auto_login_checkbox_);
   PrefService* prefs = g_browser_process->local_state();
   //prefs->SetBoolean(prefs::kYSPAutoLogin, true);

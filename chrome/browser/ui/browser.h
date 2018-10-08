@@ -116,10 +116,6 @@ namespace viz {
 class SurfaceId;
 }
 
-namespace base {
-  class Timer;
-}
-
 namespace autofill {
   struct PasswordForm;
 }
@@ -1110,7 +1106,7 @@ class Browser : public TabStripModelObserver,
 
 #if defined(REDCORE)
   YSPLockStatus lock_status_;
-  std::unique_ptr<base::Timer> auto_lock_timer_;
+  std::unique_ptr<base::RepeatingTimer> auto_lock_timer_;
 #endif
 
 #if defined(WATERMARK) && !defined(IE_REDCORE)
@@ -1121,7 +1117,7 @@ class Browser : public TabStripModelObserver,
 #endif
 
 #if defined(IE_REDCORE)
-  std::unique_ptr<base::Timer> ie_crypto_ua_timer_;
+  std::unique_ptr<base::RepeatingTimer> ie_crypto_ua_timer_;
   std::vector<LoginBtnInfo> btn_infos_;
 #endif
 

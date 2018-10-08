@@ -543,7 +543,7 @@ void Find(int request_id,
   }
   void WebContentsIE::RendererUnresponsive(
       RenderWidgetHostImpl* render_widget_host,
-      base::RepeatingClosure hang_monitor_restarter) override;
+      base::RepeatingClosure hang_monitor_restarter)
   {
     return;
   }
@@ -850,13 +850,13 @@ void Find(int request_id,
         HICON hicon = (HICON)::LoadImage(NULL, fileName.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
         if (hicon == NULL) break;
 
-        SkBitmap* tempBmp = IconUtil::CreateSkBitmapFromHICON(hicon);
+        SkBitmap tempBmp = IconUtil::CreateSkBitmapFromHICON(hicon);
         ::DestroyIcon(hicon);
-        if (tempBmp == NULL) break;
+        if (tempBmp.isNull()) break;
         // can not find any commits of SkBitmap.h by webb
-        bitmap = *tempBmp;
+        bitmap = tempBmp;
         // tempBmp->copyTo(&bitmap);
-        delete tempBmp;
+        // delete tempBmp;
       }
 
       std::vector<SkBitmap> images;

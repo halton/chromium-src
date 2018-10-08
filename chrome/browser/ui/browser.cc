@@ -628,7 +628,7 @@ Browser::Browser(const CreateParams& params)
       command_controller_(new chrome::BrowserCommandController(this)),
       window_has_shown_(false),
 #if defined(IE_REDCORE)
-      ie_crypto_ua_timer_(new base::Timer(false,false)),
+      ie_crypto_ua_timer_(new base::RepeatingTimer()),
 #endif
       chrome_updater_factory_(this),
 #if defined(REDCORE)

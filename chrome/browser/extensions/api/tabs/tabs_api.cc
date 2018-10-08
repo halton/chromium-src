@@ -2276,11 +2276,11 @@ content::WebContents * TabsSetIEAutoLoginInfoFunction::GetWebContents(int tab_id
      &error_);
  }
  else {
-   Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();;
-   if (!browser)
-     error_ = keys::kNoCurrentWindowError;
-   else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
-     error_ = keys::kNoSelectedTabError;
+  //  Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();;
+  //  if (!browser)
+  //    error_ = keys::kNoCurrentWindowError;
+  //  else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
+  //    error_ = keys::kNoSelectedTabError;
  }
 #endif /*IE_REDCORE*/
  return pWebContent;
@@ -2329,11 +2329,11 @@ content::WebContents * TabsStartListenIELoginFunction::GetWebContents(int tab_id
      &error_);
  }
  else {
-   Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();
-   if (!browser)
-     error_ = keys::kNoCurrentWindowError;
-   else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
-     error_ = keys::kNoSelectedTabError;
+  //  Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();
+  //  if (!browser)
+  //    error_ = keys::kNoCurrentWindowError;
+  //  else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
+  //    error_ = keys::kNoSelectedTabError;
  }
 #endif /*IE_REDCORE*/
  return pWebContent;

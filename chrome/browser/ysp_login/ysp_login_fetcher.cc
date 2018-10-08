@@ -6,15 +6,15 @@
 
 #include "base/bind.h"
 #include "base/values.h"
+// #include "chrome/browser/browser_process.h" //ysp+ { auto get config }
+#include "content/public/browser/browser_thread.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h" //ysp+ { auto get config }
+#include "content/public/common/service_manager_connection.h"
 #include "extensions/common/extension_urls.h"
 #include "net/base/load_flags.h"
 #include "net/base/mime_util.h"
 #include "net/url_request/url_fetcher.h"
 #include "net/url_request/url_request_status.h"
-#include "content/public/browser/browser_thread.h"
-#include "chrome/browser/ysp_login/ysp_login_manager.h" //ysp+ { auto get config }
-#include "chrome/browser/browser_process.h" //ysp+ { auto get config }
-#include "content/public/common/service_manager_connection.h"
 #include "services/data_decoder/public/cpp/safe_json_parser.h"
 
 namespace {

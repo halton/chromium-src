@@ -11,7 +11,7 @@
 #include "chrome/browser/ui/views/elevation_icon_setter.h"
 #include "chrome/browser/ui/ysp_download_activex_infobar_delegate.h"
 #include "chrome/browser/ui/views/infobars/confirm_infobar.h"
-#include "chrome/browser/ui/views/harmony/chrome_layout_provider.h"
+#include "chrome/browser/ui/views/chrome_layout_provider.h"
 #include "ui/base/material_design/material_design_controller.h"
 #include "ui/base/window_open_disposition.h"
 #include "ui/views/controls/button/label_button.h"

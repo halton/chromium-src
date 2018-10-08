@@ -471,7 +471,7 @@ void WebNavigationTabObserver::OnGetLoginContext(content::RenderFrameHost * rend
    << ", user_name=" << userName
    << ", user_password=" << userPwd << ")";
 
- helpers::DispathOnLogin(web_contents(), render_frame_host, url, userName, userPwd);
+//  helpers::DispathOnLogin(web_contents(), render_frame_host, url, userName, userPwd);
 }
 //ysp+
 #endif /*IE_REDCORE*/
@@ -487,7 +487,7 @@ void WebNavigationTabObserver::OnLoginSuccessNotice(content::RenderFrameHost* re
    << ", userId=" << user_id
    << ", companyId=" << company_id << ")";
 
- helpers::DispathOnYspManager(web_contents(), render_frame_host, status, manager_url, device_id, user_id, company_id);
+//  helpers::DispathOnYspManager(web_contents(), render_frame_host, status, manager_url, device_id, user_id, company_id);
 }
 //ysp+
 #endif /*REDCORE*/

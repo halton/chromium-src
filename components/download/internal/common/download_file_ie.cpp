@@ -214,7 +214,7 @@ void DownloadFileIE::SetPotentialFileLength(int64_t length){}
     // working with.
     if (ShouldRetryFailedRename(reason) && file_.in_progress() && retries_left > 0)
     {
-      int attempt_number = kMaxRenameRetries - retries_left;
+      // int attempt_number = kMaxRenameRetries - retries_left;
       // content::BrowserThread::PostDelayedTask(content::BrowserThread::IO, FROM_HERE,
       //   base::Bind(&DownloadFileIE::RenameWithRetryInternal,
       //     weakFactory.GetWeakPtr(),
@@ -225,9 +225,9 @@ void DownloadFileIE::SetPotentialFileLength(int64_t length){}
       return;
     }
 
-    if (!time_of_first_failure.is_null())
-      RecordDownloadFileRenameResultAfterRetry(
-        base::TimeTicks::Now() - time_of_first_failure, reason);
+    // if (!time_of_first_failure.is_null())
+    //   RecordDownloadFileRenameResultAfterRetry(
+    //     base::TimeTicks::Now() - time_of_first_failure, reason);
 
     if (reason == download::DOWNLOAD_INTERRUPT_REASON_NONE &&
       (option & ANNOTATE_WITH_SOURCE_INFORMATION)) {
