@@ -281,3 +281,4 @@ vs-chromium-project.txt
 /webpagereplay_logs/
 /x86-generic_out/
 /xcodebuild
+/build/.vs/
