@@ -69,6 +69,7 @@ namespace IE {
     STDMETHOD(OnRequestAcceleratorFromKeyboard)(int keyCode, int modifiers);
     STDMETHOD(OnRequestAcceleratorFromMouseWheel)(int delta, int Pt_x, int Pt_y, int modifiers);
     STDMETHOD(OnWinDomainAuthenticate)(BSTR* userName, BSTR* userPwd);
+    STDMETHOD(OnQueryPrivateDNS)(BSTR host, BSTR *ipList);
 
     void SetHostHWND(HWND hWnd);
     bool CreateBrowser(int browserEmu, bool isNew);

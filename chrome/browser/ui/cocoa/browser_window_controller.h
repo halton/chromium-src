@@ -74,7 +74,8 @@ constexpr const gfx::Size kMinCocoaPopupWindowSize(100, 122);
 @interface BrowserWindowController
     : TabWindowController<BookmarkBarControllerDelegate,
                           ViewResizer,
-                          TabStripControllerDelegate> {
+                          TabStripControllerDelegate,
+                          YSPControllerDelegate> {
  @private
   // The ordering of these members is important as it determines the order in
   // which they are destroyed. |browser_| needs to be destroyed last as most of

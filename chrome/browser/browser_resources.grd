@@ -783,26 +783,54 @@
       <include name="IDR_REDCORE_NEWTAB_JQUERY_JS" file="resources\redcore_ntp\jquery.js" flattenhtml="true" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_AMAZEUI_MIN_CSS" file="resources\redcore_ntp\amazeui.min.css" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_STYLES_CSS" file="resources\redcore_ntp\styles.css" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_BACKICON_SVG" file="resources\redcore_ntp\imgs\backIcon.svg" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_DEFAULTBANNER_PNG" file="resources\redcore_ntp\imgs\defaultBanner.png" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_DEFAULTBG_PNG" file="resources\redcore_ntp\imgs\defaultBG.png" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_DEFAULTICON_SVG" file="resources\redcore_ntp\imgs\defaultIcon.png" type="BINDATA" />
+      <!--//imgs -->
+      <include name="IDR_REDCORE_NEWTAB_ADD_ICON_SVG" file="resources\redcore_ntp\imgs\add_icon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_APP_BACK_ICON_SVG" file="resources\redcore_ntp\imgs\app_back_icon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_APPEARANCE_HOVER_ICON_PNG" file="resources\redcore_ntp\imgs\appearance_hover_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_APPEARANCE_ICON_PNG" file="resources\redcore_ntp\imgs\appearancel_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BACK_HOVER_ICON_PNG" file="resources\redcore_ntp\imgs\back_hover_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_BACK_NORMAL_ICON_PNG" file="resources\redcore_ntp\imgs\back_normal_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_CLOSE_ICON_PNG" file="resources\redcore_ntp\imgs\close_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTICON_PNG" file="resources\redcore_ntp\imgs\defaultIcon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_DEFAULTLOGO_PNG" file="resources\redcore_ntp\imgs\defaultLogo.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_ERROR_ICON_PNG" file="resources\redcore_ntp\imgs\error_icon.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_INVALID_PNG" file="resources\redcore_ntp\imgs\invalid.png" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_DEFAULTLOGO_PNG" file="resources\redcore_ntp\imgs\defaultLogo.png" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_ICON_SVG" file="resources\redcore_ntp\imgs\icon.svg" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_SEARCH_ICON_SVG" file="resources\redcore_ntp\imgs\search_icon.svg" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_SELECTICON_SVG" file="resources\redcore_ntp\imgs\selectIcon.svg" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_LOAD_FAILURE_ICON_PNG" file="resources\redcore_ntp\imgs\load_failure_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_LOADING_PNG" file="resources\redcore_ntp\imgs\loading.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SEARCH_ICON_PNG" file="resources\redcore_ntp\imgs\search_icon.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_SELECTED_ICON_PNG" file="resources\redcore_ntp\imgs\selected_icon.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_SELECTICON_PNG" file="resources\redcore_ntp\imgs\selectIcon.png" type="BINDATA" />
+      <!--//imgs -->
+      <!--//imgs/background -->
       <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_1_PNG" file="resources\redcore_ntp\imgs\background\bg-1.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_2_PNG" file="resources\redcore_ntp\imgs\background\bg-2.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_3_PNG" file="resources\redcore_ntp\imgs\background\bg-3.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_4_PNG" file="resources\redcore_ntp\imgs\background\bg-4.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_5_PNG" file="resources\redcore_ntp\imgs\background\bg-5.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_6_PNG" file="resources\redcore_ntp\imgs\background\bg-6.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_7_PNG" file="resources\redcore_ntp\imgs\background\bg-7.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_8_PNG" file="resources\redcore_ntp\imgs\background\bg-8.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_1_PNG" file="resources\redcore_ntp\imgs\background\abb-1.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_2_PNG" file="resources\redcore_ntp\imgs\background\abb-2.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_3_PNG" file="resources\redcore_ntp\imgs\background\abb-3.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_4_PNG" file="resources\redcore_ntp\imgs\background\abb-4.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_5_PNG" file="resources\redcore_ntp\imgs\background\abb-5.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_6_PNG" file="resources\redcore_ntp\imgs\background\abb-6.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_7_PNG" file="resources\redcore_ntp\imgs\background\abb-7.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_8_PNG" file="resources\redcore_ntp\imgs\background\abb-8.png" type="BINDATA" />
+      <!--//imgs/background -->
+      <!--//imgs/login -->
       <include name="IDR_REDCORE_NEWTAB_BACKICON_PNG" file="resources\redcore_ntp\imgs\login\backIcon.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_BACKUSER_PNG" file="resources\redcore_ntp\imgs\login\back-user.png" type="BINDATA" />
-      <include name="IDR_REDCORE_NEWTAB_BG_PNG" file="resources\redcore_ntp\imgs\login\bg.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_HOME_INDEX_PNG" file="resources\redcore_ntp\imgs\login\home_index.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_PASSWORD_ICON_PNG" file="resources\redcore_ntp\imgs\login\password_icon.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_GROUP_PNG" file="resources\redcore_ntp\imgs\login\Group.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_QRCODE_PNG" file="resources\redcore_ntp\imgs\login\qrcode.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_QRCODESUCCESS_PNG" file="resources\redcore_ntp\imgs\login\qrcodeSuccess.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_REDCORELOGO_PNG" file="resources\redcore_ntp\imgs\login\redcoreLogo.png" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_SCAN_PNG" file="resources\redcore_ntp\imgs\login\scan.png" type="BINDATA" />
+      <include name="IDR_REDCORE_NEWTAB_USER_ICON_PNG" file="resources\redcore_ntp\imgs\login\user_icon.png" type="BINDATA" />
+      <!--//imgs/login -->
       <include name="IDR_REDCORE_NEWTAB_HELLO_MOTION_CSS" file="resources\redcore_ntp\hello\motion.css" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_HELLO_INDEX_CSS" file="resources\redcore_ntp\hello\index.css" type="BINDATA" />
       <include name="IDR_REDCORE_NEWTAB_HELLO_SWIPER_MIN_CSS" file="resources\redcore_ntp\hello\swiper.min.css" type="BINDATA" />

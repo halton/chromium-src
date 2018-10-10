@@ -48,6 +48,7 @@ public:
   void OnDownloadUpdated(download::DownloadItem* download) override;
   void OnDownloadRemoved(download::DownloadItem* download) override;
 
+  void OnAutoUpdateDownload(const std::string& update_data);
   void OnAutoUpdateDownload(std::unique_ptr<base::DictionaryValue> response_data, bool enable = true);
   void StartDownload(const GURL& package_url, base::FilePath updateFilePath);
 

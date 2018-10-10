@@ -53,7 +53,7 @@ const CGFloat kAvatarSize = 24;
 - (void)OnLockButtonPressed;
 - (void)lockBrowser:(int)status;
 - (void)unlockBrowser;
-- (void)showPrompt;
+- (void)showTokenError;
 @end
 
 class LoginObserver : public YSPLoginManagerObserver {
@@ -119,7 +119,7 @@ void LoginObserver::OnTokenStatusChanged(const std::string& type) {
     g_browser_process->local_state()->SetInteger(prefs::kYSPLockScreen, Browser::UNLOCKED);
   }
   else if (type == "failure") {
-    [controller_ showPrompt];
+    [controller_ showTokenError];
   }
 }
 
@@ -192,12 +192,14 @@ void LoginObserver::OnLockStatusChanged() {
 
 - (id)initWithView:(NSView *)titleView
           lockView:(YSPLockView *)lockView
-          browser:(Browser *)browser {
+          browser:(Browser *)browser
+          delegate:(id<YSPControllerDelegate>)delegate {
   if (self = [super init]) {
     titleView_.reset([titleView retain]);
     lockViewController_.reset([[YSPLockViewController alloc] initWithView:lockView]);
 
     browser_ = browser;
+    delegate_ = delegate;
 
     //CGFloat offsetY = (38 - kAvatarSize) / 2;
     [titleView_ setWantsLayer:YES];
@@ -339,7 +341,6 @@ void LoginObserver::OnLockStatusChanged() {
 
 - (void)OnLockButtonPressed {
   LOG(INFO) << "OnLockButtonPressed";
-  [lockViewController_ setTitle:base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE))];
   g_browser_process->local_state()->SetInteger(prefs::kYSPLockScreen, Browser::SCREEN_LOCKED);
 }
 
@@ -470,11 +471,17 @@ void LoginObserver::OnLockStatusChanged() {
   else
     NOTREACHED();
 
+  [delegate_ enterLockScreen];
   [lockViewController_ show];
   
 }
 - (void)unlockBrowser {
   [lockViewController_ hide];
+  [delegate_ exitLockScreen];
 }
 
+- (void)showTokenError {
+  NSString *errorMessage = base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_REENTER_PASSWORD));
+  [lockViewController_ setPromptMessage:errorMessage];
+}
 @end

@@ -387,6 +387,11 @@ bool GetSystemPepperFlash(content::PepperPluginInfo* plugin) {
 std::string GetProduct() {
   return version_info::GetProductNameAndVersionForUserAgent();
 }
+#ifdef REDCORE //TODO(matianzhi) modify UserAgent
+std::string GetYSPProduct() {
+	return version_info::GetYSPProductNameAndVersionForUserAgent();
+}
+#endif
 
 }  // namespace
 
@@ -400,6 +405,9 @@ std::string GetUserAgent() {
   }
 
   std::string product = GetProduct();
+#ifdef REDCORE //TODO(matianzhi) modify UserAgent
+  product += " " + GetYSPProduct();
+#endif
 #if defined(OS_ANDROID)
   if (command_line->HasSwitch(switches::kUseMobileUserAgent))
     product += " Mobile";

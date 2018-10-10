@@ -6,67 +6,76 @@
 static std::string sangforFilePath = "";
 std::string GetSangforPath()
 {
-  wchar_t path[MAX_PATH + 1] = { 0 };
-  GetModuleFileName(NULL, path, MAX_PATH);
-  wchar_t driver[_MAX_DRIVE + 1] = { 0 };
-  wchar_t dir[_MAX_DIR + 1] = { 0 };
-  wchar_t fname[_MAX_FNAME + 1] = { 0 };
-  wchar_t ext[_MAX_EXT + 1] = { 0 };
-  ::_wsplitpath_s(path, driver, dir, fname, ext);
-  std::wstring sangforPath = std::wstring(driver) + dir + L"sangfor\\";
-  return base::UTF16ToUTF8(sangforPath);
+	wchar_t path[MAX_PATH + 1] = { 0 };
+	std::wstring filePath = L"";
+	HMODULE childDllHMod = LoadLibrary(L"chrome_child.dll");
+	if (childDllHMod == NULL)
+	{
+		childDllHMod = LoadLibrary(L"chrome.dll");
+		if (childDllHMod == NULL)
+			return nullptr;
+	}
+	GetModuleFileName(childDllHMod, path, MAX_PATH);
+	FreeLibrary(childDllHMod);
+	//GetModuleFileName(NULL, path, MAX_PATH);
+	wchar_t driver[_MAX_DRIVE + 1] = { 0 };
+	wchar_t dir[_MAX_DIR + 1] = { 0 };
+	wchar_t fname[_MAX_FNAME + 1] = { 0 };
+	wchar_t ext[_MAX_EXT + 1] = { 0 };
+	::_wsplitpath_s(path, driver, dir, fname, ext);
+	std::wstring sangforPath = std::wstring(driver) + dir + L"gm\\";
+	return base::UTF16ToUTF8(sangforPath);
 
 }
 
 GM_SESSION SanforGMStream::s_gmSession = NULL;
 SanforGMStream::SanforGMStream()
 {
-  sangforFilePath = GetSangforPath();
-  //Init();
+	sangforFilePath = GetSangforPath();
 }
 
 SanforGMStream::~SanforGMStream()
 {
-  Destroy();
+	Destroy();
 }
 
 void SanforGMStream::Destroy()
 {
-  if (gmStream)
-  {
-    (void)GMStreamShutdown(gmStream);
-    GMStreamDestroy(gmStream);
-    gmStream = NULL;
-  }
-  if (gmContext)
-  {
-    GMContextDestroy(gmContext);
-    gmContext = NULL;
-  }
+	if (gmStream)
+	{
+		(void)GMStreamShutdown(gmStream);
+		GMStreamDestroy(gmStream);
+		gmStream = NULL;
+	}
+	if (gmContext)
+	{
+		GMContextDestroy(gmContext);
+		gmContext = NULL;
+	}
 
-  //if (s_gmSession)
-  //{
-  //  GMSessionDestroy(s_gmSession);
-  //}
+	//if (s_gmSession)
+	//{
+	//	GMSessionDestroy(s_gmSession);
+	//}
 }
 
 int SanforGMStream::Init()
 {
-  if (SocketLibStartup() < 0)
-  {
-    DLOG(INFO) << "WSA library init failure !";
-    return -1;
-  }
-  std::string sangforDllFilePath = sangforFilePath + "sangfor.dll";
-  if (LoadSanforDLL(sangforDllFilePath.c_str()) < 0)
-  {
-    DLOG(INFO) << "Load GMlibrary failure !";
-    return -1;
-  }
-  /* 初始化国密库函数 */
-  (void)GM_init();
-
-  return 0;
+	if (SocketLibStartup() < 0)
+	{
+		DLOG(INFO) << "WSA library init failure !";
+		return -1;
+	}
+	std::string sangforDllFilePath = sangforFilePath + "gmcrypto.dll";
+	if (LoadSanforDLL(sangforDllFilePath.c_str()) < 0)
+	{
+		DLOG(INFO) << "Load GMlibrary failure !";
+		return -1;
+	}
+	/* 初始化国密库函数 */
+	(void)GM_init();
+	
+	return 0;
 }
 
 /**
@@ -77,13 +86,13 @@ int SanforGMStream::Init()
 */
 int SanforGMStream::SocketLibStartup()
 {
-  WORD sockVersion = MAKEWORD(2, 2);
-  WSADATA wsaData;
-  if (0 != WSAStartup(sockVersion, &wsaData))
-  {
-    return -1;
-  }
-  return 0;
+	WORD sockVersion = MAKEWORD(2, 2);
+	WSADATA wsaData;
+	if (0 != WSAStartup(sockVersion, &wsaData))
+	{
+		return -1;
+	}
+	return 0;
 }
 
 /**
@@ -94,172 +103,204 @@ int SanforGMStream::SocketLibStartup()
 */
 int SanforGMStream::LoadSanforDLL(const char * c_szDllFileName)
 {
-  //HMODULE  h;
+	//HMODULE  h;
 
-  if (NULL == c_szDllFileName)
-  {
-    DLOG(INFO) << "GMLibrary file name is empty !" ;
-    return -1;
-  }
+	if (NULL == c_szDllFileName)
+	{
+		DLOG(INFO) << "GMLibrary file name is empty !" ;
+		return -1;
+	}
 
-  module = LoadLibraryA(c_szDllFileName);
-  if (module == NULL)
-  {
-    DLOG(INFO) << "Load GMlibrary failure ! Lost "  << c_szDllFileName << " file. Please try reinstalling the app.";
-    return -1;
-  }
+	module = LoadLibraryA(c_szDllFileName);
+	if (module == NULL)
+	{
+		DLOG(INFO) << "Load GMlibrary failure ! Lost "  << c_szDllFileName << " file. Please try reinstalling the app.";
+		return -1;
+	}
 
-  GM_init = (int(*)(
-    )) GetProcAddress(module, "GM_init");
+	GM_init = (int(*)(
+		)) GetProcAddress(module, "GM_init");
 
-  GMContextCreate = (int(*)(
-    _Out  GM_CONTEXT*           pgmContext
-    )) GetProcAddress(module, "GMContextCreate");
+	GMContextCreate = (int(*)(
+		_Out 	GM_CONTEXT* 					pgmContext
+		)) GetProcAddress(module, "GMContextCreate");
 
-  GMContextSetSignatureCertificate = (int(*)(
-    _In   GM_CONTEXT            gmContext,
-    _In   const char*           c_szCertificate,
-    _In   const char*           c_szKey
-    )) GetProcAddress(module, "GMContextSetSignatureCertificate");
+	GMContextSetSignatureCertificate = (int(*)(
+		_In 	GM_CONTEXT 						gmContext,
+		_In 	const char* 					c_szCertificate,
+		_In 	const char* 					c_szKey
+		)) GetProcAddress(module, "GMContextSetSignatureCertificate");
 
-  GMContextSetEncryptionCertificate = (int(*)(
-    _In   GM_CONTEXT            gmContext,
-    _In   const char*           c_szCertificate,
-    _In   const char*           c_szKey
-    )) GetProcAddress(module, "GMContextSetEncryptionCertificate");
+	GMContextSetEncryptionCertificate = (int(*)(
+		_In 	GM_CONTEXT 						gmContext,
+		_In 	const char* 					c_szCertificate,
+		_In 	const char* 					c_szKey
+		)) GetProcAddress(module, "GMContextSetEncryptionCertificate");
 
-  GMContextSetVerify = (int(*)(
-    _In     GM_CONTEXT          gmContext,
-    _In     UINT            uVerifyMode,
-    _In_opt_  GM_CERT_VERIFY_CALLBACK   fnCallback,
-    _In_opt_  const char*         c_szCACertificate,
-    _In_opt_  UINT            uVerifyDepth
-    )) GetProcAddress(module, "GMContextSetVerify");
+	GMContextSetVerify = (int(*)(
+		_In 		GM_CONTEXT 					gmContext,
+		_In 		UINT 						uVerifyMode,
+		_In_opt_ 	GM_CERT_VERIFY_CALLBACK 	fnCallback,
+		_In_opt_ 	const char* 				c_szCACertificate,
+		_In_opt_ 	UINT 						uVerifyDepth
+		)) GetProcAddress(module, "GMContextSetVerify");
 
-  GMContextSetCipherList = (int(*)(
-    _In   GM_CONTEXT            gmContext,
-    _In   const char*           c_szCipherList
-    )) GetProcAddress(module, "GMContextSetCipherList");
+	GMContextSetCipherList = (int(*)(
+		_In 	GM_CONTEXT 						gmContext,
+		_In 	const char* 					c_szCipherList
+		)) GetProcAddress(module, "GMContextSetCipherList");
 
-  GMContextDestroy = (void(*)(
-    _In   GM_CONTEXT            gmContext
-    )) GetProcAddress(module, "GMContextDestroy");
+	GMContextDestroy = (void(*)(
+		_In 	GM_CONTEXT 						gmContext
+		)) GetProcAddress(module, "GMContextDestroy");
 
 
-  /******************************************************************************/
+	/******************************************************************************/
 
-  GMStreamCreate = (int(*)(
-    _Out  GM_STREAM*            pgmStream,
-    _In   GM_CONTEXT            gmContext
-    )) GetProcAddress(module, "GMStreamCreate");
+	GMStreamCreate = (int(*)(
+		_Out 	GM_STREAM* 						pgmStream,
+		_In 	GM_CONTEXT 						gmContext
+		)) GetProcAddress(module, "GMStreamCreate");
 
-  GMStreamSetUserData = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _In   void*               pvUserData
-    )) GetProcAddress(module, "GMStreamSetUserData");
+	GMStreamSetUserData = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_In 	void* 							pvUserData
+		)) GetProcAddress(module, "GMStreamSetUserData");
 
-  GMStreamGetUserData = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _Out  void**              ppvUserData
-    )) GetProcAddress(module, "GMStreamGetUserData");
+	GMStreamGetUserData = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_Out 	void** 							ppvUserData
+		)) GetProcAddress(module, "GMStreamGetUserData");
 
-  GMStreamSetHostName = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _In   const char*           c_szHostName
-    )) GetProcAddress(module, "GMStreamSetHostName");
+	GMStreamSetHostName = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_In 	const char* 					c_szHostName
+		)) GetProcAddress(module, "GMStreamSetHostName");
 
-  GMStreamSetSocket = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _In   int               nSocket
-    )) GetProcAddress(module, "GMStreamSetSocket");
+	GMStreamSetSocket = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_In 	int 							nSocket
+		)) GetProcAddress(module, "GMStreamSetSocket");
 
-  GMStreamGetPeerCertificate = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _Out  GM_CERT*            pgmCert
-    )) GetProcAddress(module, "GMStreamGetPeerCertificate");
+	GMStreamGetPeerCertificate = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_Out 	GM_CERT* 						pgmCert
+		)) GetProcAddress(module, "GMStreamGetPeerCertificate");
 
-  GMStreamInHandshake = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _Out  BOOL*               pbState
-    )) GetProcAddress(module, "GMStreamInHandshake");
+	GMStreamInHandshake = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_Out 	BOOL* 							pbState
+		)) GetProcAddress(module, "GMStreamInHandshake");
 
-  GMStreamGetError = (int(*)(
-    _In     GM_STREAM           gmStream,
-    _Out    int*            pnErrorReason,
-    _In_opt_  GM_STREAM_ERROR_CALLBACK  fnCallback,
-    _In_opt_  void*             pvUserData
-    )) GetProcAddress(module, "GMStreamGetError");
+	GMStreamGetError = (int(*)(
+		_In 		GM_STREAM 					gmStream,
+		_Out 		int* 						pnErrorReason,
+		_In_opt_ 	GM_STREAM_ERROR_CALLBACK 	fnCallback,
+		_In_opt_ 	void* 						pvUserData
+		)) GetProcAddress(module, "GMStreamGetError");
 
-  GMStreamConnect = (int(*)(
-    _In   GM_STREAM             gmStream
-    )) GetProcAddress(module, "GMStreamConnect");
+	GMStreamConnect = (int(*)(
+		_In 	GM_STREAM 						gmStream
+		)) GetProcAddress(module, "GMStreamConnect");
 
-  GMStreamWrite = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _In   const void*           pcvBuffer,
-    _In   UINT              uBufferSize
-    )) GetProcAddress(module, "GMStreamWrite");
+	GMStreamWrite = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_In 	const void* 					pcvBuffer,
+		_In 	UINT 							uBufferSize
+		)) GetProcAddress(module, "GMStreamWrite");
 
-  GMStreamRead = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _Out  void*               pvBuffer,
-    _In   UINT              uBufferSize
-    )) GetProcAddress(module, "GMStreamRead");
+	GMStreamRead = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_Out 	void* 							pvBuffer,
+		_In 	UINT 							uBufferSize
+		)) GetProcAddress(module, "GMStreamRead");
 
-  GMStreamShutdown = (int(*)(
-    _In   GM_STREAM             gmStream
-    )) GetProcAddress(module, "GMStreamShutdown");
+	GMStreamShutdown = (int(*)(
+		_In 	GM_STREAM 						gmStream
+		)) GetProcAddress(module, "GMStreamShutdown");
 
-  GMStreamDestroy = (void(*)(
-    _In   GM_STREAM             gmStream
-    )) GetProcAddress(module, "GMStreamDestroy");
+	GMStreamDestroy = (void(*)(
+		_In 	GM_STREAM 						gmStream
+		)) GetProcAddress(module, "GMStreamDestroy");
 
-  /******************************************************************************/
+	/******************************************************************************/
 
-  GMStreamGetSession = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _Out  GM_SESSION*           pgmSession
-    )) GetProcAddress(module, "GMStreamGetSession");
+	GMStreamGetSession = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_Out 	GM_SESSION* 					pgmSession
+		)) GetProcAddress(module, "GMStreamGetSession");
 
-  GMStreamSetSession = (int(*)(
-    _In   GM_STREAM             gmStream,
-    _In   GM_SESSION            gmSession
-    )) GetProcAddress(module, "GMStreamSetSession");
+	GMStreamSetSession = (int(*)(
+		_In 	GM_STREAM 						gmStream,
+		_In 	GM_SESSION 						gmSession
+		)) GetProcAddress(module, "GMStreamSetSession");
 
-  GMSessionDestroy = (void(*)(
-    _In   GM_SESSION            gmSession
-    )) GetProcAddress(module, "GMSessionDestroy");
+	GMSessionDestroy = (void(*)(
+		_In 	GM_SESSION 						gmSession
+		)) GetProcAddress(module, "GMSessionDestroy");
 
-  /******************************************************************************/
+	/******************************************************************************/
 
-  GMCertStoreContextGetStream = (int(*)(
-    _Out  GM_STREAM*            pgmStream,
-    _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext
-    )) GetProcAddress(module, "GMCertStoreContextGetStream");
+	GMCertStoreContextGetStream = (int(*)(
+		_Out 	GM_STREAM* 						pgmStream,
+		_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext
+		)) GetProcAddress(module, "GMCertStoreContextGetStream");
 
-  GMCertStoreContextGetError = (int(*)(
-    _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-    _Out  int*              pnErrorNumber
-    )) GetProcAddress(module, "GMCertStoreContextGetError");
+	GMCertStoreContextGetError = (int(*)(
+		_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+		_Out 	int* 							pnErrorNumber
+		)) GetProcAddress(module, "GMCertStoreContextGetError");
 
-  GMCertGetErrorString = (char* (*)(
-    _In   int               nError
-    )) GetProcAddress(module, "GMCertGetErrorString");
+	GMCertGetErrorString = (char* (*)(
+		_In 	int 							nError
+		)) GetProcAddress(module, "GMCertGetErrorString");
 
-  GMCertStoreContextGetErrorDepth = (int(*)(
-    _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-    _Out  int*              pnErrorDepth
-    )) GetProcAddress(module, "GMCertStoreContextGetErrorDepth");
+	GMCertStoreContextGetErrorDepth = (int(*)(
+		_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+		_Out 	int* 							pnErrorDepth
+		)) GetProcAddress(module, "GMCertStoreContextGetErrorDepth");
 
-  GMCertStoreContextGetCurrentCert = (int(*)(
-    _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-    _Out  GM_CERT*            pgmCert
-    )) GetProcAddress(module, "GMCertStoreContextGetCurrentCert");
+	GMCertStoreContextGetCurrentCert = (int(*)(
+		_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+		_Out 	GM_CERT* 						pgmCert
+		)) GetProcAddress(module, "GMCertStoreContextGetCurrentCert");
 
-  GMCertDestroy = (void(*)(
-    _In   GM_CERT             gmCert
-    )) GetProcAddress(module, "GMCertDestroy");
-  return 0;
+	GMCertDestroy = (void(*)(
+		_In 	GM_CERT 						gmCert
+		)) GetProcAddress(module, "GMCertDestroy");
+	if (!GM_init ||
+		!GMContextCreate ||
+		!GMContextSetSignatureCertificate ||
+		!GMContextSetEncryptionCertificate ||
+		!GMContextSetVerify ||
+		!GMContextSetCipherList ||
+		!GMStreamCreate ||
+		!GMStreamSetSocket ||
+		!GMStreamConnect ||
+		!GMStreamWrite ||
+		!GMStreamRead ||
+		!GMStreamGetSession ||
+		!GMStreamSetSession ||
+		!GMStreamShutdown ||
+		!GMSessionDestroy ||
+		!GMContextDestroy ||
+		!GMStreamDestroy ||
+		!GMStreamSetUserData ||
+		!GMStreamGetUserData ||
+		!GMStreamSetHostName ||
+		!GMStreamGetPeerCertificate ||
+		!GMStreamInHandshake ||
+		!GMStreamGetError ||
+		!GMCertStoreContextGetStream ||
+		!GMCertStoreContextGetError ||
+		!GMCertGetErrorString ||
+		!GMCertStoreContextGetErrorDepth ||
+		!GMCertStoreContextGetCurrentCert ||
+		!GMCertDestroy
+		) {
+		return -1;
+	}
+	return 0;
 }
 
 /**
@@ -274,65 +315,65 @@ int SanforGMStream::LoadSanforDLL(const char * c_szDllFileName)
 */
 GM_CONTEXT SanforGMStream::GMContextInit()
 {
-  GM_CONTEXT gmContext = NULL;
-  std::string ca_cert_path = sangforFilePath + "ca_cert.pem";
-  std::string signature_cert_path = sangforFilePath + "signature_cert.pem";
-  std::string signature_key_path = sangforFilePath + "signature_key.pem";
-  std::string encryption_cert_path = sangforFilePath + "encryption_cert.pem";
-  std::string encryption_key_path = sangforFilePath + "encryption_key.pem";
+	GM_CONTEXT gmContext = NULL;
+	std::string ca_cert_path = sangforFilePath + "gmcert\\ca_cert.pem";
+	std::string signature_cert_path = sangforFilePath + "gmcert\\signature_cert.pem";
+	std::string signature_key_path = sangforFilePath + "gmcert\\signature_key.pem";
+	std::string encryption_cert_path = sangforFilePath + "gmcert\\encryption_cert.pem";
+	std::string encryption_key_path = sangforFilePath + "gmcert\\encryption_key.pem";
 
-  /* 创建 GM_CONTEXT 配置模板对象 */
-  if (GMERR_OK != GMContextCreate(&gmContext))
-  {
-    DLOG(INFO) << "GMContextCreate failure !" ;
-    goto err;
-  }
+	/* 创建 GM_CONTEXT 配置模板对象 */
+	if (GMERR_OK != GMContextCreate(&gmContext))
+	{
+		DLOG(INFO) << "GMContextCreate failure !" ;
+		goto err;
+	}
 
-  /* 设置签名证书 */
-  if (GMERR_OK != GMContextSetSignatureCertificate(gmContext,
-    signature_cert_path.c_str(),
-    signature_key_path.c_str()))
-  {
-    DLOG(INFO) << "GMContextSetSignatureCertificate failure !" ;
-    goto err;
-  }
+	/* 设置签名证书 */
+	if (GMERR_OK != GMContextSetSignatureCertificate(gmContext,
+		signature_cert_path.c_str(),
+		signature_key_path.c_str()))
+	{
+		DLOG(INFO) << "GMContextSetSignatureCertificate failure !" ;
+		goto err;
+	}
 
-  /* 设置加密证书 */
-  if (GMERR_OK != GMContextSetEncryptionCertificate(gmContext,
-    encryption_cert_path.c_str(),
-    encryption_key_path.c_str()))
-  {
-    DLOG(INFO) << "GMContextSetEncryptionCertificate failure !";
-    goto err;
-  }
+	/* 设置加密证书 */
+	if (GMERR_OK != GMContextSetEncryptionCertificate(gmContext,
+		encryption_cert_path.c_str(),
+		encryption_key_path.c_str()))
+	{
+		DLOG(INFO) << "GMContextSetEncryptionCertificate failure !";
+		goto err;
+	}
 
-  /* 设置服务器认证方式 */
-  if (GMERR_OK != GMContextSetVerify(gmContext,
-    GM_VERIFY_NONE,           /* uVerifyMode, 不认证服务器身份 -- GM_VERIFY_PEER */
-    NULL,                 /* fnCallback, 使用国密库内部实现的认证方式*/
-    ca_cert_path.c_str(),   /* c_szCACertificate, CA 证书文件路径 */
-    10))                /* uVerifyDepth, 最大证书认证深度*/
-  {
-    DLOG(INFO) << "GMContextSetVerify failure !";
-    goto err;
-  }
+	/* 设置服务器认证方式 */
+	if (GMERR_OK != GMContextSetVerify(gmContext,
+		GM_VERIFY_NONE, 					/* uVerifyMode, 不认证服务器身份 -- GM_VERIFY_PEER */
+		NULL, 								/* fnCallback, 使用国密库内部实现的认证方式*/
+		ca_cert_path.c_str(), 	/* c_szCACertificate, CA 证书文件路径 */
+		10)) 								/* uVerifyDepth, 最大证书认证深度*/
+	{
+		DLOG(INFO) << "GMContextSetVerify failure !";
+		goto err;
+	}
 
-  /* 设置支持的算法列表 */
-  if (GMERR_OK != GMContextSetCipherList(gmContext,
-    "ECC-SM2-SM4-SM3:ECDHE-SM2-SM4-SM3"))
-  {
-    DLOG(INFO) << "GMContextSetCipherList failure !";
-    goto err;
-  }
+	/* 设置支持的算法列表 */
+	if (GMERR_OK != GMContextSetCipherList(gmContext,
+		"ECC-SM2-SM4-SM3:ECDHE-SM2-SM4-SM3"))
+	{
+		DLOG(INFO) << "GMContextSetCipherList failure !";
+		goto err;
+	}
 
-  return gmContext;
+	return gmContext;
 err:
-  if (gmContext)
-  {
-    (void)GMContextDestroy(gmContext);
-    gmContext = NULL;
-  }
-  return NULL;
+	if (gmContext)
+	{
+		(void)GMContextDestroy(gmContext);
+		gmContext = NULL;
+	}
+	return NULL;
 }
 
 /**
@@ -342,85 +383,59 @@ err:
 * @param   callback:   接收完回调函数
 * @return  成功返回读取的字节数，失败返回-1
 */
-int SanforGMStream::GMReadResponseData(net::IOBuffer* buf, int buf_len/*, const net::CompletionCallback& callback*/)
+int SanforGMStream::GMReadResponseData(net::IOBuffer* buf, int buf_len)
 {
-  int nReturn = 0, offset = 0;
-  char cBuffer[GMBUFFERLEN] = { 0 };
-  bool responseFlags = false, wouldBlock = true;
+	int nReturn = 0, offset = 0;
+	char cBuffer[GMBUFFERLEN] = { 0 };
 
-  if (gmStream == NULL) {
-    DLOG(INFO) << "gmStream is NULL !";
-    return -1;
-  }
-  base::Time time = base::Time::Now();
-  //int64_t millisecond = time.ToJavaTime();
-  //LOG(INFO) << "milliseconds:[" << base::Time::Now().ToJavaTime() << "][" << millisecond << "]";
-  //if (GMFlags) {
-  //  GMFlags = false;
-  //  while ((base::Time::Now().ToJavaTime() - time.ToJavaTime()) <= 500) {}
-  //}
-  /* 接收业务数据应答报文 */
-  while ((nReturn = GMStreamRead(gmStream, cBuffer, GMBUFFERLEN - 1)) > 0 || nReturn == GMERR_STREAM_WOULDBLOCK)
-  {
-    if (nReturn == GMERR_STREAM_WOULDBLOCK && wouldBlock) {
-      time = base::Time::Now();
-      wouldBlock = false;
-    }
-    if (nReturn != GMERR_STREAM_WOULDBLOCK) {
-      time = base::Time::Now();
-      wouldBlock = true;
-      cBuffer[nReturn] = '\0';
-      //ResponseData->append(cBuffer);
-      memcpy(buf->data() + offset, cBuffer, nReturn);
-      offset += nReturn;
-      //DLOG(INFO) << "ResponseData: " << ResponseData->c_str();
-      if (nReturn < GMBUFFERLEN - 1)
-        break;
-      responseFlags = true;
-    }
-    if ((offset + GMBUFFERLEN - 1) > buf_len)
-      break;
-    if (nReturn == GMERR_STREAM_WOULDBLOCK) {
-      if (responseFlags)
-        break;
-      if ((base::Time::Now().ToTimeT() - time.ToTimeT()) > 5) {
-        break;
-      }
-    }
-    DLOG(INFO) << "nReturn: " << nReturn;
-  }
-  if (NULL == s_gmSession)
-    (void) GMStreamGetSession(gmStream, &s_gmSession);
-  //DLOG(INFO) << "nReturn: " << nReturn ;
+	if (gmStream == NULL) {
+		DLOG(INFO) << "gmStream is NULL !";
+		return -1;
+	}
+	/* 接收业务数据应答报文 */
+	Sleep(200); //为防止第一次拿不到响应数据导致浏览器直接返回，临时睡眠200毫秒
+	while ((nReturn = GMStreamRead(gmStream, cBuffer, GMBUFFERLEN - 1)) > 0)
+	{
+		cBuffer[nReturn] = '\0';
+		memcpy(buf->data() + offset, cBuffer, nReturn);
+		offset += nReturn;
+		//DLOG(INFO) << "ResponseData: " << ResponseData->c_str();
+		if (nReturn < GMBUFFERLEN - 1)
+			break;
+		if ((offset + GMBUFFERLEN - 1) > buf_len)
+			break;
+		DLOG(INFO) << "nReturn: " << nReturn;
+	}
+	//if (NULL == s_gmSession)
+	//	(void)GMStreamGetSession(gmStream, &s_gmSession);
+	//DLOG(INFO) << "nReturn: " << nReturn ;
 
-  return offset;
+	return offset;
 }
 int SanforGMStream::GMReadResponseData(net::IOBuffer* buf, int buf_len, const net::CompletionCallback& callback)
 {
-  int nReturn = 0, offset = 0;
-  char cBuffer[GMBUFFERLEN] = { 0 };
+	int nReturn = 0, offset = 0;
+	char cBuffer[GMBUFFERLEN] = { 0 };
 
-  if (gmStream == NULL) {
-    DLOG(INFO) << "gmStream is NULL !";
-    return -1;
-  }
-  /* 接收业务数据应答报文 */
-  while ((nReturn = GMStreamRead(gmStream, cBuffer, GMBUFFERLEN - 1)) > 0)
-  {
-    if (nReturn != GMERR_STREAM_WOULDBLOCK) {
-      cBuffer[nReturn] = '\0';
-      memcpy(buf->data() + offset, cBuffer, nReturn);
-      offset += nReturn;
-      //DLOG(INFO) << "ResponseData: " << ResponseData->c_str();
-      if (nReturn < GMBUFFERLEN - 1)
-        break;
-    }
-    if ((offset + GMBUFFERLEN - 1) > buf_len)
-      break;
-  }
-  //DLOG(INFO) << "nReturn: " << nReturn ;
+	if (gmStream == NULL) {
+		DLOG(INFO) << "gmStream is NULL !";
+		return -1;
+	}
+	/* 接收业务数据应答报文 */
+	while ((nReturn = GMStreamRead(gmStream, cBuffer, GMBUFFERLEN - 1)) > 0)
+	{
+		cBuffer[nReturn] = '\0';
+		memcpy(buf->data() + offset, cBuffer, nReturn);
+		offset += nReturn;
+		//DLOG(INFO) << "ResponseData: " << ResponseData->c_str();
+		if (nReturn < GMBUFFERLEN - 1)
+			break;
+		if ((offset + GMBUFFERLEN - 1) > buf_len)
+			break;
+	}
+	//DLOG(INFO) << "nReturn: " << nReturn ;
 
-  return offset;
+	return offset;
 }
 
 /**
@@ -431,25 +446,13 @@ int SanforGMStream::GMReadResponseData(net::IOBuffer* buf, int buf_len, const ne
 */
 int SanforGMStream::GMWriteRequestData(const char* c_szRequest, int request_len, const net::CompletionCallback& callback)
 {
-  int nErrorReason;
-  base::Time time = base::Time::Now();
-  //if (gmStream)
-  //{
-  //  DLOG(INFO) << "gmStream is NULL !";
-  //  return -1;
-  //}
-  /* 发送业务数据请求 */
-  while (GMERR_OK != GMStreamWrite(gmStream, c_szRequest, request_len))
-  {
-    (void)GMStreamGetError(gmStream, &nErrorReason, ErrorPrint, NULL);
-    if (nErrorReason != GMERR_STREAM_WOULDBLOCK) {
-      DLOG(INFO) << "GMStreamWrite failure !";
-      return -1;
-    }
-    if ((base::Time::Now().ToJavaTime() - time.ToJavaTime()) > 2000)
-      break;
-  }
-  return request_len;
+	/* 发送业务数据请求 */
+	while (GMERR_OK != GMStreamWrite(gmStream, c_szRequest, request_len))
+	{
+		DLOG(INFO) << "GMStreamWrite failure !";
+		return -1;
+	}
+	return request_len;
 }
 
 /**
@@ -458,33 +461,20 @@ int SanforGMStream::GMWriteRequestData(const char* c_szRequest, int request_len,
 */
 int SanforGMStream::GMHandShake()
 {
-  int nErrorReason;
-  BOOL pbState = FALSE;
+	BOOL pbState = FALSE;
 
-  if (GMERR_OK == (GMStreamInHandshake(gmStream, &pbState))) {
-    if (pbState) {
-      return 0;
-    }
-  }
-  base::Time time = base::Time::Now();
-  //if (gmStream)
-  //{
-  //  DLOG(INFO) << "gmStream is NULL !";
-  //  return -1;
-  //}
-  /* 进行国密协议握手协商 */
-  while (GMERR_OK != GMStreamConnect(gmStream))
-  {
-    (void)GMStreamGetError(gmStream, &nErrorReason, ErrorPrint, NULL);
-    if (nErrorReason != GMERR_STREAM_WOULDBLOCK) {
-      DLOG(INFO) << "GMStreamConnect failure !";
-      return -1;
-    }
-    //LOG(INFO) << "Time:[" << time.ToTimeT() << "] [" << base::Time::Now().ToTimeT() << "]";
-    if ((base::Time::Now().ToJavaTime() - time.ToJavaTime()) > 2000)
-      break;
-  }
-  return 0;
+	if (GMERR_OK == (GMStreamInHandshake(gmStream, &pbState))) {
+		if (pbState) {
+			return 0;
+		}
+	}
+	/* 进行国密协议握手协商 */
+	if (GMERR_OK != GMStreamConnect(gmStream))
+	{
+		DLOG(INFO) << "GMStreamConnect failure !";
+		return -1;
+	}
+	return 0;
 }
 
 /**
@@ -495,222 +485,186 @@ int SanforGMStream::GMHandShake()
 */
 int SanforGMStream::GMCreateDataStream(int nClient)
 {
-  if (Init() < 0)
-    return -1;
-  /* 创建 GM_CONTEXT 配置模板对象 */
-  gmContext = GMContextInit();
-  if (NULL == gmContext)
-  {
-    DLOG(INFO) << "GMContextInit failure !";
-    return -1;
-  }
-  //GM_STREAM gmStream = NULL;
-  //int nErrorReason;
-  //base::Time time = base::Time::Now();
-  if (NULL == gmContext) {
-    DLOG(INFO) << "gmContext is NULL !";
-    return -1;
-  }
+	if (Init() < 0)
+		return -1;
+	/* 创建 GM_CONTEXT 配置模板对象 */
+	gmContext = GMContextInit();
+	if (NULL == gmContext)
+	{
+		DLOG(INFO) << "GMContextInit failure !";
+		return -1;
+	}
+	if (NULL == gmContext) {
+		DLOG(INFO) << "gmContext is NULL !";
+		return -1;
+	}
 
-  /* 根据 GM_CONTEXT 配置模板对象配置，创建 GM_STREAM 国密数据流对象 */
-  if (GMERR_OK != GMStreamCreate(&gmStream, gmContext))
-  {
-    DLOG(INFO) << "GMStreamCreate failure !";
-    return -1;
-  }
+	/* 根据 GM_CONTEXT 配置模板对象配置，创建 GM_STREAM 国密数据流对象 */
+	if (GMERR_OK != GMStreamCreate(&gmStream, gmContext))
+	{
+		DLOG(INFO) << "GMStreamCreate failure !";
+		return -1;
+	}
 
-  if (NULL != s_gmSession)
-    (void) GMStreamSetSession(gmStream, s_gmSession);
+	if (NULL != s_gmSession)
+		(void) GMStreamSetSession(gmStream, s_gmSession);
 
-  /* 为 GM_STREAM 国密数据流绑定 Socket 对象 */
-  if (GMERR_OK != GMStreamSetSocket(gmStream, nClient))
-  {
-    DLOG(INFO) << "GMStreamSetSocket failure !";
-    return -1;
-  }
-  ///* 进行国密协议握手协商 */
-  //time = base::Time::Now();
-  //while (GMERR_OK != GMStreamConnect(gmStream))
-  //{
-  //  (void)GMStreamGetError(gmStream, &nErrorReason, ErrorPrint, NULL);
-  //  if (nErrorReason != GMERR_STREAM_WOULDBLOCK) {
-  //    DLOG(INFO) << "GMStreamConnect failure !";
-  //    goto err;
-  //  }
-  //  //LOG(INFO) << "Time:[" << time.ToTimeT() << "] [" << base::Time::Now().ToTimeT() << "]";
-  //  if ((base::Time::Now().ToTimeT() - time.ToTimeT()) > 1)
-  //    break;
-  //}
-  /* 发送业务数据请求 */
-  //if (GMERR_OK != GMStreamWrite(gmStream, c_szRequest, strlen(c_szRequest)))
-  //{
-  //  (void)GMStreamGetError(gmStream, &nErrorReason, ErrorPrint, NULL);
-  //  DLOG(INFO) << "GMStreamWrite failure !";
-  //  goto err;
-  //}
-  ///* 接收业务数据应答报文 */
-  //while ((nReturn = GMStreamRead(gmStream, cBuffer, sizeof(cBuffer) - 1)) > 0 || nReturn == GMERR_STREAM_WOULDBLOCK)
-  //{
-  //  if (nReturn != GMERR_STREAM_WOULDBLOCK) {
-  //    cBuffer[nReturn] = '\0';
-  //    requestBuffer->append(cBuffer);
-  //    //DLOG(INFO) << "requestBuffer: " << requestBuffer->c_str();
-  //    //return requestBuffer.c_str();
-  //  }
-  //}
-  //DLOG(INFO) << "nReturn: " << nReturn ;
-
-  //(void)GMStreamShutdown(gmStream);
-  return 0;
+	/* 为 GM_STREAM 国密数据流绑定 Socket 对象 */
+	if (GMERR_OK != GMStreamSetSocket(gmStream, nClient))
+	{
+		DLOG(INFO) << "GMStreamSetSocket failure !";
+		return -1;
+	}
+	return 0;
 }
 
 int(*GM_init)(
-  );
+	);
 
 int(*GMContextCreate)(
-  _Out  GM_CONTEXT*           pgmContext
-  );
+	_Out 	GM_CONTEXT* 					pgmContext
+	);
 
 int(*GMContextSetSignatureCertificate)(
-  _In   GM_CONTEXT            gmContext,
-  _In   const char*           c_szCertificate,
-  _In   const char*           c_szKey
-  );
+	_In 	GM_CONTEXT 						gmContext,
+	_In 	const char* 					c_szCertificate,
+	_In 	const char* 					c_szKey
+	);
 
 int(*GMContextSetEncryptionCertificate)(
-  _In   GM_CONTEXT            gmContext,
-  _In   const char*           c_szCertificate,
-  _In   const char*           c_szKey
-  );
+	_In 	GM_CONTEXT 						gmContext,
+	_In 	const char* 					c_szCertificate,
+	_In 	const char* 					c_szKey
+	);
 
 int(*GMContextSetVerify)(
-  _In     GM_CONTEXT          gmContext,
-  _In     UINT            uVerifyMode,
-  _In_opt_  GM_CERT_VERIFY_CALLBACK   fnCallback,
-  _In_opt_  const char*         c_szCACertificate,
-  _In_opt_  UINT            uVerifyDepth
-  );
+	_In 		GM_CONTEXT 					gmContext,
+	_In 		UINT 						uVerifyMode,
+	_In_opt_ 	GM_CERT_VERIFY_CALLBACK 	fnCallback,
+	_In_opt_ 	const char* 				c_szCACertificate,
+	_In_opt_ 	UINT 						uVerifyDepth
+	);
 
 int(*GMContextSetCipherList)(
-  _In   GM_CONTEXT            gmContext,
-  _In   const char*           c_szCipherList
-  );
+	_In 	GM_CONTEXT 						gmContext,
+	_In 	const char* 					c_szCipherList
+	);
 
 void(*GMContextDestroy)(
-  _In   GM_CONTEXT            gmContext
-  );
+	_In 	GM_CONTEXT 						gmContext
+	);
 
 
 /******************************************************************************/
 
 int(*GMStreamCreate)(
-  _Out  GM_STREAM*            pgmStream,
-  _In   GM_CONTEXT            gmContext
-  );
+	_Out 	GM_STREAM* 						pgmStream,
+	_In 	GM_CONTEXT 						gmContext
+	);
 
 int(*GMStreamSetUserData)(
-  _In   GM_STREAM             gmStream,
-  _In   void*               pvUserData
-  );
+	_In 	GM_STREAM 						gmStream,
+	_In 	void* 							pvUserData
+	);
 
 int(*GMStreamGetUserData)(
-  _In   GM_STREAM             gmStream,
-  _Out  void**              ppvUserData
-  );
+	_In 	GM_STREAM 						gmStream,
+	_Out 	void** 							ppvUserData
+	);
 
 int(*GMStreamSetHostName)(
-  _In   GM_STREAM             gmStream,
-  _In   const char*           c_szHostName
-  );
+	_In 	GM_STREAM 						gmStream,
+	_In 	const char* 					c_szHostName
+	);
 
 int(*GMStreamSetSocket)(
-  _In   GM_STREAM             gmStream,
-  _In   int               nSocket
-  );
+	_In 	GM_STREAM 						gmStream,
+	_In 	int 							nSocket
+	);
 
 int(*GMStreamGetPeerCertificate)(
-  _In   GM_STREAM             gmStream,
-  _Out  GM_CERT*            pgmCert
-  );
+	_In 	GM_STREAM 						gmStream,
+	_Out 	GM_CERT* 						pgmCert
+	);
 
 int(*GMStreamInHandshake)(
-  _In   GM_STREAM             gmStream,
-  _Out  BOOL*               pbState
-  );
+	_In 	GM_STREAM 						gmStream,
+	_Out 	BOOL* 							pbState
+	);
 
 int(*GMStreamGetError)(
-  _In     GM_STREAM           gmStream,
-  _Out    int*            pnErrorReason,
-  _In_opt_  GM_STREAM_ERROR_CALLBACK  fnCallback,
-  _In_opt_  void*             pvUserData
-  );
+	_In 		GM_STREAM 					gmStream,
+	_Out 		int* 						pnErrorReason,
+	_In_opt_ 	GM_STREAM_ERROR_CALLBACK 	fnCallback,
+	_In_opt_ 	void* 						pvUserData
+	);
 
 int(*GMStreamConnect)(
-  _In   GM_STREAM             gmStream
-  );
+	_In 	GM_STREAM 						gmStream
+	);
 
 int(*GMStreamWrite)(
-  _In   GM_STREAM             gmStream,
-  _In   const void*           pcvBuffer,
-  _In   UINT              uBufferSize
-  );
+	_In 	GM_STREAM 						gmStream,
+	_In 	const void* 					pcvBuffer,
+	_In 	UINT 							uBufferSize
+	);
 
 int(*GMStreamRead)(
-  _In   GM_STREAM             gmStream,
-  _Out  void*               pvBuffer,
-  _In   UINT              uBufferSize
-  );
+	_In 	GM_STREAM 						gmStream,
+	_Out 	void* 							pvBuffer,
+	_In 	UINT 							uBufferSize
+	);
 
 int(*GMStreamShutdown)(
-  _In   GM_STREAM             gmStream
-  );
+	_In 	GM_STREAM 						gmStream
+	);
 
 void(*GMStreamDestroy)(
-  _In   GM_STREAM             gmStream
-  );
+	_In 	GM_STREAM 						gmStream
+	);
 
 /******************************************************************************/
 
 int(*GMStreamGetSession)(
-  _In   GM_STREAM             gmStream,
-  _Out  GM_SESSION*           pgmSession
-  );
+	_In 	GM_STREAM 						gmStream,
+	_Out 	GM_SESSION* 					pgmSession
+	);
 
 int(*GMStreamSetSession)(
-  _In   GM_STREAM             gmStream,
-  _In   GM_SESSION            gmSession
-  );
+	_In 	GM_STREAM 						gmStream,
+	_In 	GM_SESSION 						gmSession
+	);
 
 void(*GMSessionDestroy)(
-  _In   GM_SESSION            gmSession
-  );
+	_In 	GM_SESSION 						gmSession
+	);
 
 /******************************************************************************/
 
 int(*GMCertStoreContextGetStream)(
-  _Out  GM_STREAM*            pgmStream,
-  _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext
-  );
+	_Out 	GM_STREAM* 						pgmStream,
+	_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext
+	);
 
 int(*GMCertStoreContextGetError)(
-  _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-  _Out  int*              pnErrorNumber
-  );
+	_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+	_Out 	int* 							pnErrorNumber
+	);
 
 char* (*GMCertGetErrorString)(
-  _In   int               nError
-  );
+	_In 	int 							nError
+	);
 
 int(*GMCertStoreContextGetErrorDepth)(
-  _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-  _Out  int*              pnErrorDepth
-  );
+	_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+	_Out 	int* 							pnErrorDepth
+	);
 
 int(*GMCertStoreContextGetCurrentCert)(
-  _In   GM_CERT_STROE_CONTEXT       gmCertStoreContext,
-  _Out  GM_CERT*            pgmCert
-  );
+	_In 	GM_CERT_STROE_CONTEXT 			gmCertStoreContext,
+	_Out 	GM_CERT* 						pgmCert
+	);
 
 void(*GMCertDestroy)(
-  _In   GM_CERT             gmCert
-  );
+	_In 	GM_CERT 						gmCert
+	);

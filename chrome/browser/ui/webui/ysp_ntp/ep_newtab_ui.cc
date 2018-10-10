@@ -31,26 +31,55 @@ namespace {
     html_source->AddResourcePath("jquery.js", IDR_REDCORE_NEWTAB_JQUERY_JS);
     html_source->AddResourcePath("amazeui.min.css", IDR_REDCORE_NEWTAB_AMAZEUI_MIN_CSS);
     html_source->AddResourcePath("styles.css", IDR_REDCORE_NEWTAB_STYLES_CSS);
-    html_source->AddResourcePath("imgs/backIcon.svg", IDR_REDCORE_NEWTAB_BACKICON_SVG);
-    html_source->AddResourcePath("imgs/defaultBanner.png", IDR_REDCORE_NEWTAB_DEFAULTBANNER_PNG);
-    html_source->AddResourcePath("imgs/defaultBG.png", IDR_REDCORE_NEWTAB_DEFAULTBG_PNG);
-    html_source->AddResourcePath("imgs/defaultIcon.svg", IDR_REDCORE_NEWTAB_DEFAULTICON_SVG);
-    html_source->AddResourcePath("imgs/defaultLogo.png", IDR_REDCORE_NEWTAB_DEFAULTLOGO_PNG);
-    html_source->AddResourcePath("imgs/error_icon.png", IDR_REDCORE_NEWTAB_ERROR_ICON_PNG);
-    html_source->AddResourcePath("imgs/invalid.png", IDR_REDCORE_NEWTAB_INVALID_PNG);
-    html_source->AddResourcePath("imgs/icon.svg", IDR_REDCORE_NEWTAB_ICON_SVG);
-    html_source->AddResourcePath("imgs/search_icon.svg", IDR_REDCORE_NEWTAB_SEARCH_ICON_SVG);
-    html_source->AddResourcePath("imgs/selectIcon.svg", IDR_REDCORE_NEWTAB_SELECTICON_SVG);
-    html_source->AddResourcePath("imgs/selectIcon.png", IDR_REDCORE_NEWTAB_SELECTICON_PNG);
-    html_source->AddResourcePath("imgs/background/bg-1.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_1_PNG);
+    /*/imgs { */
+		html_source->AddResourcePath("imgs/add_icon.svg", IDR_REDCORE_NEWTAB_ADD_ICON_SVG);
+		html_source->AddResourcePath("imgs/app_back_icon.svg", IDR_REDCORE_NEWTAB_APP_BACK_ICON_SVG);
+		html_source->AddResourcePath("imgs/appearance_hover_icon.png", IDR_REDCORE_NEWTAB_APPEARANCE_HOVER_ICON_PNG);
+		html_source->AddResourcePath("imgs/appearancel_icon.png", IDR_REDCORE_NEWTAB_APPEARANCE_ICON_PNG);
+		html_source->AddResourcePath("imgs/back_hover_icon.png", IDR_REDCORE_NEWTAB_BACK_HOVER_ICON_PNG);
+		html_source->AddResourcePath("imgs/back_normal_icon.png", IDR_REDCORE_NEWTAB_BACK_NORMAL_ICON_PNG);
+		html_source->AddResourcePath("imgs/close_icon.png", IDR_REDCORE_NEWTAB_CLOSE_ICON_PNG);
+		html_source->AddResourcePath("imgs/defaultIcon.png", IDR_REDCORE_NEWTAB_DEFAULTICON_PNG);
+		html_source->AddResourcePath("imgs/defaultLogo.png", IDR_REDCORE_NEWTAB_DEFAULTLOGO_PNG);
+		html_source->AddResourcePath("imgs/error_icon.png", IDR_REDCORE_NEWTAB_ERROR_ICON_PNG);
+		html_source->AddResourcePath("imgs/invalid.png", IDR_REDCORE_NEWTAB_INVALID_PNG);
+		html_source->AddResourcePath("imgs/load_failure_icon.png", IDR_REDCORE_NEWTAB_LOAD_FAILURE_ICON_PNG);
+		html_source->AddResourcePath("imgs/loading.png", IDR_REDCORE_NEWTAB_LOADING_PNG);
+		html_source->AddResourcePath("imgs/search_icon.png", IDR_REDCORE_NEWTAB_SEARCH_ICON_PNG);
+		html_source->AddResourcePath("imgs/selected_icon.png", IDR_REDCORE_NEWTAB_SELECTED_ICON_PNG);
+		html_source->AddResourcePath("imgs/selectIcon.png", IDR_REDCORE_NEWTAB_SELECTICON_PNG);
+		/*/imgs } */
+  /*/imgs/background { */
+ 		html_source->AddResourcePath("imgs/background/bg-1.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_1_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-2.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_2_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-3.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_3_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-4.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_4_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-5.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_5_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-6.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_6_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-7.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_7_PNG);
+ 		html_source->AddResourcePath("imgs/background/bg-8.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_BG_8_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-1.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_1_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-2.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_2_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-3.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_3_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-4.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_4_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-5.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_5_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-6.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_6_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-7.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_7_PNG);
+ 		html_source->AddResourcePath("imgs/background/abb-8.png", IDR_REDCORE_NEWTAB_IMGS_BACKGROUND_ABB_8_PNG);
+ 		/*/imgs/background } */
+    /*/imgs/login { */
     html_source->AddResourcePath("imgs/login/backIcon.png", IDR_REDCORE_NEWTAB_BACKICON_PNG);
     html_source->AddResourcePath("imgs/login/back-user.png", IDR_REDCORE_NEWTAB_BACKUSER_PNG);
-    html_source->AddResourcePath("imgs/login/bg.png", IDR_REDCORE_NEWTAB_BG_PNG);
+    		html_source->AddResourcePath("imgs/login/home_index.png", IDR_REDCORE_NEWTAB_HOME_INDEX_PNG);
+		html_source->AddResourcePath("imgs/login/password_icon.png", IDR_REDCORE_NEWTAB_PASSWORD_ICON_PNG);
     html_source->AddResourcePath("imgs/login/Group.png", IDR_REDCORE_NEWTAB_GROUP_PNG);
     html_source->AddResourcePath("imgs/login/qrcode.png", IDR_REDCORE_NEWTAB_QRCODE_PNG);
     html_source->AddResourcePath("imgs/login/qrcodeSuccess.png", IDR_REDCORE_NEWTAB_QRCODESUCCESS_PNG);
     html_source->AddResourcePath("imgs/login/redcoreLogo.png", IDR_REDCORE_NEWTAB_REDCORELOGO_PNG);
     html_source->AddResourcePath("imgs/login/scan.png", IDR_REDCORE_NEWTAB_SCAN_PNG);
+    html_source->AddResourcePath("imgs/login/user_icon.png", IDR_REDCORE_NEWTAB_USER_ICON_PNG);
+
+    /*/imgs/login { */
     html_source->AddResourcePath("hello/motion.css", IDR_REDCORE_NEWTAB_HELLO_MOTION_CSS);
     html_source->AddResourcePath("hello/index.css", IDR_REDCORE_NEWTAB_HELLO_INDEX_CSS);
     html_source->AddResourcePath("hello/swiper.min.css", IDR_REDCORE_NEWTAB_HELLO_SWIPER_MIN_CSS);
@@ -169,7 +198,15 @@ void EPNewTabUI::SetParam(const base::ListValue* args) {
     DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1 << " = " << bParam2;
     YSPLoginManager::GetInstance()->SetManageServer(bParam2);
   }
-
+	else if (strParam1.compare("setApplicationStatus") == 0) {
+		std::string applicationId = "";
+		bool applictionStatus = false;
+		if (!args->GetString(1, &applicationId) || !args->GetBoolean(2, &applictionStatus))
+			return;
+		DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1 << " = " << applicationId << " applictionStatus" << applictionStatus;
+		YSPLoginManager::GetInstance()->PutApplictionStatusFetch(applicationId, applictionStatus);
+	}
+  
   base::Value key(strParam1);
   std::string strFunctionName = "HOMEBROWSER.setParamCallback";
   web_ui()->CallJavascriptFunctionUnsafe(strFunctionName, key);

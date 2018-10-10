@@ -1053,6 +1053,8 @@ component("net") {
       "socket/transport_client_socket.h",
       "socket/transport_client_socket_pool.cc",
       "socket/transport_client_socket_pool.h",
+      "socket/ysp_spa_packet.h",
+      "socket/ysp_spa_packet.cc",
       "socket/udp_client_socket.cc",
       "socket/udp_client_socket.h",
       "socket/udp_net_log_parameters.cc",

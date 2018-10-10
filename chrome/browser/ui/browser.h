@@ -473,8 +473,11 @@ class Browser : public TabStripModelObserver,
   void SetWatermarkString(const std::vector<base::string16>& str, const uint32_t color, const int font_size);   //ysp+ { watermark }
 #endif
   void AppAutoUpdate();   //ysp+ { app auto update }
+  void AppAutoUpdate(const std::string& update_data);   //ysp+ { app auto update }
+
   void SetPopup(); //YSP+ { window popup }
   void ConfigIEPopupManager(const int& enableBlockPopup, const std::vector<std::wstring>& exceptions);
+  void SetLockStatus(YSPLockStatus status) { lock_status_  = status; }
   void UpdateWatermark();
 #endif
 

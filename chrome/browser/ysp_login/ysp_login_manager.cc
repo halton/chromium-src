@@ -98,6 +98,9 @@ namespace {
   const char kAutoGetConfigPath[] = "/client/v3/version/"; //获取版本信息
   const char kGetAuthTokenPath[] = "/client/v3/auth/token"; //更新access_token
   const char kSdpDevicePath[] = "/client/v3/sdp/device/"; //获取/删除用户设备
+  const char kModifyPasswordPath[] = "/client/v3/device/password"; //修改密码接口
+  const char kApplictionStatusPath[] = "/client/v3/strategy/application/market/";  //启用/关闭应用市场应用
+  const char kGatewayApplictionPath[] = "/client/v3/gateway/application/domain/";  //获取需要敲门的应用
   //const char kUploadContentType[] = "multipart/form-data";
   const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
   //YSP+ } /*Fetcher resource*/
@@ -987,6 +990,96 @@ std::string YSPLoginManager::GetCompanyId() {
   return std::string();
 }
 
+void YSPLoginManager::ModifyPassword(const std::string& oldPassword, const std::string& newPassword)
+{
+	LOG(INFO) << "YSPLoginManager::ModifyPassword:";
+	if (!put_modify_password_fetcher_) 
+	{
+		put_modify_password_fetcher_ = new YSPFetcherResource(this, g_browser_process->system_request_context());
+	}
+	else if (put_modify_password_fetcher_->IsLoading())
+	{
+		return;
+	}
+
+	std::vector<std::string> header_list;
+	std::string accessToken = GetAccessToken();
+	if (!accessToken.empty())
+	{
+		header_list.push_back("access-token: " + accessToken);
+	}
+
+	std::string url = GetManageServer() + kModifyPasswordPath;
+	std::string post_data;
+	net::AddMultipartValueForUpload("id", GetUserId(), kMultipartBoundary, "", &post_data);
+	net::AddMultipartValueForUpload("newPassword", newPassword, kMultipartBoundary, "", &post_data);
+	net::AddMultipartValueForUpload("oldPassword", oldPassword, kMultipartBoundary, "", &post_data);
+	net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
+	put_modify_password_fetcher_->StarFetcherResource(net::URLFetcher::PUT, url, header_list, post_data, false);
+	header_list.clear();
+}
+
+
+void YSPLoginManager::GetGatewayApplictionFetch(bool auto_fetch) {
+	std::vector<std::string> header_list;
+	std::string accessToken = GetAccessToken();
+	// if (get_gateway_appliction_fetcher_ && get_gateway_appliction_fetcher_->IsLoading())
+	//	return;
+
+	//获取需要敲门的应用列表
+	if (!GetUserId().empty()) {
+		header_list.push_back("userid: " + GetUserId());
+		if (!accessToken.empty())
+			header_list.push_back("access-token: " + accessToken);
+
+		LOG(INFO) << "YSPLoginManager::GetGatewayApplictionFetch";
+		if (!get_gateway_appliction_fetcher_) {
+			get_gateway_appliction_fetcher_ = new YSPFetcherResource(
+				this, g_browser_process->system_request_context());
+		}
+		std::string url =
+			GetManageServer() + kGatewayApplictionPath + GetCompanyId();
+		if (get_gateway_appliction_fetcher_) {
+			get_gateway_appliction_fetcher_->StarFetcherResource(
+				net::URLFetcher::GET, url, header_list, "", true);
+		}
+		header_list.clear();
+	}
+}
+
+void YSPLoginManager::PutApplictionStatusFetch(std::string& applicationId, bool applictionStatus) {
+  std::vector<std::string> header_list;
+  std::string accessToken = GetAccessToken();
+  // if (put_appliction_status_fetcher_ && put_appliction_status_fetcher_->IsLoading())
+  //	return;
+
+  //上传应用状态
+  if (!GetUserId().empty()) {
+    header_list.push_back("userid: " + GetUserId());
+    if (!accessToken.empty())
+      header_list.push_back("access-token: " + accessToken);
+    std::string post_data;
+    net::AddMultipartValueForUpload("status", applictionStatus ? "1" : "0",
+                                    kMultipartBoundary,
+                                    "", &post_data);
+    net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
+
+    LOG(INFO) << "YSPLoginManager::PutApplictionStatusFetch";
+    if (!put_appliction_status_fetcher_) {
+      put_appliction_status_fetcher_ = new YSPFetcherResource(
+          this, g_browser_process->system_request_context());
+    }
+    std::string url =
+        GetManageServer() + kApplictionStatusPath + GetUserId() + "/" + applicationId;
+    if (put_appliction_status_fetcher_) {
+      put_appliction_status_fetcher_->StarFetcherResource(
+          net::URLFetcher::PUT, url, header_list, post_data, true);
+    }
+    header_list.clear();
+  }
+}
+
+
 bool YSPLoginManager::SetManageServer(std::string manageServer) {
   DLOG(INFO) << "YSPLoginManager::SetManageServer set manager url: " << manageServer;
   if (GURL(manageServer).is_valid() == false) {
@@ -1684,6 +1777,24 @@ void YSPLoginManager::GetSdpDevicefetcher(bool auto_fetch)
     header_list.clear();
   }
 }
+
+//ysp+ { ysp single sign on
+std::string YSPLoginManager::GetYSPSingleSignOnString()
+{
+	if (pc_info_) {
+		base::DictionaryValue* dataDict = nullptr;
+		if (pc_info_->GetDictionary("data", &dataDict)) {
+			base::ListValue* domainDict = nullptr;
+			if (dataDict && dataDict->GetList("ssoTokenUrls.list", &domainDict)) {
+				std::string domainList_string = "";
+				if (base::JSONWriter::Write(*domainDict, &domainList_string))
+					return domainList_string;
+			}
+		}
+	}
+	return std::string();
+}
+//ysp+ }
 
 void YSPLoginManager::PutSdpDevicefetcher(std::string deviceId, bool auto_fetch)
 {
@@ -3891,25 +4002,33 @@ void YSPLoginManager::NotifyConfigureUpdate(const std::string& type,
   }
 }
 
+//获取服务器时间差
+int YSPLoginManager::GetTimeDifference() {
+	double timeDiff = 0;
+	PrefService* prefs = g_browser_process->local_state();
+	timeDiff = prefs->GetDouble(prefs::kYSPTimeDifference);
+	return timeDiff;
+}
+
 void YSPLoginManager::UpdateLoginManagerSettings()
 {
-  //ysp+ { crypto http header
-  std::string cryptHeaderKey = GetCryptoHeaderKey();
-  std::string uaTypes = GetUserAgentTypes();
-  if (uaTypes == "3") {
-    YSPCryptoHeader::GetInstance()->SetBrowserVersion(
-        version_info::GetYSPVersionNumber());
-    YSPCryptoHeader::GetInstance()->Init((uaTypes + cryptHeaderKey));
-  }
-  //ysp+ } /*crypto http header*/
+	//ysp+ { crypto http header
+	std::string cryptHeaderKey = GetCryptoHeaderKey();
+	std::string uaTypes = GetUserAgentTypes();
+	if (uaTypes == "3") {
+		YSPCryptoHeader::GetInstance()->Init((uaTypes + cryptHeaderKey));
+		YSPCryptoHeader::GetInstance()->SetTimeDiff(GetTimeDifference());
+	}
+	//ysp+ } /*crypto http header*/
 
-  AddHeaders();
-  LoadWindowFrameColors();
+	AddHeaders();
+	LoadWindowFrameColors();
 #ifdef IE_REDCORE
-  UpdateProxySettings();
-  UrlTrusted trust = YSPLoginManager::GetInstance()->GetUrlTrusted();
-  SetIEUrlTrusted(trust);
+	UpdateProxySettings();
+	UrlTrusted trust = YSPLoginManager::GetInstance()->GetUrlTrusted();
+	SetIEUrlTrusted(trust);
 #endif
 }
+
 
 #endif //REDCORE

@@ -125,7 +125,8 @@ enum WindowLocation {
 - (void)createYspAccountContronller {
   yspAccountController_.reset([[yspAccountController alloc] initWithView:[self yspTitleView]
                                                                 lockView:[self yspLockView]
-                                                                 browser:browser_.get()]);
+                                                                 browser:browser_.get()
+                                                                delegate:self]);
 }
 #endif
 

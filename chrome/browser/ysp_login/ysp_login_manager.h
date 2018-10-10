@@ -130,6 +130,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   base::DictionaryValue* GetPreviewDocOnline(); //YSP+ { doc online preview }
   bool GetPreviewDocOnlineEnable(); //YSP+ { doc online preview }
   base::DictionaryValue * GetPrivateDNS(); //ysp+ { private DNS }
+  std::string GetYSPSingleSignOnString(); //ysp+ { ysp single sign on }
   void AddHeaders();
   bool GetAddressBarEnabled();
   bool GetStatusBarEnabled();
@@ -198,6 +199,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   std::string generateUserInfoForSettings();
   std::string generateLoginDeviceForSettings();
   //YSP+ { Fetcher resource
+  int GetTimeDifference(); //YSP+ { time synchronization }
   std::string GetUserId();
   int GetStrategyVersion();
   std::string GetActivelId();
@@ -215,7 +217,12 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void GetAutoConfigfetcher(bool auto_fetch = true);
   void GetSdpDevicefetcher(bool auto_fetch = true);
   void PutSdpDevicefetcher(std::string deviceId, bool auto_fetch = true);
+  void PutApplictionStatusFetch(std::string & applicationId, bool applictionStatus);
+  void GetGatewayApplictionFetch(bool auto_fetch = true);
+
   void OnAutoConfigParseSuccess(std::unique_ptr<base::DictionaryValue> response_data, bool auto_fetch);
+  void ModifyPassword(const std::string& oldPassword, const std::string& newPassword);
+
   base::string16 GetYSPUserName();
   std::string GetHeadImageUrl();
   void OnApplicationFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
@@ -318,6 +325,9 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPFetcherResource* get_auth_token_fetcher_;
   YSPFetcherResource* get_sdp_device_fetcher_;
   YSPFetcherResource* put_sdp_device_fetcher_;
+  YSPFetcherResource* put_appliction_status_fetcher_;
+  YSPFetcherResource* get_gateway_appliction_fetcher_;
+  YSPFetcherResource* put_modify_password_fetcher_;
   //YSP+ } /*Fetcher resource*/
   YSPAutoConfigFetcher* autoConfig_fetcher_;
   bool auto_login_;

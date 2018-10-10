@@ -228,7 +228,7 @@
         Done
       </message>
       <message name="IDS_LEARN_MORE" desc="Learn more text">
-        Learn more
+        <!-- Learn more -->
       </message>
       <message name="IDS_OK" desc="Used for OK on buttons">
         OK

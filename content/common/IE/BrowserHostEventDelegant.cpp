@@ -397,6 +397,23 @@ namespace IE {
     return S_OK;
   }
 
+	STDMETHODIMP BrowserHostEventDelegant::OnQueryPrivateDNS(BSTR host, BSTR * ipList)
+	{
+		if (host == NULL || ipList == NULL)
+			return E_INVALIDARG;
+
+		std::wstring jsonStr = L"";
+		if (pIEContent)
+		{
+			pIEContent->OnQueryPrivateDns(host, &jsonStr);
+			if (jsonStr.empty() == false)
+			{
+				*ipList = ::SysAllocString(jsonStr.c_str());
+			}
+		}
+		return S_OK;
+	}
+  
   void BrowserHostEventDelegant::SetHostHWND(HWND hWnd)
   {
     hMainWnd = hWnd;

@@ -190,7 +190,7 @@ bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
   std::string url_str;
 
   if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
-    YSPLoginManager::GetInstance()->GetAutoConfigfetcher(false);
+    YSPLoginManager::GetInstance()->GetAutoConfigfetcher(true);
     url_str = "redcore://settings";
   }
   else {

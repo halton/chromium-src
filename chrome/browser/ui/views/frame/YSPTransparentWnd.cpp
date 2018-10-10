@@ -113,7 +113,7 @@ void YspTransparentWnd::Show(bool isShow)
 {
 	if (isShow)
 		if (isHide) {
-			base::TimeDelta delayTime = base::TimeDelta::FromMilliseconds(400);
+			base::TimeDelta delayTime = base::TimeDelta::FromMilliseconds(0);
 			delayShowTimer->Stop();
 			delayShowTimer->Start(FROM_HERE, delayTime, base::Bind(&YspTransparentWnd::DelayShowWindow, weakFactory.GetWeakPtr()));
 		}

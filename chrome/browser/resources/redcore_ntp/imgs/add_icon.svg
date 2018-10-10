@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>add_icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="首页0514" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="应用管理" transform="translate(-1095.000000, -809.000000)" fill="#FFFFFF">
+            <g id="应用入口" transform="translate(355.000000, 459.000000)">
+                <g id="1" transform="translate(620.000000, 270.000000)">
+                    <g id="报名">
+                        <path d="M142,98 L158,98 C159.104569,98 160,98.8954305 160,100 C160,101.104569 159.104569,102 158,102 L142,102 L142,118 C142,119.104569 141.104569,120 140,120 C138.895431,120 138,119.104569 138,118 L138,102 L122,102 C120.895431,102 120,101.104569 120,100 C120,98.8954305 120.895431,98 122,98 L138,98 L138,82 C138,80.8954305 138.895431,80 140,80 C141.104569,80 142,80.8954305 142,82 L142,98 Z" id="add_icon"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

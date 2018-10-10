@@ -192,6 +192,7 @@
 #include "content/browser/frame_host/navigation_handle_impl.h"
 #include "content/public/browser/navigation_throttle.h"
 #include "chrome/browser/ui/simple_message_box.h"
+#include "net/socket/transport_client_socket_pool.h"
 #endif
 
 #include "content/public/browser/notification_details.h"
@@ -2622,6 +2623,10 @@ void Browser::RemoveScheduledUpdatesFor(WebContents* contents) {
 // Browser, Getters for UI (private):
 
 StatusBubble* Browser::GetStatusBubble() {
+#ifdef REDCORE
+  if (!YSPLoginManager::GetInstance()->GetStatusBarEnabled() || lock_status_)
+    return NULL;
+#endif
   // In kiosk and exclusive app mode, we want to always hide the status bubble.
   if (chrome::IsRunningInAppMode())
     return NULL;
@@ -2983,6 +2988,11 @@ void Browser::AppAutoUpdate() {
   std::string manager_server = YSPLoginManager::GetInstance()->GetManageServer();
   std::string access_token = YSPLoginManager::GetInstance()->GetAccessToken();
   YSPUpdateManager::GetInstance()->RequestUpdate(contents, manager_server, user_id, company_id, access_token);
+}
+
+void Browser::AppAutoUpdate(const std::string& update_data)
+{
+	YSPUpdateManager::GetInstance()->OnAutoUpdateDownload(update_data);
 }
 //ysp+ } /*app auto update*/
 
@@ -3664,7 +3674,65 @@ void Browser::OnConfigDataUpdated(const std::string & type, const std::string & 
       base::string16(),
       l10n_util::GetStringUTF16(IDS_YSP_REMOVE_DEVICE_DESC));
   }
+  else if (type == "removeUser") {
+	  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+	  ClearUserDataForBrowser(user_id);
+	  chrome::ShowWarningMessageBox(window()->GetNativeWindow(),
+		  base::string16(),
+		  l10n_util::GetStringUTF16(IDS_YSP_REMOVE_USER_DESC));
+  }
+  else if (type == "disableUser") {
+	  chrome::ShowWarningMessageBox(window()->GetNativeWindow(),
+		  base::string16(),
+		  l10n_util::GetStringUTF16(IDS_YSP_DISABLE_USER_DESC));
+  }
+  else if (type == "pullClientUpdate") {
+	  if (!data.empty())
+		  AppAutoUpdate(data);
+  }
   //ysp+ }
+  else if (type == "YSPSingleSignOn") {
+	  //ysp+ {  ysp single sign on
+	  std::string ysp_sso_token_string = "token: " + YSPLoginManager::GetInstance()->GetAccessToken();
+	  std::string domain_list_string = YSPLoginManager::GetInstance()->GetYSPSingleSignOnString();
+	  if (!domain_list_string.empty() && !ysp_sso_token_string.empty()) {
+		  content::BrowserThread::PostTask(
+			  content::BrowserThread::IO, FROM_HERE,
+			  base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, domain_list_string, ysp_sso_token_string));
+	  }
+	  //ysp+ }
+  }
+  else if (type == "gatewayDomain") {
+	  if (!data.empty())
+	  {
+		  std::string deviceId = "deviceId", lastUuid = "lastUuid";
+		  std::string device_id = YSPLoginManager::GetInstance()->GetValueForKey(deviceId);
+		  std::string username = YSPLoginManager::GetInstance()->GetValueForKey(lastUuid);
+		  std::string strategy_id = YSPLoginManager::GetInstance()->GetActivelId();
+		  std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+		  base::ListValue* gatewayDomainList = nullptr;
+		  base::DictionaryValue domainDict;
+		  std::unique_ptr<base::Value> gatewayDomainValue = std::unique_ptr<base::Value>(base::JSONReader::Read(data));
+		  gatewayDomainList = (static_cast<base::ListValue*>(gatewayDomainValue.release()));
+		  if (gatewayDomainList && !gatewayDomainList->empty())
+		  {
+			  domainDict.SetString("deviceID", device_id);
+			  domainDict.SetString("username", username);
+			  domainDict.SetString("strategyID", strategy_id);
+			  domainDict.SetString("companyID", company_id);
+			  domainDict.SetInteger("timeDifference", YSPLoginManager::GetInstance()->GetTimeDifference());
+			  domainDict.Set("list", std::unique_ptr<base::ListValue>(gatewayDomainList->DeepCopy()));
+			  std::string domainDictString = "";
+			  base::JSONWriter::Write(domainDict, &domainDictString);
+			  content::BrowserThread::PostTask(
+				  content::BrowserThread::IO, FROM_HERE,
+				  base::Bind(&net::TransportConnectJob::SetDomainDictValue, domainDictString));
+			  content::BrowserThread::PostTask(
+				  content::BrowserThread::IO, FROM_HERE,
+				  base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, domainDictString));
+		  }
+	  }
+  }
 }
 
 //ysp+{IE Function Control}
@@ -3685,7 +3753,15 @@ void Browser::OnLoginRequestFailure(const std::string& error)
     content::BrowserThread::IO, FROM_HERE,
     base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
   //YSP+ } //sangfor GM ssl
+  content::BrowserThread::PostTask(
+		content::BrowserThread::IO, FROM_HERE,
+		base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
 #endif
+	//ysp+ {  ysp single sign on
+	content::BrowserThread::PostTask(
+		content::BrowserThread::IO, FROM_HERE,
+		base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+	//ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
   if (auto_lock_timer_.get())
     auto_lock_timer_->Stop();
@@ -3707,7 +3783,15 @@ void Browser::OnLoginResponseParseFailure(const std::string& error)
     content::BrowserThread::IO, FROM_HERE,
     base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
   //YSP+ } //sangfor GM ssl
+content::BrowserThread::PostTask(
+		content::BrowserThread::IO, FROM_HERE,
+		base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
 #endif
+	//ysp+ {  ysp single sign on
+	content::BrowserThread::PostTask(
+		content::BrowserThread::IO, FROM_HERE,
+		base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+	//ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
   if (auto_lock_timer_.get())
     auto_lock_timer_->Stop();
@@ -3729,6 +3813,9 @@ void Browser::OnLoginFailure(base::string16 message)
     content::BrowserThread::IO, FROM_HERE,
     base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
   //YSP+ } //sangfor GM ssl
+  content::BrowserThread::PostTask(
+	  content::BrowserThread::IO, FROM_HERE,
+	  base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
 #endif
   content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
   if (auto_lock_timer_.get())
@@ -3808,6 +3895,16 @@ void Browser::OnLoginSuccess(const base::string16 & name, const std::string & he
   //YSP+ } //sangfor GM ssl
 #endif
 
+  //ysp+ {  ysp single sign on
+  std::string ysp_sso_token_string = "token: " + YSPLoginManager::GetInstance()->GetAccessToken();
+  std::string domain_list_string = YSPLoginManager::GetInstance()->GetYSPSingleSignOnString();
+  if (!domain_list_string.empty() && !ysp_sso_token_string.empty()) {
+	  content::BrowserThread::PostTask(
+		  content::BrowserThread::IO, FROM_HERE,
+		  base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, domain_list_string, ysp_sso_token_string));
+  }
+  //ysp+ }
+
   //YSP+ { disable drag
   bool enable = YSPLoginManager::GetInstance()->GetCutCopyEnabled();
   content::RenderWidgetHostImpl::setDisableDrag(!enable);
@@ -3860,7 +3957,15 @@ void Browser::OnLogout()
     content::BrowserThread::IO, FROM_HERE,
     base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
   //YSP+ } //sangfor GM ssl
+  content::BrowserThread::PostTask(
+	  content::BrowserThread::IO, FROM_HERE,
+	  base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
 #endif
+  //ysp+ {  ysp single sign on
+  content::BrowserThread::PostTask(
+	  content::BrowserThread::IO, FROM_HERE,
+	  base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+  //ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false); //YSP+ { disable drag }
   if (auto_lock_timer_.get())
     auto_lock_timer_->Stop();
@@ -3898,7 +4003,8 @@ std::wstring Browser::GetIEFunctionControlJsonString()
   if (uaType == "1")
     FunctionControl->SetString("userAgentString", uaStr);
   else if (uaType == "3") {
-    FunctionControl->SetString("userAgentString", YSPCryptoHeader::GetInstance()->GetEncString());
+    FunctionControl->SetString("userAgentString", version_info::GetYSPProductNameAndVersionForUserAgent() +
+			                                          YSPCryptoHeader::GetInstance()->GetEncString());
     base::TimeDelta delayTime = base::TimeDelta::FromSeconds(60);
     if (ie_crypto_ua_timer_.get()) {
       ie_crypto_ua_timer_->Stop();

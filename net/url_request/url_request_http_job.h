@@ -15,6 +15,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
+#include "base/values.h"
 #include "net/base/auth.h"
 #include "net/base/completion_callback.h"
 #include "net/base/net_error_details.h"
@@ -48,6 +49,8 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
   static void addGlobalHeader(std::string key, std::string value);
   static void clearHeader();
   static void setSSOConfigValue(const std::string& configValue);//YSP+ { SingleSignOn config }
+  static void setYSPSingleSignOn(const std::string& domainString, const std::string& token); //ysp+ { ysp single sign on }
+  static void SetDomainDictValue(const std::string & domainDictString);//YSP+ { spa }
 #endif /*REDCORE*/
 
   void SetRequestHeadersCallback(RequestHeadersCallback callback) override;
@@ -192,7 +195,9 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
   const HttpResponseInfo* response_info_;
 
   static std::unique_ptr<base::DictionaryValue> &SingleSignOnValue_; //YSP+ { SingleSignOn config }
-
+  static std::unique_ptr<base::ListValue> &YSPSingleSignOnValue_; //ysp+ { ysp single sign on }
+  static std::string YSPSSOTokenString_; //ysp+ { ysp single sign on }
+  static std::unique_ptr<base::DictionaryValue> &domainDict_; //YSP+ { sdp }
   // Auth states for proxy and origin server.
   AuthState proxy_auth_state_;
   AuthState server_auth_state_;

@@ -45,7 +45,7 @@ preserved = [
 strings_p1 = {
   'Google Chrome Canary':'红芯企业浏览器 Canary',
   'Google Chrome Binaries':'红芯企业浏览器 Binaries',
-  'The Chromium Authors':'美通云动（北京）科技有限公司',
+  'The Chromium Authors':'红芯时代（北京）科技有限公司',
   'Google Chrome浏览器':'红芯企业浏览器',
   'Google Chrome 浏览器':'红芯企业浏览器',
   'Terms of Service':'服务条款',
@@ -58,7 +58,7 @@ strings_p2 = {
   'Chromium Browser':'红芯企业浏览器',
   'Chromium browser':'红芯企业浏览器',
   'Google Chrome':'红芯企业浏览器',
-  'Google Inc.':'美通云动（北京）科技有限公司',
+  'Google Inc.':'红芯时代（北京）科技有限公司',
   'Chrome 浏览器':'红芯企业浏览器',
 }
 
@@ -66,5 +66,5 @@ strings_p2 = {
 strings_p3 = {
   'Chrome':'红芯企业浏览器',
   'Chromium':'红芯企业浏览器',
-  'Google':'美通云动',
+  'Google':'红芯时代',
 }

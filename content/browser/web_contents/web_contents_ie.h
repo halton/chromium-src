@@ -168,6 +168,10 @@ struct LoadURLParams;
     void SendFunctionControl(const std::wstring& jsonStr);
     void SetCreateByIENewWindow(bool isNew);
 
+		void OnQueryPrivateDns(const std::wstring& host, std::wstring* ipListJsonStr);
+		void QueryDnsOnIOThread(const std::wstring& host);
+		void QueryDnsFinished(const std::wstring& ipListJsonStr);
+
   private:
     bool CreateTridentWebView(const gfx::AcceleratedWidget& hwnd_parent, const gfx::Size& size);
     bool IsTridentCreated();
@@ -200,9 +204,12 @@ struct LoadURLParams;
     HANDLE cookieEvent;
     net::CookieList cookieListTemp;
     bool isNavigateStoped;
+    base::WeakPtrFactory<WebContentsIE> weakFactory;
     bool needFireUnloadEvent;
     bool isNewWindow; //是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
-    base::WeakPtrFactory<WebContentsIE> weakFactory;
+    base::WeakPtrFactory<WebContentsIE> weakFactoryForIO;
+    std::wstring QueryDnsJsonStrTemp;
+
     friend class WebContents;  // To implement factory methods.
     friend class WebContentsImpl;
     //friend class RenderFrameHostImpl;

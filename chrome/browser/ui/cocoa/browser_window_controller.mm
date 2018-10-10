@@ -1816,6 +1816,16 @@ willAnimateFromState:(BookmarkBar::State)oldState
   return [fullscreenToolbarController_ mustShowFullscreenToolbar];
 }
 
+- (void)enterLockScreen {
+  browser_->SetLockStatus(Browser::SCREEN_LOCKED);
+  statusBubble_->Hide();
+}
+
+- (void)exitLockScreen {
+  browser_->SetLockStatus(Browser::UNLOCKED);
+  //statusBubble_->Attach();
+}
+
 @end  // @implementation BrowserWindowController
 
 @implementation BrowserWindowController(Fullscreen)

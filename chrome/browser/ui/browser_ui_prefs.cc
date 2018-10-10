@@ -38,6 +38,24 @@ void RegisterBrowserPrefs(PrefRegistrySimple* registry) {
   registry->RegisterIntegerPref(prefs::kOptionsWindowLastTabIndex, 0);
   registry->RegisterBooleanPref(prefs::kAllowFileSelectionDialogs, true);
 
+#ifdef REDCORE
+  registry->RegisterBooleanPref(prefs::kYSPAutoLogin, false);
+  registry->RegisterStringPref(prefs::kYSPServerAddress, std::string());
+  registry->RegisterStringPref(prefs::kYSPUserSetServerAddress, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastCID, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastUID, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastPWD, std::string());
+  registry->RegisterStringPref(prefs::kYSPDeviceID, std::string());
+  registry->RegisterStringPref(prefs::kYSPAccessToken, std::string());
+  registry->RegisterStringPref(prefs::kYSPRefreshToken, std::string());
+  registry->RegisterBooleanPref(prefs::kYSPFirstLogin, true);
+  registry->RegisterDoublePref(prefs::kYSPTimeDifference, 0);
+  registry->RegisterIntegerPref(prefs::kYSPLockScreen, false);
+#ifdef IE_REDCORE
+  registry->RegisterDictionaryPref(prefs::kYSPActivexNoPromptInfo);
+#endif
+#endif
+
 #if !defined(OS_ANDROID)
   registry->RegisterIntegerPref(prefs::kRelaunchNotification, 0);
   registry->RegisterIntegerPref(

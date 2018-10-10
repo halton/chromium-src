@@ -564,6 +564,28 @@ namespace IE {
     }
   }
 
+	void BrowserProcess::OnQueryPrivateDNS(const std::wstring & host, std::wstring * ipListJsonStr)
+	{
+		if (pHostApp && host.empty() == false && ipListJsonStr)
+		{
+			*ipListJsonStr = L"";
+			vector<variant_t> params;
+			bstr_t hostArg = host.c_str();
+			params.push_back(hostArg);
+			bstr_t ipListArg = L"";
+			variant_t arg2;
+			arg2.vt = VT_BYREF | VT_BSTR;
+			arg2.pbstrVal = ipListArg.GetAddress();
+			params.push_back(arg2);
+			variant_t ret;
+			HRESULT hr = E_FAIL;
+			hr = DispatchInvoke(pHostApp, L"OnQueryPrivateDNS", DISPATCH_METHOD, params, ret);
+			if (SUCCEEDED(hr) && ipListArg.GetBSTR())
+			{
+				*ipListJsonStr = ipListArg.GetBSTR();
+			}
+		}
+	}
   bool BrowserProcess::RegisterClassObject()
   {
     CComPtr<IUnknown> cf;

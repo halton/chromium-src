@@ -128,6 +128,12 @@ class NET_EXPORT_PRIVATE TransportConnectJob : public ConnectJob {
       const LoadTimingInfo::ConnectTiming& connect_timing,
       RaceResult race_result);
 
+#ifdef REDCORE
+  static void SetDomainDictValue(const std::string& domainDictString);
+  static void SetLoginSpaValue(const std::string& device_id, const std::string& username, const std::string& host);
+  bool DomainCompared(const std::string& host, std::string* device_id, std::string* username, std::string* server_ip, int timeDiff);
+#endif
+
  private:
   enum State {
     STATE_RESOLVE_HOST,
@@ -165,6 +171,14 @@ class NET_EXPORT_PRIVATE TransportConnectJob : public ConnectJob {
 
   std::unique_ptr<StreamSocket> transport_socket_;
   AddressList addresses_;
+
+#ifdef REDCORE
+  static std::string device_id_;
+  static std::string username_;
+  static std::string host_;
+  static std::string localIp_;
+  static std::unique_ptr<base::DictionaryValue> domainDict_;
+#endif
 
   std::unique_ptr<StreamSocket> fallback_transport_socket_;
   std::unique_ptr<AddressList> fallback_addresses_;

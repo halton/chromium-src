@@ -269,32 +269,32 @@ namespace IE {
     }
     case DISPID_DOWNLOADCOMPLETE:
     {
-      if (pHtmlDoc == NULL) //将自己实现的IDocHostUIHandler接口替换IE内核创建的，这样能够获取IE内核创建IDocHostUIHandler接口中的GetExternal接口
-      {
-        CComPtr<IDispatch> pDisp;
-        if (pWebBrowser)
-          pWebBrowser->get_Document(&pDisp);
-        if (pDisp)
-        {
-          pDisp->QueryInterface(IID_IHTMLDocument2, (void**)&pHtmlDoc);
-          if (pHtmlDoc)
-          {
-            CComPtr<IOleObject> pOleObj;
-            pHtmlDoc->QueryInterface(IID_IOleObject, (void**)&pOleObj);
-            CComPtr<IOleClientSite> pClientSite;
-            pOleObj->GetClientSite(&pClientSite);
-            if (pClientSite)
-            {
-              pClientSite->QueryInterface(IID_IDocHostUIHandler, (void**)&pOrgDocHost);
+      // if (pHtmlDoc == NULL) //将自己实现的IDocHostUIHandler接口替换IE内核创建的，这样能够获取IE内核创建IDocHostUIHandler接口中的GetExternal接口
+      // {
+      //   CComPtr<IDispatch> pDisp;
+      //   if (pWebBrowser)
+      //     pWebBrowser->get_Document(&pDisp);
+      //   if (pDisp)
+      //   {
+      //     pDisp->QueryInterface(IID_IHTMLDocument2, (void**)&pHtmlDoc);
+      //     if (pHtmlDoc)
+      //     {
+      //       CComPtr<IOleObject> pOleObj;
+      //       pHtmlDoc->QueryInterface(IID_IOleObject, (void**)&pOleObj);
+      //       CComPtr<IOleClientSite> pClientSite;
+      //       pOleObj->GetClientSite(&pClientSite);
+      //       if (pClientSite)
+      //       {
+      //         pClientSite->QueryInterface(IID_IDocHostUIHandler, (void**)&pOrgDocHost);
 
-              pDocHostUIHandler->SetOrgDocHost(pOrgDocHost);
-              CComPtr<ICustomDoc> pCustomDoc;
-              pHtmlDoc->QueryInterface(IID_ICustomDoc, (void**)&pCustomDoc);
-              pCustomDoc->SetUIHandler(pDocHostUIHandler);
-            }
-          }
-        }
-      }
+      //         pDocHostUIHandler->SetOrgDocHost(pOrgDocHost);
+      //         CComPtr<ICustomDoc> pCustomDoc;
+      //         pHtmlDoc->QueryInterface(IID_ICustomDoc, (void**)&pCustomDoc);
+      //         pCustomDoc->SetUIHandler(pDocHostUIHandler);
+      //       }
+      //     }
+      //   }
+      // }
 
       if (refreshFlg == false)
         break;

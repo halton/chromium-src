@@ -943,6 +943,7 @@ extern const char kYSPDeviceID[];
 extern const char kYSPAccessToken[];
 extern const char kYSPRefreshToken[];
 extern const char kYSPFirstLogin[];
+extern const char kYSPTimeDifference[];
 extern const char kYSPExtensionInstallVersion[];
 extern const char kYSPActivexNoPromptInfo[];
 extern const char kYSPLockScreen[];

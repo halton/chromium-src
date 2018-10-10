@@ -179,6 +179,15 @@ std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
   // This is done to expose our product name in a manner that is maximally
   // compatible with Safari, we hope!!
   std::string user_agent;
+#ifdef REDCORE //TODO(matianzhi) modify UserAgent
+  base::StringAppendF(
+	  &user_agent,
+	  "Mozilla/5.0 (%s) AppleWebKit/%d.%d (KHTML, like Gecko) %s",
+	  os_info.c_str(),
+	  WEBKIT_VERSION_MAJOR,
+	  WEBKIT_VERSION_MINOR,
+	  product.c_str());
+#else
   base::StringAppendF(
       &user_agent,
       "Mozilla/5.0 (%s) AppleWebKit/%d.%d (KHTML, like Gecko) %s Safari/%d.%d",
@@ -188,6 +197,7 @@ std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
       product.c_str(),
       WEBKIT_VERSION_MAJOR,
       WEBKIT_VERSION_MINOR);
+#endif
   return user_agent;
 }
 

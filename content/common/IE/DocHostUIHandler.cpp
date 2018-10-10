@@ -230,12 +230,12 @@ namespace IE {
     //  pJSHandler = new JavaScriptHandler;
     //*ppDispatch = pJSHandler;
 
-    if (pOrgDocHost)
-    {
-      IDispatch* pDisp = NULL;
-      pOrgDocHost->GetExternal(&pDisp);
-      *ppDispatch = pDisp;
-    }
+    // if (pOrgDocHost)
+    // {
+    //   IDispatch* pDisp = NULL;
+    //   pOrgDocHost->GetExternal(&pDisp);
+    //   *ppDispatch = pDisp;
+    // }
     return S_OK;
   }
 
@@ -1274,13 +1274,13 @@ namespace IE {
         (dwFlags & 0x00000002) == 0x00000002)
         flag = IE::NewWindowFlag::TRANSITION;
       flag = flag | IE::NewWindowFlag::FROMDIALOG;
-      if (pDelegate)
-      {
-        CComPtr<IDispatch> pDisp;
-        bool cancel=pDelegate->OnLoadUrlNewWnd(pszUrl, flag, &pDisp);
-        if (cancel)
-          return S_FALSE;
-      }
+      // if (pDelegate)
+      // {
+      //   CComPtr<IDispatch> pDisp;
+      //   bool cancel=pDelegate->OnLoadUrlNewWnd(pszUrl, flag, &pDisp);
+      //   if (cancel)
+      //     return S_FALSE;
+      // }
     }
     return E_FAIL;
   }

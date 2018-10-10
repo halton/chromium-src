@@ -9092,6 +9092,9 @@ Please help our engineers fix this problem. Tell us what happened right before y
     <message name="IDS_ABOUT_YSP_PRODUCT_VERSION" desc="The text label describing the version of the browser">
       Version <ph name="PRODUCT_VERSION">$1<ex>1.0.0</ex></ph>
     </message>
+    <message name="IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD" desc="">
+      Please enter password
+   </message>
     <message name="IDS_YSP_LOGIN_VIEW_TITLE" desc="">
       Login the Browser
     </message>
@@ -9317,6 +9320,9 @@ Please help our engineers fix this problem. Tell us what happened right before y
     <message name="IDS_YSP_AD_USERS_FORBID_UPDATING" desc="">
       Forbid updating AD users' user information
     </message>
+    <message name="IDS_YSP_DISABLE_USER_DESC" desc="">
+      Your account has been disabled and logged out.
+   </message>
     <message name="IDS_YSP_REDCORE_ENTERPRISE_BROWSER" desc="">
       RedCore Enterprise Browser
     </message>
@@ -9341,6 +9347,9 @@ Please help our engineers fix this problem. Tell us what happened right before y
     <message name="IDS_YSP_REMOVE_DEVICE_DESC" desc="">
       You are logged out because this device has been disabled.
     </message>
+    <message name="IDS_YSP_REMOVE_USER_DESC" desc="">
+      Your account has been deleted and logged out.
+   </message>
     <!-- //ysp+ } -->
     
     <!-- Web-modal dialog shown during Web Authenticaton API requests. -->

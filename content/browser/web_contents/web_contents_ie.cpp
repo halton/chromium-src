@@ -108,6 +108,7 @@
 #include "ui/display/screen.h"
 #include "ui/gfx/codec/png_codec.h"
 #include "ui/gl/gl_switches.h"
+#include "net/dns/host_resolver_impl.h"
 
 #if defined(OS_ANDROID)
 #include "content/browser/android/content_video_view.h"
@@ -174,9 +175,12 @@ namespace content {
     cookie_json(L""),
     cookieEvent(NULL),
     isNavigateStoped(false),
+    weakFactory(this),
+    weakFactoryForIO(this),
     needFireUnloadEvent(true),
     isNewWindow(false),
-    weakFactory(this)
+    QueryDnsJsonStrTemp(L"")
+    
   {
     cookieEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     ResetEvent(cookieEvent);
@@ -813,6 +817,41 @@ void Find(int request_id,
     isNewWindow = isNew;
   }
 
+	void WebContentsIE::OnQueryPrivateDns(const std::wstring & host, std::wstring * ipListJsonStr)
+	{
+		QueryDnsJsonStrTemp.clear();
+		content::BrowserThread::PostTask(content::BrowserThread::IO, FROM_HERE,
+			base::Bind(&WebContentsIE::QueryDnsOnIOThread, weakFactoryForIO.GetWeakPtr(), host));
+		//base::MessageLoopForUI::current()->Run();
+		*ipListJsonStr = QueryDnsJsonStrTemp;
+	}
+
+	void WebContentsIE::QueryDnsOnIOThread(const std::wstring & host)
+	{
+		std::string hostStr = "";
+		std::wstring ipListJsonStr = L"";
+		hostStr = base::UTF16ToASCII(host);
+		base::ListValue* json = NULL;
+		json = net::HostResolverImpl::privateDNSCompared(hostStr);
+		if (json)
+		{
+			std::string buff = "";
+			base::JSONWriter::Write(*json, &buff);
+			ipListJsonStr = base::UTF8ToUTF16(buff);
+		}
+		content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
+			base::Bind(&WebContentsIE::QueryDnsFinished, weakFactory.GetWeakPtr(), ipListJsonStr));
+	}
+
+	void WebContentsIE::QueryDnsFinished(const std::wstring & ipListJsonStr)
+	{
+		if (ipListJsonStr.empty() == false)
+		{
+			QueryDnsJsonStrTemp = ipListJsonStr;
+		}
+		//base::MessageLoopForUI::current()->QuitWhenIdle();
+	}
+  
   void WebContentsIE::OnURLFetchComplete(const net::URLFetcher * source)
   {
     if (image_download_callback_.is_null()) return;
@@ -1149,7 +1188,7 @@ void Find(int request_id,
     {
       net::CookieOptions option;
       option.set_include_httponly();
-      // option.set_include_first_party_only_cookies();
+      //option.set_include_first_party_only_cookies();
       std::string buff = base::UTF16ToASCII(*iter);
       cookieStore->SetCookieWithOptionsAsync(url, buff, option,
         base::Bind(&WebContentsIE::OnCookieSaveSuccess, base::Unretained(this)));
@@ -1251,9 +1290,6 @@ void Find(int request_id,
     if(PageTransitionCoreTypeIs(params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD)
      && PageTransitionCoreTypeIs(params->transition_type, ui::PageTransition::PAGE_TRANSITION_FORWARD_BACK)
      && curUrl != params->url)
-    // if (params.transition_type != ui::PageTransition::PAGE_TRANSITION_RELOAD &&
-    //   params.transition_type != ui::PageTransition::PAGE_TRANSITION_FORWARD_BACK &&
-    //   curUrl != params.url)
     {
       GURL cookieUrl = GURL(params->url.scheme() + ":\\" + params->url.host());
       SetIECookie(cookieUrl);
@@ -1272,16 +1308,17 @@ void Find(int request_id,
     if (PageTransitionCoreTypeIs(params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
       pBroEventHandler->Refresh();
 
-    //chjy
-    //RenderFrameHostImpl* rfh = GetMainFrame();
-    //isNavigateStoped = false;
+    // //chjy
+    // RenderFrameHostImpl* rfh = GetMainFrame();
+    // isNavigateStoped = false;
     // if (rfh)
-    // {
-    //  DidStartLoading(rfh->frame_tree_node(), true);
-    //  rfh->frame_tree_node()->navigator()->
-    //    DidStartProvisionalLoad(rfh, GURL(url), base::TimeTicks::Now());  //will call WebContentsObserver::DidStartNavigation may be switch renderer
-    // }
-    //chjy
+    //  {
+    //   DidStartLoading(rfh->frame_tree_node(), true);
+    //   rfh->frame_tree_node()->navigator()->
+    //     DidStartProvisionalLoad(rfh, GURL(url)
+    //     , std::vector<GURL>(), base::TimeTicks::Now());  //will call WebContentsObserver::DidStartNavigation may be switch renderer
+    //  }
+    // //chjy
   }
 
 } //namespace content

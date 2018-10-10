@@ -429,10 +429,18 @@ static void Xor ( bool *InA, const bool *InB, int len )
 
 static void RotateL ( bool *In, int len, int loop )
 {
-    static bool tmp[256];               // Sample:  loop=2
-    memcpy ( tmp, In, loop );           // In=12345678 tmp=12
-    memcpy ( In, In+loop, len-loop );   // In=345678
-    memcpy ( In+len-loop, tmp, loop );  // In=34567812
+    bool tmp[2];
+    int i = 0;
+    for (i = 0; i < loop; i++) {
+      tmp[i] = In[i];
+    }
+    for (; i < len; i++) {
+      In[i - loop] = In[i];
+    }
+
+    for (i = 0; i < loop; i++) {
+      In[i+len-loop] = tmp[i];
+    }
 }
 
 // Sample:

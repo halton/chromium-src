@@ -73,6 +73,7 @@
 #include "net/url_request/websocket_handshake_userdata_key.h"
 #include "url/origin.h"
 #ifdef REDCORE
+
 #include "base/strings/string_number_conversions.h"
 #include "base/json/json_reader.h" //YSP+ { SingleSignOn config }
 #include "base/json/json_writer.h" //YSP+ { SingleSignOn config }
@@ -329,6 +330,18 @@ void LogCookieUMA(const net::CookieList& cookie_list,
 namespace net {
 
 std::unique_ptr<base::DictionaryValue> &URLRequestHttpJob::SingleSignOnValue_ = * new std::unique_ptr<base::DictionaryValue>(nullptr);
+std::unique_ptr<base::ListValue> &URLRequestHttpJob::YSPSingleSignOnValue_ = *new std::unique_ptr<base::ListValue>(nullptr);
+
+#ifdef __APPLE__
+#pragma clang diagnostic push 
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
+std::string URLRequestHttpJob::YSPSSOTokenString_;
+#ifdef __APPLE__
+#pragma clang diagnostic pop
+#endif
+    
+std::unique_ptr<base::DictionaryValue> &URLRequestHttpJob::domainDict_ = *new std::unique_ptr<base::DictionaryValue>(nullptr);
 
 #ifdef REDCORE
 //YSP+ { SingleSignOn config
@@ -670,7 +683,7 @@ void URLRequestHttpJob::Start() {
       else if (uaTypes == "3") {
         value = http_user_agent_settings_->GetUserAgent();
         if (YSPCryptoHeader::GetInstance()->isAddHeaders()) {
-        value += " " + YSPCryptoHeader::GetInstance()->GetEncString();
+          value += YSPCryptoHeader::GetInstance()->GetEncString();
         }
       }
       else if (uaTypes == "2")
@@ -688,6 +701,47 @@ void URLRequestHttpJob::Start() {
      }
   }
   //ysp+ }
+
+  //YSP+ { sdp
+  if (domainDict_) {
+	  base::DictionaryValue* dataDict = domainDict_.get();
+	  if (dataDict && !dataDict->empty()) {
+		  std::string strategy_id = "";
+		  std::string company_id = "";
+		  dataDict->GetString("strategyID", &strategy_id);
+		  dataDict->GetString("companyID", &company_id);
+		  base::ListValue* domainList = nullptr;
+		  if (dataDict->GetList("list", &domainList))
+		  {
+			  if (domainList && !domainList->empty())
+			  {
+				  for (size_t i = 0; i < domainList->GetSize(); i++)
+				  {
+					  base::DictionaryValue* domainAndGateway = nullptr;
+					  if (domainList->GetDictionary(i, &domainAndGateway))
+					  {
+						  std::string domain = "";
+						  domainAndGateway->GetString("domain", &domain);
+						  std::string url = "";
+						  url = request_->url().spec();
+						  //if (request_->url().host() == domain)
+						  //{
+						  std::string method = request_info_.method;
+						  std::string uri = request_info_.url.PathForRequest();
+						  std::string scheme = "HTTP";// request_info_.url.scheme();
+						  std::string spaValue = http_user_agent_settings_->GetUserAgent();
+						  spaValue += YSPCryptoHeader::GetInstance()->GetHMACEncString(scheme + method, uri);
+						  spaValue += " POLICYID(" + strategy_id + ") COMPANYID(" + company_id + ")";
+						  request_info_.extra_headers.SetHeader("User-Agent", spaValue);
+						  break;
+						  //}
+					  }
+				  }
+			  }
+		  }
+	  }
+  }
+  //YSP+ } /*sdp*/
 
   //YSP+ { SingleSignOn config
   if (SingleSignOnValue_) {
@@ -754,6 +808,26 @@ void URLRequestHttpJob::Start() {
     }
   }
   //YSP+ } /*SingleSignOn config*/
+
+  //ysp+ { ysp single sign on
+  if (YSPSingleSignOnValue_) {
+	  base::ListValue* YSPSSOList = YSPSingleSignOnValue_.get();
+	  if (YSPSSOList) {
+		  for (size_t i = 0; i < YSPSSOList->GetSize(); ++i) {
+			  std::string domain = "";
+			  YSPSSOList->GetString(i, &domain);
+			  DLOG(INFO) << "ysp sso request url: " << request_->url() << " domain url: " << GURL(domain);
+			  if (request_->url() == GURL(domain)) {
+				  if (!YSPSSOTokenString_.empty()) {
+					  request_info_.extra_headers.AddHeaderFromString(YSPSSOTokenString_);
+					  break;
+				  }
+			  }
+		  }
+	  }
+  }
+
+  //ysp+ }
 #endif /*REDCORE*/
 
   // This should be kept in sync with the corresponding code in
@@ -1991,6 +2065,34 @@ void URLRequestHttpJob::setSSOConfigValue(const std::string& configValue) {
     SingleSignOnValue_.reset();
 }
 //YSP+ }/*SingleSignOn config*/
+//YSP+ { spa
+//static
+void URLRequestHttpJob::SetDomainDictValue(const std::string & domainDictString)
+{
+	if (!domainDictString.empty())
+	{
+		 std::unique_ptr<base::Value> domainValue = base::JSONReader::Read(domainDictString);
+		domainDict_.reset(static_cast<base::DictionaryValue*>(domainValue.release()));
+	}
+	else
+		domainDict_.reset();
+}
+//YSP+ }/*spa*/
+//ysp+ { ysp single sign on
+void URLRequestHttpJob::setYSPSingleSignOn(const std::string & domainString, const std::string& token)
+{
+	if (!domainString.empty()) {
+		 std::unique_ptr<base::Value> dictYSPSSOValue = base::JSONReader::Read(domainString);
+		YSPSingleSignOnValue_.reset(static_cast<base::ListValue*>(dictYSPSSOValue.release()));
+	}
+	else
+		YSPSingleSignOnValue_.reset();
+	if (!token.empty())
+		YSPSSOTokenString_ = token;
+	else
+		YSPSSOTokenString_ = "";
+}
+//ysp+ }
 #endif /*REDCORE*/
 
 }  // namespace net

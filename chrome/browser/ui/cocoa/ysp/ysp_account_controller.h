@@ -14,6 +14,11 @@ class LoginObserver;
 @class CrTrackingArea;
 @class CustomWindowControlsView;
 
+@protocol YSPControllerDelegate
+- (void)enterLockScreen;
+- (void)exitLockScreen;
+@end
+
 @interface YSPTitleView : NSView<ThemedWindowDrawing> {
   
 }
@@ -34,6 +39,7 @@ class LoginObserver;
 
   scoped_ptr<LoginObserver> loginObserver_;
   Browser* browser_;
+  id<YSPControllerDelegate> delegate_;
   
   // move from TabStripController
   base::scoped_nsobject<CustomWindowControlsView> customWindowControls_;
@@ -42,13 +48,9 @@ class LoginObserver;
 
 -(id)initWithView:(NSView *)titleView
          lockView:(NSView *)lockView
-          browser:(Browser *)browser;
+          browser:(Browser *)browser
+         delegate:(id<YSPControllerDelegate>) delegate;
 
-#if 0
-- (id)initWithView:(NSTextField *)userName
-            avatar:(NSButton *)avatar
-           browser:(Browser *)browser;
-#endif
 - (void)layout:(NSRect&)frame;
 
 - (void)login:(NSString *)userName;

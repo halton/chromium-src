@@ -1388,6 +1388,8 @@ void DownloadManagerImpl::DownloadUrlForIE(std::unique_ptr<download::DownloadUrl
   std::unique_ptr<download::DownloadSaveInfo> saveInfo (new download::DownloadSaveInfo);
   // create_info.reset(new download::DownloadCreateInfo(base::Time::Now(), contentLength, netLog, std::move(saveInfo)));
   header->EnumerateHeader(nullptr, "Content-Disposition", &create_info->content_disposition);
+	header->GetMimeType(&(create_info->mime_type));
+ 	header->GetMimeType(&(create_info->original_mime_type));
   // create_info->referrer_url = params->referrer().url;
   create_info->tab_url = params->url();
   create_info->url_chain.push_back(params->url());

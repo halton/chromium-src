@@ -1,5 +1,5 @@
 #ifdef REDCORE
-//ysp+
+//ysp 
 
 #include "chrome/browser/ysp_update/ysp_update_manager.h"
 
@@ -401,11 +401,7 @@ void YSPUpdateManager::OnAutoUpdateDownload(
       return;
     bool enable_autoUpdate = false;
     int updateType = 2;
-    std::string fileName = "";
-    std::string fileMD5 = "";
-    std::string version_str = "";
-    std::string fileUrl = "";
-    std::string md5 = "";
+		std::string fileName = "", fileMD5 = "", version_str = "", fileUrl = "", md5 = "";
     base::FilePath path;
     dataDict->GetBoolean("Enable_ClientAutoUpdate", &enable_autoUpdate);
     dataDict->GetString("ClientFileName", &fileName);
@@ -446,26 +442,14 @@ void YSPUpdateManager::OnAutoUpdateDownload(
               std::unique_ptr<base::DictionaryValue>(
                 static_cast<base::DictionaryValue*>(response_data.release())));
         } else {
-          FILE* file = fopen(path.AsUTF8Unsafe().c_str(), "rb");
-          if (NULL == file) {
+					std::string file_data;
+					bool status = base::ReadFileToString(path, &file_data);
+					if (!status || file_data.empty()) {
             StartDownload(GURL(fileUrl), path);
             return;
           }
-          fseek(file, 0L, SEEK_END);
-          int sz = ftell(file);
-          fseek(file, 0L, SEEK_SET);
-          if (sz == 0) {
-            StartDownload(GURL(fileUrl), path);
-            return;
-          }
-          char* buff = new char[sz];
-          memset(buff, 0, sz);
-          size_t nmemb;
-          nmemb = fread(buff, 1, sz, file);
-          fclose(file);
           base::MD5Digest  digest = { {0} };
-          base::MD5Sum(buff, sz, &digest);
-          delete[] buff;
+					base::MD5Sum(file_data.c_str(), file_data.length(), &digest);
           md5 = base::MD5DigestToBase16(digest);
           if (md5 != fileMD5) {
             StartDownload(GURL(fileUrl), path);
@@ -485,6 +469,68 @@ void YSPUpdateManager::OnAutoUpdateDownload(
     }
   }
 }
+
+
+ void YSPUpdateManager::OnAutoUpdateDownload(const std::string& update_data)
+ {
+ 	if (!update_data.empty()) {
+ 		std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(update_data);
+ 		base::DictionaryValue* dataDict = base::DictionaryValue::From(std::move(rootValue)).get();
+ 		if (!dataDict)
+ 			return;
+ 		std::string platformType = "", fileName = "", fileMD5 = "", version_str = "", fileUrl = "", md5 = "";
+ 		base::FilePath path;
+ 		dataDict->GetString("fileName", &fileName);
+ 		dataDict->GetString("md5", &fileMD5);
+ 		dataDict->GetString("version", &version_str);
+ 		dataDict->GetString("url", &fileUrl);
+ 		dataDict->GetString("type", &platformType);
+ 		DLOG(INFO) << "YSPUpdateManager fileName: " << fileName
+ 			<< ", fileMD5:" << fileMD5 << ", version_str:" << version_str
+ 			<< ", fileUrl:" << fileUrl << ", platformType:" << platformType;
+ 
+ 		base::PathService::Get(chrome::DIR_DEFAULT_DOWNLOADS, &path);
+ 		std::string lver_string = version_info::GetYSPVersionNumber();
+ 		DLOG(INFO) << "path: " << path.value();
+ 		path = path.AppendASCII(fileName);
+ 
+ 		if (!version_str.empty()) {
+ 			base::Version remote_version(version_str);
+ 			base::Version local_version(lver_string);
+ 			if (!remote_version.IsValid())
+ 				return;
+ 			if (local_version.CompareTo(remote_version) < 0) {
+ 				LOG(INFO) << "Should update from " << lver_string << " to " << version_str;
+ 				std::string file_data;
+ 				bool status = base::ReadFileToString(path, &file_data);
+ 				if (!status || file_data.empty()) {
+ 					StartDownload(GURL(fileUrl), path);
+ 					return;
+ 				}
+ 				base::MD5Digest  digest = { { 0 } };
+ 				base::MD5Sum(file_data.c_str(), file_data.length(), &digest);
+ 				md5 = base::MD5DigestToBase16(digest);
+ 				if (md5 != fileMD5) {
+ 					StartDownload(GURL(fileUrl), path);
+ 				}
+ #if defined(OS_WIN) // TODO (ysp) : Fix it on Mac
+ 				if (platformType == "windows") {
+ 					std::wstring wPath = path.value();
+ 					HINSTANCE num = ShellExecute(NULL, L"open", wPath.c_str(), NULL, NULL, SW_SHOWNORMAL);
+ 					if ((int)(num) <= 32) {
+ 						DLOG(INFO) << "File execute failure!";
+ 					}
+ 				}
+ #elif defined(OS_MACOSX)
+ 				if (platformType == "mac") {
+ 					PrepareUpdate(path.value());
+ 				}
+ #endif
+ 			}
+ 		}
+ 	}
+ }
+ 
 
 void YSPUpdateManager::StartDownload(const GURL& package_url,
                                      base::FilePath updateFilePath) {

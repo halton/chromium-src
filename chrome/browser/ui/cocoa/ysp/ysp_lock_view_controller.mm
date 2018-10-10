@@ -107,9 +107,11 @@ const CGFloat kAvatarSize = 70;
 
     [password_ setFont:[NSFont titleBarFontOfSize:14]];
     NSSize size = [password_ intrinsicContentSize];
-    [password_ setFrame:NSMakeRect(13, (40-size.height)/2, 168, size.height)];
+    [password_ setFrame:NSMakeRect(13, (40-size.height)/2, 240, size.height)];
 
     [password_ setEditable:YES];
+    [[password_ cell] setUsesSingleLineMode:YES];
+    [[password_ cell] setScrollable:YES];
     [password_ setPlaceholderString:base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK))];
     [password_ setBordered:NO];
     [password_ setFocusRingType:NSFocusRingTypeNone];
@@ -119,6 +121,17 @@ const CGFloat kAvatarSize = 70;
     [passwordContainer_ addSubview:password_];
     [password_ setDelegate:self];
 
+    enterButton_.reset([[NSButton alloc] initWithFrame:NSMakeRect(290, 13, 16, 14)]);
+    [enterButton_ setWantsLayer:YES];
+    [enterButton_ setImage:rb.GetNativeImageNamed(IDR_YSP_LOCK_SCREEN_ENTER).ToNSImage()];
+    [enterButton_ setBordered:NO];
+    [[enterButton_ cell] setBackgroundColor:[NSColor colorWithWhite:1 alpha:1]];
+    [enterButton_ setTarget:self];
+    [enterButton_ setAction:@selector(OnSubmitButtonPressed)];
+    [passwordContainer_ addSubview:enterButton_];
+
+    [lockView_ addSubview:passwordContainer_];
+
     prompt_.reset([[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 100, 12)]);
     [prompt_ setEditable:NO];
     [prompt_ setBordered:NO];
@@ -126,21 +139,7 @@ const CGFloat kAvatarSize = 70;
     [prompt_ setFont:[NSFont titleBarFontOfSize:14]];
     [prompt_ setTextColor:[NSColor colorWithWhite:1 alpha:1]];
     [prompt_ setBackgroundColor:[NSColor colorWithWhite:1 alpha:0]];
-    //[prompt_ setStringValue:base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_REENTER_PASSWORD))];
     [lockView_ addSubview:prompt_];
-
-    enterButton_.reset([[NSButton alloc] initWithFrame:NSMakeRect(290, 13, 16, 14)]);
-    [enterButton_ setWantsLayer:YES];
-    [enterButton_ setImage:rb.GetNativeImageNamed(IDR_YSP_LOCK_SCREEN_ENTER).ToNSImage()];
-    [enterButton_ setBordered:NO];
-    [[enterButton_ cell] setBackgroundColor:[NSColor colorWithWhite:1 alpha:1]];
-
-    [enterButton_ setTarget:self];
-    [enterButton_ setAction:@selector(OnSubmitButtonPressed)];
-    [passwordContainer_ addSubview:enterButton_];
-
-    [lockView_ addSubview:passwordContainer_];
-
     [self layout];
   }
   
@@ -265,8 +264,11 @@ const CGFloat kAvatarSize = 70;
                                                text);
     return;
   }
-  
-  if (YSPLoginManager::GetInstance()->isValidPassword(text)) {
+  if ([password length] == 0) {
+    [self setPromptMessage:base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD))];
+    [self layout];
+  }
+  else if (YSPLoginManager::GetInstance()->isValidPassword(text)) {
     g_browser_process->local_state()->SetInteger(prefs::kYSPLockScreen, Browser::UNLOCKED);
   }
   else {

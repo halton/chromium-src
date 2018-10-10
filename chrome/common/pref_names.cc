@@ -2662,6 +2662,7 @@ const char kYSPDeviceID[] = "enterplorer.device_id";
 const char kYSPAccessToken[] = "enterplorer.access_token";
 const char kYSPRefreshToken[] = "enterplorer.refresh_token";
 const char kYSPFirstLogin[] = "enterplorer.first_login";
+const char kYSPTimeDifference[] = "enterplorer.time_difference";
 const char kYSPExtensionInstallVersion[] = "enterplorer.extension_install_version";
 const char kYSPLockScreen[] ="enterplorer.lock_screen_flag"; 
 #ifdef IE_REDCORE

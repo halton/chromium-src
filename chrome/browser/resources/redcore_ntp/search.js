@@ -1,7 +1,7 @@
 /**
  * search box
  */
-(function search() {
+function search() {
   $searchBox = $('#search-box');
   $searchBtn = $('#search-btn');
   $search = $('#search-input');
@@ -22,4 +22,4 @@
       searchNow(value)
     }
   })
-})()
+}

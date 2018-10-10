@@ -26,6 +26,7 @@ std::string GetProductName();
 std::string GetVersionNumber();
 
 #ifdef REDCORE
+std::string GetYSPProductNameAndVersionForUserAgent();
 std::string GetYSPVersionNumber(); //YSP+ {YSP product version}
 #endif
 
