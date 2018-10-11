@@ -1,4 +1,5 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -155,10 +156,10 @@ LocationBarView::LocationBarView(Browser* browser,
       delegate_(delegate),
       is_popup_mode_(is_popup_mode),
 #ifdef REDCORE
-      address_bar_enabled_(true),     //ysp+ { function control }
+      address_bar_enabled_(true),  // ysp+ { function control }
 #endif
 #ifdef IE_REDCORE
-      renderer_mode_view_(nullptr),    //ysp+{}
+      ysp_renderer_mode_view_(nullptr),  // ysp+{}
 #endif
       tint_(GetTint()) {
   edit_bookmarks_enabled_.Init(
@@ -197,9 +198,10 @@ void LocationBarView::Init() {
   AddChildView(omnibox_view_);
 
 #ifdef IE_REDCORE
-  renderer_mode_view_ = new RendererModeView(command_updater(), browser_,this);
-  renderer_mode_view_->SetVisible(false);
-  AddChildView(renderer_mode_view_);
+  ysp_renderer_mode_view_ =
+      new YspRendererModeView(command_updater(), browser_, this);
+  ysp_renderer_mode_view_->SetVisible(false);
+  AddChildView(ysp_renderer_mode_view_);
 #endif
 
   RefreshBackground();
@@ -291,9 +293,10 @@ void LocationBarView::Init() {
   AddChildView(clear_all_button_);
 
 #ifdef IE_REDCORE
-  renderer_mode_view_ = new RendererModeView(command_updater(), browser_, this);
-  renderer_mode_view_->SetVisible(false);
-  AddChildView(renderer_mode_view_);
+  ysp_renderer_mode_view_ =
+      new YspRendererModeView(command_updater(), browser_, this);
+  ysp_renderer_mode_view_->SetVisible(false);
+  AddChildView(ysp_renderer_mode_view_);
 #endif
 
   // Initialize the location entry. We do this to avoid a black flash which is
@@ -360,11 +363,11 @@ void LocationBarView::SetStarToggled(bool on) {
 
 #ifdef IE_REDCORE
 void LocationBarView::SetRendererModeToggled(RendererMode mode) {
-	if (!renderer_mode_view_)
+  if (!ysp_renderer_mode_view_)
     return;
 
-  renderer_mode_view_->SetVisible(mode.core != NONE_CORE);
-  renderer_mode_view_->SetToggled(mode);
+  ysp_renderer_mode_view_->SetVisible(mode.core != NONE_CORE);
+  ysp_renderer_mode_view_->SetToggled(mode);
   OnChanged();
 }
 #endif
@@ -621,10 +624,10 @@ void LocationBarView::Layout() {
   }
 
 #ifdef IE_REDCORE
-  if (renderer_mode_view_->visible()) {
+  if (ysp_renderer_mode_view_->visible()) {
     trailing_decorations.AddDecoration(vertical_padding, location_height, false,
                                        0, edge_padding, internal_padding,
-                                       renderer_mode_view_);
+                                       ysp_renderer_mode_view_);
   }
 #endif
 

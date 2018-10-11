@@ -1,4 +1,5 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,8 +54,9 @@ class Profile;
 class SelectedKeywordView;
 class StarView;
 class TranslateIconView;
+
 #ifdef IE_REDCORE
-class RendererModeView;		//ysp+{}
+class YspRendererModeView;
 #endif
 
 namespace autofill {
@@ -167,9 +169,7 @@ class LocationBarView : public LocationBar,
 #ifdef IE_REDCORE
   void SetRendererModeToggled(RendererMode mode);
 
-  RendererModeView* renderer_mode_view() {
-    return renderer_mode_view_;
-  }
+  YspRendererModeView* renderer_mode_view() { return ysp_renderer_mode_view_; }
 #endif
 
   // The save credit card icon. It may not be visible.  It will be null when
@@ -488,7 +488,7 @@ class LocationBarView : public LocationBar,
 #endif
 
 #ifdef IE_REDCORE
-  RendererModeView* renderer_mode_view_;
+  YspRendererModeView* ysp_renderer_mode_view_;
 #endif
 
   // The theme tint. Updated based on the profile and theme settings.

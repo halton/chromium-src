@@ -1041,7 +1041,7 @@ jumbo_split_static_library("ui") {
       "views/frame/ysp_transparent_window.h",
       "views/infobars/ysp_download_activex_infobar_view.cc",
       "views/infobars/ysp_download_activex_infobar_view.h",
-      "views/location_bar/ysp_renderer_mode_view.cpp",
+      "views/location_bar/ysp_renderer_mode_view.cc",
       "views/location_bar/ysp_renderer_mode_view.h",
       "views/ysp_account_view.cc",
       "views/ysp_account_view.h",
