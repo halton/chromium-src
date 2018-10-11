@@ -1,4 +1,4 @@
-﻿#ifdef REDCORE
+#ifdef REDCORE
 //ysp+ { login }
 
 #ifndef NET_SOCKET_YSP_SPA_PACKET_H_

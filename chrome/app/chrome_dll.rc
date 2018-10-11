@@ -214,5 +214,17 @@ IDI_THROBBER_24     ICON                        "theme\vista_frame_throbber_24.i
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+1 TYPELIB "IEInterface.tlb"
+ 
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
+
+
 // (temp change to touch this file or incremental builds may break now
 // that we removed chrome_dll_version.rc from it)

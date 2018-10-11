@@ -1,4 +1,4 @@
-﻿#ifdef REDCORE
+#ifdef REDCORE
 //ysp+ { proxy }
 
 #include "net/socket/ysp_spa_packet.h"

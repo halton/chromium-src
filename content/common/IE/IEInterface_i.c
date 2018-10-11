@@ -9,21 +9,20 @@
 /* at Tue Jan 19 11:14:07 2038
  */
 /* Compiler settings for IEInterface.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0613
-    protocol : dce , ms_ext, c_ext, robust
-    error checks: allocation ref bounds_check enum stub_data
-    VC __declspec() decoration level:
+    Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0613 
+    protocol : all , ms_ext, c_ext, robust
+    error checks: allocation ref bounds_check enum stub_data 
+    VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 #ifdef __cplusplus
 extern "C"{
-#endif
+#endif 
 
 
 #include <rpc.h>
@@ -65,7 +64,7 @@ typedef IID CLSID;
 #define MIDL_DEFINE_GUID(type,name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) \
         const type name = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
 
-#endif // _MIDL_USE_GUIDDEF_
+#endif !_MIDL_USE_GUIDDEF_
 
 MIDL_DEFINE_GUID(IID, IID_IBrowserContainer,0xDB1BC009,0x56ED,0x4A59,0xB4,0x10,0x1D,0x69,0xAF,0xE4,0x09,0x50);
 
