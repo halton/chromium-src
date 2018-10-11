@@ -1037,8 +1037,8 @@ jumbo_split_static_library("ui") {
       ]
     }
     sources += [
-      "views/frame/YSPTransparentWnd.cpp",
-      "views/frame/YSPTransparentWnd.h",
+      "views/frame/ysp_transparent_window.cc",
+      "views/frame/ysp_transparent_window.h",
       "views/infobars/ysp_download_activex_infobar_view.cc",
       "views/infobars/ysp_download_activex_infobar_view.h",
       "views/location_bar/ysp_renderer_mode_view.cpp",
@@ -1053,6 +1053,7 @@ jumbo_split_static_library("ui") {
       "views/ysp_login_view.h",
       "views/ysp_renderer_mode_bubble_view.cpp",
       "views/ysp_renderer_mode_bubble_view.h",
+
       # FIXME(halton):
       # "webui/options/ysp_password_manager_handler.cc",
       # "webui/options/ysp_password_manager_handler.h",
@@ -1065,9 +1066,7 @@ jumbo_split_static_library("ui") {
       "ysp_password_manager.cc",
       "ysp_password_manager.h",
     ]
-    deps += [
-      "//chrome/browser/ysp_login",
-    ]
+    deps += [ "//chrome/browser/ysp_login" ]
   }
 
   if (!is_fuchsia) {
