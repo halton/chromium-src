@@ -1842,16 +1842,20 @@ jumbo_source_set("browser") {
   }
 
   if (is_redcore) {
+    if (is_ie_redcore) {
+      sources += [
+        "web_contents/web_contents_ie.cc",
+        "web_contents/web_contents_ie.h",
+        "web_contents/web_contents_ie_view_aura.cpp",
+        "web_contents/web_contents_ie_view_aura.h",
+      ]
+    }
     sources += [
-      # YSP
-      "web_contents/web_contents_ie.cpp",
-      "web_contents/web_contents_ie.h",
-      "web_contents/web_contents_ie_view_aura.cpp",
-      "web_contents/web_contents_ie_view_aura.h",
       "ysp_resource_replace_interceptor.cc",
       "ysp_resource_replace_interceptor.h",
     ]
   }
+
   # ChromeOS also defines linux but their memory-monitors conflict.
   if (is_chromeos) {
     sources += [

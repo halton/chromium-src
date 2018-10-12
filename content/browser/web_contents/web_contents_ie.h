@@ -1,12 +1,11 @@
-#ifdef REDCORE
-#ifdef IE_REDCORE
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_H_
 #define CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_H_
-#pragma once
 
-#include "content/common/IE/ATLInclude.h"
 #include <stdint.h>
-
 #include <map>
 #include <set>
 #include <string>
@@ -16,6 +15,7 @@
 #include "base/macros.h"
 #include "base/observer_list.h"
 #include "base/process/process.h"
+#include "base/synchronization/condition_variable.h"
 #include "base/values.h"
 #include "build/build_config.h"
 #include "content/browser/frame_host/frame_tree.h"
@@ -28,6 +28,9 @@
 #include "content/browser/renderer_host/render_view_host_delegate.h"
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/renderer_host/render_widget_host_delegate.h"
+#include "content/browser/web_contents/web_contents_impl.h"
+#include "content/common/IE/ATLInclude.h"
+#include "content/common/IE/IEVersion.h"
 #include "content/common/content_export.h"
 #include "content/public/browser/color_chooser.h"
 #include "content/public/browser/notification_observer.h"
@@ -39,16 +42,13 @@
 #include "content/public/common/resource_type.h"
 #include "content/public/common/three_d_api_types.h"
 #include "net/base/load_states.h"
+#include "net/cookies/cookie_store.h"
 #include "net/http/http_response_headers.h"
+#include "net/url_request/url_fetcher_delegate.h"
+#include "net/url_request/url_request_context_getter.h"
 #include "ui/base/page_transition_types.h"
 #include "ui/gfx/geometry/rect_f.h"
 #include "ui/gfx/geometry/size.h"
-#include "content/browser/web_contents/web_contents_impl.h"
-#include "net/url_request/url_fetcher_delegate.h"
-#include "content/common/IE/IEVersion.h"
-#include "net/cookies/cookie_store.h"
-#include "base/synchronization/condition_variable.h"
-#include "net/url_request/url_request_context_getter.h"
 
 struct RendererMode;
 
@@ -59,7 +59,9 @@ namespace IE {
 namespace net {
   class URLFetcher;
 }
+
 namespace content {
+
 class BrowserPluginEmbedder;
 class BrowserPluginGuest;
 class DateTimeChooserAndroid;
@@ -95,131 +97,151 @@ class WebContentsView;
 class WebContentsViewDelegate;
 struct LoadURLParams;
 
-  class CONTENT_EXPORT WebContentsIE
-                        :public WebContentsImpl,
-                        public net::URLFetcherDelegate
-  {
-  public:
-    WebContentsIE(BrowserContext* browser_context);
-    ~WebContentsIE() override;
-    void Init(const WebContents::CreateParams& params) override;
-    void SetParentNativeViewAccessible(gfx::NativeViewAccessible accessible_parent);
+class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
+                                     public net::URLFetcherDelegate {
+ public:
+  WebContentsIE(BrowserContext* browser_context);
+  ~WebContentsIE() override;
 
-    virtual void OnRendererHostViewSize(const gfx::Size& size);
-    virtual void SetIECookie(const GURL& url);
-    virtual void SetIEAutoLoginInfo(const std::wstring& frameXPath, const std::wstring& nameXPath, const std::wstring& nameValue,
-      const std::wstring& pwdXPath, const std::wstring& pwdValue, const std::wstring& loginBtnXpath);
-    virtual void SetListenLoginXPath(const std::wstring& url, const std::wstring& frameXPath, const std::wstring& nameXPath,
-      const std::wstring& pwdXPath, const std::wstring& loginBtnXpath);
-    virtual void OnGetLoginInfo(const std::wstring& url, const std::wstring& name, const std::wstring& pwd);
-    bool IsDevToolsOpened();
-    void ShowDevTools(bool show);
-    void SetBrowserZoom(int percent);
+  void Init(const WebContents::CreateParams& params) override;
+  void SetParentNativeViewAccessible(
+      gfx::NativeViewAccessible accessible_parent);
 
-    virtual void Print();
-    virtual void FindWithoutParams();
+  virtual void OnRendererHostViewSize(const gfx::Size& size);
+  virtual void SetIECookie(const GURL& url);
+  virtual void SetIEAutoLoginInfo(const std::wstring& frame_xpath,
+                                  const std::wstring& name_xpath,
+                                  const std::wstring& name_value,
+                                  const std::wstring& pwd_xpath,
+                                  const std::wstring& pwd_value,
+                                  const std::wstring& login_button_xpath);
+  virtual void SetListenLoginXPath(const std::wstring& url,
+                                   const std::wstring& frame_xpath,
+                                   const std::wstring& name_xpath,
+                                   const std::wstring& pwd_xpath,
+                                   const std::wstring& login_button_xpath);
+  virtual void OnGetLoginInfo(const std::wstring& url,
+                              const std::wstring& name,
+                              const std::wstring& pwd);
+  bool IsDevToolsOpened();
+  void ShowDevTools(bool show);
+  void SetBrowserZoom(int percent);
 
-    void Cut() override;
-    void Copy() override;
-    void Paste() override;
+  virtual void Print();
+  virtual void FindWithoutParams();
 
-    // WebContents ------------------------------------------------------
-    void SetDelegate(WebContentsDelegate* delegate) override;
-    void WasShown() override;
-    void WasHidden() override;
-    const base::string16& GetTitle() const override;
-    bool IsLoading() const override;
-    int DownloadImage(const GURL& url,
-      bool is_favicon,
-      uint32_t max_bitmap_size,
-      bool bypass_cache,
-      ImageDownloadCallback callback) override;
-    void Focus() override;
-    RenderFrameHostImpl* GetFocusedFrame() override;
-    void Stop() override;
-    bool NeedToFireBeforeUnload() override;
-    void DispatchBeforeUnload() override;
-    int GetMinimumZoomPercent() const override;
-    int GetMaximumZoomPercent() const override;
+  void Cut() override;
+  void Copy() override;
+  void Paste() override;
 
-    // RenderFrameHostManager::Delegate ------------------------------------------
+  // WebContents ------------------------------------------------------
+  void SetDelegate(WebContentsDelegate* delegate) override;
+  void WasShown() override;
+  void WasHidden() override;
+  const base::string16& GetTitle() const override;
+  bool IsLoading() const override;
+  int DownloadImage(const GURL& url,
+                    bool is_favicon,
+                    uint32_t max_bitmap_size,
+                    bool bypass_cache,
+                    ImageDownloadCallback callback) override;
+  void Focus() override;
+  RenderFrameHostImpl* GetFocusedFrame() override;
+  void Stop() override;
+  bool NeedToFireBeforeUnload() override;
+  void DispatchBeforeUnload() override;
+  int GetMinimumZoomPercent() const override;
+  int GetMaximumZoomPercent() const override;
 
-    void CreateRenderWidgetHostViewForRenderManager(
+  // RenderFrameHostManager::Delegate ------------------------------------------
+
+  void CreateRenderWidgetHostViewForRenderManager(
       RenderViewHost* render_view_host) override;
 
-    void RendererUnresponsive(
-        RenderWidgetHostImpl* render_widget_host,
-        base::RepeatingClosure hang_monitor_restarter) override;
-    void RendererResponsive(RenderWidgetHostImpl* render_widget_host) override;
-    void Activate() override;
+  void RendererUnresponsive(
+      RenderWidgetHostImpl* render_widget_host,
+      base::RepeatingClosure hang_monitor_restarter) override;
+  void RendererResponsive(RenderWidgetHostImpl* render_widget_host) override;
+  void Activate() override;
 
-    //URLFetcherDelegate--------------------------------------------------------
-    void OnURLFetchComplete(const net::URLFetcher* source) override;
+  // URLFetcherDelegate--------------------------------------------------------
+  void OnURLFetchComplete(const net::URLFetcher* source) override;
 
-    bool LoadUrl(const NavigationController::LoadURLParams& params);
-    void OnFinishNavigate(GURL& url, std::vector<GURL>& faviconUrls);
-    void OnLoadUrlInNewContent(GURL& url, int flag, bool* cancel, IDispatch** pDisp);
-    void OnBeforeNavigate(BSTR url, bool clickUrl, bool * cancel);
-    IDispatch* GetWebBrowserIDispatch();
-    void OnBeforeDownloadFile(BSTR url, const std::wstring& responseHeader);
-    void OnUpdateCookie(const GURL& url, const std::vector<std::wstring>& cookies);
-    bool IsDownloading();
+  bool LoadUrl(const NavigationController::LoadURLParams& params);
+  void OnFinishNavigate(GURL& url, std::vector<GURL>& favicon_urls);
+  void OnLoadUrlInNewContent(GURL& url,
+                             int flag,
+                             bool* cancel,
+                             IDispatch** dispatch);
+  void OnBeforeNavigate(BSTR url, bool click_url, bool* cancel);
+  IDispatch* GetWebBrowserIDispatch();
+  void OnBeforeDownloadFile(BSTR url, const std::wstring& response_header);
+  void OnUpdateCookie(const GURL& url,
+                      const std::vector<std::wstring>& cookies);
+  bool IsDownloading();
 
-    void SendFunctionControl(const std::wstring& jsonStr);
-    void SetCreateByIENewWindow(bool isNew);
+  void SendFunctionControl(const std::wstring& jsonStr);
+  void SetCreateByIENewWindow(bool is_new);
 
-		void OnQueryPrivateDns(const std::wstring& host, std::wstring* ipListJsonStr);
-		void QueryDnsOnIOThread(const std::wstring& host);
-		void QueryDnsFinished(const std::wstring& ipListJsonStr);
+  void OnQueryPrivateDns(const std::wstring& host,
+                         std::wstring* ip_list_json_string);
+  void QueryDnsOnIOThread(const std::wstring& host);
+  void QueryDnsFinished(const std::wstring& ip_list_json_string);
 
-  private:
-    bool CreateTridentWebView(const gfx::AcceleratedWidget& hwnd_parent, const gfx::Size& size);
-    bool IsTridentCreated();
-    void CommitToEntry(GURL gurl, bool isSetHistory);
-    void LoadFinishedAndUpdateEntry(GURL gurl);
-    void SetBrowserEmulation(IE::IEEmulation emu);
-    net::CookieList LoadCookie(const GURL& url);
-    void OnBeginLoadCookie(const GURL& url, scoped_refptr<net::URLRequestContextGetter> pGetter);
-    void OnCookieLoaded(const net::CookieList& cookie_list);
-    std::wstring SerializationCookieList(const GURL& url, const net::CookieList& list);
-    void OnBeginSaveCookie(const GURL& url, 
-                          std::vector<std::wstring> cookies,
-                          scoped_refptr<net::URLRequestContextGetter> pGetter);
-    void OnCookieSaveSuccess(bool success);
-    GURL GetGurlFromCookie(const net::CanonicalCookie& cookie);
-    void NavigateUrl(const NavigationController::LoadURLParams* params);
-  private:
-     friend class WebContentsObserver;
-     friend class WebContents;  // To implement factory methods.
-  private:
-    mutable base::string16 title;
-    CComObject<IE::BrowserHostEventDelegant>* pBroEventHandler;
-    gfx::AcceleratedWidget renderHostHWnd;
-    bool tridentCreated;
-    std::unique_ptr<net::URLFetcher> imageFetcher;
-    ImageDownloadCallback image_download_callback_;
-    static int next_image_download_id_;
-    bool initAsHide;
-    std::wstring cookie_json;
-    HANDLE cookieEvent;
-    net::CookieList cookieListTemp;
-    bool isNavigateStoped;
-    base::WeakPtrFactory<WebContentsIE> weakFactory;
-    bool needFireUnloadEvent;
-    bool isNewWindow; //是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
-    base::WeakPtrFactory<WebContentsIE> weakFactoryForIO;
-    std::wstring QueryDnsJsonStrTemp;
+ private:
+  bool CreateTridentWebView(const gfx::AcceleratedWidget& hwnd_parent,
+                            const gfx::Size& size);
+  bool IsTridentCreated();
+  void CommitToEntry(GURL gurl, bool is_set_history);
+  void LoadFinishedAndUpdateEntry(GURL gurl);
+  void SetBrowserEmulation(IE::IEEmulation emu);
+  net::CookieList LoadCookie(const GURL& url);
+  void OnBeginLoadCookie(
+      const GURL& url,
+      scoped_refptr<net::URLRequestContextGetter> url_request_context_getter);
+  void OnCookieLoaded(const net::CookieList& cookie_list);
+  std::wstring SerializationCookieList(const GURL& url,
+                                       const net::CookieList& list);
+  void OnBeginSaveCookie(
+      const GURL& url,
+      std::vector<std::wstring> cookies,
+      scoped_refptr<net::URLRequestContextGetter> url_request_context_getter);
+  void OnCookieSaveSuccess(bool success);
+  GURL GetGurlFromCookie(const net::CanonicalCookie& cookie);
+  void NavigateUrl(const NavigationController::LoadURLParams* params);
 
-    friend class WebContents;  // To implement factory methods.
-    friend class WebContentsImpl;
-    //friend class RenderFrameHostImpl;
-    friend class WebContentsViewAura;
-    friend class WebContentsViewIEAura;
+ private:
+  friend class WebContentsObserver;
+  friend class WebContents;  // To implement factory methods.
 
-    DISALLOW_COPY_AND_ASSIGN(WebContentsIE);
-  };
+ private:
+  friend class WebContents;
+  friend class WebContentsImpl;
+  friend class WebContentsViewAura;
+  friend class WebContentsViewIEAura;
+
+  mutable base::string16 title_;
+
+  CComObject<IE::BrowserHostEventDelegant>* browser_event_handler_;
+  gfx::AcceleratedWidget render_host_hwnd_;
+  bool trident_created_;
+  std::unique_ptr<net::URLFetcher> image_fetcher_;
+  ImageDownloadCallback image_download_callback_;
+  static int next_image_download_id_;
+  bool init_as_hide_;
+  std::wstring cookie_json_;
+  HANDLE cookie_event_;
+  net::CookieList cookie_list_temp_;
+  bool is_navigate_stopped_;
+  bool need_fire_unload_event_;
+  bool is_new_window_;  //是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
+  base::WeakPtrFactory<WebContentsIE> weak_factory_for_io_;
+  std::wstring query_dns_json_string_;
+  base::WeakPtrFactory<WebContentsIE> self_;
+
+  DISALLOW_COPY_AND_ASSIGN(WebContentsIE);
+};
+
 } //namespace content
 
-#endif
-#endif
-#endif
+#endif  // CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_H_
