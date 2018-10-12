@@ -1,8 +1,9 @@
-#ifdef REDCORE
-#ifdef IE_REDCORE
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_VIEW_AURA_H_
 #define CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_VIEW_AURA_H_
-#pragma once
 
 #include <vector>
 
@@ -19,38 +20,36 @@
 #include "content/browser/web_contents/web_contents_view_aura.h"
 
 namespace aura {
-  class Window;
+class Window;
 }
 
 namespace ui {
-  class DropTargetEvent;
-  class TouchSelectionController;
+class DropTargetEvent;
+class TouchSelectionController;
 }
 
 namespace content {
-  class GestureNavSimple;
-  class OverscrollNavigationOverlay;
-  class RenderWidgetHostImpl;
-  class RenderWidgetHostViewAura;
-  class ShadowLayerDelegate;
-  class TouchSelectionControllerClientAura;
-  class WebContentsViewDelegate;
-  class WebContentsImpl;
-  class WebDragDestDelegate;
+class GestureNavSimple;
+class OverscrollNavigationOverlay;
+class RenderWidgetHostImpl;
+class RenderWidgetHostViewAura;
+class ShadowLayerDelegate;
+class TouchSelectionControllerClientAura;
+class WebContentsViewDelegate;
+class WebContentsImpl;
+class WebDragDestDelegate;
 
-  class WebContentsViewIEAura
-    :public WebContentsViewAura
-  {
-  public:
-    WebContentsViewIEAura(WebContentsImpl* web_contents,
-      WebContentsViewDelegate* delegate);
-    ~WebContentsViewIEAura() override;
+class WebContentsViewIEAura : public WebContentsViewAura {
+ public:
+  WebContentsViewIEAura(WebContentsImpl* web_contents,
+                        WebContentsViewDelegate* delegate);
+  ~WebContentsViewIEAura() override;
 
-     void SizeContents(const gfx::Size& size) override;
-     void OnBoundsChanged(const gfx::Rect& old_bounds,
-      const gfx::Rect& new_bounds) override;
-  };
-}// namespace content
-#endif
-#endif
-#endif
+  void SizeContents(const gfx::Size& size) override;
+  void OnBoundsChanged(const gfx::Rect& old_bounds,
+                       const gfx::Rect& new_bounds) override;
+};
+
+}  // namespace content
+
+#endif  // CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_VIEW_AURA_H_

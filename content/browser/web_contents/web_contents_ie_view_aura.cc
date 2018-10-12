@@ -1,6 +1,8 @@
-#ifdef REDCORE
-#ifdef IE_REDCORE
-#include "content/browser/web_contents/web_contents_view_aura.h"
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "content/browser/web_contents/web_contents_ie_view_aura.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,7 +26,9 @@
 #include "content/browser/renderer_host/render_widget_host_view_aura.h"
 #include "content/browser/web_contents/aura/gesture_nav_simple.h"
 #include "content/browser/web_contents/aura/overscroll_navigation_overlay.h"
+#include "content/browser/web_contents/web_contents_ie.h"
 #include "content/browser/web_contents/web_contents_impl.h"
+#include "content/browser/web_contents/web_contents_view_aura.h"
 #include "content/public/browser/content_browser_client.h"
 #include "content/public/browser/notification_observer.h"
 #include "content/public/browser/notification_registrar.h"
@@ -44,11 +48,11 @@
 #include "net/base/filename_util.h"
 #include "third_party/blink/public/platform/web_input_event.h"
 #include "ui/aura/client/aura_constants.h"
+#include "ui/aura/client/drag_drop_client.h"
+#include "ui/aura/client/drag_drop_delegate.h"
 #include "ui/aura/client/window_parenting_client.h"
 #include "ui/aura/env.h"
 #include "ui/aura/window.h"
-#include "ui/aura/client/drag_drop_client.h"
-#include "ui/aura/client/drag_drop_delegate.h"
 #include "ui/aura/window_observer.h"
 #include "ui/aura/window_tree_host.h"
 #include "ui/aura/window_tree_host_observer.h"
@@ -59,6 +63,7 @@
 #include "ui/base/dragdrop/os_exchange_data.h"
 #include "ui/base/hit_test.h"
 #include "ui/compositor/layer.h"
+#include "ui/display/screen.h"
 #include "ui/events/blink/web_input_event.h"
 #include "ui/events/event.h"
 #include "ui/events/event_utils.h"
@@ -66,39 +71,29 @@
 #include "ui/gfx/image/image.h"
 #include "ui/gfx/image/image_png_rep.h"
 #include "ui/gfx/image/image_skia.h"
-#include "ui/display/screen.h"
 #include "ui/touch_selection/touch_selection_controller.h"
-#include "content/browser/web_contents/web_contents_ie_view_aura.h"
-#include "content/browser/web_contents/web_contents_ie.h"
 
 namespace content {
 
-  WebContentsViewIEAura::WebContentsViewIEAura(
-    WebContentsImpl * web_contents, WebContentsViewDelegate * delegate)
-    :WebContentsViewAura(web_contents, delegate)
-  {
-  }
+WebContentsViewIEAura::WebContentsViewIEAura(WebContentsImpl* web_contents,
+                                             WebContentsViewDelegate* delegate)
+    : WebContentsViewAura(web_contents, delegate) {}
 
-  WebContentsViewIEAura::~WebContentsViewIEAura()
-  {
-  }
+WebContentsViewIEAura::~WebContentsViewIEAura() {}
 
-  void WebContentsViewIEAura::SizeContents(const gfx::Size & size)
-  {
-    __super::SizeContents(size);
-    WebContentsIE* pWebContentIE = static_cast<WebContentsIE*>(getWebContents());
-    if (pWebContentIE)
-      pWebContentIE->OnRendererHostViewSize(size);
-  }
-
-void WebContentsViewIEAura::OnBoundsChanged(const gfx::Rect& old_bounds, const gfx::Rect& new_bounds)
-{
-  __super::OnBoundsChanged(old_bounds, new_bounds);
-  WebContentsIE* pWebContentIE = static_cast<WebContentsIE*>(getWebContents());
-  if (pWebContentIE)
-    pWebContentIE->OnRendererHostViewSize(new_bounds.size());
+void WebContentsViewIEAura::SizeContents(const gfx::Size& size) {
+  __super::SizeContents(size);
+  WebContentsIE* web_content_ie = static_cast<WebContentsIE*>(getWebContents());
+  if (web_content_ie)
+    web_content_ie->OnRendererHostViewSize(size);
 }
 
-} //namespace content
-#endif
-#endif
+void WebContentsViewIEAura::OnBoundsChanged(const gfx::Rect& old_bounds,
+                                            const gfx::Rect& new_bounds) {
+  __super::OnBoundsChanged(old_bounds, new_bounds);
+  WebContentsIE* web_content_ie = static_cast<WebContentsIE*>(getWebContents());
+  if (web_content_ie)
+    web_content_ie->OnRendererHostViewSize(new_bounds.size());
+}
+
+}  // namespace content

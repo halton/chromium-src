@@ -1846,7 +1846,7 @@ jumbo_source_set("browser") {
       sources += [
         "web_contents/web_contents_ie.cc",
         "web_contents/web_contents_ie.h",
-        "web_contents/web_contents_ie_view_aura.cpp",
+        "web_contents/web_contents_ie_view_aura.cc",
         "web_contents/web_contents_ie_view_aura.h",
       ]
     }
