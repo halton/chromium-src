@@ -1045,7 +1045,7 @@ jumbo_split_static_library("ui") {
       "views/location_bar/ysp_renderer_mode_view.h",
       "views/ysp_account_view.cc",
       "views/ysp_account_view.h",
-      "views/ysp_ie_login_view.cpp",
+      "views/ysp_ie_login_view.cc",
       "views/ysp_ie_login_view.h",
       "views/ysp_lock_screen_view.cc",
       "views/ysp_lock_screen_view.h",
