@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/features.gni")
+
 source_set("internal") {
   visibility = [
     ":for_tests",
@@ -53,9 +55,9 @@ source_set("internal") {
     "url_download_request_handle.cc",
   ]
 
- if(is_win){
-   sources += ["download_file_ie.cpp",]
- }
+  if (is_ie_redcore) {
+    sources += [ "download_file_ie.cc" ]
+  }
   public_deps = [
     "//services/network/public/mojom",
   ]

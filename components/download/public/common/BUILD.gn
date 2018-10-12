@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//build/config/features.gni")
 
 if (is_android) {
   import("//build/config/android/config.gni")
@@ -61,10 +62,10 @@ component("public") {
     "url_download_request_handle.h",
   ]
 
-  if(is_win) {
-    sources += ["download_file_ie.h",]
+  if (is_ie_redcore) {
+    sources += [ "download_file_ie.h" ]
   }
-  
+
   configs += [ ":components_download_implementation" ]
 
   public_deps = [
