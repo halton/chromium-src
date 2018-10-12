@@ -64,6 +64,24 @@ void RegisterBrowserPrefs(PrefRegistrySimple* registry) {
           UpgradeDetector::GetDefaultHighAnnoyanceThreshold()
               .InMilliseconds()));
 #endif  // !defined(OS_ANDROID)
+
+#ifdef REDCORE
+  registry->RegisterBooleanPref(prefs::kYSPAutoLogin, false);
+  registry->RegisterStringPref(prefs::kYSPServerAddress, std::string());
+  registry->RegisterStringPref(prefs::kYSPUserSetServerAddress, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastCID, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastUID, std::string());
+  registry->RegisterStringPref(prefs::kYSPLoginLastPWD, std::string());
+  registry->RegisterStringPref(prefs::kYSPDeviceID, std::string());
+  registry->RegisterStringPref(prefs::kYSPAccessToken, std::string());
+  registry->RegisterStringPref(prefs::kYSPRefreshToken, std::string());
+  registry->RegisterBooleanPref(prefs::kYSPFirstLogin, true);
+  //registry->RegisterDoublePref(prefs::kYSPTimeDifference, 0);
+  registry->RegisterIntegerPref(prefs::kYSPLockScreen, false);
+#ifdef IE_REDCORE
+  registry->RegisterDictionaryPref(prefs::kYSPActivexNoPromptInfo);
+#endif
+#endif
 }
 
 void RegisterBrowserUserPrefs(user_prefs::PrefRegistrySyncable* registry) {
@@ -71,8 +89,13 @@ void RegisterBrowserUserPrefs(user_prefs::PrefRegistrySyncable* registry) {
       prefs::kHomePageIsNewTabPage,
       true,
       GetHomeButtonAndHomePageIsNewTabPageFlags());
-  registry->RegisterBooleanPref(prefs::kShowHomeButton, false,
-                                GetHomeButtonAndHomePageIsNewTabPageFlags());
+  registry->RegisterBooleanPref(prefs::kShowHomeButton,
+#ifdef REDCORE
+   true,  // ysp* { custom ui }
+#else
+   false,
+#endif
+   GetHomeButtonAndHomePageIsNewTabPageFlags());
 
   registry->RegisterIntegerPref(prefs::kModuleConflictBubbleShown, 0);
   registry->RegisterInt64Pref(prefs::kDefaultBrowserLastDeclined, 0);
