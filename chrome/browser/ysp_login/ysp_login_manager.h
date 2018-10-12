@@ -1,5 +1,7 @@
-//ysp+ { login }
-#ifdef REDCORE
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_LOGIN_MANAGER_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_LOGIN_MANAGER_H_
 
@@ -24,7 +26,7 @@ struct ActivexDownloadInfo;
 struct UrlTrusted {
   UrlTrusted();
   ~UrlTrusted();
-  std::vector<std::wstring> trustUrl;
+  std::vector<std::wstring> trust_url;
   std::map<std::wstring, std::wstring> policy;
   UrlTrusted(const UrlTrusted& other);
 };
@@ -61,7 +63,7 @@ class YSPLoginManagerObserver {
   virtual void OnLoginResponseParseFailure(const std::string& error) = 0;
   virtual void OnLoginFailure(base::string16 message) = 0;
   virtual void OnLoginSuccess(const base::string16& name,
-    const std::string& head_image_url) = 0;
+                              const std::string& head_image_url) = 0;
   virtual void OnLogout() = 0;
 
  protected:
@@ -71,9 +73,9 @@ class YSPLoginManagerObserver {
 // Singleton class
 class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
                         public YSPLoginFetcherDelegate,
-                        public YSPFetcherResourceDelegate, //YSP+ { Fetcher resource }
-                        public YSPReplaceFetcherDelegate, //YSP+ { Resource Replace }
-                        public YSPSingleSignOnFetcherDelegate, //YSP+ { SingleSignOn config }
+                        public YSPFetcherResourceDelegate,
+                        public YSPReplaceFetcherDelegate,
+                        public YSPSingleSignOnFetcherDelegate,
                         public ManagedSettingsProvider {
  public:
   YSPLoginManager();
@@ -81,16 +83,16 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
 
   static YSPLoginManager* GetInstance();
 
-  void set_auto_login(bool a);
+  void set_auto_login(bool auto_login);
   std::string GetLastCID();
   std::string GetLastUID();
 
   void Init();
-  void SetPushData(const std::string userInfo);
+  void SetPushData(const std::string& user_info);
   bool Restore();
   void StartLogin(const std::string& cid,
-    const std::string& account,
-    const std::string& password);
+                  const std::string& account,
+                  const std::string& password);
   void ClearCache();
   void Logout();
 
@@ -100,7 +102,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   base::string16 BuildYSPBrowserVersionString(); //YSP+ { app version }
   std::string GetCompanyId();
   std::string GetManageServer();
-  std::string GetValueForKey(std::string& key);
+  std::string GetValueForKey(const std::string& key);
   std::string GetUserInfoForKey(int key); //YSP+ { passwords AD manager }
   std::string GetDeviceInfo();
   bool HasManagedBookmarks();
@@ -151,16 +153,16 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool GetWebsiteListStatus();
   std::string GetWebsiteListType();
   bool GetLoadURLAllowed(const GURL& url);
-  bool GetDownloadFileAllowed(const base::FilePath& filePath);
+  bool GetDownloadFileAllowed(const base::FilePath& file_path);
   void ReportURLLoading(const GURL& url);
   base::string16 GetPACFileURL();
   void UpdatePACSettings(base::FilePath& pac_file);
   std::vector<ActivexDownloadInfo> GetActivexDownloadInfo();
   UrlTrusted GetUrlTrusted();
-  bool GetUserAgent(std::string* uaTypes, std::string* uaString);
+  bool GetUserAgent(std::string* ua_types, std::string* ua_string);
 
-  void AddObserver(YSPLoginManagerObserver* o);
-  void RemoveObserver(YSPLoginManagerObserver* o);
+  void AddObserver(YSPLoginManagerObserver* observer);
+  void RemoveObserver(YSPLoginManagerObserver* observer);
 
   // YSPLoginFetcherDelegate:
   void OnLoginRequestFailure(const std::string& error) override;
@@ -169,15 +171,16 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void OnLoginResponseParseFailure(const std::string& error) override;
 
   // YSPFetcherResourceDelegate:
-  void OnFetcherResourceRequestFailure(const GURL& url, bool auto_fecth, const std::string& error) override; //YSP+ { Fetcher resource }
-  void OnFetcherResourceResponseParseSuccess(const GURL& url,
-                                             std::unique_ptr<base::DictionaryValue> response_data,
-                                             bool auto_fecth) override; //YSP+ { Fetcher resource }
+  void OnFetcherResourceRequestFailure(const GURL& url,
+                                       bool auto_fecth,
+                                       const std::string& error) override;
+  void OnFetcherResourceResponseParseSuccess(
+      const GURL& url,
+      std::unique_ptr<base::DictionaryValue> response_data,
+      bool auto_fecth) override;
   void OnFetcherResourceResponseParseFailure(const GURL& url,
                                              bool auto_fecth,
-                                             const std::string& error) override; //YSP+ { Fetcher resource }
-                                                  //YSP+ { Resource Replace
-                                                  // YSPReplaceInfoFetcherDelegate:
+                                             const std::string& error) override;
   void OnReplaceRequestFailure(const std::string& error) override;
   void OnReplaceResponseParseSuccess(const std::string& response_data,
                                      const std::string& path_url) override;
@@ -192,10 +195,10 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   //YSP+ } /* SingleSignOn config */
   // ManagedSettingsProvider:
   base::Value* GetManagedValue(const std::string& path) override;
-  bool SetManageServer(std::string manageServer);
+  bool SetManageServer(const std::string& manage_server);
   void set_web_initialized(bool init) { web_initialized_ = init; }
   bool get_web_initialized() { return web_initialized_; }
-  bool isValidPassword(std::string& field) { return password_ == field; }
+  bool isValidPassword(const std::string& field) { return password_ == field; }
   std::string generateUserInfoForSettings();
   std::string generateLoginDeviceForSettings();
   //YSP+ { Fetcher resource
@@ -216,12 +219,15 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void GetAuthTokenfetcher(std::string source_url, bool auto_fetch = true);
   void GetAutoConfigfetcher(bool auto_fetch = true);
   void GetSdpDevicefetcher(bool auto_fetch = true);
-  void PutSdpDevicefetcher(std::string deviceId, bool auto_fetch = true);
-  void PutApplictionStatusFetch(std::string & applicationId, bool applictionStatus);
+  void PutSdpDevicefetcher(const std::string& device_id,
+                           bool auto_fetch = true);
+  void PutApplictionStatusFetch(const std::string& application_id,
+                                bool application_status);
   void GetGatewayApplictionFetch(bool auto_fetch = true);
 
   void OnAutoConfigParseSuccess(std::unique_ptr<base::DictionaryValue> response_data, bool auto_fetch);
-  void ModifyPassword(const std::string& oldPassword, const std::string& newPassword);
+  void ModifyPassword(const std::string& old_password,
+                      const std::string& new_password);
 
   base::string16 GetYSPUserName();
   std::string GetHeadImageUrl();
@@ -266,7 +272,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
       std::unique_ptr<base::DictionaryValue>& response_data,
       bool from_local); //YSP+ { SingleSignOn config }
   void SetIEUrlTrusted(const UrlTrusted& trust);
-  std::wstring Utf8ToUTF16(std::string str);
+  std::wstring Utf8ToUTF16(const std::string& str);
 
   std::string GetCryptKey();
   bool GetCacheCrypt(); //YSP+ { cache encryption }
@@ -274,17 +280,21 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
       std::unique_ptr<base::DictionaryValue>& response_data); //YSP+ { Fetcher resource }
   base::string16 GetResponseMessage(
       std::unique_ptr<base::DictionaryValue>& response_data); //YSP+ { Fetcher resource }
-  base::string16 GetResponseErrorMessage(const std::string errCode); //YSP+ { Fetcher resource }
+  base::string16 GetResponseErrorMessage(
+      const std::string error_code);  // YSP+ { Fetcher resource }
   std::string GetUserInfoAsJSONString();
   std::string GetDataJSAsJSONString();
   std::string GetShowConfigAsJSONString();
   base::DictionaryValue* GetShowConfig();
-  bool GetFunctionControlBool(std::string key, bool Default);
-  int GetFunctionControlInt(std::string key);
-  int GetFunctionControlIntWithDefault(std::string key, int Default);
-  base::string16 GetFunctionControlString(std::string key);
-  std::vector<base::string16> GetFunctionControlListString(std::string key);
-  double GetFunctionControlDoubleWithDefault(std::string key, double Default);
+  bool GetFunctionControlBool(const std::string& key, bool default_value);
+  int GetFunctionControlInt(const std::string& key);
+  int GetFunctionControlIntWithDefault(const std::string& key,
+                                       int default_value);
+  base::string16 GetFunctionControlString(const std::string& key);
+  std::vector<base::string16> GetFunctionControlListString(
+      const std::string& key);
+  double GetFunctionControlDoubleWithDefault(const std::string& key,
+                                             double default_value);
 
   std::string GetLoginStatusCode();
   base::string16 GetLoginErrorMessage();
@@ -297,9 +307,10 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool URLInWhitelist(const GURL& url);
   bool URLInPolicylist(const std::string& policy_path, const GURL& url);
 
-  bool FileTypeInBlacklist(const base::FilePath& filePath);
+  bool FileTypeInBlacklist(const base::FilePath& file_path);
   bool FileTypeInWhitelist(const std::string& file_ext);
-  bool FileTypeInPolicylist(const std::string& policy_path, const base::FilePath& filePath);
+  bool FileTypeInPolicylist(const std::string& policy_path,
+                            const base::FilePath& file_path);
 
   bool EmptyPolicyList(const std::string& policy_path);
 
@@ -312,8 +323,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void UpdateLoginManagerSettings();
 
   YSPLoginFetcher* login_fetcher_;
-  YSPReplaceFetcher* replace_fetcher_; //YSP+ { Resource Replace }
-  YSPSingleSignOnFetcher* singlesignon_fetcher_; //YSP+ { SingleSignOn config }
+  YSPReplaceFetcher* replace_fetcher_;
+  YSPSingleSignOnFetcher* single_signon_fetcher_;
   YSPUSReportFetcher* report_fetcher_;
   //YSP+ { Fetcher resource
   YSPFetcherResource* get_user_fetcher_;
@@ -342,22 +353,22 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   std::unique_ptr<base::DictionaryValue> swa_info_;
   std::unique_ptr<base::DictionaryValue> pc_info_;
   std::unique_ptr<base::DictionaryValue> auto_config_info_;
-  bool loginStatusCode_;
-  bool applicationStatusCode_;
-  bool strategyStatusCode_;
-  bool tokenStatusCode_;
-  bool swaStatusCode_;
-  bool pcStatusCode_;
+  bool login_status_code_;
+  bool application_status_code_;
+  bool strategy_status_code_;
+  bool token_status_code_;
+  bool swa_status_code_;
+  bool pc_status_code_;
   //YSP+ } /*Fetcher resource*/
-  std::vector<std::string> sendRequestList_;
-  std::unique_ptr<base::DictionaryValue> singlesignon_info_; //YSP+ { SingleSignOn config }
+  std::vector<std::string> send_request_list_;
+  std::unique_ptr<base::DictionaryValue> single_signon_info_;
   int window_frame_color_;
   int window_inactive_color_;
   bool should_parse_response_;
   bool download_ = false;
   int login_status_ = SATUS_LOGOUT; //ysp+ { auto get config }
   bool ntp_login_status_ = false; //false is logout
-  bool singlesignon_status_ = false; //YSP+ { SingleSignOn config }
+  bool single_signon_status_ = false;  // YSP+ { SingleSignOn config }
   bool web_initialized_;
   bool offline_status_;
 
@@ -367,4 +378,3 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
 };
 
 #endif  // CHROME_BROWSER_YSP_LOGIN_YSP_LOGIN_MANAGER_H_
-#endif //REDCORE
