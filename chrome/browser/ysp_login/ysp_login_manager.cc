@@ -3839,9 +3839,9 @@ std::vector<ActivexDownloadInfo> YSPLoginManager::GetActivexDownloadInfo() {
       if (downloadList->GetDictionary(i, &temp) == false)
         continue;
       ActivexDownloadInfo info;
-      temp->GetString("fileName", &info.fileName);
-      temp->GetString("displayName", &info.displayName);
-      temp->GetString("downLoadUrl", &info.downloadUrl);
+      temp->GetString("fileName", &info.filename);
+      temp->GetString("displayName", &info.display_name);
+      temp->GetString("downLoadUrl", &info.download_url);
       temp->GetString("md5", &info.md5);
       download_info_vector.push_back(info);
     }

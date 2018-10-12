@@ -425,7 +425,7 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
   base::FilePath path;
   base::PathService::Get(chrome::DIR_USER_DATA, &path);
   base::string16 strPath = path.value();
-  strPath += L"\\Activex\\"+info.fileName;
+  strPath += L"\\Activex\\" + info.filename;
   FILE* file = _wfopen(strPath.c_str(), L"rb");
   if (file == NULL) {
     content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
@@ -452,14 +452,14 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
   base::TimeDelta delta = endtime - tickst;
   int ms = 0;
   ms = delta.InMilliseconds();
-  LOG(INFO) << "SUM " << info.fileName << " md5 used " << ms << " ms";
+  LOG(INFO) << "SUM " << info.filename << " md5 used " << ms << " ms";
   content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
     base::Bind(&YSPAccountView::OnSumMD5, weakFactoryForUI.GetWeakPtr(), md5,info));
 }
 
 void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) {
   std::wstring md5WStr = base::ASCIIToUTF16(md5);
-  if(md5WStr !=info.md5)
+  if (md5WStr != info.md5)
     DownloadActivexInfobarDelegate::Create(browser_view_, info);
 }
 #endif
