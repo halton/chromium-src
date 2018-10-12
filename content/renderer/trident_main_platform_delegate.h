@@ -1,14 +1,10 @@
-#ifdef REDCORE
-#ifdef IE_REDCORE
-//#ifndef CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
-//#define CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#pragma once
-#include "build/build_config.h"
+#ifndef CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
+#define CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
 
-#include <windows.h>
-
-#include "base/macros.h"
 #include "content/common/content_export.h"
 #include "content/public/common/main_function_params.h"
 
@@ -16,8 +12,7 @@ namespace content {
 
 class CONTENT_EXPORT TridentMainPlatformDelegate {
  public:
-  explicit TridentMainPlatformDelegate(
-      const MainFunctionParams& parameters);
+  explicit TridentMainPlatformDelegate(const MainFunctionParams& parameters);
   ~TridentMainPlatformDelegate();
 
   void PlatformInitialize();
@@ -31,6 +26,4 @@ class CONTENT_EXPORT TridentMainPlatformDelegate {
 
 }  // namespace content
 
-//#endif  // CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
-#endif
-#endif
+#endif  // CONTENT_RENDERER_RENDERER_MAIN_PLATFORM_DELEGATE_H_
