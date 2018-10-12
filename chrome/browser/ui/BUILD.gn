@@ -1051,7 +1051,7 @@ jumbo_split_static_library("ui") {
       "views/ysp_lock_screen_view.h",
       "views/ysp_login_view.cc",
       "views/ysp_login_view.h",
-      "views/ysp_renderer_mode_bubble_view.cpp",
+      "views/ysp_renderer_mode_bubble_view.cc",
       "views/ysp_renderer_mode_bubble_view.h",
 
       # FIXME(halton):
