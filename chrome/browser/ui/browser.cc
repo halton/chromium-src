@@ -716,6 +716,11 @@ Browser::Browser(const CreateParams& params)
       new ExclusiveAccessManager(window_->GetExclusiveAccessContext()));
 
   BrowserList::AddBrowser(this);
+#if defined(REDCORE)
+  YSPLoginManager::GetInstance()->Init();
+  YSPLoginManager::GetInstance()->AddObserver(this);
+  YSPLoginManager::GetInstance()->Restore();
+#endif
 }
 
 Browser::~Browser() {
@@ -1280,11 +1285,7 @@ void Browser::TabClosingAt(TabStripModel* tab_strip_model,
       chrome::NOTIFICATION_TAB_CLOSING,
       content::Source<NavigationController>(&contents->GetController()),
       content::NotificationService::NoDetails());
-#if defined(REDCORE)
-  YSPLoginManager::GetInstance()->Init();
-  YSPLoginManager::GetInstance()->AddObserver(this);
-  YSPLoginManager::GetInstance()->Restore();
-#endif
+
 }
 
 void Browser::TabDetachedAt(WebContents* contents, int index, bool was_active) {
