@@ -17,8 +17,8 @@ namespace {
 LazyInstance<ThreadLocalBoolean>::Leaky g_blocking_disallowed =
     LAZY_INSTANCE_INITIALIZER;
 
-LazyInstance<ThreadLocalBoolean>::Leaky g_singleton_disallowed =
-    LAZY_INSTANCE_INITIALIZER;
+LazyInstance<ThreadLocalBoolean>::Leaky
+    g_singleton_disallowed = LAZY_INSTANCE_INITIALIZER;
 
 LazyInstance<ThreadLocalBoolean>::Leaky g_base_sync_primitives_disallowed =
     LAZY_INSTANCE_INITIALIZER;
@@ -26,14 +26,12 @@ LazyInstance<ThreadLocalBoolean>::Leaky g_base_sync_primitives_disallowed =
 }  // namespace
 
 void AssertBlockingAllowed() {
-#ifndef REDCORE
   DCHECK(!g_blocking_disallowed.Get().Get())
       << "Function marked as blocking was called from a scope that disallows "
          "blocking! If this task is running inside the TaskScheduler, it needs "
          "to have MayBlock() in its TaskTraits. Otherwise, consider making "
          "this blocking work asynchronous or, as a last resort, you may use "
          "ScopedAllowBlocking (see its documentation for best practices).";
-#endif
 }
 
 void DisallowBlocking() {

@@ -19,7 +19,7 @@ namespace android_webview {
 class AwFormDatabaseService;
 class CookieManager;
 class ScopedAllowInitGLBindings;
-}  // namespace android_webview
+}
 namespace audio {
 class OutputDevice;
 }
@@ -29,13 +29,13 @@ class VideoFrameResourceProvider;
 namespace cc {
 class CompletionEvent;
 class SingleThreadTaskGraphRunner;
-}  // namespace cc
+}
 namespace chromeos {
 class BlockingMethodCaller;
 namespace system {
 class StatisticsProviderImpl;
 }
-}  // namespace chromeos
+}
 namespace chrome_browser_net {
 class Predictor;
 }
@@ -68,7 +68,7 @@ class Bus;
 namespace disk_cache {
 class BackendImpl;
 class InFlightIO;
-}  // namespace disk_cache
+}
 namespace functions {
 class ExecScriptScopedAllowBaseSyncPrimitives;
 }
@@ -81,7 +81,7 @@ class LevelDBMojoProxy;
 namespace media {
 class AudioInputDevice;
 class BlockingUrlProtocol;
-}  // namespace media
+}
 namespace midi {
 class TaskService;  // https://crbug.com/796830
 }
@@ -91,7 +91,7 @@ class SyncCallRestrictions;
 namespace core {
 class ScopedIPCSupport;
 }
-}  // namespace mojo
+}
 namespace rlz_lib {
 class FinancialPing;
 }
@@ -100,14 +100,14 @@ class CommandBufferClientImpl;
 class CommandBufferLocal;
 class GpuState;
 class MaterialDesignController;
-}  // namespace ui
+}
 namespace net {
 class MultiThreadedCertVerifierScopedAllowBaseSyncPrimitives;
 class NetworkChangeNotifierMac;
 namespace internal {
 class AddressTrackerLinux;
 }
-}  // namespace net
+}
 
 namespace remoting {
 class AutoThread;
@@ -169,9 +169,7 @@ class ThreadTestHelper;
 // a socket, rename or delete a file, enumerate files in a directory, etc.
 // Acquiring a low contention lock is not considered a blocking call.
 
-// Asserts that blocking calls are allowed in the current scope. Prefer using
-// ScopedBlockingCall instead, which also serves as a precise annotation of the
-// scope that may/will block.
+// Asserts that blocking calls are allowed in the current scope.
 //
 // Style tip: It's best if you put AssertBlockingAllowed() checks as close to
 // the blocking call as possible. For example:
@@ -407,21 +405,6 @@ INLINE_IF_DCHECK_IS_OFF void ResetThreadRestrictionsForTesting()
 
 }  // namespace internal
 
-// "Long CPU" work refers to any code that takes more than 100 ms to
-// run when there is no CPU contention and no hard page faults and therefore,
-// is not suitable to run on a thread required to keep the browser responsive
-// (where jank could be visible to the user).
-
-// Asserts that running long CPU work is allowed in the current scope.
-INLINE_IF_DCHECK_IS_OFF void AssertLongCPUWorkAllowed()
-    EMPTY_BODY_IF_DCHECK_IS_OFF;
-
-// Disallows all tasks that may be unresponsive on the current thread. This
-// disallows blocking calls, waiting on a //base sync primitive and long CPU
-// work.
-INLINE_IF_DCHECK_IS_OFF void DisallowUnresponsiveTasks()
-    EMPTY_BODY_IF_DCHECK_IS_OFF;
-
 class BASE_EXPORT ThreadRestrictions {
  public:
   // Constructing a ScopedAllowIO temporarily allows IO for the current
@@ -504,24 +487,23 @@ class BASE_EXPORT ThreadRestrictions {
   // END ALLOWED USAGE.
   // BEGIN USAGE THAT NEEDS TO BE FIXED.
   friend class ::chromeos::BlockingMethodCaller;  // http://crbug.com/125360
-  friend class ::chromeos::system::
-      StatisticsProviderImpl;                  // http://crbug.com/125385
-  friend class chrome_browser_net::Predictor;  // http://crbug.com/78451
-  friend class content::
-      BrowserGpuChannelHostFactory;                 // http://crbug.com/125248
-  friend class content::TextInputClientMac;         // http://crbug.com/121917
-  friend class dbus::Bus;                           // http://crbug.com/125222
-  friend class disk_cache::BackendImpl;             // http://crbug.com/74623
-  friend class disk_cache::InFlightIO;              // http://crbug.com/74623
-  friend class gpu::GpuChannelHost;                 // http://crbug.com/125264
+  friend class ::chromeos::system::StatisticsProviderImpl;  // http://crbug.com/125385
+  friend class chrome_browser_net::Predictor;     // http://crbug.com/78451
+  friend class
+      content::BrowserGpuChannelHostFactory;      // http://crbug.com/125248
+  friend class content::TextInputClientMac;       // http://crbug.com/121917
+  friend class dbus::Bus;                         // http://crbug.com/125222
+  friend class disk_cache::BackendImpl;           // http://crbug.com/74623
+  friend class disk_cache::InFlightIO;            // http://crbug.com/74623
+  friend class gpu::GpuChannelHost;               // http://crbug.com/125264
   friend class net::internal::AddressTrackerLinux;  // http://crbug.com/125097
-  friend class net::NetworkChangeNotifierMac;       // http://crbug.com/125097
-  friend class ::BrowserProcessImpl;                // http://crbug.com/125207
-  friend class ::NativeBackendKWallet;              // http://crbug.com/125331
+  friend class net::NetworkChangeNotifierMac;     // http://crbug.com/125097
+  friend class ::BrowserProcessImpl;              // http://crbug.com/125207
+  friend class ::NativeBackendKWallet;            // http://crbug.com/125331
 #if !defined(OFFICIAL_BUILD)
   friend class content::SoftwareOutputDeviceMus;  // Interim non-production code
 #endif
-  // END USAGE THAT NEEDS TO BE FIXED.
+// END USAGE THAT NEEDS TO BE FIXED.
 
 #if DCHECK_IS_ON()
   // DEPRECATED. Use ScopedAllowBaseSyncPrimitives.
