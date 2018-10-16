@@ -2429,7 +2429,7 @@ void BrowserView::InitViews() {
                             tabstrip_,
                             toolbar_,
 #if defined(REDCORE)
-                            account_view_,    //ysp+ { custom ui }
+                    //        account_view_,    //ysp+ { custom ui }
 #endif // defined(REDCORE)
                             infobar_container_,
                             contents_container_,

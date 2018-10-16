@@ -11,11 +11,7 @@ namespace content {
 // There are security implications associated with introducing new schemes.
 const char kChromeDevToolsScheme[] = "chrome-devtools";
 const char kChromeErrorScheme[] = "chrome-error";
-#ifdef REDCORE
-const char kChromeUIScheme[] = "redcore";
-#else
 const char kChromeUIScheme[] = "chrome";
-#endif
 const char kGuestScheme[] = "chrome-guest";
 const char kViewSourceScheme[] = "view-source";
 #if defined(OS_CHROMEOS)
@@ -41,25 +37,6 @@ const char kChromeUIServiceWorkerInternalsHost[] = "serviceworker-internals";
 const char kChromeUITracingHost[] = "tracing";
 const char kChromeUIWebRTCInternalsHost[] = "webrtc-internals";
 
-#ifdef REDCORE
-const char kChromeUIBadCastCrashURL[] = "redcore://badcastcrash/";
-const char kChromeUICheckCrashURL[] = "redcore://checkcrash/";
-const char kChromeUIBrowserCrashURL[] = "redcore://inducebrowsercrashforrealz/";
-const char kChromeUIBrowserUIHang[] = "redcore://uithreadhang/";
-const char kChromeUICrashURL[] = "redcore://crash/";
-const char kChromeUIDelayedBrowserUIHang[] = "redcore://delayeduithreadhang/";
-const char kChromeUIDumpURL[] = "redcore://crashdump/";
-const char kChromeUIGpuCleanURL[] = "redcore://gpuclean/";
-const char kChromeUIGpuCrashURL[] = "redcore://gpucrash/";
-const char kChromeUIGpuHangURL[] = "redcore://gpuhang/";
-const char kChromeUIHangURL[] = "redcore://hang/";
-const char kChromeUIKillURL[] = "redcore://kill/";
-const char kChromeUIMemoryExhaustURL[] = "redcore://memory-exhaust/";
-const char kChromeUINetworkErrorURL[] = "redcore://network-error/";
-const char kChromeUINetworkErrorsListingURL[] = "redcore://network-errors/";
-const char kChromeUIPpapiFlashCrashURL[] = "redcore://ppapiflashcrash/";
-const char kChromeUIPpapiFlashHangURL[] = "redcore://ppapiflashhang/";
-#else
 const char kChromeUIBadCastCrashURL[] = "chrome://badcastcrash/";
 const char kChromeUICheckCrashURL[] = "chrome://checkcrash/";
 const char kChromeUIBrowserCrashURL[] = "chrome://inducebrowsercrashforrealz/";
@@ -78,7 +55,6 @@ const char kChromeUINetworkErrorsListingURL[] = "chrome://network-errors/";
 const char kChromeUIPpapiFlashCrashURL[] = "chrome://ppapiflashcrash/";
 const char kChromeUIPpapiFlashHangURL[] = "chrome://ppapiflashhang/";
 const char kChromeUIProcessInternalsURL[] = "chrome://process-internals";
-#endif
 #if defined(OS_ANDROID)
 const char kChromeUIGpuJavaCrashURL[] = "chrome://gpu-java-crash/";
 #endif
@@ -107,12 +83,7 @@ const char kChromeUICrashDcheckURL[] = "chrome://crash/dcheck";
 // have a chrome:// scheme that might let it be confused with a WebUI page.
 const char kUnreachableWebDataURL[] = "chrome-error://chromewebdata/";
 
-#ifdef REDCORE
-const char kChromeUIResourcesURL[] = "redcore://resources/";
-const char kChromeUIShorthangURL[] = "redcore://shorthang/";
-#else
 const char kChromeUIResourcesURL[] = "chrome://resources/";
 const char kChromeUIShorthangURL[] = "chrome://shorthang/";
-#endif
 
 }  // namespace content

@@ -48,9 +48,6 @@ class BrowserViewLayout : public views::LayoutManager {
             views::View* top_container,
             TabStrip* tab_strip,
             views::View* toolbar,
-#ifdef REDCORE
-            views::View* account_view,    //ysp+ { custom ui }
-#endif
             InfoBarContainerView* infobar_container,
             views::View* contents_container,
             ContentsLayoutManager* contents_layout_manager,
@@ -87,10 +84,6 @@ class BrowserViewLayout : public views::LayoutManager {
 
   // Returns true if an infobar is showing.
   bool IsInfobarVisible() const;
-
-#ifdef REDCORE
-  void LayoutAccountView(int top, int bottom);    //ysp+ { custom ui }
-#endif
 
  private:
   FRIEND_TEST_ALL_PREFIXES(BrowserViewLayoutTest, BrowserViewLayout);
@@ -141,9 +134,6 @@ class BrowserViewLayout : public views::LayoutManager {
   views::View* top_container_;
   TabStrip* tab_strip_;
   views::View* toolbar_;
-#ifdef REDCORE
-  views::View* account_view_;    //ysp+ { custom ui }
-#endif
   BookmarkBarView* bookmark_bar_;
   InfoBarContainerView* infobar_container_;
   views::View* contents_container_;
