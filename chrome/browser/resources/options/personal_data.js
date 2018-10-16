@@ -392,7 +392,7 @@ cr.define("options", function() {
         //console.log(d);
         if (d === 'false') {
             $('rdc_reset_frm').style.display = 'none';
-            $('rdc_reset_status').style.display = 'block';
+            $('rdc_reset_nopermit').style.display = 'block';
         }
         PageManager.showPageByName('resetpsw');
     },

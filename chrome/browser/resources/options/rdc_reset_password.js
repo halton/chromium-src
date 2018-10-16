@@ -45,9 +45,9 @@ cr.define('options', function () {
         };
         var self = this;
         $('rdcRestpsw_complete').addEventListener('click', function () {
+            chrome.send('logout');
             SettingsDialog.prototype.handleCancel.call(this);
             self.restore();
-            chrome.send('logout');
         });
 
         $('rdcRestpsw_fail').addEventListener('click', function () {
@@ -87,28 +87,6 @@ cr.define('options', function () {
         $('txt_rdc_psw_new').value = '';
         $('txt_rdc_psw_new2').value = '';
     },
-
-    //afterInit: function () {
-    //    var self = this;
-    //    var el_rdc_psw_origin = $('txt_rdc_psw_origin');
-    //    var el_rdc_psw_new = $('txt_rdc_psw_new');
-    //    var el_rdc_psw_new2 = $('txt_rdc_psw_new2');
-
-    //    el_rdc_psw_origin.addEventListener(
-    //        'change', this.standardRangeChanged_.bind(this, el_rdc_psw_origin));
-    //    el_rdc_psw_origin.addEventListener(
-    //        'input', this.standardRangeChanged_.bind(this, el_rdc_psw_origin));
-
-    //    el_rdc_psw_new.addEventListener(
-    //        'change', this.standardRangeChanged_.bind(this, el_rdc_psw_new));
-    //    el_rdc_psw_new.addEventListener(
-    //        'input', this.standardRangeChanged_.bind(this, el_rdc_psw_new));
-
-    //    el_rdc_psw_new2.addEventListener(
-    //        'change', this.standardRangeChanged_.bind(this, el_rdc_psw_new2));
-    //    el_rdc_psw_new2.addEventListener(
-    //        'input', this.standardRangeChanged_.bind(this, el_rdc_psw_new2));
-    //},
 
     handleChange_: function (el, event) {
         //console.log(el.value);
