@@ -17,7 +17,7 @@
 namespace {
   content::WebUIDataSource* CreateWebUIDataSource() {
     content::WebUIDataSource* html_source =
-      content::WebUIDataSource::Create(chrome::kChromeUIThumbnailHost);
+        content::WebUIDataSource::Create(chrome::kChromeUIShowConfigHost);
 
     html_source->AddResourcePath("base.css", IDR_YSP_CONFIG_BASE_CSS);
     html_source->AddResourcePath("showConfig.html", IDR_YSP_CONFIG_SHOW_CONFIG_HTML);
