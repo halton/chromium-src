@@ -16,7 +16,8 @@
 
 namespace {
   content::WebUIDataSource* CreateWebUIDataSource() {
-    content::WebUIDataSource* html_source = content::WebUIDataSource::Create(chrome::kChromeUIWelcomeHost);
+    content::WebUIDataSource* html_source =
+        content::WebUIDataSource::Create(chrome::kChromeUINewTabHost);
 
     html_source->AddResourcePath("Home.html", IDR_REDCORE_NEWTAB_HOME_HTML);
     html_source->AddResourcePath("Home.js", IDR_REDCORE_NEWTAB_HOME_JS);

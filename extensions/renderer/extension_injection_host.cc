@@ -51,8 +51,8 @@ PermissionsData::PageAccess ExtensionInjectionHost::CanExecuteOnFrame(
     int tab_id,
     bool is_declarative) const {
 #ifdef REDCORE  //TODO(matianzhi) Support Extensions Insert JS on newtab page
-	if (document_url.spec() == "redcore://newtab/")
-		return PermissionsData::PageAccess::kAllowed;
+  if (document_url.spec() == "chrome://newtab/")
+    return PermissionsData::PageAccess::kAllowed;
 #endif
   blink::WebSecurityOrigin top_frame_security_origin =
       render_frame->GetWebFrame()->Top()->GetSecurityOrigin();

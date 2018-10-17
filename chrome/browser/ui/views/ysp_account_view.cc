@@ -191,10 +191,10 @@ bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
 
   if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
     YSPLoginManager::GetInstance()->GetAutoConfigfetcher(true);
-    url_str = "redcore://settings";
+    url_str = "chrome://settings";
   }
   else {
-    url_str = "redcore://newtab";
+    url_str = "chrome://newtab";
   }
 
   const GURL url(url_str);

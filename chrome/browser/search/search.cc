@@ -361,6 +361,7 @@ bool HandleNewTabURLRewrite(GURL* url,
       url->host() != chrome::kChromeUINewTabHost)
     return false;
 
+#ifndef REDCORE
   Profile* profile = Profile::FromBrowserContext(browser_context);
   NewTabURLDetails details(NewTabURLDetails::ForProfile(profile));
   UMA_HISTOGRAM_ENUMERATION("NewTabPage.URLState",
@@ -369,6 +370,7 @@ bool HandleNewTabURLRewrite(GURL* url,
     *url = details.url;
     return true;
   }
+#endif
   return false;
 }
 
