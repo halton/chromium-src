@@ -1716,7 +1716,7 @@ base::string16 BrowserView::GetWindowTitle() const {
       browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
 
 #if defined(REDCORE) // ysp (LIUWEI) TODO: find a better place for setting?
-  title = base::string16(l10n_util::GetStringUTF16(IDS_YSP_REDCORE_ENTERPRISE_BROWSER));
+  title = base::string16();
 #else
   title = browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
 #endif // defined(REDCORE)
