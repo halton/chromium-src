@@ -4763,6 +4763,15 @@ bool ChromeContentBrowserClient::HandleWebUI(
     return false;
   }
 
+#ifdef REDCORE
+  if (url->SchemeIs(content::kChromeUIScheme) &&
+      (url->host() == chrome::kChromeUIWelcomeHost ||
+       url->host() == chrome::kChromeUIWelcomeWin10Host)) {
+    *url = GURL(chrome::kChromeUINewTabURL);
+    return true;
+  }
+#endif
+
 #if defined(OS_CHROMEOS)
   // Special case : in ChromeOS in Guest mode bookmarks and history are
   // disabled for security reasons. New tab page explains the reasons, so

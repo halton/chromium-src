@@ -571,11 +571,7 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui,
       !profile->IsOffTheRecord())
     return &NewWebUI<SigninEmailConfirmationUI>;
   if (url.host_piece() == chrome::kChromeUIWelcomeHost)
-#ifdef REDCORE
-    return &NewWebUI<EPNewTabUI>;
-#else
     return &NewWebUI<WelcomeUI>;
-#endif
 #endif
 #if defined(OS_WIN)
   if (url.host_piece() == chrome::kChromeUIWelcomeWin10Host)
