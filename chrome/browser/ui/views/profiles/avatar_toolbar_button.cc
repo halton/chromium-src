@@ -34,6 +34,10 @@
 #include "ui/gfx/paint_vector_icon.h"
 #include "ui/views/controls/button/label_button_border.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_account_view.h"
+#endif
+
 namespace {
 
 ProfileAttributesEntry* GetProfileAttributesEntry(Profile* profile) {
@@ -134,6 +138,21 @@ void AvatarToolbarButton::UpdateText() {
 
 void AvatarToolbarButton::NotifyClick(const ui::Event& event) {
   Button::NotifyClick(event);
+#ifdef REDCORE
+  std::string url_str;
+  if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
+    YSPLoginManager::GetInstance()->GetAutoConfigfetcher(true);
+    url_str = "chrome://settings";
+  } else {
+    url_str = "chrome://newtab";
+  }
+
+  const GURL url(url_str);
+  const content::Referrer ref(url, blink::kWebReferrerPolicyDefault);
+  content::OpenURLParams param(url, ref, WindowOpenDisposition::SINGLETON_TAB,
+                               ui::PAGE_TRANSITION_AUTO_TOPLEVEL, false);
+  browser_->OpenURL(param);
+ #else
   // TODO(bsep): Other toolbar buttons have ToolbarView as a listener and let it
   // call ExecuteCommandWithDisposition on their behalf. Unfortunately, it's not
   // possible to plumb IsKeyEvent through, so this has to be a special case.
@@ -141,6 +160,7 @@ void AvatarToolbarButton::NotifyClick(const ui::Event& event) {
       BrowserWindow::AVATAR_BUBBLE_MODE_DEFAULT, signin::ManageAccountsParams(),
       signin_metrics::AccessPoint::ACCESS_POINT_AVATAR_BUBBLE_SIGN_IN,
       event.IsKeyEvent());
+#endif  // REDCORE
 }
 
 void AvatarToolbarButton::OnAvatarErrorChanged() {

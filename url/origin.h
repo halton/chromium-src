@@ -154,6 +154,8 @@ class URL_EXPORT Origin {
     return !unique() ? tuple_.host() : base::EmptyString();
   }
   uint16_t port() const { return !unique() ? tuple_.port() : 0; }
+ 
+  bool opaque() const { return nonce_.has_value(); }
 
   // TODO(dcheng): Rename this to opaque().
   bool unique() const { return tuple_.IsInvalid(); }
@@ -211,7 +213,7 @@ class URL_EXPORT Origin {
   // should be responsible for deriving a canonical origin from a GURL.
   static Origin CreateUniqueOpaque();
 
-  // Similar to Create(const GURL&). However, if the returned Origin is an
+  // Similar to Create(const GURL&). However, if the returned Origiport()n is an
   // opaque origin, it will be created with CreateUniqueOpaque(), have an
   // associated identity, and be considered same-origin to copies of itself.
   static Origin CreateCanonical(const GURL&);

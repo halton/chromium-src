@@ -4250,7 +4250,9 @@ void Browser::UpdateStrategy()
   // devtools
   bool dev_enabled = manager->GetDevToolsEnabled();
   PrefService* prefs = profile()->GetPrefs();
-  prefs->SetBoolean(prefs::kDevToolsAvailability, !dev_enabled);
+  // ysp(wangping)+ SetBoolean will throw exception
+  //prefs->SetBoolean(prefs::kDevToolsAvailability, !dev_enabled);
+  prefs->SetInteger(prefs::kDevToolsAvailability, (int)!dev_enabled);
 
   if (!YSPLoginManager::GetInstance()->GetStatusBarEnabled()) {
     StatusBubble *bubble = window_ ? window_->GetStatusBubble() : NULL;

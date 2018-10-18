@@ -718,6 +718,9 @@ YSPLoginManager::YSPLoginManager()
       get_auth_token_fetcher_(nullptr),
       get_sdp_device_fetcher_(nullptr),
       put_sdp_device_fetcher_(nullptr),
+	  put_modify_password_fetcher_(nullptr),
+	  put_appliction_status_fetcher_(nullptr),
+	  get_gateway_appliction_fetcher_(nullptr),
       autoConfig_fetcher_(nullptr),
       login_info_(nullptr),
       application_info_(nullptr),
@@ -795,6 +798,18 @@ YSPLoginManager::~YSPLoginManager() {
   if (put_sdp_device_fetcher_) {
     delete put_sdp_device_fetcher_;
     put_sdp_device_fetcher_ = nullptr;
+  }
+  if (put_appliction_status_fetcher_) {
+    delete put_appliction_status_fetcher_;
+    put_appliction_status_fetcher_ = nullptr;
+  }
+  if (get_gateway_appliction_fetcher_) {
+	  delete get_gateway_appliction_fetcher_;
+	  get_gateway_appliction_fetcher_ = nullptr;
+  }
+  if (put_modify_password_fetcher_) {
+	  delete put_modify_password_fetcher_;
+	  put_modify_password_fetcher_ = nullptr;
   }
   observers_.clear();
 }
@@ -1447,6 +1462,11 @@ void YSPLoginManager::OnSdpDeviceFetcherResponseParse(
   }
 }
 
+void YSPLoginManager::OnModifyPasswordResponseParse(std::string response) {
+  LOG(INFO) << "YSPLoginManager::OnModifyPasswordResponseParse";
+  NotifyConfigureUpdate("modifyPassword", response);
+}
+
 //YSP+ { Fetcher resource
 std::string YSPLoginManager::GetUserId() {
   if (login_info_) {
@@ -1466,6 +1486,19 @@ int YSPLoginManager::GetStrategyVersion() {
     }
   }
   return version;
+}
+
+// 获取账号创建source类型
+// 1. 手动创建 2. 批量导入 3.定制导入 4.AD导入
+// 注：4. 类型不能修改密码
+int YSPLoginManager::GetAccountSourceType() {
+  int sourceType = 0;
+  if (login_info_) {
+    if (login_info_->GetInteger("data.user.source", &sourceType)) {
+      return sourceType;
+    }
+  }
+  return sourceType;
 }
 
 //获取策略ID
@@ -1821,7 +1854,7 @@ std::string YSPLoginManager::GetResponseStatusCode(
     std::unique_ptr<base::DictionaryValue>& response_data) {
   std::string status_code = "-1";
   if (response_data) {
-    response_data->GetString("errorCode", &status_code);
+    response_data->GetString("errCode", &status_code);
   }
   return status_code;
 }
@@ -1884,7 +1917,7 @@ base::string16 YSPLoginManager::GetResponseErrorMessage(
 std::string YSPLoginManager::GetLoginStatusCode() {
   std::string status_code = "-1";
   if (login_info_) {
-    login_info_->GetString("errorCode", &status_code);
+    login_info_->GetString("errCode", &status_code);
   }
   DLOG(INFO) << "YSPLoginManager::GetLoginStatusCode: " << status_code;
   return status_code;
@@ -2507,6 +2540,13 @@ void YSPLoginManager::OnFetcherResourceRequestFailure(const GURL & url, bool aut
   }
   base::string16 error_message = GetResponseErrorMessage(error);
   std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+
+  // ModifyPassword
+  if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
+    OnModifyPasswordResponseParse(base::UTF16ToUTF8(error_message));
+    return;
+  }
+
   for (; iter != observers_.end(); ++iter) {
     (*iter)->OnLoginRequestFailure(base::UTF16ToUTF8(error_message));
   }
@@ -2553,6 +2593,11 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL &
     else if (url.spec().find(kSdpDevicePath) != std::string::npos) {
       OnSdpDeviceFetcherResponseParse(response_data, from_local, auto_fetch);
     }
+    if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
+      OnModifyPasswordResponseParse(response_status);
+	  return;
+    }
+
     LOG(INFO) << "login_status_code_: " << login_status_code_
               << " application_status_code_: " << application_status_code_
               << " pc_status_code_: " << pc_status_code_
@@ -2620,6 +2665,8 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL &
       }
     } else if (response_status == "E1002") {
       GetAuthTokenfetcher(url.spec(), false);
+    } else if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
+      OnModifyPasswordResponseParse(response_status);
     }
     else {
       if (!auto_fetch) {
@@ -2641,6 +2688,13 @@ void YSPLoginManager::OnFetcherResourceResponseParseFailure(const GURL & url, bo
   }
   base::string16 error_message = GetResponseErrorMessage(error);
   std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+
+  // ModifyPassword
+  if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
+    OnModifyPasswordResponseParse(base::UTF16ToUTF8(error_message));
+    return;
+  }
+ 
   for (; iter != observers_.end(); ++iter) {
     (*iter)->OnLoginResponseParseFailure(base::UTF16ToUTF8(error_message));
   }

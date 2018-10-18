@@ -227,7 +227,9 @@ PasswordStoreDefault::FillLoginsForSameOrganizationName(
 
 bool PasswordStoreDefault::FillAutofillableLogins(
     std::vector<std::unique_ptr<PasswordForm>>* forms) {
+#ifndef REDCORE
   DCHECK(background_task_runner()->RunsTasksInCurrentSequence());
+#endif  // !REDCORE
   return login_db_ && login_db_->GetAutofillableLogins(forms);
 }
 

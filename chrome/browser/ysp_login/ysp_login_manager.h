@@ -206,6 +206,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   std::string GetUserId();
   int GetStrategyVersion();
   std::string GetActivelId();
+  int GetAccountSourceType();
   std::string GetAccessToken();
   std::string GetAccessTokenForLogin();
   std::string GetRefreshToken();
@@ -255,6 +256,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void OnSdpDeviceFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
                                        bool from_local,
                                        bool auto_fetch);
+  void OnModifyPasswordResponseParse(std::string response);
   //YSP+ } /*Fetcher resource*/
  private:
   void OnLoginResponseParseSuccessInternal(
