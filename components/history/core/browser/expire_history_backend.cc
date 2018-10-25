@@ -80,8 +80,8 @@ class AutoSubframeVisitsReader : public ExpiringVisitsReader {
 
     base::Time begin_time = db->GetEarlyExpirationThreshold();
     // Advance |end_time| to expire early.
-    base::Time early_end_time = end_time +
-        base::TimeDelta::FromDays(kEarlyExpirationAdvanceDays);
+    base::Time early_end_time =
+        end_time + base::TimeDelta::FromDays(kEarlyExpirationAdvanceDays);
 
     // We don't want to set the early expiration threshold to a time in the
     // future.
@@ -89,8 +89,7 @@ class AutoSubframeVisitsReader : public ExpiringVisitsReader {
     if (early_end_time > now)
       early_end_time = now;
 
-    db->GetVisitsInRangeForTransition(begin_time, early_end_time,
-                                      max_visits,
+    db->GetVisitsInRangeForTransition(begin_time, early_end_time, max_visits,
                                       ui::PAGE_TRANSITION_AUTO_SUBFRAME,
                                       visits);
     bool more = static_cast<int>(visits->size()) == max_visits;
@@ -152,12 +151,9 @@ const int kOnDemandFaviconIsOldAfterDays = 30;
 
 // ExpireHistoryBackend::DeleteEffects ----------------------------------------
 
-ExpireHistoryBackend::DeleteEffects::DeleteEffects() {
-}
+ExpireHistoryBackend::DeleteEffects::DeleteEffects() {}
 
-ExpireHistoryBackend::DeleteEffects::~DeleteEffects() {
-}
-
+ExpireHistoryBackend::DeleteEffects::~DeleteEffects() {}
 
 // ExpireHistoryBackend -------------------------------------------------------
 
@@ -174,8 +170,7 @@ ExpireHistoryBackend::ExpireHistoryBackend(
   DCHECK(notifier_);
 }
 
-ExpireHistoryBackend::~ExpireHistoryBackend() {
-}
+ExpireHistoryBackend::~ExpireHistoryBackend() {}
 
 void ExpireHistoryBackend::SetDatabases(HistoryDatabase* main_db,
                                         ThumbnailDatabase* thumb_db) {
@@ -257,10 +252,8 @@ void ExpireHistoryBackend::ExpireHistoryForTimes(
   // |times| must be in reverse chronological order and have no
   // duplicates, i.e. each member must be earlier than the one before
   // it.
-  DCHECK(
-      std::adjacent_find(
-          times.begin(), times.end(), std::less_equal<base::Time>()) ==
-      times.end());
+  DCHECK(std::adjacent_find(times.begin(), times.end(),
+                            std::less_equal<base::Time>()) == times.end());
 
   if (!main_db_)
     return;
@@ -335,7 +328,7 @@ const ExpiringVisitsReader* ExpireHistoryBackend::GetAllVisitsReader() {
 }
 
 const ExpiringVisitsReader*
-    ExpireHistoryBackend::GetAutoSubframeVisitsReader() {
+ExpireHistoryBackend::GetAutoSubframeVisitsReader() {
   if (!auto_subframe_visits_reader_)
     auto_subframe_visits_reader_.reset(new AutoSubframeVisitsReader());
   return auto_subframe_visits_reader_.get();
@@ -369,9 +362,7 @@ void ExpireHistoryBackend::DeleteFaviconsIfPossible(DeleteEffects* effects) {
     if (!thumb_db_->HasMappingFor(*i)) {
       GURL icon_url;
       favicon_base::IconType icon_type;
-      if (thumb_db_->GetFaviconHeader(*i,
-                                      &icon_url,
-                                      &icon_type) &&
+      if (thumb_db_->GetFaviconHeader(*i, &icon_url, &icon_type) &&
           thumb_db_->DeleteFavicon(*i)) {
         effects->deleted_favicons.insert(icon_url);
       }
@@ -557,8 +548,8 @@ void ExpireHistoryBackend::DoExpireIteration() {
   }
 
   const ExpiringVisitsReader* reader = work_queue_.front();
-  bool more_to_expire = ExpireSomeOldHistory(
-      GetCurrentExpirationTime(), reader, kNumExpirePerIteration);
+  bool more_to_expire = ExpireSomeOldHistory(GetCurrentExpirationTime(), reader,
+                                             kNumExpirePerIteration);
 
   work_queue_.pop();
   if (more_to_expire) {
@@ -625,8 +616,8 @@ bool ExpireHistoryBackend::ExpireSomeOldHistory(
       base::Time::FromInternalValue(end_time.ToInternalValue() + 1);
 
   VisitVector deleted_visits;
-  bool more_to_expire = reader->Read(effective_end_time, main_db_,
-                                     &deleted_visits, max_visits);
+  bool more_to_expire =
+      reader->Read(effective_end_time, main_db_, &deleted_visits, max_visits);
 
   DeleteEffects deleted_effects;
   DeleteVisitRelatedInfo(deleted_visits, &deleted_effects);
@@ -644,16 +635,16 @@ void ExpireHistoryBackend::ParanoidExpireHistory() {
 }
 
 #ifdef REDCORE
-//TODO (matianzhi): YSP+ { clear user data
-void ExpireHistoryBackend::ExpireHistoryForUserId(const std::string & userid) {
- if (!main_db_)
-   return;
- // Find the affected visits and delete them.
- VisitVector visits;
- main_db_->GetVisitsForUserId(userid, &visits);
- ExpireVisits(visits);
+// TODO(matianzhi): YSP+ { clear user data
+void ExpireHistoryBackend::ExpireHistoryForUserId(const std::string& userid) {
+  if (!main_db_)
+    return;
+  // Find the affected visits and delete them.
+  VisitVector visits;
+  main_db_->GetVisitsForUserId(userid, &visits);
+  ExpireVisits(visits);
 }
-//ysp+ }
+// ysp+ }
 #endif
 
 }  // namespace history

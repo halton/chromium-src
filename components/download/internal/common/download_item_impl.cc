@@ -291,7 +291,7 @@ DownloadItemImpl::DownloadItemImpl(
     const base::FilePath& current_path,
     const base::FilePath& target_path,
 #ifdef REDCORE
-    const std::string& YSPUserName, //YSP+ { User information isolation }
+    const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
@@ -349,14 +349,14 @@ DownloadItemImpl::DownloadItemImpl(
       received_slices_(received_slices),
       is_updating_observers_(false),
 #ifdef REDCORE
-      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
-      is_doc_view_(false),    //ysp+
-      is_update_(false),      //ysp+
+      ysp_username_(ysp_username),  // YSP+ { User information isolation }
+      is_doc_view_(false),        // ysp+
+      is_update_(false),          // ysp+
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false), //ysp+
-      // render_process_host_id_(-1), //ysp+
-      // render_frame_host_id_(-1), //ysp+
+      is_ie_download_(false),  // ysp+
+// render_process_host_id_(-1), //ysp+
+// render_frame_host_id_(-1), //ysp+
 #endif
       weak_ptr_factory_(this) {
   delegate_->Attach();
@@ -367,12 +367,13 @@ DownloadItemImpl::DownloadItemImpl(
 }
 
 // Constructing for a regular download:
-DownloadItemImpl::DownloadItemImpl(DownloadItemImplDelegate* delegate,
-                                   uint32_t download_id,
+DownloadItemImpl::DownloadItemImpl(
+    DownloadItemImplDelegate* delegate,
+    uint32_t download_id,
 #ifdef REDCORE
-                                   const std::string& YSPUserName, //YSP+ { User information isolation }
+    const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
-                                   const DownloadCreateInfo& info)
+    const DownloadCreateInfo& info)
     : request_info_(info.url_chain,
                     info.referrer_url,
                     info.site_url,
@@ -408,14 +409,14 @@ DownloadItemImpl::DownloadItemImpl(DownloadItemImplDelegate* delegate,
       request_headers_(info.request_headers),
       download_source_(info.download_source),
 #ifdef REDCORE
-      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
-      is_doc_view_(false),    //ysp+
-      is_update_(false),      //ysp+
+      ysp_username_(ysp_username),  // YSP+ { User information isolation }
+      is_doc_view_(false),        // ysp+
+      is_update_(false),          // ysp+
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false), //ysp+
-      // render_process_host_id_(info.render_process_id), //ysp+
-      // render_frame_host_id_(info.render_frame_id), //ysp+
+      is_ie_download_(false),  // ysp+
+// render_process_host_id_(info.render_process_id), //ysp+
+// render_frame_host_id_(info.render_frame_id), //ysp+
 #endif
       weak_ptr_factory_(this) {
   delegate_->Attach();
@@ -429,7 +430,7 @@ DownloadItemImpl::DownloadItemImpl(
     DownloadItemImplDelegate* delegate,
     uint32_t download_id,
 #ifdef REDCORE
-    const std::string& YSPUserName, //YSP+ { User information isolation }
+    const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
     const base::FilePath& path,
     const GURL& url,
@@ -446,14 +447,14 @@ DownloadItemImpl::DownloadItemImpl(
       destination_info_(path, path, 0, false, std::string(), base::Time()),
       is_updating_observers_(false),
 #ifdef REDCORE
-      YSPUserName_(YSPUserName), //YSP+ { User information isolation }
-      is_doc_view_(false),    //ysp+
-      is_update_(false),      //ysp+
+      ysp_username_(ysp_username),  // YSP+ { User information isolation }
+      is_doc_view_(false),        // ysp+
+      is_update_(false),          // ysp+
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false), //ysp+
-      // render_process_host_id_(-1), //ysp+
-      // render_frame_host_id_(-1), //ysp+
+      is_ie_download_(false),  // ysp+
+// render_process_host_id_(-1), //ysp+
+// render_frame_host_id_(-1), //ysp+
 #endif
       weak_ptr_factory_(this) {
   job_ = DownloadJobFactory::CreateJob(this, std::move(request_handle),
@@ -560,8 +561,8 @@ void DownloadItemImpl::Pause() {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
   if (is_ie_download_) {
-	  //Cancel(true);
-	  return;
+    // Cancel(true);
+    return;
   }
 #endif
 
@@ -634,7 +635,8 @@ void DownloadItemImpl::Cancel(bool user_cancel) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DVLOG(20) << __func__ << "() download = " << DebugString(true);
 #if defined(REDCORE) && defined(IE_REDCORE)
-  if (!is_ie_download_) return;
+  if (!is_ie_download_)
+    return;
 #endif
 
   InterruptAndDiscardPartialState(
@@ -728,7 +730,8 @@ bool DownloadItemImpl::CanResume() const {
     case TARGET_RESOLVED_INTERNAL:
     case IN_PROGRESS_INTERNAL:
 #if defined(REDCORE) && defined(IE_REDCORE)
-      if (is_ie_download_) return false;
+      if (is_ie_download_)
+        return false;
 #endif
       return IsPaused();
 
@@ -928,7 +931,7 @@ bool DownloadItemImpl::IsDangerous() const {
 
 DownloadDangerType DownloadItemImpl::GetDangerType() const {
 #ifdef REDCORE
-  if(is_update_ || is_doc_view_)
+  if (is_update_ || is_doc_view_)
     return DOWNLOAD_DANGER_TYPE_NOT_DANGEROUS;
 #endif
   return danger_type_;
@@ -1159,11 +1162,11 @@ ResumeMode DownloadItemImpl::GetResumeMode() const {
       break;
 
     case DOWNLOAD_INTERRUPT_REASON_SERVER_NO_RANGE:
-    // The server disagreed with the file offset that we sent.
+      // The server disagreed with the file offset that we sent.
 
     case DOWNLOAD_INTERRUPT_REASON_FILE_HASH_MISMATCH:
-    // The file on disk was found to not match the expected hash. Discard and
-    // start from beginning.
+      // The file on disk was found to not match the expected hash. Discard and
+      // start from beginning.
 
     case DOWNLOAD_INTERRUPT_REASON_FILE_TOO_SHORT:
       // The [possibly persisted] file offset disagreed with the file on disk.
@@ -1470,9 +1473,9 @@ void DownloadItemImpl::Start(
   DVLOG(20) << __func__ << "() this=" << DebugString(true);
 #if defined(REDCORE) && defined(IE_REDCORE)
   is_ie_download_ = file->IsIEDownload();
-  if(file->IsIEDownload()==false)
+  if (file->IsIEDownload() == false)
 #endif
-  RecordDownloadCountWithSource(START_COUNT, download_source_);
+    RecordDownloadCountWithSource(START_COUNT, download_source_);
 
   download_file_ = std::move(file);
   job_ = DownloadJobFactory::CreateJob(
@@ -2307,7 +2310,7 @@ void DownloadItemImpl::TransitionTo(DownloadInternalState new_state) {
 
 void DownloadItemImpl::SetDangerType(DownloadDangerType danger_type) {
 #if defined(REDCORE)
-  if(is_update_ || is_doc_view_) {
+  if (is_update_ || is_doc_view_) {
     danger_type_ = DOWNLOAD_DANGER_TYPE_NOT_DANGEROUS;
     return;
   }
@@ -2647,7 +2650,7 @@ const char* DownloadItemImpl::DebugResumeModeString(ResumeMode mode) {
 
 #ifdef REDCORE
 std::string DownloadItemImpl::GetYSPUserName() const {
-  return YSPUserName_;
+  return ysp_username_;
 }
 
 bool DownloadItemImpl::is_doc_view() {
@@ -2669,9 +2672,8 @@ void DownloadItemImpl::set_is_update(bool update) {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 bool DownloadItemImpl::IsIEDownload() {
-    return is_ie_download_;
+  return is_ie_download_;
 }
 #endif
-
 
 }  // namespace download

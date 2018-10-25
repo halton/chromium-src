@@ -47,28 +47,29 @@ DownloadUrlParameters::DownloadUrlParameters(
 DownloadUrlParameters::~DownloadUrlParameters() = default;
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-//ysp+ {IE Embedded}
+// ysp+ {IE Embedded}
 void DownloadUrlParameters::SetIEDownloader(IE::IEDownloader* downloader) {
-	pIEDownloader = downloader;
-	useIeDownload = true;
+  pIEDownloader = downloader;
+  useIeDownload = true;
 }
 
 IE::IEDownloader* DownloadUrlParameters::IEDownloader() {
-	return pIEDownloader;
+  return pIEDownloader;
 }
 
 bool DownloadUrlParameters::IsUseIEDownloader() {
-	if(pIEDownloader && useIeDownload)
-		return true;
-	return false;
+  if (pIEDownloader && useIeDownload)
+    return true;
+  return false;
 }
 
-void DownloadUrlParameters::SetIEDownloadResponseheader(const std::wstring header) {
-	ieResponseHeader = header;
+void DownloadUrlParameters::SetIEDownloadResponseheader(
+    const std::wstring header) {
+  ieResponseHeader = header;
 }
 
 std::wstring DownloadUrlParameters::IEDownloadResponseheader() {
-	return ieResponseHeader;
+  return ieResponseHeader;
 }
 #endif
 

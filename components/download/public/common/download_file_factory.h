@@ -14,12 +14,12 @@
 #include "base/memory/weak_ptr.h"
 #include "components/download/public/common/download_export.h"
 #include "components/download/public/common/input_stream.h"
-#include "url/gurl.h"
 #include "net/log/net_log_with_source.h"
+#include "url/gurl.h"
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 namespace IE {
-	class IEDownloader;
+class IEDownloader;
 }
 #endif
 
@@ -42,18 +42,18 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadFileFactory {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 class COMPONENTS_DOWNLOAD_EXPORT IEDownloadFileFactory {
-public:
-	virtual ~IEDownloadFileFactory();
+ public:
+  virtual ~IEDownloadFileFactory();
 
-	virtual DownloadFile* CreateFile(
-		std::unique_ptr<DownloadSaveInfo> save_info,
-		const base::FilePath& default_downloads_directory,
-		const GURL& url,
-		const GURL& referrer_url,
-		bool calculate_hash,
-		base::WeakPtr<IE::IEDownloader> pDownloader,
-		const net::NetLogWithSource& bound_net_log,
-		base::WeakPtr<DownloadDestinationObserver> observer);
+  virtual DownloadFile* CreateFile(
+      std::unique_ptr<DownloadSaveInfo> save_info,
+      const base::FilePath& default_downloads_directory,
+      const GURL& url,
+      const GURL& referrer_url,
+      bool calculate_hash,
+      base::WeakPtr<IE::IEDownloader> pDownloader,
+      const net::NetLogWithSource& bound_net_log,
+      base::WeakPtr<DownloadDestinationObserver> observer);
 };
 #endif
 

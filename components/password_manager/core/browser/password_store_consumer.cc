@@ -8,11 +8,9 @@
 
 namespace password_manager {
 
-PasswordStoreConsumer::PasswordStoreConsumer() : weak_ptr_factory_(this) {
-}
+PasswordStoreConsumer::PasswordStoreConsumer() : weak_ptr_factory_(this) {}
 
-PasswordStoreConsumer::~PasswordStoreConsumer() {
-}
+PasswordStoreConsumer::~PasswordStoreConsumer() {}
 
 void PasswordStoreConsumer::OnGetSiteStatistics(
     std::vector<InteractionsStats> stats) {}

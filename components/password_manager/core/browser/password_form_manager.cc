@@ -1054,15 +1054,18 @@ std::vector<PasswordForm> PasswordFormManager::FindOtherCredentialsToUpdate() {
 }
 
 #ifdef REDCORE
-bool SearchForms(PasswordStore* password_store, const autofill::PasswordForm& forms)
-{
+bool SearchForms(PasswordStore* password_store,
+                 const autofill::PasswordForm& forms) {
   std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
   if (password_store) {
     password_store->GetYSPLogins(forms, &matched_forms);
     for (auto& login : matched_forms) {
-      if (forms.signon_realm == login->signon_realm && forms.origin == login->origin && forms.YSPUserName_value == login->YSPUserName_value) {
-        if ((forms.username_value != login->username_value) && !forms.username_value.empty()) {
-          //password_store->RemoveLogin(*login);
+      if (forms.signon_realm == login->signon_realm &&
+          forms.origin == login->origin &&
+          forms.ysp_username_value == login->ysp_username_value) {
+        if ((forms.username_value != login->username_value) &&
+            !forms.username_value.empty()) {
+          // password_store->RemoveLogin(*login);
           break;
         }
         return true;
@@ -1074,79 +1077,84 @@ bool SearchForms(PasswordStore* password_store, const autofill::PasswordForm& fo
 }
 
 void PasswordFormManager::GetFormsForLoginManager() {
-  base::ListValue* formDict =
+  base::ListValue* form_dict =
       YSPLoginManager::GetInstance()->GetManagedADProxyAuth();
-  std::string uuidKey = "onlyid", passwdFlag = "password";
-  std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
-  std::string password = YSPLoginManager::GetInstance()->GetValueForKey(passwdFlag);
-  if (formDict) {
-    std::string formDict_str = "";
-    base::JSONWriter::Write(*formDict, &formDict_str);
-    if (!formDict_str.empty()) {
+  std::string uuid_key = "onlyid", password_flag = "password";
+  std::string username =
+      YSPLoginManager::GetInstance()->GetValueForKey(uuid_key);
+  std::string password =
+      YSPLoginManager::GetInstance()->GetValueForKey(password_flag);
+  if (form_dict) {
+    std::string form_dict_str = "";
+    base::JSONWriter::Write(*form_dict, &form_dict_str);
+    if (!form_dict_str.empty()) {
       content::BrowserThread::PostTask(
-        content::BrowserThread::IO, FROM_HERE,
-        base::Bind(&PasswordFormManager::SaveFormsForLoginManager,
-          base::Unretained(this), formDict_str, username, password));
+          content::BrowserThread::IO, FROM_HERE,
+          base::Bind(&PasswordFormManager::SaveFormsForLoginManager,
+                     base::Unretained(this), form_dict_str, username,
+                     password));
     }
   }
-  
 }
 
-void PasswordFormManager::SaveFormsForLoginManager(const std::string& formDict_str,
-  const std::string& username, const std::string& password)
-{
+void PasswordFormManager::SaveFormsForLoginManager(
+    const std::string& form_dict_str,
+    const std::string& username,
+    const std::string& password) {
   PasswordStore* password_store = client_->GetPasswordStore();
   if (!password_store) {
     NOTREACHED();
     return;
   }
-  if (formDict_str.empty())
+  if (form_dict_str.empty())
     return;
-  std::unique_ptr<base::Value> formDict_tmp = base::JSONReader::Read(formDict_str);
+  std::unique_ptr<base::Value> form_dict_tmp =
+      base::JSONReader::Read(form_dict_str);
   std::unique_ptr<base::ListValue> formList;
-  formList.reset(static_cast<base::ListValue*>(formDict_tmp.release()));
-    if (formList && !formList->empty()) {
-      for (size_t i = 0; i < formList->GetSize(); ++i) {
-        autofill::PasswordForm forms;
-        base::DictionaryValue* bmDict = nullptr;
-        if (formList->GetDictionary(i, &bmDict)) {
-          int type = 1;
-          bmDict->GetInteger("type", &type);
-          if (type == 1)
-            continue;
-          int userLoginType;
-          std::string appName, url, icon_url;
-          bmDict->GetString("name", &appName);
-          bmDict->GetString("url", &url);
-          bmDict->GetString("logoUrl", &icon_url);
-          bmDict->GetInteger("loginType", &userLoginType);
-          if (url.find("://") == std::string::npos)
-            url = "http://" + url;
-          if (userLoginType == 1) {
-            std::string loginName;
-            bmDict->GetString("alias", &loginName);
-            if (!loginName.empty()) {
-              forms.username_value = base::UTF8ToUTF16(loginName);
-              forms.password_value = base::UTF8ToUTF16(password);
-            }
+  formList.reset(static_cast<base::ListValue*>(form_dict_tmp.release()));
+  if (formList && !formList->empty()) {
+    for (size_t i = 0; i < formList->GetSize(); ++i) {
+      autofill::PasswordForm forms;
+      base::DictionaryValue* bmDict = nullptr;
+      if (formList->GetDictionary(i, &bmDict)) {
+        int type = 1;
+        bmDict->GetInteger("type", &type);
+        if (type == 1)
+          continue;
+        int userLoginType;
+        std::string appName, url, icon_url;
+        bmDict->GetString("name", &appName);
+        bmDict->GetString("url", &url);
+        bmDict->GetString("logoUrl", &icon_url);
+        bmDict->GetInteger("loginType", &userLoginType);
+        if (url.find("://") == std::string::npos)
+          url = "http://" + url;
+        if (userLoginType == 1) {
+          std::string login_name;
+          bmDict->GetString("alias", &login_name);
+          if (!login_name.empty()) {
+            forms.username_value = base::UTF8ToUTF16(login_name);
+            forms.password_value = base::UTF8ToUTF16(password);
           }
-          forms.YSPLoginType_value = userLoginType;
-          forms.signon_realm = GURL(url).GetOrigin().spec();
-          forms.YSPAppName_value = base::UTF8ToUTF16(appName);
-          forms.YSPUserName_value = base::UTF8ToUTF16(username);
-          forms.origin = GURL(url);
-          forms.action = GURL(url);
-          forms.icon_url = GURL(icon_url);
-          if (!forms.signon_realm.empty() && !forms.YSPAppName_value.empty() && !forms.origin.is_empty()) {
-            password_store->UpdateLogin(forms);
-            //if (!SearchForms(password_store, forms)) {
-            //  password_store->SaveLoginForEnterplorer(forms);
-            //  /*password_store->UpdateLoginWithPrimaryKey(forms, forms);*/
-            //}
-          }
+        }
+        forms.ysp_login_type_value = userLoginType;
+        forms.signon_realm = GURL(url).GetOrigin().spec();
+        forms.ysp_app_name_value = base::UTF8ToUTF16(appName);
+        forms.ysp_username_value = base::UTF8ToUTF16(username);
+        forms.origin = GURL(url);
+        forms.action = GURL(url);
+        forms.icon_url = GURL(icon_url);
+        if (!forms.signon_realm.empty() && !forms.ysp_username_value.empty() &&
+            !forms.origin.is_empty()) {
+          password_store->UpdateLogin(forms);
+          // if (!SearchForms(password_store, forms)) {
+          //  password_store->SaveLoginForEnterplorer(forms);
+          //  /*password_store->UpdateLoginWithPrimaryKey(forms, forms);*/
+          //}
         }
       }
     }
+  }
 }
 #endif
 

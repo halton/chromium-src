@@ -111,8 +111,7 @@ ContentFaviconDriver::ContentFaviconDriver(content::WebContents* web_contents,
       FaviconDriverImpl(favicon_service),
       document_on_load_completed_(false) {}
 
-ContentFaviconDriver::~ContentFaviconDriver() {
-}
+ContentFaviconDriver::~ContentFaviconDriver() {}
 
 int ContentFaviconDriver::DownloadImage(const GURL& url,
                                         int max_image_size,
@@ -240,8 +239,7 @@ void ContentFaviconDriver::DidStartNavigation(
 void ContentFaviconDriver::DidFinishNavigation(
     content::NavigationHandle* navigation_handle) {
   if (!navigation_handle->IsInMainFrame() ||
-      !navigation_handle->HasCommitted() ||
-      navigation_handle->IsErrorPage()) {
+      !navigation_handle->HasCommitted() || navigation_handle->IsErrorPage()) {
     return;
   }
 
@@ -266,28 +264,26 @@ void ContentFaviconDriver::DocumentOnLoadCompletedInMainFrame() {
 
 #ifdef REDCORE
 #ifdef IE_REDCORE
-//ysp+{IE Embedded}
+// ysp+{IE Embedded}
 void ContentFaviconDriver::DidCommitProvisionalLoadForFrame(
-	content::RenderFrameHost* render_frame_host,
-	const GURL& url,
-	ui::PageTransition transition_type)
-{
-	if (web_contents()->GetRendererMode().core == IE_CORE)
-	{
-		favicon_urls_->clear();
+    content::RenderFrameHost* render_frame_host,
+    const GURL& url,
+    ui::PageTransition transition_type) {
+  if (web_contents()->GetRendererMode().core == IE_CORE) {
+    favicon_urls_->clear();
 
-		content::NavigationEntry* entry =
-			web_contents()->GetController().GetLastCommittedEntry();
-		if (!entry)
-			return;
+    content::NavigationEntry* entry =
+        web_contents()->GetController().GetLastCommittedEntry();
+    if (!entry)
+      return;
 
-		if (url != bypass_cache_page_url_)
-			bypass_cache_page_url_ = GURL();
+    if (url != bypass_cache_page_url_)
+      bypass_cache_page_url_ = GURL();
 
-		FetchFavicon(url,true);
-	}
+    FetchFavicon(url, true);
+  }
 }
-//ysp+
+// ysp+
 #endif
 #endif
 

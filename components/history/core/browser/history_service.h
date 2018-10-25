@@ -51,7 +51,7 @@ class TestingProfile;
 namespace base {
 class FilePath;
 class Thread;
-}
+}  // namespace base
 
 namespace favicon {
 class FaviconServiceImpl;
@@ -543,8 +543,9 @@ class HistoryService : public syncer::SyncableService, public KeyedService {
       const base::Location& from_here,
       const syncer::SyncChangeList& change_list) override;
 #ifdef REDCORE
-  void ClearHistoryForUser(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
-#endif    
+  void ClearHistoryForUser(
+      const std::string& user_id);  // TODO(matianzhi): YSP+ { clear user data }
+#endif
 
   // For sync codebase only: instantiates a controller delegate to interact with
   // TypedURLSyncBridge. Must be called from the UI thread.

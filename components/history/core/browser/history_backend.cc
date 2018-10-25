@@ -1358,7 +1358,7 @@ void HistoryBackend::QueryHistoryBasic(const QueryOptions& options,
         (visit.transition & ui::PAGE_TRANSITION_BLOCKED) != 0);
 
 #ifdef REDCORE
-    url_result.set_YSPUserName(visit.YSPUserName);
+    url_result.set_YSPUserName(visit.ysp_username);
 #endif
 
     // We don't set any of the query-specific parts of the URLResult, since
@@ -2859,11 +2859,11 @@ bool HistoryBackend::ClearAllMainHistory(const URLRows& kept_urls) {
 
 #ifdef REDCORE
 //TODO (matianzhi): YSP+ { clear user data
-void HistoryBackend::ClearHistoryForUser(const std::string& userid) {
+void HistoryBackend::ClearHistoryForUser(const std::string& user_id) {
   if (!db_)
     return;
 
-  expirer_.ExpireHistoryForUserId(userid);
+  expirer_.ExpireHistoryForUserId(user_id);
 
   // Force a commit, if the user is deleting something for privacy reasons,
   // we want to get it on disk ASAP.

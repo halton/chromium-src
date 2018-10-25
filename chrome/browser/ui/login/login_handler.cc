@@ -55,12 +55,12 @@
 #include "chrome/browser/ui/blocked_content/popunder_preventer.h"
 #endif
 
-#ifdef REDCORE //YSP+ { passwords AD manager
+#ifdef REDCORE  // YSP+ { passwords AD manager
 #include "chrome/browser/password_manager/password_store_factory.h"
 #include "chrome/browser/profiles/profile.h"
-#include "components/password_manager/core/browser/password_store_factory_util.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
-#endif //YSP+ } /*passwords AD manager*/
+#include "components/password_manager/core/browser/password_store_factory_util.h"
+#endif  // YSP+ } /*passwords AD manager*/
 
 using autofill::PasswordForm;
 using content::BrowserThread;
@@ -87,27 +87,31 @@ void RecordHttpAuthPromptType(AuthPromptType prompt_type) {
                             AUTH_PROMPT_TYPE_ENUM_COUNT);
 }
 
-#ifdef REDCORE //YSP+ { passwords AD manager
-void SetAuthentication(LoginHandler* handler, const base::string16 username, const base::string16 password)
-{
+#ifdef REDCORE  // YSP+ { passwords AD manager
+void SetAuthentication(LoginHandler* handler,
+                       const base::string16 username,
+                       const base::string16 password) {
   handler->SetAuth(username, password);
 }
 
-void GetUsernameAndPassword(LoginHandler* handler, content::WebContents* web_contents, const autofill::PasswordForm& form)
-{
-  static int ADAutoLogin = 1; //YSP+ { passwords AD manager }
-  base::string16 username;// = L"";
-  base::string16 password;// = L"";
-    std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
+void GetUsernameAndPassword(LoginHandler* handler,
+                            content::WebContents* web_contents,
+                            const autofill::PasswordForm& form) {
+  static int ADAutoLogin = 1;  // YSP+ { passwords AD manager }
+  base::string16 username;     // = L"";
+  base::string16 password;     // = L"";
+  std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
   if (web_contents) {
     Profile* profile =
         Profile::FromBrowserContext(web_contents->GetBrowserContext());
     scoped_refptr<password_manager::PasswordStore> password_store =
-      PasswordStoreFactory::GetForProfile(profile, ServiceAccessType::EXPLICIT_ACCESS);
+        PasswordStoreFactory::GetForProfile(profile,
+                                            ServiceAccessType::EXPLICIT_ACCESS);
     if (password_store) {
       password_store->GetYSPLogins(form, &matched_forms);
       for (auto& login : matched_forms) {
-        if (form.signon_realm == login->signon_realm && form.YSPUserName_value == login->YSPUserName_value) {
+        if (form.signon_realm == login->signon_realm &&
+            form.ysp_username_value == login->ysp_username_value) {
           username = login->username_value;
           password = login->password_value;
           break;
@@ -116,16 +120,16 @@ void GetUsernameAndPassword(LoginHandler* handler, content::WebContents* web_con
       matched_forms.clear();
     }
   }
-   if (ADAutoLogin && !username.empty() && !password.empty()) {
+  if (ADAutoLogin && !username.empty() && !password.empty()) {
     BrowserThread::PostTask(
-      BrowserThread::UI, FROM_HERE,
-      base::Bind(&SetAuthentication, base::Unretained(handler), username, password));
+        BrowserThread::UI, FROM_HERE,
+        base::Bind(&SetAuthentication, base::Unretained(handler), username,
+                   password));
     ADAutoLogin = 0;
-  }
-  else
+  } else
     ADAutoLogin = 1;
 }
-#endif //YSP+ } /*passwords AD manager*/
+#endif  // YSP+ } /*passwords AD manager*/
 
 }  // namespace
 
@@ -168,14 +172,15 @@ LoginHandler::LoginHandler(
   // semantics.
   AddRef();  // matched by LoginHandler::ReleaseSoon().
 
-  BrowserThread::PostTask(BrowserThread::UI, FROM_HERE,
-                          // TODO (halton_): Understand why this change.
-                          base::BindOnce(&LoginHandler::AddObservers, base::Unretained(this)));
+  BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      // TODO(halton_): Understand why this change.
+      base::BindOnce(&LoginHandler::AddObservers, base::Unretained(this)));
 }
 
 void LoginHandler::OnRequestCancelled() {
-  DCHECK(BrowserThread::CurrentlyOn(BrowserThread::IO)) <<
-      "Why is OnRequestCancelled called from the UI thread?";
+  DCHECK(BrowserThread::CurrentlyOn(BrowserThread::IO))
+      << "Why is OnRequestCancelled called from the UI thread?";
 
   // Callback is no longer valid.
   auth_required_callback_.Reset();
@@ -195,12 +200,13 @@ void LoginHandler::BuildViewWithPasswordManager(
   LoginHandler::LoginModelData model_data(password_manager, observed_form);
   has_shown_login_handler_ = true;
   BuildViewImpl(authority, explanation, &model_data);
-#ifdef REDCORE  //YSP+ { passwords AD manager
+#ifdef REDCORE  // YSP+ { passwords AD manager
   content::WebContents* web_contents = GetWebContentsForLogin();
   BrowserThread::PostTask(
       BrowserThread::IO, FROM_HERE,
-      base::Bind(&GetUsernameAndPassword, base::Unretained(this), web_contents, observed_form));
-#endif  //YSP+ } /*passwords AD manager*/
+      base::Bind(&GetUsernameAndPassword, base::Unretained(this), web_contents,
+                 observed_form));
+#endif  // YSP+ } /*passwords AD manager*/
 }
 
 void LoginHandler::BuildViewWithoutPasswordManager(
@@ -427,8 +433,7 @@ void LoginHandler::NotifyAuthSupplied(const base::string16& username,
 
   content::NotificationService* service =
       content::NotificationService::current();
-  NavigationController* controller =
-      &requesting_contents->GetController();
+  NavigationController* controller = &requesting_contents->GetController();
   AuthSuppliedLoginNotificationDetails details(this, username, password);
 
   service->Notify(
@@ -624,9 +629,8 @@ void LoginHandler::ShowLoginPrompt(const GURL& request_url,
     // manager, but still needs to be able to show login prompts.
     const auto* guest =
         guest_view::GuestViewBase::FromWebContents(parent_contents);
-    if (guest &&
-        extensions::GetViewType(guest->owner_web_contents()) !=
-            extensions::VIEW_TYPE_EXTENSION_BACKGROUND_PAGE) {
+    if (guest && extensions::GetViewType(guest->owner_web_contents()) !=
+                     extensions::VIEW_TYPE_EXTENSION_BACKGROUND_PAGE) {
       handler->BuildViewWithoutPasswordManager(authority, explanation);
       return;
     }
@@ -646,13 +650,15 @@ void LoginHandler::ShowLoginPrompt(const GURL& request_url,
   PasswordForm observed_form(
       LoginHandler::MakeInputForPasswordManager(request_url, *auth_info));
 
-#ifdef REDCORE //YSP+ { passwords AD manager
+#ifdef REDCORE  // YSP+ { passwords AD manager
   std::string uuidKey = "onlyid";
   std::string loggingstatus = "loggingStatus";
-  std::string loginstatus = YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
+  std::string loginstatus =
+      YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
   if (loginstatus == "100")
-    observed_form.YSPUserName_value = base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
-#endif  //YSP+ } /*passwords AD manager*/
+    observed_form.ysp_username_value = base::UTF8ToUTF16(
+        YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
+#endif  // YSP+ } /*passwords AD manager*/
 
   handler->BuildViewWithPasswordManager(authority, explanation,
                                         password_manager, observed_form);

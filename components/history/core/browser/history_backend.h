@@ -516,7 +516,8 @@ class HistoryBackend : public base::RefCountedThreadSafe<HistoryBackend>,
 
   base::Time GetFirstRecordedTimeForTest() { return first_recorded_time_; }
 #ifdef REDCORE
-  void ClearHistoryForUser(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
+  void ClearHistoryForUser(
+      const std::string& user_id);  // TODO(matianzhi): YSP+ { clear user data }
 #endif
  protected:
   ~HistoryBackend() override;

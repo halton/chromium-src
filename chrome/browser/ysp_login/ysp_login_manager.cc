@@ -4,7 +4,7 @@
 
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 
-#include <openssl/aes.h>  //YSP+ { config cryptor }
+#include <openssl/aes.h>  // YSP+ { config cryptor }
 #include <locale>
 #include <utility>
 
@@ -13,29 +13,29 @@
 #include "base/files/file_util.h"
 #include "base/guid.h"
 #include "base/json/json_file_value_serializer.h"
-#include "base/json/json_reader.h"  //YSP+ { config cryptor }
+#include "base/json/json_reader.h"  // YSP+ { config cryptor }
 #include "base/json/json_writer.h"
 #include "base/native_library.h"
 #include "base/path_service.h"
-#include "base/strings/string_number_conversions.h"  //YSP+ { SingleSignOn config }
+#include "base/strings/string_number_conversions.h"  // YSP+ { SingleSignOn config }
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
-#include "base/win/windows_version.h"  //YSP+ { system version }
+#include "base/win/windows_version.h"  // YSP+ { system version }
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/themes/theme_properties.h"
 #include "chrome/browser/ysp_login/ysp_us_report_fetcher.h"
-#include "chrome/common/channel_info.h"  //YSP+ { app version }
+#include "chrome/common/channel_info.h"  // YSP+ { app version }
 #include "chrome/common/chrome_paths.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/generated_resources.h"
 #include "components/metrics/metrics_pref_names.h"
 #include "components/prefs/pref_service.h"
-#include "components/version_info/version_info.h"  //YSP+ { app version }
-#include "components/version_info/version_info.h"  //ysp+ { crypto http header }
+#include "components/version_info/version_info.h"  // YSP+ { app version }
+#include "components/version_info/version_info.h"  // ysp+ { crypto http header }
 #include "content/public/browser/browser_thread.h"
-#include "crypto/ysp_crypto_header.h"  //ysp+ { crypto http header }
-#include "net/base/mime_util.h"        //YSP+ { Fetcher resource }
+#include "crypto/ysp_crypto_header.h"  // ysp+ { crypto http header }
+#include "net/base/mime_util.h"        // YSP+ { Fetcher resource }
 #include "net/url_request/url_request_http_job.h"
 #include "ui/base/l10n/l10n_util.h"
 
@@ -60,21 +60,13 @@
 
 #ifdef IE_REDCORE
 #pragma comment(lib, "iphlpapi.lib")
-#pragma comment (lib,"netapi32")
+#pragma comment(lib, "netapi32")
 #pragma comment(lib, "setupapi")
 #endif  // IE_REDCORE
 
-const SkColor kAvatarBackground[] = {
-  0xffe13737,
-  0xfffc7936,
-  0xffffad36,
-  0xff71ad2c,
-  0xff2dc6e0,
-  0xff2590ee,
-  0xff5169fa,
-  0xff8158ec,
-  0xffb757df
-};
+const SkColor kAvatarBackground[] = {0xffe13737, 0xfffc7936, 0xffffad36,
+                                     0xff71ad2c, 0xff2dc6e0, 0xff2590ee,
+                                     0xff5169fa, 0xff8158ec, 0xffb757df};
 const int kAvatarBackgroundSize = sizeof(kAvatarBackground) / sizeof(SkColor);
 
 UrlTrusted::UrlTrusted() {}
@@ -84,626 +76,632 @@ UrlTrusted::~UrlTrusted() {}
 UrlTrusted::UrlTrusted(const UrlTrusted& other) = default;
 
 namespace {
-  //YSP+ { Fetcher resource
-  const char kLoginUploadPath[] = "/client/v3/login"; //登录接口
-  const char kGetUserPath[] = "/client/v3/user/";  //获取企业和用户信息
-  const char kGetApplicationPath[] = "/client/v3/strategy/application/"; //获取用户应用
-  const char kGetConfigurationStrategyPath[] = "/client/v3/strategy/configuration/"; //获取用户功能配置
-  const char kGetSsoTokenPath[] = "/client/v3/sso/token"; //获取SSO的token
-  const char kGetSWAPath[] = "/client/v3/swa/"; //获取SWA配置
-  const char kGetConfigurationPCPath[] = "/client/v3/configuration/pc/"; //获取PC设置
-  const char kAutoGetConfigPath[] = "/client/v3/version/"; //获取版本信息
-  const char kGetAuthTokenPath[] = "/client/v3/auth/token"; //更新access_token
-  const char kSdpDevicePath[] = "/client/v3/sdp/device/"; //获取/删除用户设备
-  const char kModifyPasswordPath[] = "/client/v3/device/password"; //修改密码接口
-  const char kApplictionStatusPath[] = "/client/v3/strategy/application/market/";  //启用/关闭应用市场应用
-  const char kGatewayApplictionPath[] = "/client/v3/gateway/application/domain/";  //获取需要敲门的应用
-  //const char kUploadContentType[] = "multipart/form-data";
-  const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
-  //YSP+ } /*Fetcher resource*/
+// YSP+ { Fetcher resource
+const char kLoginUploadPath[] = "/client/v3/login";  // 登录接口
+const char kGetUserPath[] = "/client/v3/user/";  // 获取企业和用户信息
+const char kGetApplicationPath[] =
+    "/client/v3/strategy/application/";  // 获取用户应用
+const char kGetConfigurationStrategyPath[] =
+    "/client/v3/strategy/configuration/";  // 获取用户功能配置
+const char kGetSsoTokenPath[] = "/client/v3/sso/token";  // 获取SSO的token
+const char kGetSWAPath[] = "/client/v3/swa/";            // 获取SWA配置
+const char kGetConfigurationPCPath[] =
+    "/client/v3/configuration/pc/";                        // 获取PC设置
+const char kAutoGetConfigPath[] = "/client/v3/version/";   // 获取版本信息
+const char kGetAuthTokenPath[] = "/client/v3/auth/token";  // 更新access_token
+const char kSdpDevicePath[] = "/client/v3/sdp/device/";  // 获取/删除用户设备
+const char kModifyPasswordPath[] =
+    "/client/v3/device/password";  // 修改密码接口
+const char kApplictionStatusPath[] =
+    "/client/v3/strategy/application/market/";  // 启用/关闭应用市场应用
+const char kGatewayApplictionPath[] =
+    "/client/v3/gateway/application/domain/";  // 获取需要敲门的应用
+// const char kUploadContentType[] = "multipart/form-data";
+const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
+// YSP+ } /*Fetcher resource*/
 
-  YSPLoginManager* g_instance = nullptr;
-  //YSP+ { Resource Replace
-  static std::string ParsePath(const std::string& path_url) {
+YSPLoginManager* g_instance = nullptr;
+// YSP+ { Resource Replace
+static std::string ParsePath(const std::string& path_url) {
 #if defined(OS_WIN)
-    std::string file_path;
-    std::string path_url_parse;
+  std::string file_path;
+  std::string path_url_parse;
 
-    std::string u16_url = path_url;
-    int offset = u16_url.find('/', 0);
-    file_path.assign(u16_url, offset + 2, (u16_url.length() - offset + 2));
+  std::string u16_url = path_url;
+  int offset = u16_url.find('/', 0);
+  file_path.assign(u16_url, offset + 2, (u16_url.length() - offset + 2));
 
-    for (int i = file_path.find('/'); i != -1; i = file_path.find('/'))
-      file_path.replace(i, 1, "\\");
+  for (int i = file_path.find('/'); i != -1; i = file_path.find('/'))
+    file_path.replace(i, 1, "\\");
 
-    int colon_offset = file_path.find(':');
-    if (file_path.find(':') != std::string::npos) {
-      path_url_parse.append(file_path, 0, colon_offset);
-      path_url_parse.append(file_path, colon_offset + 1,
-                            file_path.length() - colon_offset - 1);
-    } else {
-      path_url_parse.assign(file_path);
-    }
+  int colon_offset = file_path.find(':');
+  if (file_path.find(':') != std::string::npos) {
+    path_url_parse.append(file_path, 0, colon_offset);
+    path_url_parse.append(file_path, colon_offset + 1,
+                          file_path.length() - colon_offset - 1);
+  } else {
+    path_url_parse.assign(file_path);
+  }
 
-    return path_url_parse;
+  return path_url_parse;
 #else
-    return path_url;
+  return path_url;
 #endif
-  }
+}
 
-  //YSP+ } /*Resource Replace*/
-  base::FilePath FilePathOfLoginCache(const std::string& company_id) {
-    base::FilePath path;
-    if (company_id.empty())
-      return path;
+// YSP+ } /*Resource Replace*/
+base::FilePath FilePathOfLoginCache(const std::string& company_id) {
+  base::FilePath path;
+  if (company_id.empty())
+    return path;
 
-    base::PathService::Get(chrome::DIR_USER_DATA, &path);
-    path = path.Append(FILE_PATH_LITERAL("Default"));
-    path = path.Append(FILE_PATH_LITERAL("Cache"));
-    path = path.AppendASCII(company_id + ".dat");
+  base::PathService::Get(chrome::DIR_USER_DATA, &path);
+  path = path.Append(FILE_PATH_LITERAL("Default"));
+  path = path.Append(FILE_PATH_LITERAL("Cache"));
+  path = path.AppendASCII(company_id + ".dat");
+  return path;
+}
+
+// YSP+ { Resource Replace
+base::FilePath FileDirectoryPathOfReplaceCache(const std::string& path_url) {
+  base::FilePath path;
+  if (path_url.empty()) {
     return path;
   }
+  std::string tmp_path = ParsePath(path_url);
 
-  //YSP+ { Resource Replace
-  base::FilePath FileDirectoryPathOfReplaceCache(const std::string& path_url) {
-    base::FilePath path;
-    if (path_url.empty()) {
-      return path;
-    }
-    std::string tmp_path = ParsePath(path_url);
+  base::PathService::Get(chrome::DIR_USER_DATA, &path);
+  path = path.AppendASCII("Default");
+  path = path.AppendASCII("Resource");
+  path = path.AppendASCII(tmp_path.c_str());
+  path = path.DirName();
 
-    base::PathService::Get(chrome::DIR_USER_DATA, &path);
-    path = path.AppendASCII("Default");
-    path = path.AppendASCII("Resource");
-    path = path.AppendASCII(tmp_path.c_str());
-    path = path.DirName();
+  return path;
+}
 
+base::FilePath FilePathOfReplaceCache(const std::string& path_url) {
+  base::FilePath path;
+  if (path_url.empty()) {
     return path;
   }
+  std::string tmp_path = ParsePath(path_url);
 
-  base::FilePath FilePathOfReplaceCache(const std::string& path_url) {
-    base::FilePath path;
-    if (path_url.empty()) {
-      return path;
-    }
-    std::string tmp_path = ParsePath(path_url);
+  base::PathService::Get(chrome::DIR_USER_DATA, &path);
+  path = path.AppendASCII("Default");
+  path = path.AppendASCII("Resource");
+  path = path.AppendASCII(tmp_path.c_str());
 
-    base::PathService::Get(chrome::DIR_USER_DATA, &path);
-    path = path.AppendASCII("Default");
-    path = path.AppendASCII("Resource");
-    path = path.AppendASCII(tmp_path.c_str());
+  return path;
+}
+// YSP+ } /*Resource Replace*/
+// std::string GetOsVersionStr() {
+//  static std::string strVersion;
 
-    return path;
-  }
-  //YSP+ } /*Resource Replace*/
-  //std::string GetOsVersionStr() {
-  //  static std::string strVersion;
+//  if (strVersion.empty())
+//  {
+//    OSVERSIONINFO osVer;
+//    osVer.dwOSVersionInfoSize = sizeof(osVer);
+//    GetVersionEx(&osVer);
 
-  //  if (strVersion.empty())
-  //  {
-  //    OSVERSIONINFO osVer;
-  //    osVer.dwOSVersionInfoSize = sizeof(osVer);
-  //    GetVersionEx(&osVer);
+//    std::ostringstream ostrStream;
 
-  //    std::ostringstream ostrStream;
+//    ostrStream << osVer.dwMajorVersion << "."
+//      << osVer.dwMinorVersion << "."
+//      << osVer.dwBuildNumber << "."
+//      << osVer.szCSDVersion;
 
-  //    ostrStream << osVer.dwMajorVersion << "."
-  //      << osVer.dwMinorVersion << "."
-  //      << osVer.dwBuildNumber << "."
-  //      << osVer.szCSDVersion;
+//    strVersion = ostrStream.str();
+//  }
 
-  //    strVersion = ostrStream.str();
-  //  }
-
-  //  return strVersion;
-  //}
-  //YSP+ { system version
-  std::string GetOsVersionStr() {
-    std::string system_version = "";
+//  return strVersion;
+//}
+// YSP+ { system version
+std::string GetOsVersionStr() {
+  std::string system_version = "";
 #if defined(OS_WIN)
-    base::win::Version version = base::win::GetVersion();
-    if (version == base::win::VERSION_PRE_XP)
-      system_version = "Not supported";
-    else if (version == base::win::VERSION_XP)
-      system_version = "Windows XP";
-    else if (version == base::win::VERSION_SERVER_2003)
-      system_version = "Windows XP";
-    else if (version == base::win::VERSION_VISTA)
-      system_version = "Winsows vista";
-    else if (version == base::win::VERSION_WIN7)
-      system_version = "Windows 7";
-    else if (version == base::win::VERSION_WIN8)
-      system_version = "Windows 8";
-    else if (version == base::win::VERSION_WIN8_1)
-      system_version = "Windows 8.1";
-    else if (version == base::win::VERSION_WIN10)
-      system_version = "Windows 10";
-    else if (version == base::win::VERSION_WIN10_TH2)
-      system_version = "Windows 10";
-    else if (version == base::win::VERSION_WIN_LAST)
-      system_version = "unknown";
+  base::win::Version version = base::win::GetVersion();
+  if (version == base::win::VERSION_PRE_XP)
+    system_version = "Not supported";
+  else if (version == base::win::VERSION_XP)
+    system_version = "Windows XP";
+  else if (version == base::win::VERSION_SERVER_2003)
+    system_version = "Windows XP";
+  else if (version == base::win::VERSION_VISTA)
+    system_version = "Winsows vista";
+  else if (version == base::win::VERSION_WIN7)
+    system_version = "Windows 7";
+  else if (version == base::win::VERSION_WIN8)
+    system_version = "Windows 8";
+  else if (version == base::win::VERSION_WIN8_1)
+    system_version = "Windows 8.1";
+  else if (version == base::win::VERSION_WIN10)
+    system_version = "Windows 10";
+  else if (version == base::win::VERSION_WIN10_TH2)
+    system_version = "Windows 10";
+  else if (version == base::win::VERSION_WIN_LAST)
+    system_version = "unknown";
 #elif defined(OS_MACOSX)
-    system_version = "OS X " + base::SysInfo::OperatingSystemVersion();
+  system_version = "OS X " + base::SysInfo::OperatingSystemVersion();
 #else
-    DLOG(WARNING) << "Unknown operating system";
+  DLOG(WARNING) << "Unknown operating system";
 #endif
-    return system_version;
-  }
+  return system_version;
+}
 
 #if defined(OS_WIN)
-  //YSP+ } /*system version*/
-  void FormatString(std::string& return_value, const char* format, ...) {
-    char buffer_array[512] = {0};
-    va_list args;
+// YSP+ } /*system version*/
+void FormatString(std::string& return_value, const char* format, ...) {
+  char buffer_array[512] = {0};
+  va_list args;
 
-    va_start(args, format);
-    int size =
-        _vsnprintf(buffer_array, sizeof(buffer_array) / sizeof(buffer_array[0]),
-                   format, args);
+  va_start(args, format);
+  int size =
+      _vsnprintf(buffer_array, sizeof(buffer_array) / sizeof(buffer_array[0]),
+                 format, args);
 
-    if ((unsigned int)size < strlen(buffer_array) && size != -1) {
-      return_value = buffer_array;
-    } else {
-      int i = 1;
-      char* tmp_buffer = NULL;
+  if ((unsigned int)size < strlen(buffer_array) && size != -1) {
+    return_value = buffer_array;
+  } else {
+    int i = 1;
+    char* tmp_buffer = NULL;
 
-      do {
-        if (tmp_buffer) {
-          delete[] tmp_buffer;
-          tmp_buffer = NULL;
-        }
-
-        if (++i >= 100)
-          break;
-
-        tmp_buffer = new char[512 * i];
-        memset(tmp_buffer, 0, 512 * i * sizeof(char));
-
-        size = _vsnprintf(tmp_buffer, 512 * i, format, args);
-      } while (size >= 512 * i || size == -1);
-
+    do {
       if (tmp_buffer) {
-        return_value = tmp_buffer;
         delete[] tmp_buffer;
         tmp_buffer = NULL;
       }
-    }
 
-    va_end(args);
+      if (++i >= 100)
+        break;
+
+      tmp_buffer = new char[512 * i];
+      memset(tmp_buffer, 0, 512 * i * sizeof(char));
+
+      size = _vsnprintf(tmp_buffer, 512 * i, format, args);
+    } while (size >= 512 * i || size == -1);
+
+    if (tmp_buffer) {
+      return_value = tmp_buffer;
+      delete[] tmp_buffer;
+      tmp_buffer = NULL;
+    }
   }
 
-  BOOL IsPhysicalAdapter(const char* adapter_name, DWORD& media_sub_type) {
-    BOOL return_value = FALSE;
-    UUID guid;
-    unsigned char guid_string[] = "4D36E972-E325-11CE-BFC1-08002BE10318";
-    ::UuidFromStringA(guid_string, &guid);
-    HDEVINFO device_info_handle =
-        ::SetupDiGetClassDevsA(&guid, NULL, NULL, DIGCF_PRESENT);
-    if (device_info_handle == INVALID_HANDLE_VALUE)
-      return return_value;
+  va_end(args);
+}
 
-    unsigned char net_card_key[] =
-        "System\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-"
-        "08002BE10318}";
-    char data_buffer[MAX_PATH + 1] = {0};
-    DWORD data_len = MAX_PATH;
-    DWORD type = REG_SZ;
-    HKEY local_net = NULL;
-    std::string pnp_instance_id;
+BOOL IsPhysicalAdapter(const char* adapter_name, DWORD& media_sub_type) {
+  BOOL return_value = FALSE;
+  UUID guid;
+  unsigned char guid_string[] = "4D36E972-E325-11CE-BFC1-08002BE10318";
+  ::UuidFromStringA(guid_string, &guid);
+  HDEVINFO device_info_handle =
+      ::SetupDiGetClassDevsA(&guid, NULL, NULL, DIGCF_PRESENT);
+  if (device_info_handle == INVALID_HANDLE_VALUE)
+    return return_value;
 
-    sprintf_s(data_buffer, "%s\\%s\\Connection", net_card_key, adapter_name);
-    if (::RegOpenKeyExA(HKEY_LOCAL_MACHINE, data_buffer, 0, KEY_READ,
-                        &local_net) != ERROR_SUCCESS) {
-      SetupDiDestroyDeviceInfoList(device_info_handle);
-      return return_value;
-    }
+  unsigned char net_card_key[] =
+      "System\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-"
+      "08002BE10318}";
+  char data_buffer[MAX_PATH + 1] = {0};
+  DWORD data_len = MAX_PATH;
+  DWORD type = REG_SZ;
+  HKEY local_net = NULL;
+  std::string pnp_instance_id;
 
-    if (::RegQueryValueExA(local_net, "PnpInstanceID", 0, &type,
-                           (BYTE*)data_buffer, &data_len)) {
-      SetupDiDestroyDeviceInfoList(device_info_handle);
-      ::RegCloseKey(local_net);
-      return return_value;
-    }
-
-    pnp_instance_id = data_buffer;
-    type = REG_DWORD;
-    data_len = sizeof(DWORD);
-    ::RegQueryValueExA(local_net, "MediaSubType", 0, &type,
-                       (BYTE*)&media_sub_type, &data_len);
-
-    char device_id[MAX_PATH] = {0};
-    ULONG bus_number = (ULONG)-1;
-    SP_DEVINFO_DATA device_info_data;
-    device_info_data.cbSize = sizeof(SP_DEVINFO_DATA);
-    for (int i = 0;
-         ::SetupDiEnumDeviceInfo(device_info_handle, i, &device_info_data);
-         ++i) {
-      ZeroMemory(device_id, sizeof(device_id));
-      bus_number = (ULONG)-1;
-
-      ::SetupDiGetDeviceInstanceIdA(device_info_handle, &device_info_data,
-                                    device_id, MAX_PATH, NULL);
-
-      if (!::SetupDiGetDeviceRegistryPropertyA(
-              device_info_handle, &device_info_data, SPDRP_BUSNUMBER, NULL,
-              (PBYTE)&bus_number, sizeof(ULONG), NULL))
-        continue;
-
-      if (pnp_instance_id.compare(device_id) == 0 && bus_number != (ULONG)-1) {
-        return_value = TRUE;
-        break;
-      }
-    }
-
-    ::RegCloseKey(local_net);
+  sprintf_s(data_buffer, "%s\\%s\\Connection", net_card_key, adapter_name);
+  if (::RegOpenKeyExA(HKEY_LOCAL_MACHINE, data_buffer, 0, KEY_READ,
+                      &local_net) != ERROR_SUCCESS) {
     SetupDiDestroyDeviceInfoList(device_info_handle);
     return return_value;
   }
 
-  // std::string GetResolution() {
-  //   std::string strScreen = "";
-  //   FormatString(strScreen, "%dx%d", GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-  //   return strScreen;
-  // }
-#endif //OS_WIN
-  std::string GetLocalMacAdd() {
-    static std::string mac_address_string;
+  if (::RegQueryValueExA(local_net, "PnpInstanceID", 0, &type,
+                         (BYTE*)data_buffer, &data_len)) {
+    SetupDiDestroyDeviceInfoList(device_info_handle);
+    ::RegCloseKey(local_net);
+    return return_value;
+  }
 
-    if (!mac_address_string.empty())
-      return mac_address_string;
+  pnp_instance_id = data_buffer;
+  type = REG_DWORD;
+  data_len = sizeof(DWORD);
+  ::RegQueryValueExA(local_net, "MediaSubType", 0, &type,
+                     (BYTE*)&media_sub_type, &data_len);
 
-#if defined(OS_WIN)
-    typedef ULONG(WINAPI *PFN_GetAdaptersInfo)(__out_bcount_opt(*SizePointer) PIP_ADAPTER_INFO AdapterInfo, __inout PULONG SizePointer);
-    // no logic, just for compile
-    base::NativeLibraryOptions opt;
-    const base::NativeLibraryOptions& options = opt;
-    base::NativeLibrary dll_handle = base::LoadNativeLibraryWithOptions(
-        base::FilePath(L"Iphlpapi.dll"), options, nullptr);
+  char device_id[MAX_PATH] = {0};
+  ULONG bus_number = (ULONG)-1;
+  SP_DEVINFO_DATA device_info_data;
+  device_info_data.cbSize = sizeof(SP_DEVINFO_DATA);
+  for (int i = 0;
+       ::SetupDiEnumDeviceInfo(device_info_handle, i, &device_info_data); ++i) {
+    ZeroMemory(device_id, sizeof(device_id));
+    bus_number = (ULONG)-1;
 
-    if (dll_handle) {
-      PFN_GetAdaptersInfo pfn_adapters_info =
-          (PFN_GetAdaptersInfo)base::GetFunctionPointerFromNativeLibrary(
-              dll_handle, "GetAdaptersInfo");
+    ::SetupDiGetDeviceInstanceIdA(device_info_handle, &device_info_data,
+                                  device_id, MAX_PATH, NULL);
 
-      if (pfn_adapters_info) {
-        PIP_ADAPTER_INFO pip_adapter_info = NULL;
-        ULONG output_buffer_len;
-        pip_adapter_info = (PIP_ADAPTER_INFO)malloc(sizeof(IP_ADAPTER_INFO));
-        output_buffer_len = sizeof(IP_ADAPTER_INFO);
-        if (ERROR_BUFFER_OVERFLOW ==
-            pfn_adapters_info(pip_adapter_info, &output_buffer_len)) {
-          free(pip_adapter_info);
-          pip_adapter_info = (PIP_ADAPTER_INFO)malloc(output_buffer_len);
-        }
+    if (!::SetupDiGetDeviceRegistryPropertyA(
+            device_info_handle, &device_info_data, SPDRP_BUSNUMBER, NULL,
+            (PBYTE)&bus_number, sizeof(ULONG), NULL))
+      continue;
 
-        BYTE system_info_array[100] = {0};
-        if (NO_ERROR ==
-            pfn_adapters_info(pip_adapter_info, &output_buffer_len)) {
-          PIP_ADAPTER_INFO tmp_adapter = pip_adapter_info;
-
-          while (tmp_adapter != NULL && tmp_adapter->AddressLength < 100U) {
-            DWORD media_sub_type = 0;
-            if (IsPhysicalAdapter(tmp_adapter->AdapterName, media_sub_type)) {
-              CopyMemory(system_info_array, tmp_adapter->Address,
-                         tmp_adapter->AddressLength);
-
-              if (system_info_array[0] + system_info_array[1] +
-                      system_info_array[2] + system_info_array[3] +
-                      system_info_array[4] + system_info_array[5] !=
-                  0) {
-                FormatString(mac_address_string, "%02x%02x%02x%02x%02x%02x",
-                             system_info_array[0], system_info_array[1],
-                             system_info_array[2], system_info_array[3],
-                             system_info_array[4], system_info_array[5]);
-
-                if (media_sub_type != 0x2)
-                  break;
-              }
-            }
-            tmp_adapter = tmp_adapter->Next;
-          }
-        }
-        free(pip_adapter_info);
-      }
-      base::UnloadNativeLibrary(dll_handle);
+    if (pnp_instance_id.compare(device_id) == 0 && bus_number != (ULONG)-1) {
+      return_value = TRUE;
+      break;
     }
-#endif /*OS_WIN*/
+  }
+
+  ::RegCloseKey(local_net);
+  SetupDiDestroyDeviceInfoList(device_info_handle);
+  return return_value;
+}
+
+// std::string GetResolution() {
+//   std::string strScreen = "";
+//   FormatString(strScreen, "%dx%d", GetSystemMetrics(SM_CXSCREEN),
+//   GetSystemMetrics(SM_CYSCREEN)); return strScreen;
+// }
+#endif  // OS_WIN
+std::string GetLocalMacAdd() {
+  static std::string mac_address_string;
+
+  if (!mac_address_string.empty())
     return mac_address_string;
-  }
 
-  std::string GetRegMachineId() {
 #if defined(OS_WIN)
-    base::win::RegKey key(HKEY_LOCAL_MACHINE,
-      L"SOFTWARE\\Microsoft\\Cryptography",
-      KEY_READ | KEY_WOW64_64KEY);
-    std::wstring mid;
-    key.ReadValue(L"MachineGuid", &mid);
-    return base::UTF16ToUTF8(mid);
+  typedef ULONG(WINAPI * PFN_GetAdaptersInfo)(__out_bcount_opt(*SizePointer)
+                                                  PIP_ADAPTER_INFO AdapterInfo,
+                                              __inout PULONG SizePointer);
+  // no logic, just for compile
+  base::NativeLibraryOptions opt;
+  const base::NativeLibraryOptions& options = opt;
+  base::NativeLibrary dll_handle = base::LoadNativeLibraryWithOptions(
+      base::FilePath(L"Iphlpapi.dll"), options, nullptr);
+
+  if (dll_handle) {
+    PFN_GetAdaptersInfo pfn_adapters_info =
+        (PFN_GetAdaptersInfo)base::GetFunctionPointerFromNativeLibrary(
+            dll_handle, "GetAdaptersInfo");
+
+    if (pfn_adapters_info) {
+      PIP_ADAPTER_INFO pip_adapter_info = NULL;
+      ULONG output_buffer_len;
+      pip_adapter_info = (PIP_ADAPTER_INFO)malloc(sizeof(IP_ADAPTER_INFO));
+      output_buffer_len = sizeof(IP_ADAPTER_INFO);
+      if (ERROR_BUFFER_OVERFLOW ==
+          pfn_adapters_info(pip_adapter_info, &output_buffer_len)) {
+        free(pip_adapter_info);
+        pip_adapter_info = (PIP_ADAPTER_INFO)malloc(output_buffer_len);
+      }
+
+      BYTE system_info_array[100] = {0};
+      if (NO_ERROR == pfn_adapters_info(pip_adapter_info, &output_buffer_len)) {
+        PIP_ADAPTER_INFO tmp_adapter = pip_adapter_info;
+
+        while (tmp_adapter != NULL && tmp_adapter->AddressLength < 100U) {
+          DWORD media_sub_type = 0;
+          if (IsPhysicalAdapter(tmp_adapter->AdapterName, media_sub_type)) {
+            CopyMemory(system_info_array, tmp_adapter->Address,
+                       tmp_adapter->AddressLength);
+
+            if (system_info_array[0] + system_info_array[1] +
+                    system_info_array[2] + system_info_array[3] +
+                    system_info_array[4] + system_info_array[5] !=
+                0) {
+              FormatString(mac_address_string, "%02x%02x%02x%02x%02x%02x",
+                           system_info_array[0], system_info_array[1],
+                           system_info_array[2], system_info_array[3],
+                           system_info_array[4], system_info_array[5]);
+
+              if (media_sub_type != 0x2)
+                break;
+            }
+          }
+          tmp_adapter = tmp_adapter->Next;
+        }
+      }
+      free(pip_adapter_info);
+    }
+    base::UnloadNativeLibrary(dll_handle);
+  }
+#endif /*OS_WIN*/
+  return mac_address_string;
+}
+
+std::string GetRegMachineId() {
+#if defined(OS_WIN)
+  base::win::RegKey key(HKEY_LOCAL_MACHINE,
+                        L"SOFTWARE\\Microsoft\\Cryptography",
+                        KEY_READ | KEY_WOW64_64KEY);
+  std::wstring mid;
+  key.ReadValue(L"MachineGuid", &mid);
+  return base::UTF16ToUTF8(mid);
 #elif defined(OS_MACOSX)
-    return GetHardwareUUID();
+  return GetHardwareUUID();
 #else
-    DLOG(WARNING) << "Unknown operating system";
+  DLOG(WARNING) << "Unknown operating system";
 #endif
-    return std::string();
-  }
+  return std::string();
+}
 
-  //获取主板信息
-  void GetBoardInfo(std::string* board_info) {
+//获取主板信息
+void GetBoardInfo(std::string* board_info) {
 #if defined(OS_WIN)
-    HKEY root_key;              //主键
-    LPCTSTR ip_sub_key;         //子键名称
-    std::wstring brand_buffer;  //品牌
-    std::wstring model_buffer;  //型号
+  HKEY root_key;              //主键
+  LPCTSTR ip_sub_key;         //子键名称
+  std::wstring brand_buffer;  //品牌
+  std::wstring model_buffer;  //型号
 
-    root_key = HKEY_LOCAL_MACHINE;
-    ip_sub_key = L"HARDWARE\\DESCRIPTION\\System\\BIOS";
-    base::win::RegKey key(root_key, ip_sub_key, KEY_READ | KEY_WOW64_64KEY);
-    key.ReadValue(L"SystemManufacturer", &brand_buffer);
-    key.ReadValue(L"SystemProductName", &model_buffer);
-    board_info->clear();
-    board_info->assign(base::UTF16ToUTF8(brand_buffer) + "_" +
-                       base::UTF16ToUTF8(model_buffer));
+  root_key = HKEY_LOCAL_MACHINE;
+  ip_sub_key = L"HARDWARE\\DESCRIPTION\\System\\BIOS";
+  base::win::RegKey key(root_key, ip_sub_key, KEY_READ | KEY_WOW64_64KEY);
+  key.ReadValue(L"SystemManufacturer", &brand_buffer);
+  key.ReadValue(L"SystemProductName", &model_buffer);
+  board_info->clear();
+  board_info->assign(base::UTF16ToUTF8(brand_buffer) + "_" +
+                     base::UTF16ToUTF8(model_buffer));
 #elif defined(OS_MACOSX)
-    board_info->assign(base::SysInfo::HardwareModelName());
+  board_info->assign(base::SysInfo::HardwareModelName());
 #else
-    DLOG(WARNING) << "Uknown operating system";
+  DLOG(WARNING) << "Uknown operating system";
 #endif
-    return;
-  }
+  return;
+}
 #if defined(OS_WIN)
-  //判断系统位数，64位返回TRUE，32位返回FALSE
-  // BOOL IsWow64()
-  // {
-  //   typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
-  //   LPFN_ISWOW64PROCESS fnIsWow64Process;
-  //   BOOL bIsWow64 = FALSE;
-  //   fnIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle(L"kernel32"), "IsWow64Process");
-  //   if (NULL != fnIsWow64Process)
-  //   {
-  //     fnIsWow64Process(GetCurrentProcess(), &bIsWow64);
-  //   }
-  //   return bIsWow64;
-  // }
+// 判断系统位数，64位返回TRUE，32位返回FALSE
+// BOOL IsWow64()
+// {
+//   typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+//   LPFN_ISWOW64PROCESS fnIsWow64Process;
+//   BOOL bIsWow64 = FALSE;
+//   fnIsWow64Process =
+//   (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle(L"kernel32"),
+//   "IsWow64Process"); if (NULL != fnIsWow64Process)
+//   {
+//     fnIsWow64Process(GetCurrentProcess(), &bIsWow64);
+//   }
+//   return bIsWow64;
+// }
 
-  //void SetProxyEnabled(bool enabled) {
-  //  base::win::RegKey key(HKEY_CURRENT_USER,
-  //             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
-  //             KEY_SET_VALUE | KEY_WOW64_64KEY);
-  //  key.WriteValue(L"ProxyEnable", enabled ? 0x1 : 0x0);
-  //}
-  //
-  //void SetProxyInfo(
-  //  const base::string16& server,
-  //  const base::string16& except) {
-  //  base::win::RegKey key(HKEY_CURRENT_USER,
-  //             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
-  //             KEY_SET_VALUE | KEY_WOW64_64KEY);
-  //  key.WriteValue(L"ProxyServer", server.c_str());
-  //  key.WriteValue(L"ProxyOverride", except.c_str());
-  //}
+// void SetProxyEnabled(bool enabled) {
+//  base::win::RegKey key(HKEY_CURRENT_USER,
+//             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet
+//             Settings", KEY_SET_VALUE | KEY_WOW64_64KEY);
+//  key.WriteValue(L"ProxyEnable", enabled ? 0x1 : 0x0);
+//}
+//
+// void SetProxyInfo(
+//  const base::string16& server,
+//  const base::string16& except) {
+//  base::win::RegKey key(HKEY_CURRENT_USER,
+//             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet
+//             Settings", KEY_SET_VALUE | KEY_WOW64_64KEY);
+//  key.WriteValue(L"ProxyServer", server.c_str());
+//  key.WriteValue(L"ProxyOverride", except.c_str());
+//}
 
-  BOOL SetProxyInfo(bool enabled,
-                    const base::string16& server,
-                    const base::string16& except) {
-    INTERNET_PER_CONN_OPTION_LIST option_list;
-    BOOL return_value;
-    DWORD buffer_size = sizeof(option_list);
+BOOL SetProxyInfo(bool enabled,
+                  const base::string16& server,
+                  const base::string16& except) {
+  INTERNET_PER_CONN_OPTION_LIST option_list;
+  BOOL return_value;
+  DWORD buffer_size = sizeof(option_list);
 
-    // Fill the list structure.
-    option_list.dwSize = sizeof(option_list);
+  // Fill the list structure.
+  option_list.dwSize = sizeof(option_list);
 
-    // NULL == LAN, otherwise connectoid name.
-    option_list.pszConnection = NULL;
+  // NULL == LAN, otherwise connectoid name.
+  option_list.pszConnection = NULL;
 
-    // Set three options.
-    if (server.empty() && except.empty())
-      option_list.dwOptionCount = 1;
-    else
-      option_list.dwOptionCount = 3;
-    option_list.pOptions = new INTERNET_PER_CONN_OPTION[3];
+  // Set three options.
+  if (server.empty() && except.empty())
+    option_list.dwOptionCount = 1;
+  else
+    option_list.dwOptionCount = 3;
+  option_list.pOptions = new INTERNET_PER_CONN_OPTION[3];
 
-    // Ensure that the memory was allocated.
-    if (NULL == option_list.pOptions) {
-      // Return FALSE if the memory wasn't allocated.
-      return FALSE;
-    }
-
-    // Set flags.
-    option_list.pOptions[0].dwOption = INTERNET_PER_CONN_FLAGS;
-    if (enabled) {
-      option_list.pOptions[0].Value.dwValue =
-          PROXY_TYPE_DIRECT | PROXY_TYPE_PROXY | PROXY_TYPE_AUTO_DETECT;
-    } else {
-      option_list.pOptions[0].Value.dwValue =
-          PROXY_TYPE_DIRECT | PROXY_TYPE_AUTO_DETECT;
-    }
-
-    // Set proxy name.
-    option_list.pOptions[1].dwOption = INTERNET_PER_CONN_PROXY_SERVER;
-    option_list.pOptions[1].Value.pszValue = const_cast<LPWSTR>(server.data());
-
-    // Set proxy override.
-    option_list.pOptions[2].dwOption = INTERNET_PER_CONN_PROXY_BYPASS;
-    option_list.pOptions[2].Value.pszValue = const_cast<LPWSTR>(except.data());
-
-    // Set the options on the connection.
-    return_value = InternetSetOption(
-        NULL, INTERNET_OPTION_PER_CONNECTION_OPTION, &option_list, buffer_size);
-
-    // Free the allocated memory.
-    delete[] option_list.pOptions;
-
-    return return_value;
+  // Ensure that the memory was allocated.
+  if (NULL == option_list.pOptions) {
+    // Return FALSE if the memory wasn't allocated.
+    return FALSE;
   }
 
-  BOOL SetPACInfo(bool enabled, const base::string16& pac) {
-    INTERNET_PER_CONN_OPTION_LIST option_list;
-    BOOL return_value;
-    DWORD buffer_size = sizeof(option_list);
-
-    // Fill the list structure.
-    option_list.dwSize = sizeof(option_list);
-
-    // NULL == LAN, otherwise connectoid name.
-    option_list.pszConnection = NULL;
-
-    // Set three options.
-    if (pac.empty())
-      option_list.dwOptionCount = 1;
-    else
-      option_list.dwOptionCount = 2;
-    option_list.pOptions = new INTERNET_PER_CONN_OPTION[2];
-
-    // Ensure that the memory was allocated.
-    if (NULL == option_list.pOptions) {
-      // Return FALSE if the memory wasn't allocated.
-      return FALSE;
-    }
-
-    // Set flags.
-    option_list.pOptions[0].dwOption = INTERNET_PER_CONN_FLAGS;
-    if (enabled) {
-      option_list.pOptions[0].Value.dwValue = PROXY_TYPE_DIRECT |
-                                              PROXY_TYPE_AUTO_PROXY_URL |
-                                              PROXY_TYPE_AUTO_DETECT;
-    } else {
-      option_list.pOptions[0].Value.dwValue =
-          PROXY_TYPE_DIRECT | PROXY_TYPE_AUTO_DETECT;
-    }
-
-    // Set auto proxy url.
-    option_list.pOptions[1].dwOption = INTERNET_PER_CONN_AUTOCONFIG_URL;
-    option_list.pOptions[1].Value.pszValue = const_cast<LPWSTR>(pac.data());
-
-    // Set the options on the connection.
-    return_value = InternetSetOption(
-        NULL, INTERNET_OPTION_PER_CONNECTION_OPTION, &option_list, buffer_size);
-
-    // Free the allocated memory.
-    delete[] option_list.pOptions;
-
-    return return_value;
+  // Set flags.
+  option_list.pOptions[0].dwOption = INTERNET_PER_CONN_FLAGS;
+  if (enabled) {
+    option_list.pOptions[0].Value.dwValue =
+        PROXY_TYPE_DIRECT | PROXY_TYPE_PROXY | PROXY_TYPE_AUTO_DETECT;
+  } else {
+    option_list.pOptions[0].Value.dwValue =
+        PROXY_TYPE_DIRECT | PROXY_TYPE_AUTO_DETECT;
   }
 
-  //void SetPACInfo(const base::string16& pac) {
-  //  base::win::RegKey key(HKEY_CURRENT_USER,
-  //             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
-  //             KEY_SET_VALUE | KEY_WOW64_64KEY);
-  //
-  //  if(pac.empty())
-  //    key.DeleteValue(L"AutoConfigURL");
-  //  else
-  //    key.WriteValue(L"AutoConfigURL", pac.c_str());
-  //}
+  // Set proxy name.
+  option_list.pOptions[1].dwOption = INTERNET_PER_CONN_PROXY_SERVER;
+  option_list.pOptions[1].Value.pszValue = const_cast<LPWSTR>(server.data());
+
+  // Set proxy override.
+  option_list.pOptions[2].dwOption = INTERNET_PER_CONN_PROXY_BYPASS;
+  option_list.pOptions[2].Value.pszValue = const_cast<LPWSTR>(except.data());
+
+  // Set the options on the connection.
+  return_value = InternetSetOption(NULL, INTERNET_OPTION_PER_CONNECTION_OPTION,
+                                   &option_list, buffer_size);
+
+  // Free the allocated memory.
+  delete[] option_list.pOptions;
+
+  return return_value;
+}
+
+BOOL SetPACInfo(bool enabled, const base::string16& pac) {
+  INTERNET_PER_CONN_OPTION_LIST option_list;
+  BOOL return_value;
+  DWORD buffer_size = sizeof(option_list);
+
+  // Fill the list structure.
+  option_list.dwSize = sizeof(option_list);
+
+  // NULL == LAN, otherwise connectoid name.
+  option_list.pszConnection = NULL;
+
+  // Set three options.
+  if (pac.empty())
+    option_list.dwOptionCount = 1;
+  else
+    option_list.dwOptionCount = 2;
+  option_list.pOptions = new INTERNET_PER_CONN_OPTION[2];
+
+  // Ensure that the memory was allocated.
+  if (NULL == option_list.pOptions) {
+    // Return FALSE if the memory wasn't allocated.
+    return FALSE;
+  }
+
+  // Set flags.
+  option_list.pOptions[0].dwOption = INTERNET_PER_CONN_FLAGS;
+  if (enabled) {
+    option_list.pOptions[0].Value.dwValue =
+        PROXY_TYPE_DIRECT | PROXY_TYPE_AUTO_PROXY_URL | PROXY_TYPE_AUTO_DETECT;
+  } else {
+    option_list.pOptions[0].Value.dwValue =
+        PROXY_TYPE_DIRECT | PROXY_TYPE_AUTO_DETECT;
+  }
+
+  // Set auto proxy url.
+  option_list.pOptions[1].dwOption = INTERNET_PER_CONN_AUTOCONFIG_URL;
+  option_list.pOptions[1].Value.pszValue = const_cast<LPWSTR>(pac.data());
+
+  // Set the options on the connection.
+  return_value = InternetSetOption(NULL, INTERNET_OPTION_PER_CONNECTION_OPTION,
+                                   &option_list, buffer_size);
+
+  // Free the allocated memory.
+  delete[] option_list.pOptions;
+
+  return return_value;
+}
+
+// void SetPACInfo(const base::string16& pac) {
+//  base::win::RegKey key(HKEY_CURRENT_USER,
+//             L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet
+//             Settings", KEY_SET_VALUE | KEY_WOW64_64KEY);
+//
+//  if(pac.empty())
+//    key.DeleteValue(L"AutoConfigURL");
+//  else
+//    key.WriteValue(L"AutoConfigURL", pac.c_str());
+//}
 #endif /*OS_WIN*/
 
-  std::string GetStringFromDictionary(const base::DictionaryValue* dict,
-                                      const std::string& node_path) {
-    if (dict) {
-      std::string value;
-      if (dict->GetString(node_path, &value))
-        return value;
-    }
-
-    return std::string();
+std::string GetStringFromDictionary(const base::DictionaryValue* dict,
+                                    const std::string& node_path) {
+  if (dict) {
+    std::string value;
+    if (dict->GetString(node_path, &value))
+      return value;
   }
 
-  base::string16 GetString16FromDictionary(const base::DictionaryValue* dict,
-                                           const std::string& node_path) {
-    if (dict) {
-      base::string16 value;
-      if (dict->GetString(node_path, &value))
-        return value;
-    }
+  return std::string();
+}
 
-    return base::string16();
+base::string16 GetString16FromDictionary(const base::DictionaryValue* dict,
+                                         const std::string& node_path) {
+  if (dict) {
+    base::string16 value;
+    if (dict->GetString(node_path, &value))
+      return value;
   }
+
+  return base::string16();
+}
 }  // namespace
-   //YSP+ { config cryptor
+// YSP+ { config cryptor
 namespace cryptorkey {
 // config data cache crypto key
 const std::string& key = "3zVssP6JRSduWS2XppyvkaAi64R8rcoh";
-} //namespace cryptorkey
+}  // namespace cryptorkey
 
 namespace {
-  class ConfigCryptor {
-  public:
-    ConfigCryptor();
-    ~ConfigCryptor();
-    bool EncryptString(const std::string& key,
-                       const std::string& plain_text,
-                       std::string* cipher_text);
-    bool DecryptString(const std::string& key,
-                       const std::string& cipher_text,
-                       std::string* plain_text);
-  };
+class ConfigCryptor {
+ public:
+  ConfigCryptor();
+  ~ConfigCryptor();
+  bool EncryptString(const std::string& key,
+                     const std::string& plain_text,
+                     std::string* cipher_text);
+  bool DecryptString(const std::string& key,
+                     const std::string& cipher_text,
+                     std::string* plain_text);
+};
 
-  ConfigCryptor::ConfigCryptor() {}
+ConfigCryptor::ConfigCryptor() {}
 
-  ConfigCryptor::~ConfigCryptor() {}
+ConfigCryptor::~ConfigCryptor() {}
 
-  bool ConfigCryptor::EncryptString(const std::string& key,
-                                    const std::string& plain_text,
-                                    std::string* cipher_text) {
-    AES_KEY aes_key;
-    char key_data[17] = { 0 };
-    memcpy(key_data, key.c_str(), 8);
-    memcpy(key_data + 8, key.c_str() + 8, 8);
-    if (AES_set_encrypt_key(reinterpret_cast<const uint8_t*>(key_data),
-                            AES_BLOCK_SIZE * 8, &aes_key) != 0) {
-      return false;
-    }
-
-    const size_t out_size = plain_text.size();
-    std::string pla_padding = plain_text;
-    int offset = AES_BLOCK_SIZE - out_size % AES_BLOCK_SIZE;
-    size_t out_size_new = out_size + offset;
-    char padding[AES_BLOCK_SIZE];
-    memset(padding, offset, AES_BLOCK_SIZE);
-    pla_padding.append(padding, offset);
-    std::string result;
-    uint8_t* out_ptr =
-        reinterpret_cast<uint8_t*>(base::WriteInto(&result, out_size_new + 1));
-
-    uint8_t ivec[AES_BLOCK_SIZE] = { 0 };
-    memcpy(ivec, key.c_str() + 16, AES_BLOCK_SIZE);
-
-    AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(pla_padding.data()),
-                    out_ptr, pla_padding.size(), &aes_key, ivec, AES_ENCRYPT);
-    cipher_text->swap(result);
-    return true;
+bool ConfigCryptor::EncryptString(const std::string& key,
+                                  const std::string& plain_text,
+                                  std::string* cipher_text) {
+  AES_KEY aes_key;
+  char key_data[17] = {0};
+  memcpy(key_data, key.c_str(), 8);
+  memcpy(key_data + 8, key.c_str() + 8, 8);
+  if (AES_set_encrypt_key(reinterpret_cast<const uint8_t*>(key_data),
+                          AES_BLOCK_SIZE * 8, &aes_key) != 0) {
+    return false;
   }
 
-  bool ConfigCryptor::DecryptString(const std::string& key,
-                                    const std::string& cipher_text,
-                                    std::string* plain_text) {
-    AES_KEY aes_key;
-    char key_data[17] = { 0 };
-    memcpy(key_data, key.c_str(), 8);
-    memcpy(key_data + 8, key.c_str() + 8, 8);
-    if (AES_set_decrypt_key(reinterpret_cast<const uint8_t*>(key_data),
-                            AES_BLOCK_SIZE * 8, &aes_key) != 0) {
-      return false;
-    }
-    const size_t out_size = cipher_text.size();
-    std::string result;
-    uint8_t* out_ptr =
+  const size_t out_size = plain_text.size();
+  std::string pla_padding = plain_text;
+  int offset = AES_BLOCK_SIZE - out_size % AES_BLOCK_SIZE;
+  size_t out_size_new = out_size + offset;
+  char padding[AES_BLOCK_SIZE];
+  memset(padding, offset, AES_BLOCK_SIZE);
+  pla_padding.append(padding, offset);
+  std::string result;
+  uint8_t* out_ptr =
+      reinterpret_cast<uint8_t*>(base::WriteInto(&result, out_size_new + 1));
+
+  uint8_t ivec[AES_BLOCK_SIZE] = {0};
+  memcpy(ivec, key.c_str() + 16, AES_BLOCK_SIZE);
+
+  AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(pla_padding.data()), out_ptr,
+                  pla_padding.size(), &aes_key, ivec, AES_ENCRYPT);
+  cipher_text->swap(result);
+  return true;
+}
+
+bool ConfigCryptor::DecryptString(const std::string& key,
+                                  const std::string& cipher_text,
+                                  std::string* plain_text) {
+  AES_KEY aes_key;
+  char key_data[17] = {0};
+  memcpy(key_data, key.c_str(), 8);
+  memcpy(key_data + 8, key.c_str() + 8, 8);
+  if (AES_set_decrypt_key(reinterpret_cast<const uint8_t*>(key_data),
+                          AES_BLOCK_SIZE * 8, &aes_key) != 0) {
+    return false;
+  }
+  const size_t out_size = cipher_text.size();
+  std::string result;
+  uint8_t* out_ptr =
       reinterpret_cast<uint8_t*>(base::WriteInto(&result, out_size + 1));
 
-    uint8_t ivec[AES_BLOCK_SIZE] = { 0 };
-    memcpy(ivec, key.c_str() + 16, AES_BLOCK_SIZE);
+  uint8_t ivec[AES_BLOCK_SIZE] = {0};
+  memcpy(ivec, key.c_str() + 16, AES_BLOCK_SIZE);
 
-    AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(cipher_text.data()),
-                    out_ptr, cipher_text.size(), &aes_key, ivec, AES_DECRYPT);
-    size_t length = result.length();
-    int offset = result.c_str()[length - 1];
-    plain_text->clear();
-    plain_text->assign(result, 0, length - offset);
-    return true;
-  }
+  AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(cipher_text.data()), out_ptr,
+                  cipher_text.size(), &aes_key, ivec, AES_DECRYPT);
+  size_t length = result.length();
+  int offset = result.c_str()[length - 1];
+  plain_text->clear();
+  plain_text->assign(result, 0, length - offset);
+  return true;
+}
 
-} //namespace
-  //YSP+ } /*config cryptor*/
+}  // namespace
+// YSP+ } /*config cryptor*/
 YSPLoginManager::YSPLoginManager()
     : login_fetcher_(nullptr),
       replace_fetcher_(nullptr),
@@ -718,9 +716,9 @@ YSPLoginManager::YSPLoginManager()
       get_auth_token_fetcher_(nullptr),
       get_sdp_device_fetcher_(nullptr),
       put_sdp_device_fetcher_(nullptr),
-	  put_modify_password_fetcher_(nullptr),
-	  put_appliction_status_fetcher_(nullptr),
-	  get_gateway_appliction_fetcher_(nullptr),
+      put_modify_password_fetcher_(nullptr),
+      put_appliction_status_fetcher_(nullptr),
+      get_gateway_appliction_fetcher_(nullptr),
       autoConfig_fetcher_(nullptr),
       login_info_(nullptr),
       application_info_(nullptr),
@@ -747,18 +745,18 @@ YSPLoginManager::~YSPLoginManager() {
     delete login_fetcher_;
     login_fetcher_ = nullptr;
   }
-  //YSP+ { Resource Replace }
+  // YSP+ { Resource Replace }
   if (replace_fetcher_) {
     delete replace_fetcher_;
     replace_fetcher_ = nullptr;
   }
-  //YSP+ } /*Fetcher resource*/
-  //YSP+ { SingleSignOn config
+  // YSP+ } /*Fetcher resource*/
+  // YSP+ { SingleSignOn config
   if (single_signon_fetcher_) {
     delete single_signon_fetcher_;
     single_signon_fetcher_ = nullptr;
   }
-  //YSP+ } /*SingleSignOn config*/
+  // YSP+ } /*SingleSignOn config*/
   if (report_fetcher_) {
     delete report_fetcher_;
     report_fetcher_ = nullptr;
@@ -804,17 +802,17 @@ YSPLoginManager::~YSPLoginManager() {
     put_appliction_status_fetcher_ = nullptr;
   }
   if (get_gateway_appliction_fetcher_) {
-	  delete get_gateway_appliction_fetcher_;
-	  get_gateway_appliction_fetcher_ = nullptr;
+    delete get_gateway_appliction_fetcher_;
+    get_gateway_appliction_fetcher_ = nullptr;
   }
   if (put_modify_password_fetcher_) {
-	  delete put_modify_password_fetcher_;
-	  put_modify_password_fetcher_ = nullptr;
+    delete put_modify_password_fetcher_;
+    put_modify_password_fetcher_ = nullptr;
   }
   observers_.clear();
 }
 
-//static
+// static
 YSPLoginManager* YSPLoginManager::GetInstance() {
   if (!g_instance) {
     g_instance = new YSPLoginManager;
@@ -829,7 +827,7 @@ void YSPLoginManager::Init() {
     DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -842,7 +840,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       login_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -850,10 +848,10 @@ void YSPLoginManager::Init() {
   // load application info
   file_path = FilePathOfLoginCache("application");
   if (base::PathExists(file_path)) {
-    //DCHECK(auto_login_);
+    // DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -865,7 +863,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       application_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -876,7 +874,7 @@ void YSPLoginManager::Init() {
     DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -888,7 +886,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       pc_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -899,7 +897,7 @@ void YSPLoginManager::Init() {
     DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -911,7 +909,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       strategy_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -922,7 +920,7 @@ void YSPLoginManager::Init() {
     DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -934,7 +932,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       token_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -945,7 +943,7 @@ void YSPLoginManager::Init() {
     DCHECK(auto_login_);
     int error_code = JSONFileValueDeserializer::JSON_NO_ERROR;
     std::string error_str;
-    //YSP+ { config cryptor
+    // YSP+ { config cryptor
     std::string enc_value = "";
     std::string dec_value = "";
     error_code = base::ReadFileToString(file_path, &enc_value);
@@ -957,7 +955,7 @@ void YSPLoginManager::Init() {
       aes_crypted.DecryptString(cryptorkey::key, enc_value, &dec_value);
     }
     std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(dec_value);
-    //YSP+ } /*config cryptor*/
+    // YSP+ } /*config cryptor*/
     if ((!error_code) == JSONFileValueDeserializer::JSON_NO_ERROR) {
       swa_info_ = base::DictionaryValue::From(std::move(rootValue));
     }
@@ -974,7 +972,7 @@ void YSPLoginManager::Init() {
       for (; iter != observers_.end(); ++iter) {
         (*iter)->OnLoginSuccess(username, head_image_url);
       }
-  }
+    }
   }
   UpdateLoginManagerSettings();
 
@@ -1029,7 +1027,6 @@ void YSPLoginManager::ModifyPassword(const std::string& old_password,
       net::URLFetcher::PUT, url, header_list, post_data, false);
   header_list.clear();
 }
-
 
 void YSPLoginManager::GetGatewayApplictionFetch(bool auto_fetch) {
   std::vector<std::string> header_list;
@@ -1106,9 +1103,10 @@ bool YSPLoginManager::SetManageServer(const std::string& manage_server) {
 
 std::string YSPLoginManager::GetManageServer() {
   PrefService* prefs = g_browser_process->local_state();
-  std::string userSettingServer = prefs->GetString(prefs::kYSPUserSetServerAddress);
-  if (userSettingServer.length() > 0)
-    return userSettingServer;
+  std::string user_setting_server =
+      prefs->GetString(prefs::kYSPUserSetServerAddress);
+  if (user_setting_server.length() > 0)
+    return user_setting_server;
 
   std::string server = prefs->GetString(prefs::kYSPServerAddress);
   if (server.length() > 0)
@@ -1117,7 +1115,7 @@ std::string YSPLoginManager::GetManageServer() {
   return std::string();
 }
 
-//ysp+ { AES DES and SMS4 crypt
+// ysp+ { AES DES and SMS4 crypt
 std::string YSPLoginManager::GetCryptKey() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -1141,9 +1139,9 @@ std::string YSPLoginManager::GetCryptKey() {
   }
 
   return std::string();
-}//ysp+ }
+}  // ysp+ }
 
- //YSP+ { cache encryption
+// YSP+ { cache encryption
 bool YSPLoginManager::GetCacheCrypt() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -1162,7 +1160,7 @@ bool YSPLoginManager::GetCacheCrypt() {
   }
   return false;
 }
-//ysp+ }
+// ysp+ }
 
 base::string16 YSPLoginManager::GetYSPUserName() {
   if (login_info_) {
@@ -1200,14 +1198,15 @@ void YSPLoginManager::OnApplicationFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnApplicationFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnApplicationFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string folder = "application";
   std::string response_status = GetResponseStatusCode(response_data);
   application_status_code_ = (response_status == "0");
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1218,7 +1217,7 @@ void YSPLoginManager::OnApplicationFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
   application_info_.reset();
@@ -1233,14 +1232,15 @@ void YSPLoginManager::OnStrategyFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnStrategyFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnStrategyFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string folder = "confituration_strategy";
   std::string response_status = GetResponseStatusCode(response_data);
   strategy_status_code_ = (response_status == "0");
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1251,7 +1251,7 @@ void YSPLoginManager::OnStrategyFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
   strategy_info_.reset();
@@ -1265,14 +1265,15 @@ void YSPLoginManager::OnTokenFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnTokenFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnTokenFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string folder = "sso_token";
   std::string response_status = GetResponseStatusCode(response_data);
   token_status_code_ = (response_status == "0");
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1283,7 +1284,7 @@ void YSPLoginManager::OnTokenFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
 
@@ -1295,14 +1296,15 @@ void YSPLoginManager::OnSwaFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnSwaFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnSwaFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string folder = "swa";
   std::string response_status = GetResponseStatusCode(response_data);
   swa_status_code_ = (response_status == "0");
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1313,7 +1315,7 @@ void YSPLoginManager::OnSwaFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
 
@@ -1325,14 +1327,15 @@ void YSPLoginManager::OnPcFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnPcFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnPcFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string folder = "confituration_pc";
   std::string response_status = GetResponseStatusCode(response_data);
   pc_status_code_ = (response_status == "0");
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1343,7 +1346,7 @@ void YSPLoginManager::OnPcFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
 
@@ -1358,14 +1361,15 @@ void YSPLoginManager::OnUserFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnUserFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnUserFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string response_status = GetResponseStatusCode(response_data);
   login_status_code_ = (response_status == "0");
   std::string folder = "login";
   if (!from_local) {
     if (auto_login_ && !folder.empty()) {
       base::FilePath saved_path = FilePathOfLoginCache(folder);
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -1376,7 +1380,7 @@ void YSPLoginManager::OnUserFetcherResponseParse(
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write fetch resource cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
   }
 
@@ -1401,7 +1405,8 @@ void YSPLoginManager::OnAutoTokenFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnAutoTokenFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnAutoTokenFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string new_access_token = "";
   response_data->GetString("data.access_token", &new_access_token);
   SaveLastId(prefs::kYSPAccessToken, new_access_token);
@@ -1435,7 +1440,8 @@ void YSPLoginManager::OnSdpDeviceFetcherResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data,
     bool from_local,
     bool auto_fetch) {
-  LOG(INFO) << "YSPLoginManager::OnSdpDeviceFetcherResponseParse auto_fetch:" << auto_fetch;
+  LOG(INFO) << "YSPLoginManager::OnSdpDeviceFetcherResponseParse auto_fetch:"
+            << auto_fetch;
   std::string response_status = GetResponseStatusCode(response_data);
   bool device_status_code = (response_status == "0");
   base::ListValue* data_dict = nullptr;
@@ -1467,7 +1473,7 @@ void YSPLoginManager::OnModifyPasswordResponseParse(std::string response) {
   NotifyConfigureUpdate("modifyPassword", response);
 }
 
-//YSP+ { Fetcher resource
+// YSP+ { Fetcher resource
 std::string YSPLoginManager::GetUserId() {
   if (login_info_) {
     std::string id;
@@ -1492,16 +1498,14 @@ int YSPLoginManager::GetStrategyVersion() {
 // 1. 手动创建 2. 批量导入 3.定制导入 4.AD导入
 // 注：4. 类型不能修改密码
 int YSPLoginManager::GetAccountSourceType() {
-  int sourceType = 0;
-  if (login_info_) {
-    if (login_info_->GetInteger("data.user.source", &sourceType)) {
-      return sourceType;
-    }
-  }
-  return sourceType;
+  int source_type = 0;
+  if (login_info_)
+    login_info_->GetInteger("data.user.source", &source_type);
+
+  return source_type;
 }
 
-//获取策略ID
+// 获取策略ID
 std::string YSPLoginManager::GetActivelId() {
   if (login_info_) {
     std::string active_id;
@@ -1514,7 +1518,7 @@ std::string YSPLoginManager::GetActivelId() {
   return std::string("null");
 }
 
-//获取access_token
+// 获取access_token
 std::string YSPLoginManager::GetAccessTokenForLogin() {
   if (login_info_) {
     std::string access_token;
@@ -1527,12 +1531,12 @@ std::string YSPLoginManager::GetAccessTokenForLogin() {
 }
 
 std::string YSPLoginManager::GetAccessToken() {
-  //DLOG(INFO) << "prefs access token: " << prefs->GetString(prefs::kYSPAccessToken);
+  // DLOG(INFO) << "prefs access token: " <<
+  // prefs->GetString(prefs::kYSPAccessToken);
   return GetLastId(prefs::kYSPAccessToken);
 }
 
-
-//获取refresh_token
+// 获取refresh_token
 std::string YSPLoginManager::GetRefreshTokenForLogin() {
   if (login_info_) {
     std::string refresh_token;
@@ -1550,7 +1554,7 @@ std::string YSPLoginManager::GetRefreshToken() {
 void YSPLoginManager::GetApplicationfetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_application_fetcher_ && get_application_fetcher_->IsLoading())
+  // if (get_application_fetcher_ && get_application_fetcher_->IsLoading())
   //  return;
   header_list.push_back("userid: " + GetUserId());
   if (!access_token.empty())
@@ -1574,7 +1578,8 @@ void YSPLoginManager::GetApplicationfetcher(bool auto_fetch) {
 void YSPLoginManager::GetStrategyfetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_configuration_strategy_fetcher_ && get_configuration_strategy_fetcher_->IsLoading())
+  // if (get_configuration_strategy_fetcher_ &&
+  // get_configuration_strategy_fetcher_->IsLoading())
   //  return;
 
   header_list.push_back("userid: " + GetUserId());
@@ -1599,7 +1604,7 @@ void YSPLoginManager::GetStrategyfetcher(bool auto_fetch) {
 void YSPLoginManager::GetTokenfetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_sso_token_fetcher_ && get_sso_token_fetcher_->IsLoading())
+  // if (get_sso_token_fetcher_ && get_sso_token_fetcher_->IsLoading())
   //  return;
   if (GetUserId().empty() || GetCompanyId().empty())
     return;
@@ -1607,7 +1612,7 @@ void YSPLoginManager::GetTokenfetcher(bool auto_fetch) {
   if (!access_token.empty())
     header_list.push_back("access-token: " + access_token);
 
-  //获取sso的token
+  // 获取sso的token
   LOG(INFO) << "YSPLoginManager::GetTokenfetcher auto_fetch:" << auto_fetch;
   std::string post_data;
   net::AddMultipartValueForUpload("companyId", GetCompanyId(),
@@ -1633,13 +1638,13 @@ void YSPLoginManager::GetTokenfetcher(bool auto_fetch) {
 void YSPLoginManager::GetSwafetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_swa_fetcher_ && get_swa_fetcher_->IsLoading())
+  // if (get_swa_fetcher_ && get_swa_fetcher_->IsLoading())
   //  return;
   header_list.push_back("userid: " + GetUserId());
   if (!access_token.empty())
     header_list.push_back("access-token: " + access_token);
 
-  //获取SWA配置
+  // 获取SWA配置
   LOG(INFO) << "YSPLoginManager::GetSwafetcher auto_fetch:" << auto_fetch;
   if (!get_swa_fetcher_) {
     get_swa_fetcher_ = new YSPFetcherResource(
@@ -1657,7 +1662,8 @@ void YSPLoginManager::GetSwafetcher(bool auto_fetch) {
 void YSPLoginManager::GetPcfetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_configuration_pc_fetcher_ && get_configuration_pc_fetcher_->IsLoading())
+  // if (get_configuration_pc_fetcher_ &&
+  // get_configuration_pc_fetcher_->IsLoading())
   //  return;
   if (GetUserId().empty() || GetCompanyId().empty())
     return;
@@ -1666,7 +1672,7 @@ void YSPLoginManager::GetPcfetcher(bool auto_fetch) {
   if (!access_token.empty())
     header_list.push_back("access-token: " + access_token);
 
-  //获取PC配置
+  // 获取PC配置
   LOG(INFO) << "YSPLoginManager::GetPcfetcher auto_fetch:" << auto_fetch;
   if (!get_configuration_pc_fetcher_) {
     get_configuration_pc_fetcher_ = new YSPFetcherResource(
@@ -1684,7 +1690,7 @@ void YSPLoginManager::GetPcfetcher(bool auto_fetch) {
 void YSPLoginManager::GetUserfetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_user_fetcher_ && get_user_fetcher_->IsLoading())
+  // if (get_user_fetcher_ && get_user_fetcher_->IsLoading())
   //  return;
 
   //获取企业和用户信息
@@ -1729,7 +1735,7 @@ void YSPLoginManager::GetAuthTokenfetcher(std::string source_url,
     return;
   header_list.push_back("userid: " + GetUserId());
 
-  //获取auth的token
+  // 获取auth的token
   LOG(INFO) << "YSPLoginManager::GetAuthTokenfetcher auto_fetch:" << auto_fetch;
   std::string post_data;
   net::AddMultipartValueForUpload("refresh_token", GetRefreshToken(),
@@ -1780,7 +1786,7 @@ void YSPLoginManager::GetAutoConfigfetcher(bool auto_fetch) {
 void YSPLoginManager::GetSdpDevicefetcher(bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (get_sdp_device_fetcher_ && get_sdp_device_fetcher_->IsLoading())
+  // if (get_sdp_device_fetcher_ && get_sdp_device_fetcher_->IsLoading())
   //  return;
 
   //获取用户登陆过的设备
@@ -1788,7 +1794,8 @@ void YSPLoginManager::GetSdpDevicefetcher(bool auto_fetch) {
     header_list.push_back("userid: " + GetUserId());
     if (!access_token.empty())
       header_list.push_back("access-token: " + access_token);
-    LOG(INFO) << "YSPLoginManager::GetSdpDevicefetcher auto_fetch:" << auto_fetch;
+    LOG(INFO) << "YSPLoginManager::GetSdpDevicefetcher auto_fetch:"
+              << auto_fetch;
     if (!get_sdp_device_fetcher_) {
       get_sdp_device_fetcher_ = new YSPFetcherResource(
           this, g_browser_process->system_request_context());
@@ -1802,7 +1809,7 @@ void YSPLoginManager::GetSdpDevicefetcher(bool auto_fetch) {
   }
 }
 
-//ysp+ { ysp single sign on
+// ysp+ { ysp single sign on
 std::string YSPLoginManager::GetYSPSingleSignOnString() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -1817,13 +1824,13 @@ std::string YSPLoginManager::GetYSPSingleSignOnString() {
   }
   return std::string();
 }
-//ysp+ }
+// ysp+ }
 
 void YSPLoginManager::PutSdpDevicefetcher(const std::string& device_id,
                                           bool auto_fetch) {
   std::vector<std::string> header_list;
   std::string access_token = GetAccessToken();
-  //if (put_sdp_device_fetcher_ && put_sdp_device_fetcher_->IsLoading())
+  // if (put_sdp_device_fetcher_ && put_sdp_device_fetcher_->IsLoading())
   //  return;
 
   //删除用户登陆过的设备
@@ -1835,7 +1842,8 @@ void YSPLoginManager::PutSdpDevicefetcher(const std::string& device_id,
     net::AddMultipartValueForUpload("deviceId", device_id, kMultipartBoundary,
                                     "", &post_data);
     net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
-    LOG(INFO) << "YSPLoginManager::PutSdpDevicefetcher auto_fetch:" << auto_fetch;
+    LOG(INFO) << "YSPLoginManager::PutSdpDevicefetcher auto_fetch:"
+              << auto_fetch;
     if (!put_sdp_device_fetcher_) {
       put_sdp_device_fetcher_ = new YSPFetcherResource(
           this, g_browser_process->system_request_context());
@@ -1893,18 +1901,21 @@ base::string16 YSPLoginManager::GetResponseErrorMessage(
   } else if (error_code == "E9999") {
     message = l10n_util::GetStringUTF16(IDS_YSP_HANDLE_ERROR);
   } else if (error_code == "-1") {
-    base::string16 errstr = l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
+    base::string16 errstr =
+        l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
     message = errstr + base::UTF8ToUTF16(error_code + " ") +
               l10n_util::GetStringUTF16(IDS_YSP_CONNENT_SERVICE_FAILED);
   } else if (error_code == "404" || error_code == "403" ||
              error_code == "400" || error_code == "410") {
-    base::string16 errstr = l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
+    base::string16 errstr =
+        l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
     message = errstr + base::UTF8ToUTF16(error_code + " ") +
               l10n_util::GetStringUTF16(IDS_YSP_SERVER_RESOURCE_ERROR);
   } else if (error_code == "502" || error_code == "500" ||
              error_code == "501" || error_code == "503" ||
              error_code == "504" || error_code == "505") {
-    base::string16 errstr = l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
+    base::string16 errstr =
+        l10n_util::GetStringUTF16(IDS_YSP_SERVER_ERROR_CODE);
     message = errstr + base::UTF8ToUTF16(error_code + " ") +
               l10n_util::GetStringUTF16(IDS_YSP_SERVER_INTERNAL_ERROR);
   } else {
@@ -1913,7 +1924,7 @@ base::string16 YSPLoginManager::GetResponseErrorMessage(
   LOG(ERROR) << "GetResponseErrorMessage message: " << message;
   return message;
 }
-//YSP+ } /*Fetcher resource*/
+// YSP+ } /*Fetcher resource*/
 std::string YSPLoginManager::GetLoginStatusCode() {
   std::string status_code = "-1";
   if (login_info_) {
@@ -1926,9 +1937,9 @@ std::string YSPLoginManager::GetLoginStatusCode() {
 void YSPLoginManager::SetLoginStatus(int status) {
   DLOG(INFO) << "YSPLoginManager::SetLoginStatus status:" << status;
   login_status_ = status;
-  // TODO: to noify all observers that the status is changed.
-  //std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
-  //for (; iter != observers_.end(); ++iter) {
+  // TODO(who): to noify all observers that the status is changed.
+  // std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+  // for (; iter != observers_.end(); ++iter) {
   //  (*iter)->OnStatusChanged(status);
   //}
 }
@@ -1958,11 +1969,11 @@ std::string YSPLoginManager::GetUserInfoAsJSONString() {
 
 std::string YSPLoginManager::GetDataJSAsJSONString() {
   if (application_info_) {
-    base::ListValue* dataList = nullptr;
-    if (application_info_->GetList("data", &dataList)) {
-      if (dataList) {
+    base::ListValue* data_list = nullptr;
+    if (application_info_->GetList("data", &data_list)) {
+      if (data_list) {
         std::string json_string;
-        base::JSONWriter::Write(*dataList, &json_string);
+        base::JSONWriter::Write(*data_list, &json_string);
         return json_string;
       }
     }
@@ -1970,125 +1981,122 @@ std::string YSPLoginManager::GetDataJSAsJSONString() {
 
   return "";
 }
-//ysp+ { show config
+// ysp+ { show config
 std::string YSPLoginManager::GetShowConfigAsJSONString() {
   std::string result = "";
-  base::DictionaryValue configDict;
+  base::DictionaryValue config_dict;
   if (login_info_) {
-    base::DictionaryValue* tmpDict = nullptr;
-    login_info_->GetDictionary("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("login", std::make_unique<base::Value>(tmpDict));
+    base::DictionaryValue* temp_dict = nullptr;
+    login_info_->GetDictionary("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("login", std::make_unique<base::Value>(temp_dict));
     }
   }
   if (application_info_) {
-    base::ListValue* tmpDict = nullptr;
-    application_info_->GetList("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("application", std::make_unique<base::Value>(tmpDict));
+    base::ListValue* temp_dict = nullptr;
+    application_info_->GetList("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("application", std::make_unique<base::Value>(temp_dict));
     }
   }
   if (strategy_info_) {
-    base::DictionaryValue* tmpDict = nullptr;
-    strategy_info_->GetDictionary("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("strategy", std::make_unique<base::Value>(tmpDict));
+    base::DictionaryValue* temp_dict = nullptr;
+    strategy_info_->GetDictionary("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("strategy", std::make_unique<base::Value>(temp_dict));
     }
   }
   if (token_info_) {
-    base::DictionaryValue* tmpDict = nullptr;
-    token_info_->GetDictionary("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("tocken", std::make_unique<base::Value>(tmpDict));
+    base::DictionaryValue* temp_dict = nullptr;
+    token_info_->GetDictionary("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("tocken", std::make_unique<base::Value>(temp_dict));
     }
   }
   if (swa_info_) {
-    base::ListValue* tmpDict = nullptr;
-    swa_info_->GetList("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("swa", std::make_unique<base::Value>(tmpDict));
+    base::ListValue* temp_dict = nullptr;
+    swa_info_->GetList("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("swa", std::make_unique<base::Value>(temp_dict));
     }
   }
   if (pc_info_) {
-    base::DictionaryValue* tmpDict = nullptr;
-    pc_info_->GetDictionary("data", &tmpDict);
-    if (tmpDict) {
-      configDict.Set("pc", std::make_unique<base::Value>(tmpDict));
+    base::DictionaryValue* temp_dict = nullptr;
+    pc_info_->GetDictionary("data", &temp_dict);
+    if (temp_dict) {
+      config_dict.Set("pc", std::make_unique<base::Value>(temp_dict));
     }
   }
-  base::JSONWriter::Write(configDict, &result);
+  base::JSONWriter::Write(config_dict, &result);
 
   return result;
 }
-//ysp+ } /*show config*/
-//TODO(matianzhi) ysp+{push server api}
+// ysp+ } /*show config*/
+// TODO(matianzhi) ysp+{push server api}
 void YSPLoginManager::SetPushData(const std::string& value) {
   if (!value.empty()) {
-    std::unique_ptr<base::DictionaryValue> pushDataDict = nullptr;
-    std::unique_ptr<base::Value> rootValue = base::JSONReader::Read(value);
-    pushDataDict = base::DictionaryValue::From(std::move(rootValue));
-    std::string eventID;
-    pushDataDict->GetString("eventID", &eventID);
-    if (eventID == "allowLogin") {
+    std::unique_ptr<base::DictionaryValue> push_data_dict = nullptr;
+    std::unique_ptr<base::Value> root_value = base::JSONReader::Read(value);
+    push_data_dict = base::DictionaryValue::From(std::move(root_value));
+    std::string event_id;
+    push_data_dict->GetString("eventID", &event_id);
+    if (event_id == "allowLogin") {
       // push data crypto key
       std::string key = "CSkBQrCX7X7Tlsp38jZQj5uRD0w6MwUx";
       std::string dec_user_info = "";
       std::string user_info, user_info_base64;
-      pushDataDict.get()->GetString("data.identity", &user_info_base64);
+      push_data_dict.get()->GetString("data.identity", &user_info_base64);
       ConfigCryptor aes_crypted;
       base::Base64Decode(user_info_base64, &user_info);
       aes_crypted.DecryptString(key, user_info, &dec_user_info);
       if (!dec_user_info.empty()) {
-        std::unique_ptr<base::Value> userInfoValue =
+        std::unique_ptr<base::Value> user_info_value =
             base::JSONReader::Read(dec_user_info);
-        std::unique_ptr<base::DictionaryValue> userInfoDict = base::DictionaryValue::From(std::move(userInfoValue));
+        std::unique_ptr<base::DictionaryValue> user_info_dict =
+            base::DictionaryValue::From(std::move(user_info_value));
         std::string server, username, password;
-        userInfoDict->GetString("server", &server);
-        userInfoDict->GetString("username", &username);
-        userInfoDict->GetString("password", &password);
+        user_info_dict->GetString("server", &server);
+        user_info_dict->GetString("username", &username);
+        user_info_dict->GetString("password", &password);
         if (!server.empty() && !username.empty() && !password.empty()) {
           StartLogin(server, username, password);
         }
         DLOG(INFO) << "user info: " << dec_user_info;
       }
-    }
-    else if (eventID == "pushNotification") {
+    } else if (event_id == "pushNotification") {
       GetAutoConfigfetcher();
-    }
-    else if (eventID == "pushMessage") {
+    } else if (event_id == "pushMessage") {
       std::string type = "";
-      if (pushDataDict && pushDataDict.get()->GetString("data.name", &type)) {
+      if (push_data_dict &&
+          push_data_dict.get()->GetString("data.name", &type)) {
         if (type == "removeDevice") {
           std::string device_id = "";
-          if (pushDataDict && pushDataDict.get()->GetString(
-                                  "data.content.deviceId", &device_id)) {
+          if (push_data_dict && push_data_dict.get()->GetString(
+                                    "data.content.deviceId", &device_id)) {
             std::string key = "deviceId";
             std::string local_device_id = GetValueForKey(key);
             if (local_device_id == device_id) {
-              //clear user data
+              // clear user data
               NotifyConfigureUpdate("removeDevice", "");
               Logout();
-            }
-            else {
+            } else {
               GetSdpDevicefetcher();
             }
           }
         }
       }
-    }
-    else if (eventID == "reconnect") {
+    } else if (event_id == "reconnect") {
       GetAutoConfigfetcher();
-    }
-    else {
+    } else {
       DLOG(INFO) << "YSPLoginManager::SetPushData value: " << value;
     }
     UpdateLoginManagerSettings();
   }
 }
-//ysp+
+// ysp+
 bool YSPLoginManager::Restore() {
   if (!auto_login_ || cid_.empty() || account_.empty() || password_.empty())
-      return false;
+    return false;
   if (login_info_) {
     double expiry_date = 0;
     login_info_->GetDouble("data.token.expiryDate", &expiry_date);
@@ -2210,12 +2218,12 @@ void YSPLoginManager::ClearCache() {
     base::DeleteFile(file_path, false);
   }
   swa_info_.reset();
-  //YSP+ { SingleSignOn config
+  // YSP+ { SingleSignOn config
   single_signon_info_.reset();
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::URLRequestHttpJob::setSSOConfigValue, ""));
-  //YSP+ } /*SingleSignOn config*/
+  // YSP+ } /*SingleSignOn config*/
   login_status_code_ = false;
   application_status_code_ = false;
   strategy_status_code_ = false;
@@ -2232,7 +2240,7 @@ void YSPLoginManager::Logout() {
   SaveLastId(prefs::kYSPAccessToken, "");
   SaveLastId(prefs::kYSPRefreshToken, "");
   password_.clear();
-  SetLoginStatus(SATUS_LOGOUT); //ysp+ { auto get config }
+  SetLoginStatus(SATUS_LOGOUT);  // ysp+ { auto get config }
   ntp_login_status_ = false;
   // Once user does logout manually, the auto_login becomes false.
   net::URLRequestHttpJob::clearHeader();
@@ -2244,13 +2252,13 @@ void YSPLoginManager::Logout() {
   ClearCache();
 }
 
-//YSP+ { Resource Replace
+// YSP+ { Resource Replace
 // YSPReplaceFetcherDelegate:
 void YSPLoginManager::OnReplaceRequestFailure(const std::string& error) {
   DLOG(INFO) << "YSPLoginManager::OnReplaceRequestFailure";
   LOG(INFO) << "Resource replace file download failure !";
-  //std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
-  //for (; iter != observers_.end(); ++iter) {
+  // std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+  // for (; iter != observers_.end(); ++iter) {
   //  (*iter)->OnLoginRequestFailure();
   //}
 }
@@ -2259,7 +2267,8 @@ void YSPLoginManager::OnReplaceResponseParseSuccess(
     const std::string& response_data,
     const std::string& path_url) {
   if (response_data.empty()) {
-    DLOG(INFO) << "YSPLoginManager::OnReplaceResponseParseSuccess ignore response.";
+    DLOG(INFO)
+        << "YSPLoginManager::OnReplaceResponseParseSuccess ignore response.";
     return;
   }
   DLOG(INFO) << "YSPLoginManager::OnReplaceResponseParseSuccess";
@@ -2288,7 +2297,7 @@ void YSPLoginManager::OnReplaceResponseParseSuccessInternal(
 }
 
 #ifdef IE_REDCORE
-void YSPLoginManager::SetIEUrlTrusted(const UrlTrusted & trust) {
+void YSPLoginManager::SetIEUrlTrusted(const UrlTrusted& trust) {
   if (trust.trust_url.empty() || trust.policy.empty())
     return;
 
@@ -2303,11 +2312,11 @@ void YSPLoginManager::SetIEUrlTrusted(const UrlTrusted & trust) {
     result_handle = zone_attributes.dwFlags &= ~ZAFLAGS_REQUIRE_VERIFICATION;
     result_handle = zone_manager->SetZoneAttributes((DWORD)URLZONE_TRUSTED,
                                                     &zone_attributes);
-    std::map<std::wstring, std::wstring>::const_iterator policyIter =
+    std::map<std::wstring, std::wstring>::const_iterator policy_iter =
         trust.policy.begin();
-    for (; policyIter != trust.policy.end(); policyIter++) {
-      DWORD policy = wcstol(policyIter->second.c_str(), NULL, 16);
-      DWORD action = wcstol(policyIter->first.c_str(), NULL, 16);
+    for (; policy_iter != trust.policy.end(); policy_iter++) {
+      DWORD policy = wcstol(policy_iter->second.c_str(), NULL, 16);
+      DWORD action = wcstol(policy_iter->first.c_str(), NULL, 16);
       result_handle = zone_manager->SetZoneActionPolicy(
           URLZONE_TRUSTED, action, (BYTE*)&policy, sizeof(DWORD),
           URLZONEREG_DEFAULT);
@@ -2343,8 +2352,8 @@ void YSPLoginManager::OnReplaceResponseParseFailure(const std::string& error) {
   DLOG(INFO) << "YSPLoginManager::OnReplaceResponseParseFailure";
   LOG(INFO) << "Resource replace file download failure !";
 }
-//YSP+ } /*Resource Replace*/
-//YSP+ { SingleSignOn config
+// YSP+ } /*Resource Replace*/
+// YSP+ { SingleSignOn config
 void YSPLoginManager::OnSingleSignOnRequestFailure() {
   DLOG(INFO) << "YSPLoginManager::OnSingleSignOnRequestFailure";
   content::BrowserThread::PostTask(
@@ -2355,7 +2364,8 @@ void YSPLoginManager::OnSingleSignOnRequestFailure() {
 void YSPLoginManager::OnSingleSignOnResponseParseSuccess(
     std::unique_ptr<base::DictionaryValue> response_data) {
   if (!response_data) {
-    DLOG(INFO) << "YSPLoginManager::OnSingleSignOnResponseParseSuccess ignore response.";
+    DLOG(INFO) << "YSPLoginManager::OnSingleSignOnResponseParseSuccess ignore "
+                  "response.";
     return;
   }
   DLOG(INFO) << "YSPLoginManager::OnSingleSignOnResponseParseSuccess";
@@ -2364,7 +2374,8 @@ void YSPLoginManager::OnSingleSignOnResponseParseSuccess(
 
 void YSPLoginManager::OnSingleSignOnResponseParseFailure(
     const std::string& error) {
-  DLOG(INFO) << "YSPLoginManager::OnSingleSignOnResponseParseFailure (" << error << ")";
+  DLOG(INFO) << "YSPLoginManager::OnSingleSignOnResponseParseFailure (" << error
+             << ")";
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::URLRequestHttpJob::setSSOConfigValue, ""));
@@ -2395,13 +2406,13 @@ void YSPLoginManager::OnSingleSignOnResponseParseSuccessInternal(
     }
   }
 }
-//YSP+ } /*SingleSignOn config*/
+// YSP+ } /*SingleSignOn config*/
 // YSPLoginFetcherDelegate:
 void YSPLoginManager::OnLoginRequestFailure(const std::string& error) {
   LOG(INFO) << "YSPLoginManager::OnLoginRequestFailure";
   if (error != "-1" && error != "404" && error != "403" && error != "400" &&
-    error != "410" && error != "502" && error != "500" && error != "501" &&
-    error != "503" && error != "504" && error != "505") {
+      error != "410" && error != "502" && error != "500" && error != "501" &&
+      error != "503" && error != "504" && error != "505") {
     SetLoginStatus(SATUS_LOGIN_REQUEST_FAIL);
     ntp_login_status_ = false;
   }
@@ -2412,31 +2423,36 @@ void YSPLoginManager::OnLoginRequestFailure(const std::string& error) {
   }
 }
 
-void YSPLoginManager::OnLoginResponseParseSuccess(std::unique_ptr<base::DictionaryValue> response_data)
-{
+void YSPLoginManager::OnLoginResponseParseSuccess(
+    std::unique_ptr<base::DictionaryValue> response_data) {
   if (!should_parse_response_) {
-    LOG(INFO) << "YSPLoginManager::OnLoginResponseParseSuccess ignore response.";
+    LOG(INFO)
+        << "YSPLoginManager::OnLoginResponseParseSuccess ignore response.";
     return;
   }
   LOG(INFO) << "YSPLoginManager::OnLoginResponseParseSuccess";
   OnLoginResponseParseSuccessInternal(response_data, false);
 }
 
-void YSPLoginManager::OnLoginResponseParseSuccessInternal(std::unique_ptr<base::DictionaryValue>& response_data, bool from_local)
-{
+void YSPLoginManager::OnLoginResponseParseSuccessInternal(
+    std::unique_ptr<base::DictionaryValue>& response_data,
+    bool from_local) {
   SetLoginStatus(SATUS_LOGIN_FETCH_RECEIVED);
-  DLOG(INFO) << "YSPLoginManager::OnLoginResponseParseSuccessInternal from local ? : " << from_local;
+  DLOG(INFO)
+      << "YSPLoginManager::OnLoginResponseParseSuccessInternal from local ? : "
+      << from_local;
   // save to local cache
   if (!from_local) {
     if (auto_login_) {
-      base::DictionaryValue* tokenDict = nullptr;
+      base::DictionaryValue* token_dict = nullptr;
       if (login_info_) {
-        login_info_->GetDictionary("data.token", &tokenDict);
-        if (tokenDict && !tokenDict->empty())
-          response_data->Set("data.token", std::make_unique<base::Value>(tokenDict->DeepCopy()));
+        login_info_->GetDictionary("data.token", &token_dict);
+        if (token_dict && !token_dict->empty())
+          response_data->Set("data.token", std::make_unique<base::Value>(
+                                               token_dict->DeepCopy()));
       }
       base::FilePath saved_path = FilePathOfLoginCache("login");
-      //YSP+ { config cryptor
+      // YSP+ { config cryptor
       std::string response_data_string;
       std::string enc_response;
       base::JSONWriter::Write(*response_data, &response_data_string);
@@ -2448,11 +2464,12 @@ void YSPLoginManager::OnLoginResponseParseSuccessInternal(std::unique_ptr<base::
                                  enc_response.length()))) {
         DLOG(INFO) << "fail write login cache data.";
       }
-      //YSP+ } /*config cryptor*/
+      // YSP+ } /*config cryptor*/
     }
     login_info_.reset(response_data.release());
     DLOG(INFO) << "login_info_ access token: " << GetAccessTokenForLogin();
-    if (!GetAccessTokenForLogin().empty() && !GetRefreshTokenForLogin().empty()) {
+    if (!GetAccessTokenForLogin().empty() &&
+        !GetRefreshTokenForLogin().empty()) {
       SaveLastId(prefs::kYSPAccessToken, GetAccessTokenForLogin());
       SaveLastId(prefs::kYSPRefreshToken, GetRefreshTokenForLogin());
     }
@@ -2467,15 +2484,14 @@ void YSPLoginManager::OnLoginResponseParseSuccessInternal(std::unique_ptr<base::
     SetLoginStatus(SATUS_VERIFY_ACCOUNT_SUCCESS);
     // should dispatch the satus to the login page.
     SetLoginStatus(SATUS_LOGIN_FETCH_RESOURCE_START);
-    //YSP+ { Fetcher resource
+    // YSP+ { Fetcher resource
     GetApplicationfetcher(false);
     GetStrategyfetcher(false);
     GetTokenfetcher(false);
     GetSwafetcher(false);
     GetPcfetcher(false);
-    //YSP+ } /*Fetcher resource*/
-  }
-  else {
+    // YSP+ } /*Fetcher resource*/
+  } else {
     if (status == "E1002")
       GetAuthTokenfetcher(GetManageServer() + kLoginUploadPath, false);
     else if (status == "E1003") {
@@ -2483,20 +2499,19 @@ void YSPLoginManager::OnLoginResponseParseSuccessInternal(std::unique_ptr<base::
       for (; iter != observers_.end(); ++iter) {
         (*iter)->OnTokenStatusChanged("TokenExpired");
       }
-    }
-    else {
+    } else {
       if (status == "E3002") {
-        std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+        std::vector<YSPLoginManagerObserver*>::iterator iter =
+            observers_.begin();
         for (; iter != observers_.end(); ++iter) {
           (*iter)->OnTokenStatusChanged("failure");
         }
+      } else if (status == "E4002") {
+        Logout();
       }
-    else if (status == "E4002") {
-      Logout();
-    }
 
       SetLoginStatus(SATUS_VERIFY_ACCOUNT_FAIL);
-    ntp_login_status_ = false;
+      ntp_login_status_ = false;
       NotifyFailure();
       ClearCache();
     }
@@ -2504,19 +2519,17 @@ void YSPLoginManager::OnLoginResponseParseSuccessInternal(std::unique_ptr<base::
     return;
   }
 
-  //YSP+ { SingleSignOn config
+  // YSP+ { SingleSignOn config
   {
     if (single_signon_status_) {
       GetSingleSignOnConfig();
       single_signon_status_ = false;
     }
   }
-  //YSP+ } /* SingleSignOn config */
-
+  // YSP+ } /* SingleSignOn config */
 }
 
-void YSPLoginManager::OnLoginResponseParseFailure(const std::string& error)
-{
+void YSPLoginManager::OnLoginResponseParseFailure(const std::string& error) {
   LOG(INFO) << "YSPLoginManager::OnLoginResponseParseFailure";
   SetLoginStatus(SATUS_LOGIN_RESPONSE_FAIL);
   ntp_login_status_ = false;
@@ -2526,13 +2539,16 @@ void YSPLoginManager::OnLoginResponseParseFailure(const std::string& error)
     (*iter)->OnLoginResponseParseFailure(base::UTF16ToUTF8(error_message));
   }
 }
-//YSP+ { Fetcher resource
-void YSPLoginManager::OnFetcherResourceRequestFailure(const GURL & url, bool auto_fecth, const std::string& error)
-{
-  LOG(INFO) << "YSPLoginManager::OnFetcherResourceRequestFailure original url:" << url;
+// YSP+ { Fetcher resource
+void YSPLoginManager::OnFetcherResourceRequestFailure(
+    const GURL& url,
+    bool auto_fecth,
+    const std::string& error) {
+  LOG(INFO) << "YSPLoginManager::OnFetcherResourceRequestFailure original url:"
+            << url;
   if (error != "-1" && error != "404" && error != "403" && error != "400" &&
-    error != "410" && error != "502" && error != "500" && error != "501" &&
-    error != "503" && error != "504" && error != "505") {
+      error != "410" && error != "502" && error != "500" && error != "501" &&
+      error != "503" && error != "504" && error != "505") {
     if (!auto_fecth) {
       SetLoginStatus(SATUS_LOGIN_FETCH_RESOURCE_REQUEST_FAIL);
       ntp_login_status_ = false;
@@ -2552,53 +2568,58 @@ void YSPLoginManager::OnFetcherResourceRequestFailure(const GURL & url, bool aut
   }
 }
 
-void YSPLoginManager::OnFetcherResourceResponseParseSuccess(const GURL & url, std::unique_ptr<base::DictionaryValue> response_data, bool auto_fetch)
-{
+void YSPLoginManager::OnFetcherResourceResponseParseSuccess(
+    const GURL& url,
+    std::unique_ptr<base::DictionaryValue> response_data,
+    bool auto_fetch) {
   if (!should_parse_response_) {
-    LOG(INFO) << "YSPLoginManager::OnFetcherResourceResponseParseSuccess ignore response. original url:" << url;
+    LOG(INFO) << "YSPLoginManager::OnFetcherResourceResponseParseSuccess "
+                 "ignore response. original url:"
+              << url;
     return;
   }
-  LOG(INFO) << "YSPLoginManager::OnFetcherResourceResponseParseSuccess original url:" << url << " auto_fetch:" << auto_fetch;
-  OnFetcherResourceResponseParseSuccessInternal(url, response_data, false, auto_fetch);
+  LOG(INFO)
+      << "YSPLoginManager::OnFetcherResourceResponseParseSuccess original url:"
+      << url << " auto_fetch:" << auto_fetch;
+  OnFetcherResourceResponseParseSuccessInternal(url, response_data, false,
+                                                auto_fetch);
 }
 
-void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL & url, std::unique_ptr<base::DictionaryValue>& response_data, bool from_local, bool auto_fetch)
-{
+void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(
+    const GURL& url,
+    std::unique_ptr<base::DictionaryValue>& response_data,
+    bool from_local,
+    bool auto_fetch) {
   std::string response_status = GetResponseStatusCode(response_data);
   LOG(INFO) << "response_status: " << response_status;
-  bool statusCode = (response_status == "0");
+  bool status_code = (response_status == "0");
   if (!auto_fetch)
     SetLoginStatus(SATUS_LOGIN_FETCH_RESOURCE_RECEIVED);
-  if (statusCode) {
+  if (status_code) {
     if (url.spec().find(kGetApplicationPath) != std::string::npos) {
       OnApplicationFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kGetConfigurationPCPath) != std::string::npos) {
+    } else if (url.spec().find(kGetConfigurationPCPath) != std::string::npos) {
       OnPcFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kGetConfigurationStrategyPath) != std::string::npos) {
+    } else if (url.spec().find(kGetConfigurationStrategyPath) !=
+               std::string::npos) {
       OnStrategyFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kGetSsoTokenPath) != std::string::npos) {
+    } else if (url.spec().find(kGetSsoTokenPath) != std::string::npos) {
       OnTokenFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kGetSWAPath) != std::string::npos) {
+    } else if (url.spec().find(kGetSWAPath) != std::string::npos) {
       OnSwaFetcherResponseParse(response_data, from_local, auto_fetch);
     } else if (url.spec().find(kGetUserPath) != std::string::npos) {
       OnUserFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kGetAuthTokenPath) != std::string::npos) {
+    } else if (url.spec().find(kGetAuthTokenPath) != std::string::npos) {
       OnAutoTokenFetcherResponseParse(response_data, from_local, auto_fetch);
-    }
-    else if (url.spec().find(kSdpDevicePath) != std::string::npos) {
+    } else if (url.spec().find(kSdpDevicePath) != std::string::npos) {
       OnSdpDeviceFetcherResponseParse(response_data, from_local, auto_fetch);
     }
     if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
       OnModifyPasswordResponseParse(response_status);
-	  return;
+      return;
     }
 
-    LOG(INFO) << "login_status_code_: " << login_status_code_
+    LOG(INFO) << " login_status_code_: " << login_status_code_
               << " application_status_code_: " << application_status_code_
               << " pc_status_code_: " << pc_status_code_
               << " strategy_status_code_: " << strategy_status_code_
@@ -2609,54 +2630,61 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL &
       PrefService* prefs = g_browser_process->local_state();
       prefs->SetBoolean(prefs::kYSPFirstLogin, false);
       if (!auto_fetch)
-        SetLoginStatus(SATUS_VERIFY_CONFIG_SUCCESS); //ysp+ { auto get config }
+        SetLoginStatus(SATUS_VERIFY_CONFIG_SUCCESS);  // ysp+ { auto get config
+                                                      // }
       ntp_login_status_ = true;
 
-    if (!auto_fetch) {
-      std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
-      for (; iter != observers_.end(); ++iter) {
-        (*iter)->OnTokenStatusChanged("TokenAvailable");
+      if (!auto_fetch) {
+        std::vector<YSPLoginManagerObserver*>::iterator iter =
+            observers_.begin();
+        for (; iter != observers_.end(); ++iter) {
+          (*iter)->OnTokenStatusChanged("TokenAvailable");
+        }
       }
-    }
 
-    UpdateLoginManagerSettings();
+      UpdateLoginManagerSettings();
 
       if (!auto_fetch) {
         base::string16 username = GetYSPUserName();
         std::string head_image_url = GetHeadImageUrl();
-        std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
+        std::vector<YSPLoginManagerObserver*>::iterator iter =
+            observers_.begin();
         for (; iter != observers_.end(); ++iter) {
           (*iter)->OnLoginSuccess(username, head_image_url);
         }
       }
-      //YSP+ { Resource Replace
+      // YSP+ { Resource Replace
       {
-        DLOG(INFO) << "YSPLoginManager::OnLoginResponseParseSuccessInternal download online";
-        base::DictionaryValue* rootDict = GetManagedResourceReplace();
-        base::ListValue* resourceReplace = nullptr;
-        if (rootDict && rootDict->GetList("resourceReplace", &resourceReplace)) {
-          if (resourceReplace && !resourceReplace->empty()) {
-            for (size_t i = 0; i < resourceReplace->GetSize(); ++i) {
-              base::DictionaryValue* bmDict = nullptr;
-              if (resourceReplace->GetDictionary(i, &bmDict)) {
+        DLOG(INFO) << "YSPLoginManager::OnLoginResponseParseSuccessInternal "
+                      "download online";
+        base::DictionaryValue* root_dict = GetManagedResourceReplace();
+        base::ListValue* resource_replace = nullptr;
+        if (root_dict &&
+            root_dict->GetList("resourceReplace", &resource_replace)) {
+          if (resource_replace && !resource_replace->empty()) {
+            for (size_t i = 0; i < resource_replace->GetSize(); ++i) {
+              base::DictionaryValue* bm_dict = nullptr;
+              if (resource_replace->GetDictionary(i, &bm_dict)) {
                 std::string source_url, dest_url;
-                bmDict->GetString("sourceUrl", &source_url);
-                bmDict->GetString("destUrl", &dest_url);
-                DLOG(INFO) << "sourceUrl: " << source_url << " destUrl: " << dest_url;
+                bm_dict->GetString("sourceUrl", &source_url);
+                bm_dict->GetString("destUrl", &dest_url);
+                DLOG(INFO) << "sourceUrl: " << source_url
+                           << " destUrl: " << dest_url;
                 if (!dest_url.empty() && !source_url.empty()) {
-                  YSPReplaceFetcher* replace_fetcher = new YSPReplaceFetcher(this, g_browser_process->system_request_context());
+                  YSPReplaceFetcher* replace_fetcher = new YSPReplaceFetcher(
+                      this, g_browser_process->system_request_context());
                   if (replace_fetcher)
-                    replace_fetcher->StartGetReplace(dest_url, cid_, source_url);
+                    replace_fetcher->StartGetReplace(dest_url, cid_,
+                                                     source_url);
                 }
               }
             }
           }
         }
       }
-      //YSP+ } /* Resource Replace */
+      // YSP+ } /* Resource Replace */
     }
-  }
-  else {
+  } else {
     if (url.spec().find(kGetAuthTokenPath) != std::string::npos &&
         (response_status == "E1003")) {
       std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
@@ -2667,11 +2695,10 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL &
       GetAuthTokenfetcher(url.spec(), false);
     } else if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
       OnModifyPasswordResponseParse(response_status);
-    }
-    else {
+    } else {
       if (!auto_fetch) {
-        SetLoginStatus(SATUS_LOGIN_RESPONSE_FAIL); //ysp+ { auto get config }
-    ntp_login_status_ = false;
+        SetLoginStatus(SATUS_LOGIN_RESPONSE_FAIL);  // ysp+ { auto get config }
+        ntp_login_status_ = false;
         NotifyFailure();
       }
       ClearCache();
@@ -2679,9 +2706,13 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(const GURL &
   }
 }
 
-void YSPLoginManager::OnFetcherResourceResponseParseFailure(const GURL & url, bool auto_fecth, const std::string & error)
-{
-  LOG(INFO) << "YSPLoginManager::OnFetcherResourceResponseParseFailure original url:" << url;
+void YSPLoginManager::OnFetcherResourceResponseParseFailure(
+    const GURL& url,
+    bool auto_fecth,
+    const std::string& error) {
+  LOG(INFO)
+      << "YSPLoginManager::OnFetcherResourceResponseParseFailure original url:"
+      << url;
   if (!auto_fecth) {
     SetLoginStatus(SATUS_LOGIN_FETCH_RESOURCE_RESPONSE_FAIL);
     ntp_login_status_ = false;
@@ -2694,18 +2725,19 @@ void YSPLoginManager::OnFetcherResourceResponseParseFailure(const GURL & url, bo
     OnModifyPasswordResponseParse(base::UTF16ToUTF8(error_message));
     return;
   }
- 
+
   for (; iter != observers_.end(); ++iter) {
     (*iter)->OnLoginResponseParseFailure(base::UTF16ToUTF8(error_message));
   }
 }
 
 void YSPLoginManager::OnAutoConfigParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data, bool auto_fetch) {
+    std::unique_ptr<base::DictionaryValue> response_data,
+    bool auto_fetch) {
   if (response_data->empty())
     return;
-  std::string autoConfigStatus = GetResponseStatusCode(response_data);
-  if (autoConfigStatus == "E1002")
+  std::string auto_config_status = GetResponseStatusCode(response_data);
+  if (auto_config_status == "E1002")
     GetAuthTokenfetcher(GetManageServer() + kAutoGetConfigPath, false);
   if (!auto_config_info_) {
     auto_config_info_.reset(response_data.release());
@@ -2776,7 +2808,7 @@ void YSPLoginManager::OnAutoConfigParseSuccess(
   auto_config_info_.reset(response_data.release());
 }
 
-//YSP+ } /*Fetcher resource*/
+// YSP+ } /*Fetcher resource*/
 void YSPLoginManager::AddObserver(YSPLoginManagerObserver* observer) {
   if (!observer)
     return;
@@ -2866,9 +2898,10 @@ std::string YSPLoginManager::GetValueForKey(const std::string& key) {
   } else if (key.compare("accountInfo") == 0) {
     result = GetUserInfoAsJSONString();
   } else if (key.compare("lastUuid") == 0) {
-    result = account_; // 用户名
+    result = account_;  // 用户名
   } else if (key.compare("onlyid") == 0) {
-    result = GetStringFromDictionary(login_info_.get(), "data.user.id"); // uuid
+    result =
+        GetStringFromDictionary(login_info_.get(), "data.user.id");  // uuid
   } else if (key.compare("password") == 0) {
     result = password_;
   } else if (key.compare("appGroupList") == 0) {
@@ -2903,7 +2936,7 @@ std::string YSPLoginManager::GetValueForKey(const std::string& key) {
 
   return result;
 }
-//YSP+ { passwords AD manager
+// YSP+ { passwords AD manager
 std::string YSPLoginManager::GetUserInfoForKey(int key) {
   std::string result = "";
   std::string login_name = "";
@@ -2938,7 +2971,7 @@ bool YSPLoginManager::GetAutoLoginStatus() {
   return login_status_ > 0;
 }
 
-//ysp+ } /*auto get config*/
+// ysp+ } /*auto get config*/
 std::string YSPLoginManager::GetLoginInfo() {
   std::string result = "";
   base::DictionaryValue return_dict;
@@ -2983,14 +3016,14 @@ std::string YSPLoginManager::GetLoginInfo() {
 
   // FIXME(halton):
   const std::string id("swaList");
-  base::ListValue* swaList = GetManagedADProxyAuth()->DeepCopy();
-  return_dict.Set(id, std::make_unique<base::Value>(swaList));
+  base::ListValue* swa_list = GetManagedADProxyAuth()->DeepCopy();
+  return_dict.Set(id, std::make_unique<base::Value>(swa_list));
 
   base::JSONWriter::Write(return_dict, &result);
   return result;
 }
 
-//YSP+ { app version
+// YSP+ { app version
 base::string16 YSPLoginManager::BuildYSPBrowserVersionString() {
   std::string version = version_info::GetYSPVersionNumber();
 
@@ -3004,7 +3037,7 @@ base::string16 YSPLoginManager::BuildYSPBrowserVersionString() {
 
   return base::UTF8ToUTF16(version);
 }
-//YSP+ } /*app version*/
+// YSP+ } /*app version*/
 
 std::string YSPLoginManager::GetDeviceInfo() {
   std::string mac_address_string = GetLocalMacAdd();
@@ -3020,16 +3053,16 @@ std::string YSPLoginManager::GetDeviceInfo() {
   GetBoardInfo(&board_info);
   DLOG(INFO) << "YSPLoginManager::GetDeviceInfo, device id: " << device_id;
 
-  base::DictionaryValue dic;
-  dic.SetString("systemVersion", GetOsVersionStr());
-  dic.SetString("appVersion", BuildYSPBrowserVersionString());
-  dic.SetString("deviceId", device_id);
-  dic.SetString("model", board_info);
-  dic.SetString("architecture", /*IsWow64()*/true ? "64" : "32");
-  dic.SetString("platform", "1");
+  base::DictionaryValue dict;
+  dict.SetString("systemVersion", GetOsVersionStr());
+  dict.SetString("appVersion", BuildYSPBrowserVersionString());
+  dict.SetString("deviceId", device_id);
+  dict.SetString("model", board_info);
+  dict.SetString("architecture", /*IsWow64()*/ true ? "64" : "32");
+  dict.SetString("platform", "1");
 
   std::string device_info;
-  base::JSONWriter::Write(dic, &device_info);
+  base::JSONWriter::Write(dict, &device_info);
 
   return device_info;
 }
@@ -3054,19 +3087,19 @@ base::DictionaryValue* YSPLoginManager::GetManagedBookmarks() {
 }
 //------------------------------------------
 std::string YSPLoginManager::GetUserAgent() {
-  std::string userAgent;
+  std::string user_agent;
   if (login_info_) {
     base::DictionaryValue* data_dict = nullptr;
     if (login_info_->GetDictionary("data", &data_dict)) {
       if (data_dict)
-        data_dict->GetString("userAgent", &userAgent);
+        data_dict->GetString("userAgent", &user_agent);
     }
   }
 
-  return userAgent;
+  return user_agent;
 }
 
-//ysp+ { auto get config---------------------------------------
+// ysp+ { auto get config---------------------------------------
 std::string YSPLoginManager::GetAutoConfigUrl() {
   if (login_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3074,10 +3107,10 @@ std::string YSPLoginManager::GetAutoConfigUrl() {
       base::DictionaryValue* func_dict = nullptr;
       if (data_dict &&
           data_dict->GetDictionary("functionControl", &func_dict)) {
-        std::string autoConfigUrl;
+        std::string auto_config_url;
         if (func_dict &&
-            func_dict->GetString("ConfigVersionUrl", &autoConfigUrl))
-          return autoConfigUrl;
+            func_dict->GetString("ConfigVersionUrl", &auto_config_url))
+          return auto_config_url;
       }
     }
   }
@@ -3088,7 +3121,7 @@ std::string YSPLoginManager::GetAutoConfigUrl() {
 int YSPLoginManager::GetAutoConfigDelta() {
   return GetFunctionControlIntWithDefault("IntervalTime", 60);
 }
-//ysp+ } /*auto get config*/
+// ysp+ } /*auto get config*/
 
 base::DictionaryValue* YSPLoginManager::GetAutoUpgrade() {
   if (pc_info_) {
@@ -3104,7 +3137,7 @@ base::DictionaryValue* YSPLoginManager::GetAutoUpgrade() {
   return nullptr;
 }
 
-//ysp+ { URL Blacklist And Whitelist
+// ysp+ { URL Blacklist And Whitelist
 base::DictionaryValue* YSPLoginManager::GetWebsiteListEnabled() {
   if (strategy_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3119,8 +3152,8 @@ base::DictionaryValue* YSPLoginManager::GetWebsiteListEnabled() {
 
   return nullptr;
 }
-//ysp+ } //URL Blacklist And Whitelist
-//ysp+ { Resource Replace
+// ysp+ } //URL Blacklist And Whitelist
+// ysp+ { Resource Replace
 base::DictionaryValue* YSPLoginManager::GetManagedResourceReplace() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3134,8 +3167,8 @@ base::DictionaryValue* YSPLoginManager::GetManagedResourceReplace() {
 
   return nullptr;
 }
-//ysp + } //Resource Replace
-//ysp+ { Kernel switching
+// ysp + } //Resource Replace
+// ysp+ { Kernel switching
 base::DictionaryValue* YSPLoginManager::GetManagedKernels() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3151,24 +3184,24 @@ base::DictionaryValue* YSPLoginManager::GetManagedKernels() {
 }
 
 std::string YSPLoginManager::GetDefaultCore() {
-  std::string defaultCore;
+  std::string default_core;
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
     if (pc_info_->GetDictionary("data", &data_dict)) {
-      base::DictionaryValue* kernelDict = nullptr;
+      base::DictionaryValue* kernel_dict = nullptr;
       if (data_dict &&
-          data_dict->GetDictionary("siteCompatibility", &kernelDict)) {
-        if (kernelDict)
-          kernelDict->GetString("defaultCore", &defaultCore);
+          data_dict->GetDictionary("siteCompatibility", &kernel_dict)) {
+        if (kernel_dict)
+          kernel_dict->GetString("defaultCore", &default_core);
       }
     }
   }
 
-  return defaultCore;
+  return default_core;
 }
-//ysp+ } //Kernel switching
+// ysp+ } //Kernel switching
 
-//YSP+ { sangfor GM ssl
+// YSP+ { sangfor GM ssl
 base::DictionaryValue* YSPLoginManager::GetManagedGMStream() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3181,11 +3214,12 @@ base::DictionaryValue* YSPLoginManager::GetManagedGMStream() {
 
   return nullptr;
 }
-//YSP+ } //sangfor GM ssl
+// YSP+ } //sangfor GM ssl
 
-//YSP+ { SingleSignOn config
+// YSP+ { SingleSignOn config
 void YSPLoginManager::GetSingleSignOnConfig() {
-  DLOG(INFO) << "YSPLoginManager::GetSingleSignOnConfig SingleSignOn config online";
+  DLOG(INFO)
+      << "YSPLoginManager::GetSingleSignOnConfig SingleSignOn config online";
   if (login_info_) {
     if (GetUserId().empty() || GetCompanyId().empty())
       return;
@@ -3219,9 +3253,9 @@ base::DictionaryValue* YSPLoginManager::GetManagedSingleSignOnConfig() {
 
   return nullptr;
 }
-//YSP+ } /*SingleSignOn config*/
+// YSP+ } /*SingleSignOn config*/
 
-//ysp+ { passwords AD manager
+// ysp+ { passwords AD manager
 base::ListValue* YSPLoginManager::GetManagedADProxyAuth() {
   if (swa_info_ && !swa_info_->empty()) {
     base::ListValue* data_dict = nullptr;
@@ -3234,21 +3268,21 @@ base::ListValue* YSPLoginManager::GetManagedADProxyAuth() {
 
   return nullptr;
 }
-//ysp + } /*passwords AD manager*/
+// ysp + } /*passwords AD manager*/
 
-//ysp+ { AES DES and SMS4 crypt
+// ysp+ { AES DES and SMS4 crypt
 std::string YSPLoginManager::GetEncryptionAndKey() {
   return GetCryptKey();
 }
-//ysp+ } //AES DES and SMS4 crypt
+// ysp+ } //AES DES and SMS4 crypt
 
-//YSP+ { cache encryption
+// YSP+ { cache encryption
 bool YSPLoginManager::GetCacheEncryption() {
   return GetCacheCrypt();
 }
-//YSP+ }
+// YSP+ }
 
-//ysp+ { crypto http header
+// ysp+ { crypto http header
 std::string YSPLoginManager::GetCryptoHeaderKey() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3282,25 +3316,25 @@ std::string YSPLoginManager::GetUserAgentTypes() {
 
   return std::string();
 }
-//ysp+ } /*crypto http header*/
-//YSP+ { lock screen time
+// ysp+ } /*crypto http header*/
+// YSP+ { lock screen time
 int YSPLoginManager::GetLockScreenTime() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
     if (pc_info_->GetDictionary("data", &data_dict)) {
       base::DictionaryValue* func_dict = nullptr;
       if (data_dict && data_dict->GetDictionary("lockScreenTime", &func_dict)) {
-        int lockScreenTime = 0;
-        if (func_dict && func_dict->GetInteger("value", &lockScreenTime))
-          return lockScreenTime;
+        int lock_screen_time = 0;
+        if (func_dict && func_dict->GetInteger("value", &lock_screen_time))
+          return lock_screen_time;
       }
     }
   }
 
   return 0;
 }
-//ysp+ } /*lock screen time*/
-//YSP+ { window popup
+// ysp+ } /*lock screen time*/
+// YSP+ { window popup
 base::DictionaryValue* YSPLoginManager::GetPopupSetting() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
@@ -3314,40 +3348,40 @@ base::DictionaryValue* YSPLoginManager::GetPopupSetting() {
 
   return nullptr;
 }
-//YSP+ } /*window popup*/
+// YSP+ } /*window popup*/
 
-//TODO (matianzhi): YSP+ { startup and home pages
+// TODO(matianzhi): YSP+ { startup and home pages
 base::ListValue* YSPLoginManager::GetStartupPages() {
   if (pc_info_) {
-    base::ListValue* dictList = nullptr;
-    if (pc_info_->GetList("data.startPageSetting.list", &dictList)) {
-      return dictList;
+    base::ListValue* dict_list = nullptr;
+    if (pc_info_->GetList("data.startPageSetting.list", &dict_list)) {
+      return dict_list;
     }
   }
   return nullptr;
 }
 
 bool YSPLoginManager::isStartupPages() {
-  bool defalutMainPage = false;
+  bool defalut_main_page = false;
   if (pc_info_) {
     int status = 1;
     pc_info_->GetInteger("data.startPageSetting.value", &status);
     if (status == 2)
-      defalutMainPage = true;
+      defalut_main_page = true;
   }
-  return defalutMainPage;
+  return defalut_main_page;
 }
-//YSP+ } /*startup and home pages*/
+// YSP+ } /*startup and home pages*/
 
-//YSP+ { doc online preview
+// YSP+ { doc online preview
 base::DictionaryValue* YSPLoginManager::GetPreviewDocOnline() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
     if (pc_info_->GetDictionary("data", &data_dict)) {
-      base::DictionaryValue* docDict = nullptr;
+      base::DictionaryValue* doc_dict = nullptr;
       if (data_dict &&
-          data_dict->GetDictionary("docOnlinePreview.setting", &docDict)) {
-        return docDict;
+          data_dict->GetDictionary("docOnlinePreview.setting", &doc_dict)) {
+        return doc_dict;
       }
     }
   }
@@ -3366,22 +3400,22 @@ bool YSPLoginManager::GetPreviewDocOnlineEnable() {
   }
   return status;
 }
-//YSP+ } /*doc online preview*/
+// YSP+ } /*doc online preview*/
 
-//ysp+ { private DNS
+// ysp+ { private DNS
 base::DictionaryValue* YSPLoginManager::GetPrivateDNS() {
   if (pc_info_) {
     base::DictionaryValue* data_dict = nullptr;
     if (pc_info_->GetDictionary("data", &data_dict)) {
-      base::DictionaryValue* docDict = nullptr;
-      if (data_dict && data_dict->GetDictionary("privateDNS", &docDict)) {
-        return docDict;
+      base::DictionaryValue* doc_dict = nullptr;
+      if (data_dict && data_dict->GetDictionary("privateDNS", &doc_dict)) {
+        return doc_dict;
       }
     }
   }
   return nullptr;
 }
-//ysp+ }
+// ysp+ }
 
 void YSPLoginManager::AddHeaders() {
   if (!pc_info_)
@@ -3487,13 +3521,13 @@ std::vector<base::string16> YSPLoginManager::GetFunctionControlListString(
       if (data_dict && data_dict->GetList(key, &list)) {
         if (list) {
           for (size_t i = 0; i < list->GetSize(); i++) {
-            std::string listKey = "", str = "";
-            list->GetString(i, &listKey);
-            if (login_info_ && !listKey.empty()) {
-              str = listKey;
-              if (listKey == "?timestamp?")
+            std::string list_key = "", str = "";
+            list->GetString(i, &list_key);
+            if (login_info_ && !list_key.empty()) {
+              str = list_key;
+              if (list_key == "?timestamp?")
                 login_info_->GetString("data.user.lastLoginTime", &str);
-              if (listKey == "?device_id?")
+              if (list_key == "?device_id?")
                 str = GetRegMachineId();
               if (!str.empty())
                 download_info_vector.push_back(base::UTF8ToUTF16(str));
@@ -3532,7 +3566,8 @@ bool YSPLoginManager::GetCutCopyEnabled() {
 }
 
 void YSPLoginManager::LoadWindowFrameColors() {
-  window_frame_color_ = GetFunctionControlIntWithDefault("windowFrameColor", -1);
+  window_frame_color_ =
+      GetFunctionControlIntWithDefault("windowFrameColor", -1);
   window_inactive_color_ = GetFunctionControlInt("windowFrameColor");
 }
 
@@ -3663,15 +3698,15 @@ bool YSPLoginManager::GetLoadURLAllowed(const GURL& url) {
     return true;
   }
   return false;
-  //if(URLInBacklist(url))
+  // if(URLInBacklist(url))
   //  return false;
   //
-  //return URLInWhitelist(url);
+  // return URLInWhitelist(url);
 }
 
 // ManagedSettingsProvider:
 base::Value* YSPLoginManager::GetManagedValue(const std::string& path) {
-  //if(path.compare("browser.show_home_button") == 0) {
+  // if(path.compare("browser.show_home_button") == 0) {
   //  DLOG(INFO) << "YSPLoginManager::GetManagedValue!!!!";
   //  return new base::FundamentalValue(false);
   //}
@@ -3682,7 +3717,7 @@ base::Value* YSPLoginManager::GetManagedValue(const std::string& path) {
       if (data_dict && data_dict->GetDictionary("managedSettings", &dict)) {
         base::Value* value = nullptr;
         if (dict) {
-          //DLOG(INFO) << "YSPLoginManager::GetManagedValue: " << path;
+          // DLOG(INFO) << "YSPLoginManager::GetManagedValue: " << path;
           dict->Get(path, &value);
         }
         return value;
@@ -3721,7 +3756,7 @@ bool YSPLoginManager::URLInPolicylist(const std::string& policy_path,
 
         const base::Value urlValue(url.host());
         bool in = (list->Find(urlValue) != list->end());
-        //DLOG(INFO) << "YSPLoginManager::URLInPolicylist host: "
+        // DLOG(INFO) << "YSPLoginManager::URLInPolicylist host: "
         //  << url.host()
         //  << (in ? " in " : " not in ")
         //  << "policy: "
@@ -3786,7 +3821,10 @@ bool YSPLoginManager::EmptyPolicyList(const std::string& policy_path) {
 }
 
 #if defined(OS_WIN)
-typedef bool(__stdcall *InternetSetOpt)(_In_ HINTERNET, _In_ DWORD, _In_ LPVOID, _In_ DWORD);
+typedef bool(__stdcall* InternetSetOpt)(_In_ HINTERNET,
+                                        _In_ DWORD,
+                                        _In_ LPVOID,
+                                        _In_ DWORD);
 InternetSetOpt MyInternetSetOpt;
 
 void YSPLoginManager::UpdateProxySettings() {
@@ -3818,14 +3856,16 @@ void YSPLoginManager::UpdateProxySettings() {
   HMODULE wininet_module;
   bool proxy_tmp = false;
   wininet_module = LoadLibraryA("wininet.dll");
-  MyInternetSetOpt = (InternetSetOpt)GetProcAddress(wininet_module, "InternetSetOptionW");
+  MyInternetSetOpt =
+      (InternetSetOpt)GetProcAddress(wininet_module, "InternetSetOptionW");
   if (MyInternetSetOpt != NULL) {
-    proxy_tmp = MyInternetSetOpt(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0);
+    proxy_tmp =
+        MyInternetSetOpt(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0);
     if (!proxy_tmp)
       DLOG(INFO) << "UpdateProxySettings InternetSetOptionW is failure!";
   }
-  //INTERNET_PER_CONN_OPTION option;
-  //if (!InternetSetOption(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0)) {
+  // INTERNET_PER_CONN_OPTION option;
+  // if (!InternetSetOption(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0)) {
   // LOG(INFO) << "InternetSetOption failure !";
   //}
 }
@@ -3864,17 +3904,18 @@ void YSPLoginManager::UpdatePACSettings(base::FilePath& pac_file) {
   HMODULE wininet_module;
   bool pac_tmp = false;
   wininet_module = LoadLibraryA("wininet.dll");
-  MyInternetSetOpt = (InternetSetOpt)GetProcAddress(wininet_module, "InternetSetOptionW");
+  MyInternetSetOpt =
+      (InternetSetOpt)GetProcAddress(wininet_module, "InternetSetOptionW");
   if (MyInternetSetOpt != NULL) {
     pac_tmp = MyInternetSetOpt(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0);
     if (!pac_tmp)
       DLOG(INFO) << "UpdatePACSettings InternetSetOptionW is failure!";
   }
-  //if (!InternetSetOption(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0)) {
+  // if (!InternetSetOption(NULL, INTERNET_OPTION_SETTINGS_CHANGED, NULL, 0)) {
   // LOG(INFO) << "InternetSetOption failure !";
   //}
 }
-#endif //OS_WIN
+#endif  // OS_WIN
 
 #ifdef IE_REDCORE
 

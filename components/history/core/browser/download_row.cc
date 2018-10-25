@@ -31,8 +31,7 @@ bool DownloadRow::operator==(const DownloadRow& rhs) const {
          id == rhs.id && guid == rhs.guid && opened == rhs.opened &&
          last_access_time == rhs.last_access_time &&
          transient == rhs.transient && by_ext_id == rhs.by_ext_id &&
-         by_ext_name == rhs.by_ext_name &&
-         YSPUserName == rhs.YSPUserName &&
+         by_ext_name == rhs.by_ext_name && ysp_username == rhs.ysp_username &&
          download_slice_info == rhs.download_slice_info;
 }
 

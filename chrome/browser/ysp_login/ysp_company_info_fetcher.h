@@ -1,4 +1,8 @@
-//ysp+ { login }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { login }
 #ifdef REDCORE
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_COMPANY_INFO_FETCHER_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_COMPANY_INFO_FETCHER_H_
@@ -12,40 +16,40 @@
 #include "url/gurl.h"
 
 namespace base {
-  class Value;
-  class DictionaryValue;
-}
+class Value;
+class DictionaryValue;
+}  // namespace base
 
 namespace net {
-  class URLFetcher;
-  class URLRequestContextGetter;
-}
+class URLFetcher;
+class URLRequestContextGetter;
+}  // namespace net
 
 // YSPCompanyInfoFetcherDelegate
 class YSPCompanyInfoFetcherDelegate {
-public:
+ public:
   virtual void OnCompanyInfoRequestFailure() = 0;
   virtual void OnCompanyInfoResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) = 0;
+      std::unique_ptr<base::DictionaryValue> response_data) = 0;
   virtual void OnCompanyInfoResponseParseFailure(const std::string& error) = 0;
 
-protected:
+ protected:
   virtual ~YSPCompanyInfoFetcherDelegate() {}
 };
 
 // YSPCompanyInfoFetcher
-class YSPCompanyInfoFetcher : public base::SupportsWeakPtr<YSPCompanyInfoFetcher>,
-  public net::URLFetcherDelegate {
-public:
+class YSPCompanyInfoFetcher
+    : public base::SupportsWeakPtr<YSPCompanyInfoFetcher>,
+      public net::URLFetcherDelegate {
+ public:
   YSPCompanyInfoFetcher(YSPCompanyInfoFetcherDelegate* delegate,
-    net::URLRequestContextGetter* request_context);
+                        net::URLRequestContextGetter* request_context);
   ~YSPCompanyInfoFetcher() override;
 
-  void StartGetCompanyInfo(
-    const std::string& serverUrl,
-    const std::string& cid);
+  void StartGetCompanyInfo(const std::string& server_url,
+                           const std::string& cid);
 
-private:
+ private:
   void DoStartGetCompanyInfo(const std::string& post_data);
   void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
   void OnJsonParseFailure(const std::string& error);

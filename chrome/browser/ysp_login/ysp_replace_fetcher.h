@@ -1,4 +1,8 @@
-//YSP+ { Resource Replace
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// YSP+ { Resource Replace
 #ifdef REDCORE
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_REPLACE_FETCHER_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_REPLACE_FETCHER_H_
@@ -12,42 +16,42 @@
 #include "url/gurl.h"
 
 namespace base {
-  class Value;
-  class DictionaryValue;
-}
+class Value;
+class DictionaryValue;
+}  // namespace base
 
 namespace net {
-  class URLFetcher;
-  class URLRequestContextGetter;
-}
+class URLFetcher;
+class URLRequestContextGetter;
+}  // namespace net
 
 // YSPReplaceFetcherDelegate
 class YSPReplaceFetcherDelegate {
-public:
+ public:
   virtual void OnReplaceRequestFailure(const std::string& error) = 0;
-  virtual void OnReplaceResponseParseSuccess(const std::string& response_data, const std::string& path_url) = 0;
+  virtual void OnReplaceResponseParseSuccess(const std::string& response_data,
+                                             const std::string& path_url) = 0;
   virtual void OnReplaceResponseParseFailure(const std::string& error) = 0;
 
-protected:
+ protected:
   virtual ~YSPReplaceFetcherDelegate() {}
 };
 
 // YSPReplaceFetcher
 class YSPReplaceFetcher : public base::SupportsWeakPtr<YSPReplaceFetcher>,
-  public net::URLFetcherDelegate {
-public:
+                          public net::URLFetcherDelegate {
+ public:
   YSPReplaceFetcher(YSPReplaceFetcherDelegate* delegate,
-    net::URLRequestContextGetter* request_context);
+                    net::URLRequestContextGetter* request_context);
   ~YSPReplaceFetcher() override;
 
-  void StartGetReplace(\
-    const std::string& server_url,\
-    const std::string& cid,\
-    const std::string& path_url);
+  void StartGetReplace(const std::string& server_url,
+                       const std::string& cid,
+                       const std::string& path_url);
 
-private:
+ private:
   void DoStartGetReplace(const std::string& post_data);
-  //void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
+  // void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
   void OnValueParseSuccess(const std::string& value_data);
   void OnValueParseFailure(const std::string& error);
 
@@ -66,5 +70,5 @@ private:
 };
 
 #endif  // CHROME_BROWSER_YSP_LOGIN_YSP_REPLACE_FETCHER_H_
-#//YSP+ }
-#endif //REDCORE
+#       // YSP+ }
+#endif  // REDCORE

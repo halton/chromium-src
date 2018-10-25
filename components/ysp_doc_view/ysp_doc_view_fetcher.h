@@ -1,4 +1,8 @@
-//ysp+
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+
 #ifdef REDCORE
 #ifndef COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
 #define COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
@@ -6,45 +10,45 @@
 #include <memory>
 #include <string>
 
+#include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "base/files/file_path.h"
 #include "net/url_request/url_fetcher_delegate.h"
 #include "url/gurl.h"
 
 namespace base {
-  class Value;
-  class DictionaryValue;
-}
+class Value;
+class DictionaryValue;
+}  // namespace base
 
 namespace net {
-  class URLFetcher;
-  class URLRequestContextGetter;
-}
+class URLFetcher;
+class URLRequestContextGetter;
+}  // namespace net
 
 // YSPDocViewFetcherDelegate
 class YSPDocViewFetcherDelegate {
-public:
+ public:
   virtual void OnDocViewRequestFailure() = 0;
   virtual void OnDocViewResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) = 0;
+      std::unique_ptr<base::DictionaryValue> response_data) = 0;
   virtual void OnDocViewResponseParseFailure(const std::string& error) = 0;
 
-protected:
+ protected:
   virtual ~YSPDocViewFetcherDelegate() {}
 };
 
 // YSPDocViewFetcher
 class YSPDocViewFetcher : public base::SupportsWeakPtr<YSPDocViewFetcher>,
-  public net::URLFetcherDelegate {
-public:
+                          public net::URLFetcherDelegate {
+ public:
   YSPDocViewFetcher(YSPDocViewFetcherDelegate* delegate,
-    net::URLRequestContextGetter* request_context);
+                    net::URLRequestContextGetter* request_context);
   ~YSPDocViewFetcher() override;
 
   void Start(const std::string& uploadUrl, const base::FilePath& localPath);
 
-private:
+ private:
   void DoStart(const std::string& post_data);
   void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
   void OnJsonParseFailure(const std::string& error);
@@ -63,4 +67,4 @@ private:
 };
 
 #endif  // COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
-#endif // REDCORE
+#endif  // REDCORE

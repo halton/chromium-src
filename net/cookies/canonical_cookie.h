@@ -85,8 +85,7 @@ class NET_EXPORT CanonicalCookie {
   bool IsHttpOnly() const { return httponly_; }
   CookieSameSite SameSite() const { return same_site_; }
   CookiePriority Priority() const { return priority_; }
-  bool IsDomainCookie() const {
-    return !domain_.empty() && domain_[0] == '.'; }
+  bool IsDomainCookie() const { return !domain_.empty() && domain_[0] == '.'; }
   bool IsHostCookie() const { return !IsDomainCookie(); }
 
   bool IsExpired(const base::Time& current) const {
@@ -103,8 +102,8 @@ class NET_EXPORT CanonicalCookie {
     // It seems like it would make sense to take secure and httponly into
     // account, but the RFC doesn't specify this.
     // NOTE: Keep this logic in-sync with TrimDuplicateCookiesForHost().
-    return (name_ == ecc.Name() && domain_ == ecc.Domain()
-            && path_ == ecc.Path());
+    return (name_ == ecc.Name() && domain_ == ecc.Domain() &&
+            path_ == ecc.Path());
   }
 
   // Checks a looser set of equivalency rules than 'IsEquivalent()' in order
@@ -121,9 +120,7 @@ class NET_EXPORT CanonicalCookie {
   // '/login' and '/' do not match '/login/en').
   bool IsEquivalentForSecureCookieMatching(const CanonicalCookie& ecc) const;
 
-  void SetLastAccessDate(const base::Time& date) {
-    last_access_date_ = date;
-  }
+  void SetLastAccessDate(const base::Time& date) { last_access_date_ = date; }
   void SetCreationDate(const base::Time& date) { creation_date_ = date; }
 
   // Returns true if the given |url_path| path-matches the cookie-path as
@@ -179,7 +176,9 @@ class NET_EXPORT CanonicalCookie {
   bool IsCanonical() const;
 
 #ifdef REDCORE
-  const std::string& YSPUserName() const { return YSPUserName_; } //YSP+ { User information isolation }
+  const std::string& YSPUserName() const {
+    return ysp_username_;
+  }  // YSP+ { User information isolation }
 #endif
 
   // Returns the cookie line (e.g. "cookie1=value1; cookie2=value2") represented
@@ -228,7 +227,7 @@ class NET_EXPORT CanonicalCookie {
   bool httponly_;
   CookieSameSite same_site_;
 #ifdef REDCORE
-  std::string YSPUserName_; //YSP+ { User information isolation }
+  std::string ysp_username_;  // YSP+ { User information isolation }
 #endif
   CookiePriority priority_;
 };

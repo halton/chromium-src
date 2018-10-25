@@ -1,3 +1,7 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "chrome/browser/ysp_login/ysp_us_report_fetcher.h"
 
 #include <utility>
@@ -9,11 +13,11 @@
 #include "content/public/browser/browser_thread.h"
 #include "content/public/common/service_manager_connection.h"
 #include "extensions/common/extension_urls.h"
-#include "services/data_decoder/public/cpp/safe_json_parser.h"
 #include "net/base/load_flags.h"
 #include "net/base/mime_util.h"
 #include "net/url_request/url_fetcher.h"
 #include "net/url_request/url_request_status.h"
+#include "services/data_decoder/public/cpp/safe_json_parser.h"
 
 namespace {
 
@@ -25,26 +29,22 @@ const char kMultipartBoundary[] = "------xdcehKrkohmfetirroFpWefrhsDu------";
 }  // namespace
 
 YSPUSReportFetcher::YSPUSReportFetcher(
-  net::URLRequestContextGetter* request_context)
-  : request_context_(request_context) {
-}
+    net::URLRequestContextGetter* request_context)
+    : request_context_(request_context) {}
 
-YSPUSReportFetcher::~YSPUSReportFetcher() {
-}
+YSPUSReportFetcher::~YSPUSReportFetcher() {}
 
-void YSPUSReportFetcher::StartReport(
-    const std::string& server_url,
-    const std::string& companyId,
-    const base::string16& companyName,
-    const std::string& departmentId,
-    const base::string16& departmentName,
-    const std::string& uuid,
-    const base::string16& userName,
-    const std::string& deviceId,
-    const std::string& access_url) {
-
+void YSPUSReportFetcher::StartReport(const std::string& server_url,
+                                     const std::string& company_id,
+                                     const base::string16& company_name,
+                                     const std::string& department_id,
+                                     const base::string16& department_name,
+                                     const std::string& uuid,
+                                     const base::string16& username,
+                                     const std::string& device_id,
+                                     const std::string& access_url) {
   unsigned long long tm = base::Time::Now().ToJavaTime();
-  if((tm - last_timestamp_) < 500 && access_url == last_access_url_) {
+  if ((tm - last_timestamp_) < 500 && access_url == last_access_url_) {
     last_timestamp_ = tm;
     return;
   }
@@ -61,19 +61,19 @@ void YSPUSReportFetcher::StartReport(
 
   // build data
   sObj += "[{\"companyId\":\"";
-  sObj += companyId;
+  sObj += company_id;
   sObj += "\",\"uuid\":\"";
   sObj += uuid;
   sObj += "\",\"departmentId\":\"";
-  sObj += departmentId;
+  sObj += department_id;
   sObj += "\",\"userName\":\"";
-  sObj += base::UTF16ToUTF8(userName);
+  sObj += base::UTF16ToUTF8(username);
   sObj += "\",\"companyName\":\"";
-  sObj += base::UTF16ToUTF8(companyName);
+  sObj += base::UTF16ToUTF8(company_name);
   sObj += "\",\"departmentName\":\"";
-  sObj += base::UTF16ToUTF8(departmentName);
+  sObj += base::UTF16ToUTF8(department_name);
   sObj += "\",\"deviceId\":\"";
-  sObj += deviceId;
+  sObj += device_id;
   sObj += "\",\"url\":\"";
   sObj += access_url;
   sObj += "\",\"time\":";
@@ -82,13 +82,14 @@ void YSPUSReportFetcher::StartReport(
   sObj += version;
   sObj += "\"}]";
 
-  net::AddMultipartValueForUpload("sObj", sObj, kMultipartBoundary, "", &post_data);
+  net::AddMultipartValueForUpload("sObj", sObj, kMultipartBoundary, "",
+                                  &post_data);
   net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
 
   content::BrowserThread::PostTask(
       content::BrowserThread::UI, FROM_HERE,
-      base::Bind(&YSPUSReportFetcher::DoStartReport,
-                 base::Unretained(this), post_data));
+      base::Bind(&YSPUSReportFetcher::DoStartReport, base::Unretained(this),
+                 post_data));
 }
 
 void YSPUSReportFetcher::DoStartReport(const std::string& post_data) {
@@ -109,24 +110,21 @@ void YSPUSReportFetcher::DoStartReport(const std::string& post_data) {
 }
 
 void YSPUSReportFetcher::OnJsonParseSuccess(
-  std::unique_ptr<base::Value> parsed_json) {
+    std::unique_ptr<base::Value> parsed_json) {
   if (!parsed_json->is_dict()) {
     OnJsonParseFailure(kInvalidDataResponseError);
     return;
   }
 }
 
-void YSPUSReportFetcher::OnJsonParseFailure(
-  const std::string& error) {
-}
+void YSPUSReportFetcher::OnJsonParseFailure(const std::string& error) {}
 
 void YSPUSReportFetcher::OnURLFetchComplete(const net::URLFetcher* source) {
   CHECK_EQ(data_fetcher_.get(), source);
 
   std::unique_ptr<net::URLFetcher> fetcher(std::move(data_fetcher_));
 
-  if (!fetcher->GetStatus().is_success() ||
-      fetcher->GetResponseCode() != 200) {
+  if (!fetcher->GetStatus().is_success() || fetcher->GetResponseCode() != 200) {
     return;
   }
 

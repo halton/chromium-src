@@ -1,3 +1,7 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_US_REPORT_FETCHER_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_US_REPORT_FETCHER_H_
 
@@ -12,12 +16,12 @@
 namespace base {
 class Value;
 class DictionaryValue;
-} // namespace base
+}  // namespace base
 
 namespace net {
 class URLFetcher;
 class URLRequestContextGetter;
-} // namespace net
+}  // namespace net
 
 // YSPUSReportFetcher
 class YSPUSReportFetcher : public base::SupportsWeakPtr<YSPUSReportFetcher>,
@@ -26,16 +30,15 @@ class YSPUSReportFetcher : public base::SupportsWeakPtr<YSPUSReportFetcher>,
   YSPUSReportFetcher(net::URLRequestContextGetter* request_context);
   ~YSPUSReportFetcher() override;
 
-  void StartReport(
-      const std::string& server_url,
-      const std::string& companyId,
-      const base::string16& companyName,
-      const std::string& departmentId,
-      const base::string16& departmentName,
-      const std::string& uuid,
-      const base::string16& userName,
-      const std::string& deviceId,
-      const std::string& access_url);
+  void StartReport(const std::string& server_url,
+                   const std::string& company_id,
+                   const base::string16& company_name,
+                   const std::string& department_id,
+                   const base::string16& department_name,
+                   const std::string& uuid,
+                   const base::string16& username,
+                   const std::string& device_id,
+                   const std::string& access_url);
 
  private:
   void DoStartReport(const std::string& post_data);

@@ -476,14 +476,15 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItem : public base::SupportsUserData {
   virtual void SimulateErrorForTesting(DownloadInterruptReason reason) = 0;
 
 #ifdef REDCORE
-  virtual std::string GetYSPUserName() const = 0; //YSP+ { User information isolation }
+  virtual std::string GetYSPUserName()
+      const = 0;  // YSP+ { User information isolation }
   virtual bool is_doc_view() = 0;
   virtual void set_is_doc_view(bool doc_view) = 0;
   virtual bool is_update() = 0;
   virtual void set_is_update(bool update) = 0;
 #endif
 
-#ifdef IE_REDCORE  
+#ifdef IE_REDCORE
   virtual bool IsIEDownload() = 0;
 #endif
 };

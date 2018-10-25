@@ -24,7 +24,7 @@ bool InProgressInfo::operator==(const InProgressInfo& other) const {
          current_path == other.current_path &&
          target_path == other.target_path &&
 #ifdef REDCORE
-         YSPUserName == other.YSPUserName &&
+         ysp_username == other.ysp_username &&
 #endif
          received_bytes == other.received_bytes &&
          start_time == other.start_time && end_time == other.end_time &&

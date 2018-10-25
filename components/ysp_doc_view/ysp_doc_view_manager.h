@@ -1,4 +1,8 @@
-//ysp+
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+
 #ifdef REDCORE
 #ifndef COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
 #define COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
@@ -13,16 +17,17 @@
 #include "components/ysp_doc_view/ysp_doc_view_fetcher.h"
 
 namespace net {
-  class URLRequestContext;
+class URLRequestContext;
 }
 
 // YSPDocViewManagerDelegate
 class YSPDocViewManagerDelegate {
-public:
+ public:
   virtual void OnDocViewRequestFailure() = 0;
-  virtual void OnDocViewRequestSuccess(download::DownloadItem* download, const std::string& doc_url) = 0;
+  virtual void OnDocViewRequestSuccess(download::DownloadItem* download,
+                                       const std::string& doc_url) = 0;
 
-protected:
+ protected:
   virtual ~YSPDocViewManagerDelegate() {}
 };
 
@@ -31,19 +36,17 @@ class YSPDocViewManager : public base::SupportsWeakPtr<YSPDocViewManager>,
                           public base::RefCounted<YSPDocViewManager>,
                           public YSPDocViewFetcherDelegate,
                           public download::DownloadItem::Observer {
-public:
+ public:
   YSPDocViewManager();
 
   static YSPDocViewManager* GetInstance();
 
-  void SetDelegate(YSPDocViewManagerDelegate* d) {
-    delegate_ = d;
-  }
+  void SetDelegate(YSPDocViewManagerDelegate* d) { delegate_ = d; }
 
   // YSPDocViewFetcherDelegate:
   void OnDocViewRequestFailure() override;
   void OnDocViewResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) override;
+      std::unique_ptr<base::DictionaryValue> response_data) override;
   void OnDocViewResponseParseFailure(const std::string& error) override;
 
   // download::DownloadItem::Observer:
@@ -54,9 +57,9 @@ public:
 
   bool IsDocViewType(const base::FilePath& filePath);
 
-private:
+ private:
   ~YSPDocViewManager() override;
-  void RequestDocView(const std::string& url, const base::FilePath& localPath);
+  void RequestDocView(const std::string& url, const base::FilePath& local_path);
 
   YSPDocViewFetcher* doc_fetcher_;
   YSPDocViewManagerDelegate* delegate_;
@@ -67,4 +70,4 @@ private:
 };
 
 #endif  // COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
-#endif // REDCORE
+#endif  // REDCORE

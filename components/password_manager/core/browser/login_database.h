@@ -179,8 +179,9 @@ class LoginDatabase {
 
 #ifdef REDCORE
   PasswordStoreChangeList SelectLogins(const autofill::PasswordForm& form)
-    WARN_UNUSED_RESULT;
+      WARN_UNUSED_RESULT;
 #endif
+
  private:
 #if defined(OS_IOS)
   friend class LoginDatabaseIOSTest;

@@ -36,8 +36,10 @@ class ExpiringVisitsReader {
   virtual ~ExpiringVisitsReader() {}
   // Populates |visits| from |db|, using provided |end_time| and |max_visits|
   // cap.
-  virtual bool Read(base::Time end_time, HistoryDatabase* db,
-                    VisitVector* visits, int max_visits) const = 0;
+  virtual bool Read(base::Time end_time,
+                    HistoryDatabase* db,
+                    VisitVector* visits,
+                    int max_visits) const = 0;
 };
 
 typedef std::vector<const ExpiringVisitsReader*> ExpiringVisitsReaders;
@@ -64,8 +66,7 @@ class ExpireHistoryBackend {
   ~ExpireHistoryBackend();
 
   // Completes initialization by setting the databases that this class will use.
-  void SetDatabases(HistoryDatabase* main_db,
-                    ThumbnailDatabase* thumb_db);
+  void SetDatabases(HistoryDatabase* main_db, ThumbnailDatabase* thumb_db);
 
   // Begins periodic expiration of history older than the given threshold. This
   // will continue until the object is deleted.
@@ -80,7 +81,8 @@ class ExpireHistoryBackend {
   // Removes all visits to restrict_urls (or all URLs if empty) in the given
   // time range, updating the URLs accordingly.
   void ExpireHistoryBetween(const std::set<GURL>& restrict_urls,
-                            base::Time begin_time, base::Time end_time);
+                            base::Time begin_time,
+                            base::Time end_time);
 
   // Removes all visits to all URLs with the given times, updating the
   // URLs accordingly.  |times| must be in reverse chronological order
@@ -102,8 +104,10 @@ class ExpireHistoryBackend {
     return base::Time::Now() - expiration_threshold_;
   }
 #ifdef REDCORE
-  void ExpireHistoryForUserId(const std::string& userid); //TODO (matianzhi): YSP+ { clear user data }
+  void ExpireHistoryForUserId(
+      const std::string& userid);  // TODO(matianzhi): YSP+ { clear user data }
 #endif
+
  private:
   FRIEND_TEST_ALL_PREFIXES(ExpireHistoryTest, DeleteFaviconsIfPossible);
   FRIEND_TEST_ALL_PREFIXES(ExpireHistoryTest, ExpireSomeOldHistory);
@@ -243,8 +247,8 @@ class ExpireHistoryBackend {
   // be more history to expire with the current time threshold (it does not
   // indicate success or failure).
   bool ExpireSomeOldHistory(base::Time end_time,
-                             const ExpiringVisitsReader* reader,
-                             int max_visits);
+                            const ExpiringVisitsReader* reader,
+                            int max_visits);
 
   // Tries to detect possible bad history or inconsistencies in the database
   // and deletes items. For example, URLs with no visits.
@@ -266,8 +270,8 @@ class ExpireHistoryBackend {
   HistoryBackendNotifier* notifier_;
 
   // Non-owning pointers to the databases we deal with (MAY BE NULL).
-  HistoryDatabase* main_db_;       // Main history database.
-  ThumbnailDatabase* thumb_db_;    // Thumbnails and favicons.
+  HistoryDatabase* main_db_;     // Main history database.
+  ThumbnailDatabase* thumb_db_;  // Thumbnails and favicons.
 
   // The threshold for "old" history where we will automatically delete it.
   base::TimeDelta expiration_threshold_;

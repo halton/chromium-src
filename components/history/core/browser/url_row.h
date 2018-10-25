@@ -48,9 +48,7 @@ class URLRow {
   void set_url(const GURL& url) { url_ = url; }
   const GURL& url() const { return url_; }
 
-  const base::string16& title() const {
-    return title_;
-  }
+  const base::string16& title() const { return title_; }
   void set_title(const base::string16& title) {
     // The title is frequently set to the same thing, so we don't bother
     // updating unless the string has changed.
@@ -60,13 +58,11 @@ class URLRow {
   }
 
 #ifdef REDCORE
-  const std::string& YSPUserName() const {
-    return YSPUserName_;
-  }
+  const std::string& YSPUserName() const { return ysp_username_; }
 
-  void set_YSPUserName(const std::string& YSPUserName) {
-    if (YSPUserName != YSPUserName_) {
-      YSPUserName_ = YSPUserName;
+  void set_YSPUserName(const std::string& ysp_username) {
+    if (ysp_username != ysp_username_) {
+      ysp_username_ = ysp_username;
     }
   }
 #endif
@@ -75,39 +71,23 @@ class URLRow {
   // number of entries in the visit table for this URL, but won't always. It's
   // really designed for autocomplete ranking, so some "useless" transitions
   // from the visit table aren't counted in this tally.
-  int visit_count() const {
-    return visit_count_;
-  }
-  void set_visit_count(int visit_count) {
-    visit_count_ = visit_count;
-  }
+  int visit_count() const { return visit_count_; }
+  void set_visit_count(int visit_count) { visit_count_ = visit_count; }
 
   // Number of times the URL was typed in the Omnibox. This "should" match
   // the number of TYPED transitions in the visit table. It's used primarily
   // for faster autocomplete ranking. If you need to know the actual number of
   // TYPED transitions, you should query the visit table since there could be
   // something out of sync.
-  int typed_count() const {
-    return typed_count_;
-  }
-  void set_typed_count(int typed_count) {
-    typed_count_ = typed_count;
-  }
+  int typed_count() const { return typed_count_; }
+  void set_typed_count(int typed_count) { typed_count_ = typed_count; }
 
-  base::Time last_visit() const {
-    return last_visit_;
-  }
-  void set_last_visit(base::Time last_visit) {
-    last_visit_ = last_visit;
-  }
+  base::Time last_visit() const { return last_visit_; }
+  void set_last_visit(base::Time last_visit) { last_visit_ = last_visit; }
 
   // If this is set, we won't autocomplete this URL.
-  bool hidden() const {
-    return hidden_;
-  }
-  void set_hidden(bool hidden) {
-    hidden_ = hidden;
-  }
+  bool hidden() const { return hidden_; }
+  void set_hidden(bool hidden) { hidden_ = hidden; }
 
   // Estimates dynamic memory usage.
   // See base/trace_event/memory_usage_estimator.h for more info.
@@ -118,9 +98,7 @@ class URLRow {
    public:
     explicit URLRowHasURL(const GURL& url) : url_(url) {}
 
-    bool operator()(const URLRow& row) {
-      return row.url() == url_;
-    }
+    bool operator()(const URLRow& row) { return row.url() == url_; }
 
    private:
     const GURL& url_;
@@ -145,7 +123,7 @@ class URLRow {
   base::string16 title_;
 
 #ifdef REDCORE
-  std::string YSPUserName_; //YSP+ { User information isolation }
+  std::string ysp_username_;  // YSP+ { User information isolation }
 #endif
 
   // Total number of times this URL has been visited.
@@ -166,7 +144,6 @@ class URLRow {
 };
 typedef std::vector<URLRow> URLRows;
 
-
 class URLResult : public URLRow {
  public:
   URLResult();
@@ -184,9 +161,7 @@ class URLResult : public URLRow {
   const query_parser::Snippet& snippet() const { return snippet_; }
 
   bool blocked_visit() const { return blocked_visit_; }
-  void set_blocked_visit(bool blocked_visit) {
-    blocked_visit_ = blocked_visit;
-  }
+  void set_blocked_visit(bool blocked_visit) { blocked_visit_ = blocked_visit; }
 
   // If this is a title match, title_match_positions contains an entry for
   // every word in the title that matched one of the query parameters. Each

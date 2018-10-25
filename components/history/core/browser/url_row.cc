@@ -10,11 +10,9 @@
 
 namespace history {
 
-URLRow::URLRow() {
-}
+URLRow::URLRow() {}
 
-URLRow::URLRow(const GURL& url) : url_(url) {
-}
+URLRow::URLRow(const GURL& url) : url_(url) {}
 
 URLRow::URLRow(const GURL& url, URLID id) : id_(id), url_(url) {}
 
@@ -22,8 +20,7 @@ URLRow::URLRow(const URLRow& other) = default;
 
 URLRow::URLRow(URLRow&& other) noexcept = default;
 
-URLRow::~URLRow() {
-}
+URLRow::~URLRow() {}
 
 URLRow& URLRow::operator=(const URLRow& other) = default;
 URLRow& URLRow::operator=(URLRow&& other) = default;
@@ -33,7 +30,7 @@ void URLRow::Swap(URLRow* other) {
   url_.Swap(&other->url_);
   title_.swap(other->title_);
 #ifdef REDCORE
-  YSPUserName_ = other->YSPUserName_; //YSP+ { User information isolation }
+  ysp_username_ = other->ysp_username_;  // YSP+ { User information isolation }
 #endif
   std::swap(visit_count_, other->visit_count_);
   std::swap(typed_count_, other->typed_count_);
@@ -64,8 +61,7 @@ URLResult::URLResult(URLResult&& other) noexcept
       title_match_positions_(std::move(other.title_match_positions_)),
       blocked_visit_(other.blocked_visit_) {}
 
-URLResult::~URLResult() {
-}
+URLResult::~URLResult() {}
 
 URLResult& URLResult::operator=(const URLResult&) = default;
 

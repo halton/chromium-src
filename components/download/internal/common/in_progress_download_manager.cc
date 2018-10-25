@@ -49,7 +49,7 @@ std::unique_ptr<DownloadItemImpl> CreateDownloadItemImpl(
       delegate, entry.download_info->guid, entry.download_info->id,
       in_progress_info->current_path, in_progress_info->target_path,
 #ifdef REDCORE
-      in_progress_info->YSPUserName,
+      in_progress_info->ysp_username,
 #endif
       in_progress_info->url_chain, in_progress_info->referrer_url,
       in_progress_info->site_url, in_progress_info->tab_url,

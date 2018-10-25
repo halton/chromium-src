@@ -1,4 +1,8 @@
-//ysp+ { fetcher resource }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { fetcher resource }
 #ifdef REDCORE
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_FETCHER_RESOURCE_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_FETCHER_RESOURCE_H_
@@ -8,49 +12,55 @@
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "net/url_request/url_fetcher_delegate.h"
 #include "net/url_request/url_fetcher.h"
+#include "net/url_request/url_fetcher_delegate.h"
 #include "url/gurl.h"
 
 namespace base {
-  class Value;
-  class DictionaryValue;
-}
+class Value;
+class DictionaryValue;
+}  // namespace base
 
 namespace net {
-  class URLFetcher;
-  class URLRequestContextGetter;
-}
+class URLFetcher;
+class URLRequestContextGetter;
+}  // namespace net
 
 // YSPFetcherResourceDelegate
 class YSPFetcherResourceDelegate {
-public:
-  virtual void OnFetcherResourceRequestFailure(const GURL& url, bool auto_fecth, const std::string& error) = 0;
-  virtual void OnFetcherResourceResponseParseSuccess(const GURL& url,
-    std::unique_ptr<base::DictionaryValue> response_data, bool auto_fecth) = 0;
-  virtual void OnFetcherResourceResponseParseFailure(const GURL& url, bool auto_fecth, const std::string& error) = 0;
+ public:
+  virtual void OnFetcherResourceRequestFailure(const GURL& url,
+                                               bool auto_fecth,
+                                               const std::string& error) = 0;
+  virtual void OnFetcherResourceResponseParseSuccess(
+      const GURL& url,
+      std::unique_ptr<base::DictionaryValue> response_data,
+      bool auto_fecth) = 0;
+  virtual void OnFetcherResourceResponseParseFailure(
+      const GURL& url,
+      bool auto_fecth,
+      const std::string& error) = 0;
 
-protected:
+ protected:
   virtual ~YSPFetcherResourceDelegate() {}
 };
 
 // YSPFetcherResource
 class YSPFetcherResource : public base::SupportsWeakPtr<YSPFetcherResource>,
-  public net::URLFetcherDelegate {
-public:
+                           public net::URLFetcherDelegate {
+ public:
   YSPFetcherResource(YSPFetcherResourceDelegate* delegate,
-    net::URLRequestContextGetter* request_context);
+                     net::URLRequestContextGetter* request_context);
   ~YSPFetcherResource() override;
 
-  void StarFetcherResource(
-    const net::URLFetcher::RequestType& request_type,
-    const std::string& server_url,
-    const std::vector<std::string> header_list,
-    const std::string& post_data,
-    bool auto_fetch);
+  void StarFetcherResource(const net::URLFetcher::RequestType& request_type,
+                           const std::string& server_url,
+                           const std::vector<std::string> header_list,
+                           const std::string& post_data,
+                           bool auto_fetch);
   bool IsLoading() { return loading; }
 
-private:
+ private:
   void DoStartFetcherResource(const std::string& post_data);
   void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
   void OnJsonParseFailure(const std::string& error);

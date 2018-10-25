@@ -50,7 +50,9 @@ class PasswordStoreDefault : public PasswordStore {
   PasswordStoreChangeList AddLoginImpl(
       const autofill::PasswordForm& form) override;
 #ifdef REDCORE
-  PasswordStoreChangeList SaveLoginForEnterplorerImpl(const autofill::PasswordForm & form) override; //YSP+ { passwords AD manager }
+  PasswordStoreChangeList SaveLoginForEnterplorerImpl(
+      const autofill::PasswordForm& form)
+      override;  // YSP+ { passwords AD manager }
 #endif
   PasswordStoreChangeList UpdateLoginImpl(
       const autofill::PasswordForm& form) override;

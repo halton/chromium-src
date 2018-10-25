@@ -50,9 +50,9 @@ typedef int64_t IconMappingID;    // For page url and icon mapping.
 // (Warning): Please don't change any existing values while it is ok to add
 // new values when needed.
 enum VisitSource {
-  SOURCE_SYNCED = 0,         // Synchronized from somewhere else.
-  SOURCE_BROWSED = 1,        // User browsed.
-  SOURCE_EXTENSION = 2,      // Added by an extension.
+  SOURCE_SYNCED = 0,     // Synchronized from somewhere else.
+  SOURCE_BROWSED = 1,    // User browsed.
+  SOURCE_EXTENSION = 2,  // Added by an extension.
   SOURCE_FIREFOX_IMPORTED = 3,
   SOURCE_IE_IMPORTED = 4,
   SOURCE_SAFARI_IMPORTED = 5,
@@ -72,7 +72,8 @@ class VisitRow {
   VisitRow(URLID arg_url_id,
            base::Time arg_visit_time,
 #ifdef REDCORE
-           const std::string& arg_YSPUserName, //YSP+ { User information isolation }
+           const std::string& 
+               arg_ysp_username,  // YSP+ { User information isolation }
 #endif
            VisitID arg_referring_visit,
            ui::PageTransition arg_transition,
@@ -90,7 +91,7 @@ class VisitRow {
   base::Time visit_time;
 
 #ifdef REDCORE
-  std::string YSPUserName; //YSP+ { User information isolation }
+  std::string ysp_username;  // YSP+ { User information isolation }
 #endif
 
   // Indicates another visit that was the referring page for this one.

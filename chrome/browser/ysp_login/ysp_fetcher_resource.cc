@@ -1,4 +1,8 @@
-//ysp+ { fetcher resource }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { fetcher resource }
 #ifdef REDCORE
 #include "chrome/browser/ysp_login/ysp_fetcher_resource.h"
 
@@ -17,26 +21,24 @@
 
 namespace {
 
-  const char kInvalidDataResponseError[] = "Invalid Data reponse";
-  const char kUploadContentType[] = "multipart/form-data";
-  const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
+const char kInvalidDataResponseError[] = "Invalid Data reponse";
+const char kUploadContentType[] = "multipart/form-data";
+const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
 
 }  // namespace
 YSPFetcherResource::YSPFetcherResource(
-  YSPFetcherResourceDelegate* delegate,
-  net::URLRequestContextGetter* request_context)
-  : delegate_(delegate),
-    request_context_(request_context) {
-}
+    YSPFetcherResourceDelegate* delegate,
+    net::URLRequestContextGetter* request_context)
+    : delegate_(delegate), request_context_(request_context) {}
 
 YSPFetcherResource::~YSPFetcherResource() {}
 
 void YSPFetcherResource::StarFetcherResource(
-  const net::URLFetcher::RequestType& request_type,
-  const std::string& server_url,
-  const std::vector<std::string> header_list,
-  const std::string& post_data,
-  bool auto_fetch) {
+    const net::URLFetcher::RequestType& request_type,
+    const std::string& server_url,
+    const std::vector<std::string> header_list,
+    const std::string& post_data,
+    bool auto_fetch) {
   server_url_ = server_url;
   header_list_ = header_list;
   request_type_ = request_type;
@@ -44,20 +46,20 @@ void YSPFetcherResource::StarFetcherResource(
   loading = true;
 
   content::BrowserThread::PostTask(
-    content::BrowserThread::UI, FROM_HERE,
-    base::Bind(&YSPFetcherResource::DoStartFetcherResource,
-      base::Unretained(this), post_data));
+      content::BrowserThread::UI, FROM_HERE,
+      base::Bind(&YSPFetcherResource::DoStartFetcherResource,
+                 base::Unretained(this), post_data));
 }
 
 void YSPFetcherResource::DoStartFetcherResource(const std::string& post_data) {
-  GURL requestUrl(server_url_);
-  if (!requestUrl.is_valid()) {
+  GURL request_url(server_url_);
+  if (!request_url.is_valid()) {
     return;
   }
-  data_fetcher_ =
-    net::URLFetcher::Create(requestUrl, request_type_, this);
+  data_fetcher_ = net::URLFetcher::Create(request_url, request_type_, this);
   data_fetcher_->SetRequestContext(request_context_);
-  if (request_type_ == net::URLFetcher::POST || request_type_ == net::URLFetcher::PUT) {
+  if (request_type_ == net::URLFetcher::POST ||
+      request_type_ == net::URLFetcher::PUT) {
     std::string content_type = kUploadContentType;
     content_type.append("; boundary=");
     content_type.append(kMultipartBoundary);
@@ -72,36 +74,37 @@ void YSPFetcherResource::DoStartFetcherResource(const std::string& post_data) {
 }
 
 void YSPFetcherResource::OnJsonParseSuccess(
-  std::unique_ptr<base::Value> parsed_json) {
+    std::unique_ptr<base::Value> parsed_json) {
   if (!parsed_json->is_dict()) {
     OnJsonParseFailure(kInvalidDataResponseError);
     return;
   }
-  delegate_->OnFetcherResourceResponseParseSuccess(original_url_,
-    std::unique_ptr<base::DictionaryValue>(
-      static_cast<base::DictionaryValue*>(parsed_json.release())), auto_fetch_);
+  delegate_->OnFetcherResourceResponseParseSuccess(
+      original_url_,
+      std::unique_ptr<base::DictionaryValue>(
+          static_cast<base::DictionaryValue*>(parsed_json.release())),
+      auto_fetch_);
   loading = false;
 }
 
-void YSPFetcherResource::OnJsonParseFailure(
-  const std::string& error) {
-  delegate_->OnFetcherResourceResponseParseFailure(original_url_, auto_fetch_, error);
+void YSPFetcherResource::OnJsonParseFailure(const std::string& error) {
+  delegate_->OnFetcherResourceResponseParseFailure(original_url_, auto_fetch_,
+                                                   error);
   loading = false;
 }
 
 void YSPFetcherResource::OnURLFetchComplete(const net::URLFetcher* source) {
   CHECK_EQ(data_fetcher_.get(), source);
 
-  std::unique_ptr<net::URLFetcher> fetcher(
-    std::move(data_fetcher_));
+  std::unique_ptr<net::URLFetcher> fetcher(std::move(data_fetcher_));
   original_url_ = fetcher->GetOriginalURL();
   DLOG(INFO) << "original_url: " << original_url_;
-  if (!fetcher->GetStatus().is_success() ||
-    fetcher->GetResponseCode() != 200) {
+  if (!fetcher->GetStatus().is_success() || fetcher->GetResponseCode() != 200) {
     char buffer[10];
-    sprintf(buffer, "%d",fetcher->GetResponseCode());
+    sprintf(buffer, "%d", fetcher->GetResponseCode());
     const std::string error(buffer);
-    delegate_->OnFetcherResourceRequestFailure(original_url_, auto_fetch_, error);
+    delegate_->OnFetcherResourceRequestFailure(original_url_, auto_fetch_,
+                                               error);
     return;
   }
 
@@ -110,10 +113,10 @@ void YSPFetcherResource::OnURLFetchComplete(const net::URLFetcher* source) {
 
   // The parser will call us back via one of the callbacks.
   data_decoder::SafeJsonParser::Parse(
-    content::ServiceManagerConnection::GetForProcess()->GetConnector(),
-    json_data,
-    base::Bind(&YSPFetcherResource::OnJsonParseSuccess, AsWeakPtr()),
-    base::Bind(&YSPFetcherResource::OnJsonParseFailure, AsWeakPtr()));
+      content::ServiceManagerConnection::GetForProcess()->GetConnector(),
+      json_data,
+      base::Bind(&YSPFetcherResource::OnJsonParseSuccess, AsWeakPtr()),
+      base::Bind(&YSPFetcherResource::OnJsonParseFailure, AsWeakPtr()));
   loading = false;
 }
 #endif  // REDCORE

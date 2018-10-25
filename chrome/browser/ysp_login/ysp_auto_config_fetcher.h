@@ -1,4 +1,8 @@
-//ysp+ { auto get config }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { auto get config }
 
 #ifdef REDCORE
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_AUTO_CONFIG_FETCHER_H_
@@ -10,30 +14,32 @@
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
+#include "chrome/browser/ysp_login/ysp_login_fetcher.h"
 #include "net/url_request/url_fetcher_delegate.h"
 #include "url/gurl.h"
-#include "chrome/browser/ysp_login/ysp_login_fetcher.h"
 
 namespace base {
-  class Value;
-  class DictionaryValue;
-}
+class Value;
+class DictionaryValue;
+}  // namespace base
 
 namespace net {
-  class URLFetcher;
-  class URLRequestContextGetter;
-}
+class URLFetcher;
+class URLRequestContextGetter;
+}  // namespace net
 
 // YSPAutoConfigFetcher
 class YSPAutoConfigFetcher : public base::SupportsWeakPtr<YSPAutoConfigFetcher>,
-  public net::URLFetcherDelegate {
-public:
+                             public net::URLFetcherDelegate {
+ public:
   YSPAutoConfigFetcher(net::URLRequestContextGetter* request_context);
   ~YSPAutoConfigFetcher() override;
 
-  void StartGetConfigVersion(const std::string& server_url, const std::vector<std::string> header_list, bool auto_fetch);
+  void StartGetConfigVersion(const std::string& server_url,
+                             const std::vector<std::string> header_list,
+                             bool auto_fetch);
 
-private:
+ private:
   void DoStartGetConfigVersion();
   void OnJsonParseSuccess(std::unique_ptr<base::Value> parsed_json);
   void OnJsonParseFailure(const std::string& error);
@@ -41,7 +47,7 @@ private:
   // net::URLFetcherDelegate overrides:
   void OnURLFetchComplete(const net::URLFetcher* source) override;
 
-  //YSPAutoConfigFetcherDelegate* delegate_;
+  // YSPAutoConfigFetcherDelegate* delegate_;
   net::URLRequestContextGetter* request_context_;
 
   // For fetching JSON data.

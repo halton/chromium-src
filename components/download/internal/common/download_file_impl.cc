@@ -119,7 +119,7 @@ InputStream::StreamState DownloadFileImpl::SourceStream::Read(
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 bool DownloadFileImpl::IsIEDownload() {
-	return false;
+  return false;
 }
 #endif
 

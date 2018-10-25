@@ -77,7 +77,7 @@ struct InProgressInfo {
   base::FilePath target_path;
 
 #ifdef REDCORE
- std::string YSPUserName; //YSP+ { User information isolation }
+  std::string ysp_username;  // YSP+ { User information isolation }
 #endif
 
   // The number of bytes received (so far).

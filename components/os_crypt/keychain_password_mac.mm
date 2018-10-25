@@ -52,7 +52,7 @@ const char KeychainPassword::account_name[] = "Chrome";
 const char KeychainPassword::service_name[] = "Chromium Safe Storage";
 const char KeychainPassword::account_name[] = "Chromium";
 #endif
-#endif//REDCORE
+#endif  // REDCORE
 
 std::string KeychainPassword::GetPassword() const {
   UInt32 password_length = 0;

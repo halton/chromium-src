@@ -282,3 +282,4 @@ vs-chromium-project.txt
 /x86-generic_out/
 /xcodebuild
 /build/.vs/
+/tools/stats_viewer/obj/

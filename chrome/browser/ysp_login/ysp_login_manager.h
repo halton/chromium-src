@@ -5,20 +5,20 @@
 #ifndef CHROME_BROWSER_YSP_LOGIN_YSP_LOGIN_MANAGER_H_
 #define CHROME_BROWSER_YSP_LOGIN_YSP_LOGIN_MANAGER_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "components/prefs/pref_service.h"
-#include "chrome/browser/ysp_login/ysp_auto_config_fetcher.h" //ysp+ { auto get config }
-#include "chrome/browser/ysp_login/ysp_fetcher_resource.h" //YSP+ { Fetcher resource }
+#include "chrome/browser/ysp_login/ysp_auto_config_fetcher.h"  // ysp+ { auto get config }
+#include "chrome/browser/ysp_login/ysp_fetcher_resource.h"  // YSP+ { Fetcher resource }
 #include "chrome/browser/ysp_login/ysp_login_fetcher.h"
-#include "chrome/browser/ysp_login/ysp_replace_fetcher.h" //YSP+ { Resource Replace }
-#include "chrome/browser/ysp_login/ysp_singlesignon_fetcher.h" //YSP+ { SingleSignOn config }
+#include "chrome/browser/ysp_login/ysp_replace_fetcher.h"  // YSP+ { Resource Replace }
+#include "chrome/browser/ysp_login/ysp_singlesignon_fetcher.h"  // YSP+ { SingleSignOn config }
 #include "chrome/browser/ysp_login/ysp_us_report_fetcher.h"
+#include "components/prefs/pref_service.h"
 #include "ui/gfx/geometry/size.h"
 
 struct ActivexDownloadInfo;
@@ -57,8 +57,8 @@ enum {
 class YSPLoginManagerObserver {
  public:
   virtual void OnConfigDataUpdated(const std::string& type,
-                                   const std::string& data) { }
-  virtual void OnTokenStatusChanged(const std::string& type) { }
+                                   const std::string& data) {}
+  virtual void OnTokenStatusChanged(const std::string& type) {}
   virtual void OnLoginRequestFailure(const std::string& error) = 0;
   virtual void OnLoginResponseParseFailure(const std::string& error) = 0;
   virtual void OnLoginFailure(base::string16 message) = 0;
@@ -99,40 +99,43 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool GetLoginStatus();
   bool GetAutoLoginStatus();
   std::string GetLoginInfo();
-  base::string16 BuildYSPBrowserVersionString(); //YSP+ { app version }
+  base::string16 BuildYSPBrowserVersionString();  // YSP+ { app version }
   std::string GetCompanyId();
   std::string GetManageServer();
   std::string GetValueForKey(const std::string& key);
-  std::string GetUserInfoForKey(int key); //YSP+ { passwords AD manager }
+  std::string GetUserInfoForKey(int key);  // YSP+ { passwords AD manager }
   std::string GetDeviceInfo();
   bool HasManagedBookmarks();
   base::DictionaryValue* GetManagedBookmarks();
   std::string GetUserAgent();
-  std::string GetAutoConfigUrl(); //ysp+ { auto get config }
-  int GetAutoConfigDelta(); //ysp+ { auto get config }
-  base::DictionaryValue * GetAutoUpgrade();
-  base::DictionaryValue * GetWebsiteListEnabled(); //ysp+ { URL Blacklist And Whitelist }
-  base::DictionaryValue* GetManagedResourceReplace(); //ysp+ { Resource Replace }
-  base::DictionaryValue* GetManagedKernels(); //ysp+ { Kernel switching }
-  std::string GetDefaultCore(); //ysp+ { Kernel switching }
-  base::DictionaryValue* GetManagedGMStream(); //YSP+ { sangfor GM ssl }
-  void GetSingleSignOnConfig(); //YSP+ { SingleSignOn config }
-  base::DictionaryValue * GetManagedSingleSignOnConfig(); //YSP+ { SingleSignOn config }
-  base::ListValue * GetManagedADProxyAuth(); //YSP+ { passwords AD manager }
-  std::string GetEncryptionAndKey(); //ysp+ { AES DES and SMS4 crypt }
-  bool GetCacheEncryption(); //YSP+ { cache encryption }
-  std::string GetCryptoHeaderKey(); //ysp+ { crypto http header }
-  std::string GetUserAgentTypes(); //ysp+ { crypto http header }
-  int GetLockScreenTime(); //YSP+ { lock screen time }
-  base::DictionaryValue * GetPopupSetting(); //YSP+ { window popup }
-  //TODO (matianzhi): YSP+ { startup and home pages
+  std::string GetAutoConfigUrl();  // ysp+ { auto get config }
+  int GetAutoConfigDelta();        // ysp+ { auto get config }
+  base::DictionaryValue* GetAutoUpgrade();
+  base::DictionaryValue*
+  GetWebsiteListEnabled();  // ysp+ { URL Blacklist And Whitelist }
+  base::DictionaryValue*
+  GetManagedResourceReplace();                  // ysp+ { Resource Replace }
+  base::DictionaryValue* GetManagedKernels();   // ysp+ { Kernel switching }
+  std::string GetDefaultCore();                 // ysp+ { Kernel switching }
+  base::DictionaryValue* GetManagedGMStream();  // YSP+ { sangfor GM ssl }
+  void GetSingleSignOnConfig();                 // YSP+ { SingleSignOn config }
+  base::DictionaryValue*
+  GetManagedSingleSignOnConfig();            // YSP+ { SingleSignOn config }
+  base::ListValue* GetManagedADProxyAuth();  // YSP+ { passwords AD manager }
+  std::string GetEncryptionAndKey();         // ysp+ { AES DES and SMS4 crypt }
+  bool GetCacheEncryption();                 // YSP+ { cache encryption }
+  std::string GetCryptoHeaderKey();          // ysp+ { crypto http header }
+  std::string GetUserAgentTypes();           // ysp+ { crypto http header }
+  int GetLockScreenTime();                   // YSP+ { lock screen time }
+  base::DictionaryValue* GetPopupSetting();  // YSP+ { window popup }
+  // TODO(matianzhi): YSP+ { startup and home pages
   bool isStartupPages();
   base::ListValue* GetStartupPages();
-  //YSP+ }
-  base::DictionaryValue* GetPreviewDocOnline(); //YSP+ { doc online preview }
-  bool GetPreviewDocOnlineEnable(); //YSP+ { doc online preview }
-  base::DictionaryValue * GetPrivateDNS(); //ysp+ { private DNS }
-  std::string GetYSPSingleSignOnString(); //ysp+ { ysp single sign on }
+  // YSP+ }
+  base::DictionaryValue* GetPreviewDocOnline();  // YSP+ { doc online preview }
+  bool GetPreviewDocOnlineEnable();              // YSP+ { doc online preview }
+  base::DictionaryValue* GetPrivateDNS();        // ysp+ { private DNS }
+  std::string GetYSPSingleSignOnString();        // ysp+ { ysp single sign on }
   void AddHeaders();
   bool GetAddressBarEnabled();
   bool GetStatusBarEnabled();
@@ -167,7 +170,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   // YSPLoginFetcherDelegate:
   void OnLoginRequestFailure(const std::string& error) override;
   void OnLoginResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) override;
+      std::unique_ptr<base::DictionaryValue> response_data) override;
   void OnLoginResponseParseFailure(const std::string& error) override;
 
   // YSPFetcherResourceDelegate:
@@ -185,14 +188,14 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void OnReplaceResponseParseSuccess(const std::string& response_data,
                                      const std::string& path_url) override;
   void OnReplaceResponseParseFailure(const std::string& error) override;
-  //YSP+ }
-  //YSP+ { SingleSignOn config
+  // YSP+ }
+  // YSP+ { SingleSignOn config
   // YSPSingleSignOnInfoFetcherDelegate:
   void OnSingleSignOnRequestFailure() override;
   void OnSingleSignOnResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) override;
+      std::unique_ptr<base::DictionaryValue> response_data) override;
   void OnSingleSignOnResponseParseFailure(const std::string& error) override;
-  //YSP+ } /* SingleSignOn config */
+  // YSP+ } /* SingleSignOn config */
   // ManagedSettingsProvider:
   base::Value* GetManagedValue(const std::string& path) override;
   bool SetManageServer(const std::string& manage_server);
@@ -201,8 +204,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool isValidPassword(const std::string& field) { return password_ == field; }
   std::string generateUserInfoForSettings();
   std::string generateLoginDeviceForSettings();
-  //YSP+ { Fetcher resource
-  int GetTimeDifference(); //YSP+ { time synchronization }
+  // YSP+ { Fetcher resource
+  int GetTimeDifference();  // YSP+ { time synchronization }
   std::string GetUserId();
   int GetStrategyVersion();
   std::string GetActivelId();
@@ -226,62 +229,75 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
                                 bool application_status);
   void GetGatewayApplictionFetch(bool auto_fetch = true);
 
-  void OnAutoConfigParseSuccess(std::unique_ptr<base::DictionaryValue> response_data, bool auto_fetch);
+  void OnAutoConfigParseSuccess(
+      std::unique_ptr<base::DictionaryValue> response_data,
+      bool auto_fetch);
   void ModifyPassword(const std::string& old_password,
                       const std::string& new_password);
 
   base::string16 GetYSPUserName();
   std::string GetHeadImageUrl();
-  void OnApplicationFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                         bool from_local,
-                                         bool auto_fetch);
-  void OnStrategyFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                      bool from_local,
-                                      bool auto_fetch);
-  void OnTokenFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                   bool from_local,
-                                   bool auto_fetch);
-  void OnSwaFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                 bool from_local,
-                                 bool auto_fetch);
-  void OnPcFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                bool from_local,
-                                bool auto_fetch);
-  void OnUserFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                  bool from_local,
-                                  bool auto_fetch);
-  void OnAutoTokenFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                       bool from_local,
-                                       bool auto_fetch);
-  void OnSdpDeviceFetcherResponseParse(std::unique_ptr<base::DictionaryValue>& response_data,
-                                       bool from_local,
-                                       bool auto_fetch);
+  void OnApplicationFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnStrategyFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnTokenFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnSwaFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnPcFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnUserFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnAutoTokenFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
+  void OnSdpDeviceFetcherResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data,
+      bool from_local,
+      bool auto_fetch);
   void OnModifyPasswordResponseParse(std::string response);
-  //YSP+ } /*Fetcher resource*/
+  // YSP+ } /*Fetcher resource*/
  private:
   void OnLoginResponseParseSuccessInternal(
       std::unique_ptr<base::DictionaryValue>& response_data,
       bool from_local);
-  void OnFetcherResourceResponseParseSuccessInternal(const GURL& url,
+  void OnFetcherResourceResponseParseSuccessInternal(
+      const GURL& url,
       std::unique_ptr<base::DictionaryValue>& response_data,
       bool from_local,
-      bool auto_fetch); //YSP+ { Fetcher resource }
+      bool auto_fetch);  // YSP+ { Fetcher resource }
   void OnReplaceResponseParseSuccessInternal(
       const std::string& response_data,
       const std::string& path_url,
-      bool from_local); //YSP+ { Resource Replace }
+      bool from_local);  // YSP+ { Resource Replace }
   void OnSingleSignOnResponseParseSuccessInternal(
       std::unique_ptr<base::DictionaryValue>& response_data,
-      bool from_local); //YSP+ { SingleSignOn config }
+      bool from_local);  // YSP+ { SingleSignOn config }
   void SetIEUrlTrusted(const UrlTrusted& trust);
   std::wstring Utf8ToUTF16(const std::string& str);
 
   std::string GetCryptKey();
-  bool GetCacheCrypt(); //YSP+ { cache encryption }
+  bool GetCacheCrypt();  // YSP+ { cache encryption }
   std::string GetResponseStatusCode(
-      std::unique_ptr<base::DictionaryValue>& response_data); //YSP+ { Fetcher resource }
+      std::unique_ptr<base::DictionaryValue>&
+          response_data);  // YSP+ { Fetcher resource }
   base::string16 GetResponseMessage(
-      std::unique_ptr<base::DictionaryValue>& response_data); //YSP+ { Fetcher resource }
+      std::unique_ptr<base::DictionaryValue>&
+          response_data);  // YSP+ { Fetcher resource }
   base::string16 GetResponseErrorMessage(
       const std::string error_code);  // YSP+ { Fetcher resource }
   std::string GetUserInfoAsJSONString();
@@ -328,7 +344,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPReplaceFetcher* replace_fetcher_;
   YSPSingleSignOnFetcher* single_signon_fetcher_;
   YSPUSReportFetcher* report_fetcher_;
-  //YSP+ { Fetcher resource
+  // YSP+ { Fetcher resource
   YSPFetcherResource* get_user_fetcher_;
   YSPFetcherResource* get_application_fetcher_;
   YSPFetcherResource* get_configuration_strategy_fetcher_;
@@ -341,14 +357,14 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPFetcherResource* put_appliction_status_fetcher_;
   YSPFetcherResource* get_gateway_appliction_fetcher_;
   YSPFetcherResource* put_modify_password_fetcher_;
-  //YSP+ } /*Fetcher resource*/
+  // YSP+ } /*Fetcher resource*/
   YSPAutoConfigFetcher* autoConfig_fetcher_;
   bool auto_login_;
   std::string account_;
   std::string password_;
   std::string cid_;
   std::unique_ptr<base::DictionaryValue> login_info_;
-  //YSP+ { Fetcher resource
+  // YSP+ { Fetcher resource
   std::unique_ptr<base::DictionaryValue> application_info_;
   std::unique_ptr<base::DictionaryValue> strategy_info_;
   std::unique_ptr<base::DictionaryValue> token_info_;
@@ -361,15 +377,15 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool token_status_code_;
   bool swa_status_code_;
   bool pc_status_code_;
-  //YSP+ } /*Fetcher resource*/
+  // YSP+ } /*Fetcher resource*/
   std::vector<std::string> send_request_list_;
   std::unique_ptr<base::DictionaryValue> single_signon_info_;
   int window_frame_color_;
   int window_inactive_color_;
   bool should_parse_response_;
   bool download_ = false;
-  int login_status_ = SATUS_LOGOUT; //ysp+ { auto get config }
-  bool ntp_login_status_ = false; //false is logout
+  int login_status_ = SATUS_LOGOUT;    // ysp+ { auto get config }
+  bool ntp_login_status_ = false;      // false is logout
   bool single_signon_status_ = false;  // YSP+ { SingleSignOn config }
   bool web_initialized_;
   bool offline_status_;

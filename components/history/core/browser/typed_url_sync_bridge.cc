@@ -98,8 +98,7 @@ TypedURLSyncBridge::TypedURLSyncBridge(
   DCHECK(sequence_checker_.CalledOnValidSequence());
 }
 
-TypedURLSyncBridge::~TypedURLSyncBridge() {
-}
+TypedURLSyncBridge::~TypedURLSyncBridge() {}
 
 std::unique_ptr<MetadataChangeList>
 TypedURLSyncBridge::CreateMetadataChangeList() {
@@ -668,13 +667,14 @@ TypedURLSyncBridge::MergeResult TypedURLSyncBridge::MergeUrls(
         ++visit_ix;
       }
 #ifdef REDCORE
-    std::string uuidKey = "onlyid";
-    std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
-    VisitRow visit(url.id(), new_visit->first, username, 0, new_visit->second, 0,
-                   HistoryBackend::IsTypedIncrement(new_visit->second));
+      std::string uuid_key = "onlyid";
+      std::string username =
+          YSPLoginManager::GetInstance()->GetValueForKey(uuid_key);
+      VisitRow visit(url.id(), new_visit->first, username, 0, new_visit->second,
+                     0, HistoryBackend::IsTypedIncrement(new_visit->second));
 #else
-    VisitRow visit(url.id(), new_visit->first, 0, new_visit->second, 0,
-                   HistoryBackend::IsTypedIncrement(new_visit->second));
+      VisitRow visit(url.id(), new_visit->first, 0, new_visit->second, 0,
+                     HistoryBackend::IsTypedIncrement(new_visit->second));
 #endif
       visit_ix = visits->insert(visit_ix, visit);
       ++visit_ix;
@@ -1124,7 +1124,8 @@ bool TypedURLSyncBridge::FixupURLAndGetVisits(URLRow* url,
 
 #ifdef REDCORE
     std::string uuidKey = "onlyid";
-    std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+    std::string username =
+        YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
     VisitRow visit(url->id(), url->last_visit(), username, 0,
                    ui::PAGE_TRANSITION_TYPED, 0, true);
 #else

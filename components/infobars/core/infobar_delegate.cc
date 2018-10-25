@@ -21,11 +21,10 @@ namespace infobars {
 
 const int InfoBarDelegate::kNoIconID = 0;
 
-InfoBarDelegate::~InfoBarDelegate() {
-}
+InfoBarDelegate::~InfoBarDelegate() {}
 
 InfoBarDelegate::InfoBarAutomationType
-    InfoBarDelegate::GetInfoBarAutomationType() const {
+InfoBarDelegate::GetInfoBarAutomationType() const {
   return UNKNOWN_INFOBAR;
 }
 
@@ -60,17 +59,16 @@ bool InfoBarDelegate::EqualsDelegate(InfoBarDelegate* delegate) const {
 
 bool InfoBarDelegate::ShouldExpire(const NavigationDetails& details) const {
   return details.is_navigation_to_different_page &&
-      !details.did_replace_entry &&
-      // This next condition ensures a navigation that passes the above
-      // conditions doesn't dismiss infobars added while that navigation was
-      // already in process.  We carve out an exception for reloads since we
-      // want reloads to dismiss infobars, but they will have unchanged entry
-      // IDs.
-      ((nav_entry_id_ != details.entry_id) || details.is_reload);
+         !details.did_replace_entry &&
+         // This next condition ensures a navigation that passes the above
+         // conditions doesn't dismiss infobars added while that navigation was
+         // already in process.  We carve out an exception for reloads since we
+         // want reloads to dismiss infobars, but they will have unchanged entry
+         // IDs.
+         ((nav_entry_id_ != details.entry_id) || details.is_reload);
 }
 
-void InfoBarDelegate::InfoBarDismissed() {
-}
+void InfoBarDelegate::InfoBarDismissed() {}
 
 ConfirmInfoBarDelegate* InfoBarDelegate::AsConfirmInfoBarDelegate() {
   return nullptr;
@@ -81,7 +79,7 @@ HungRendererInfoBarDelegate* InfoBarDelegate::AsHungRendererInfoBarDelegate() {
 }
 
 InsecureContentInfoBarDelegate*
-    InfoBarDelegate::AsInsecureContentInfoBarDelegate() {
+InfoBarDelegate::AsInsecureContentInfoBarDelegate() {
   return nullptr;
 }
 
@@ -94,17 +92,17 @@ PopupBlockedInfoBarDelegate* InfoBarDelegate::AsPopupBlockedInfoBarDelegate() {
 }
 
 RegisterProtocolHandlerInfoBarDelegate*
-    InfoBarDelegate::AsRegisterProtocolHandlerInfoBarDelegate() {
+InfoBarDelegate::AsRegisterProtocolHandlerInfoBarDelegate() {
   return nullptr;
 }
 
 ScreenCaptureInfoBarDelegate*
-    InfoBarDelegate::AsScreenCaptureInfoBarDelegate() {
+InfoBarDelegate::AsScreenCaptureInfoBarDelegate() {
   return nullptr;
 }
 
 ThemeInstalledInfoBarDelegate*
-    InfoBarDelegate::AsThemePreviewInfobarDelegate() {
+InfoBarDelegate::AsThemePreviewInfobarDelegate() {
   return nullptr;
 }
 
@@ -113,13 +111,14 @@ ThreeDAPIInfoBarDelegate* InfoBarDelegate::AsThreeDAPIInfoBarDelegate() {
 }
 
 translate::TranslateInfoBarDelegate*
-    InfoBarDelegate::AsTranslateInfoBarDelegate() {
+InfoBarDelegate::AsTranslateInfoBarDelegate() {
   return nullptr;
 }
 
 #ifdef IE_REDCORE
-DownloadActivexInfobarDelegate* InfoBarDelegate::AsDownloadActivexInfobarDelegate() {
-	return nullptr;
+DownloadActivexInfobarDelegate*
+InfoBarDelegate::AsDownloadActivexInfobarDelegate() {
+  return nullptr;
 }
 #endif
 
@@ -130,8 +129,7 @@ InfoBarDelegate::AsOfflinePageInfoBarDelegate() {
 }
 #endif
 
-InfoBarDelegate::InfoBarDelegate() : nav_entry_id_(0) {
-}
+InfoBarDelegate::InfoBarDelegate() : nav_entry_id_(0) {}
 
 InfoBarDelegate::Type InfoBarDelegate::GetInfoBarType() const {
   return WARNING_TYPE;

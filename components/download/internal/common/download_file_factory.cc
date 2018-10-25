@@ -27,18 +27,20 @@ DownloadFile* DownloadFileFactory::CreateFile(
 }
 
 #ifdef IE_REDCORE
-IEDownloadFileFactory::~IEDownloadFileFactory() {
-}
+IEDownloadFileFactory::~IEDownloadFileFactory() {}
 
-DownloadFile * IEDownloadFileFactory::CreateFile(std::unique_ptr<DownloadSaveInfo> save_info, 
-																				const base::FilePath & default_downloads_directory, 
-																				const GURL & url, const GURL & referrer_url, 
-																				bool calculate_hash, base::WeakPtr<IE::IEDownloader> pDownloader, 
-																				const net::NetLogWithSource & bound_net_log, 
-																				base::WeakPtr<DownloadDestinationObserver> observer)
-{
-	return new IE::DownloadFileIE(std::move(save_info), default_downloads_directory,
-		url, referrer_url, calculate_hash, bound_net_log, observer, std::move(pDownloader));
+DownloadFile* IEDownloadFileFactory::CreateFile(
+    std::unique_ptr<DownloadSaveInfo> save_info,
+    const base::FilePath& default_downloads_directory,
+    const GURL& url,
+    const GURL& referrer_url,
+    bool calculate_hash,
+    base::WeakPtr<IE::IEDownloader> pDownloader,
+    const net::NetLogWithSource& bound_net_log,
+    base::WeakPtr<DownloadDestinationObserver> observer) {
+  return new IE::DownloadFileIE(
+      std::move(save_info), default_downloads_directory, url, referrer_url,
+      calculate_hash, bound_net_log, observer, std::move(pDownloader));
 }
 #endif
 

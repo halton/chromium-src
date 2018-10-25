@@ -127,7 +127,7 @@ struct DownloadRow {
   std::vector<DownloadSliceInfo> download_slice_info;
 
 #ifdef REDCORE
-  std::string YSPUserName;
+  std::string ysp_username;
 #endif
 };
 

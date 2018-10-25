@@ -13,8 +13,8 @@
 #include "components/prefs/pref_service.h"
 
 #ifdef REDCORE
-#include "chrome/browser/ysp_login/ysp_login_manager.h" //YSP+ { passwords AD manager }
-#include "base/strings/utf_string_conversions.h" //YSP+ { passwords AD manager }
+#include "base/strings/utf_string_conversions.h"  // YSP+ { passwords AD manager }
+#include "chrome/browser/ysp_login/ysp_login_manager.h"  // YSP+ { passwords AD manager }
 #endif
 
 using autofill::PasswordForm;
@@ -25,8 +25,7 @@ PasswordStoreDefault::PasswordStoreDefault(
     std::unique_ptr<LoginDatabase> login_db)
     : login_db_(std::move(login_db)) {}
 
-PasswordStoreDefault::~PasswordStoreDefault() {
-}
+PasswordStoreDefault::~PasswordStoreDefault() {}
 
 void PasswordStoreDefault::ShutdownOnUIThread() {
   PasswordStore::ShutdownOnUIThread();
@@ -166,9 +165,8 @@ bool PasswordStoreDefault::RemoveStatisticsByOriginAndTimeImpl(
     const base::Callback<bool(const GURL&)>& origin_filter,
     base::Time delete_begin,
     base::Time delete_end) {
-  return login_db_ &&
-         login_db_->stats_table().RemoveStatsByOriginAndTime(
-             origin_filter, delete_begin, delete_end);
+  return login_db_ && login_db_->stats_table().RemoveStatsByOriginAndTime(
+                          origin_filter, delete_begin, delete_end);
 }
 
 std::vector<std::unique_ptr<PasswordForm>>
@@ -180,13 +178,17 @@ PasswordStoreDefault::FillMatchingLogins(const FormDigest& form) {
   std::vector<std::unique_ptr<autofill::PasswordForm>> new_matched_forms;
   std::string uuidKey = "onlyid";
   std::string loggingstatus = "loggingStatus";
-  base::string16 username = base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
-  std::string loginstatus = YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
-  if (loginstatus != "100") username.clear();
+  base::string16 username = base::UTF8ToUTF16(
+      YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
+  std::string loginstatus =
+      YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
+  if (loginstatus != "100")
+    username.clear();
 
   new_matched_forms.clear();
   for (auto& login : matched_forms) {
-    if (login->YSPUserName_value.empty() || (login->YSPUserName_value == username)) {
+    if (login->ysp_username_value.empty() ||
+        (login->ysp_username_value == username)) {
       std::unique_ptr<PasswordForm> new_form(new PasswordForm());
       new_form->action = login->action;
       new_form->form_data = login->form_data;
@@ -203,9 +205,9 @@ PasswordStoreDefault::FillMatchingLogins(const FormDigest& form) {
       new_form->type = login->type;
       new_form->username_element = login->username_element;
       new_form->username_value = login->username_value;
-      new_form->YSPAppName_value = login->YSPAppName_value;
-      new_form->YSPLoginType_value = login->YSPLoginType_value;
-      new_form->YSPUserName_value = login->YSPUserName_value;
+      new_form->ysp_app_name_value = login->ysp_app_name_value;
+      new_form->ysp_login_type_value = login->ysp_login_type_value;
+      new_form->ysp_username_value = login->ysp_username_value;
       new_matched_forms.push_back(std::move(new_form));
     }
   }

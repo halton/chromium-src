@@ -36,7 +36,7 @@ class PrefService;
 namespace autofill {
 struct FormData;
 struct PasswordForm;
-}
+}  // namespace autofill
 
 namespace syncer {
 class SyncableService;
@@ -309,11 +309,15 @@ class PasswordStore : protected PasswordStoreSync,
 #endif
 
 #ifdef REDCORE
-  void GetYSPLogins(const autofill::PasswordForm& form,
-     std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
-  void GetYSPAllLogins(std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
-  virtual void SaveLoginForEnterplorer(const autofill::PasswordForm & form); //YSP+ { passwords AD manager }
-  virtual PasswordStoreChangeList SaveLoginForEnterplorerImpl(const autofill::PasswordForm& form) = 0;
+  void GetYSPLogins(
+      const autofill::PasswordForm& form,
+      std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
+  void GetYSPAllLogins(
+      std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms);
+  virtual void SaveLoginForEnterplorer(
+      const autofill::PasswordForm& form);  // YSP+ { passwords AD manager }
+  virtual PasswordStoreChangeList SaveLoginForEnterplorerImpl(
+      const autofill::PasswordForm& form) = 0;
 #endif
 
  protected:
@@ -659,7 +663,8 @@ class PasswordStore : protected PasswordStoreSync,
   void DestroyOnBackgroundSequence();
 
 #ifdef REDCORE
-  void SaveLoginForEnterplorerInternal(const autofill::PasswordForm & form); //YSP+ { passwords AD manager }
+  void SaveLoginForEnterplorerInternal(
+      const autofill::PasswordForm& form);  // YSP+ { passwords AD manager }
 #endif
 
   // TaskRunner for tasks that run on the main sequence (usually the UI thread).

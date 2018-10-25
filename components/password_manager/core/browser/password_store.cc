@@ -38,14 +38,13 @@ namespace password_manager {
 
 PasswordStore::GetLoginsRequest::GetLoginsRequest(
     const PasswordStoreConsumer* consumer)
-  // comment just for compiling
-   // : consumer_weak_(consumer->GetWeakPtr()) 
-    {
+// comment just for compiling
+// : consumer_weak_(consumer->GetWeakPtr())
+{
   origin_task_runner_ = base::SequencedTaskRunnerHandle::Get();
 }
 
-PasswordStore::GetLoginsRequest::~GetLoginsRequest() {
-}
+PasswordStore::GetLoginsRequest::~GetLoginsRequest() {}
 
 void PasswordStore::GetLoginsRequest::NotifyConsumerWithResults(
     std::vector<std::unique_ptr<PasswordForm>> results) {
@@ -222,8 +221,8 @@ void PasswordStore::GetLogins(const FormDigest& form,
        form.signon_realm == "http://www.google.com/" ||
        form.signon_realm == "https://www.google.com" ||
        form.signon_realm == "https://www.google.com/")) {
-    static const base::Time::Exploded exploded_cutoff =
-        { 2012, 1, 0, 1, 0, 0, 0, 0 };  // 00:00 Jan 1 2012
+    static const base::Time::Exploded exploded_cutoff = {
+        2012, 1, 0, 1, 0, 0, 0, 0};  // 00:00 Jan 1 2012
     base::Time out_time;
     bool conversion_success =
         base::Time::FromUTCExploded(exploded_cutoff, &out_time);
@@ -251,7 +250,8 @@ void PasswordStore::GetLoginsForSameOrganizationName(
                           this, signon_realm, base::Passed(&request)));
 }
 
-void PasswordStore::GetAutofillableLogins(const PasswordStoreConsumer* consumer) {
+void PasswordStore::GetAutofillableLogins(
+    const PasswordStoreConsumer* consumer) {
   Schedule(&PasswordStore::GetAutofillableLoginsImpl, consumer);
 }
 
@@ -489,7 +489,6 @@ void PasswordStore::GetLoginsImpl(const FormDigest& form,
   request->NotifyConsumerWithResults(FillMatchingLogins(form));
 }
 
-
 void PasswordStore::LogStatsForBulkDeletion(int num_deletions) {
   UMA_HISTOGRAM_COUNTS("PasswordManager.NumPasswordsDeletedByBulkDelete",
                        num_deletions);
@@ -608,7 +607,7 @@ void PasswordStore::ClearAllEnterprisePasswordHashImpl() {
 
 void PasswordStore::Schedule(
     void (PasswordStore::*func)(std::unique_ptr<GetLoginsRequest>),
-         const PasswordStoreConsumer* consumer) {
+    const PasswordStoreConsumer* consumer) {
   std::unique_ptr<GetLoginsRequest> request(new GetLoginsRequest(consumer));
   // comment just for compiling
   // consumer->cancelable_task_tracker()->PostTask(
@@ -935,7 +934,8 @@ std::ostream& operator<<(std::ostream& os,
 
 #ifdef REDCORE
 void PasswordStore::SaveLoginForEnterplorer(const PasswordForm& form) {
-  ScheduleTask(base::Bind(&PasswordStore::SaveLoginForEnterplorerInternal, this, form));
+  ScheduleTask(
+      base::Bind(&PasswordStore::SaveLoginForEnterplorerInternal, this, form));
 }
 
 void PasswordStore::SaveLoginForEnterplorerInternal(const PasswordForm& form) {
@@ -943,13 +943,15 @@ void PasswordStore::SaveLoginForEnterplorerInternal(const PasswordForm& form) {
   NotifyLoginsChanged(changes);
 }
 
-void PasswordStore::GetYSPLogins(const PasswordForm& form,
-  std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
+void PasswordStore::GetYSPLogins(
+    const PasswordForm& form,
+    std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
   // FIXME(halton):
   // *matched_forms = FillMatchingLogins(form);
 }
 
-void PasswordStore::GetYSPAllLogins(std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
+void PasswordStore::GetYSPAllLogins(
+    std::vector<std::unique_ptr<autofill::PasswordForm>>* matched_forms) {
   std::vector<std::unique_ptr<PasswordForm>> obtained_forms;
   if (!FillAutofillableLogins(&obtained_forms))
     obtained_forms.clear();

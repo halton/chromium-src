@@ -794,9 +794,8 @@ void HistoryService::QueryDownloads(const DownloadQueryCallback& callback) {
 
 // Handle updates for a particular download. This is a 'fire and forget'
 // operation, so we don't need to be called back.
-void HistoryService::UpdateDownload(
-    const DownloadRow& data,
-    bool should_commit_immediately) {
+void HistoryService::UpdateDownload(const DownloadRow& data,
+                                    bool should_commit_immediately) {
   DCHECK(backend_task_runner_) << "History service being called after cleanup";
   DCHECK(thread_checker_.CalledOnValidThread());
   ScheduleTask(PRIORITY_NORMAL,
@@ -1057,14 +1056,14 @@ HistoryService::GetTypedURLSyncControllerDelegate() {
 }
 
 #ifdef REDCORE
-//TODO (matianzhi): YSP+ { clear user data
-void HistoryService::ClearHistoryForUser(const std::string & userid) {
-	DCHECK(thread_) << "History service being called after cleanup";
-	DCHECK(thread_checker_.CalledOnValidThread());
-	ScheduleTask(PRIORITY_NORMAL, base::Bind(&HistoryBackend::ClearHistoryForUser,
-      history_backend_.get(), userid));
+// TODO(matianzhi): YSP+ { clear user data
+void HistoryService::ClearHistoryForUser(const std::string& user_id) {
+  DCHECK(thread_) << "History service being called after cleanup";
+  DCHECK(thread_checker_.CalledOnValidThread());
+  ScheduleTask(PRIORITY_NORMAL, base::Bind(&HistoryBackend::ClearHistoryForUser,
+                                           history_backend_.get(), user_id));
 }
-//ysp+ }
+// ysp+ }
 #endif
 
 syncer::SyncError HistoryService::ProcessLocalDeleteDirective(

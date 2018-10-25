@@ -103,7 +103,7 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
       bool is_sparse_file,
       int64_t* const bytes_wasted);
 
-  //just for compile
+  // just for compile
   DownloadInterruptReason Initialize(const base::FilePath& default_directory);
 
   // Write a new chunk of data to the file. Returns a DownloadInterruptReason

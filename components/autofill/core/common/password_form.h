@@ -364,9 +364,9 @@ struct PasswordForm {
   PasswordForm& operator=(PasswordForm&& form);
 
 #ifdef REDCORE
-  base::string16 YSPAppName_value;
-  base::string16 YSPUserName_value;
-  std::string YSPLoginType_value;
+  base::string16 ysp_app_name_value;
+  base::string16 ysp_username_value;
+  std::string ysp_login_type_value;
 #endif
 };
 

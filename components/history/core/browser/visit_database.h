@@ -13,7 +13,7 @@
 namespace sql {
 class Database;
 class Statement;
-}
+}  // namespace sql
 
 namespace history {
 
@@ -84,8 +84,10 @@ class VisitDatabase {
   // is used for history expiration.)
   //
   // The results will be in increasing order of date.
-  bool GetAllVisitsInRange(base::Time begin_time, base::Time end_time,
-                           int max_results, VisitVector* visits);
+  bool GetAllVisitsInRange(base::Time begin_time,
+                           base::Time end_time,
+                           int max_results,
+                           VisitVector* visits);
 
   // Fills all visits with specified transition in the time range [begin, end)
   // to the given vector. Either time can be is_null(), in which case the times
@@ -129,8 +131,7 @@ class VisitDatabase {
   //
   // If non-NULL, the given visit row will be filled with the information of
   // the found visit. When no visit is found, the row will be unchanged.
-  VisitID GetMostRecentVisitForURL(URLID url_id,
-                                   VisitRow* visit_row);
+  VisitID GetMostRecentVisitForURL(URLID url_id, VisitRow* visit_row);
 
   // Returns the |max_results| most recent visit sessions for |url_id|.
   //
@@ -185,8 +186,7 @@ class VisitDatabase {
   bool GetStartDate(base::Time* first_visit);
 
   // Get the source information about the given visits.
-  void GetVisitsSource(const VisitVector& visits,
-                       VisitSourceMap* sources);
+  void GetVisitsSource(const VisitVector& visits, VisitSourceMap* sources);
 
   // Returns the list of Google domain visits of the user based on the Google
   // searches issued in the specified time interval.
@@ -196,7 +196,9 @@ class VisitDatabase {
       base::Time end_time);
 
 #ifdef REDCORE
-  bool GetVisitsForUserId(const std::string& userid, VisitVector* visits); //TODO (matianzhi): YSP+ { clear user data }
+  bool GetVisitsForUserId(
+      const std::string& user_id,
+      VisitVector* visits);  // TODO(matianzhi): YSP+ { clear user data }
 #endif
 
  protected:
@@ -236,16 +238,16 @@ class VisitDatabase {
       std::vector<URLID>* visited_url_rowids_sorted);
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(VisitDatabase);
 };
 
 // Columns, in order, of the visit table.
 #ifdef REDCORE
-#define HISTORY_VISIT_ROW_FIELDS \
-    " id,url,visit_time,from_visit,transition,segment_id,visit_duration,YSPUserName "
+#define HISTORY_VISIT_ROW_FIELDS                                        \
+  " id,url,visit_time,from_visit,transition,segment_id,visit_duration," \
+  "YSPUserName "
 #else
-#define HISTORY_VISIT_ROW_FIELDS \
+#define HISTORY_VISIT_ROW_FIELDS                                        \
   " id,url,visit_time,from_visit,transition,segment_id,visit_duration," \
   "incremented_omnibox_typed_score "
 #endif

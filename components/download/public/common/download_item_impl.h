@@ -165,7 +165,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -191,12 +191,13 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
 
   // Constructing for a regular download.
   // |net_log| is constructed externally for our use.
-  DownloadItemImpl(DownloadItemImplDelegate* delegate,
-                   uint32_t id,
+  DownloadItemImpl(
+      DownloadItemImplDelegate* delegate,
+      uint32_t id,
 #ifdef REDCORE
-                   const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
-                   const DownloadCreateInfo& info);
+      const DownloadCreateInfo& info);
 
   // Constructing for the "Save Page As..." feature:
   // |net_log| is constructed externally for our use.
@@ -204,7 +205,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       DownloadItemImplDelegate* delegate,
       uint32_t id,
 #ifdef REDCORE
-      const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
       const base::FilePath& path,
       const GURL& url,
@@ -796,7 +797,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   THREAD_CHECKER(thread_checker_);
 
 #ifdef REDCORE
-  std::string YSPUserName_; //YSP+ { User information isolation }
+  std::string ysp_username_;  // YSP+ { User information isolation }
   bool is_doc_view_;
   bool is_update_;
 #endif

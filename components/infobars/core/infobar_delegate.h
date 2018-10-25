@@ -36,7 +36,7 @@ class TranslateInfoBarDelegate;
 namespace gfx {
 class Image;
 struct VectorIcon;
-}
+}  // namespace gfx
 
 namespace infobars {
 
@@ -158,9 +158,9 @@ class InfoBarDelegate {
     BLOATED_RENDERER_INFOBAR_DELEGATE = 84,
     SUPERVISED_USERS_DEPRECATED_INFOBAR_DELEGATE = 85,
     NEAR_OOM_REDUCTION_INFOBAR_ANDROID = 86,
-  #ifdef REDCORE
-    DOWNLOAD_ACTIVEX_INFOBAR_DELEGATE = 87, //ysp+ {Activex distribute}
-  #endif
+#ifdef REDCORE
+    DOWNLOAD_ACTIVEX_INFOBAR_DELEGATE = 87,  // ysp+ {Activex distribute}
+#endif
   };
   virtual Type GetInfoBarType() const;
   // Describes navigation events, used to decide whether infobars should be
@@ -231,7 +231,7 @@ class InfoBarDelegate {
   virtual NativeAppInfoBarDelegate* AsNativeAppInfoBarDelegate();
   virtual PopupBlockedInfoBarDelegate* AsPopupBlockedInfoBarDelegate();
   virtual RegisterProtocolHandlerInfoBarDelegate*
-      AsRegisterProtocolHandlerInfoBarDelegate();
+  AsRegisterProtocolHandlerInfoBarDelegate();
   virtual ScreenCaptureInfoBarDelegate* AsScreenCaptureInfoBarDelegate();
   virtual ThemeInstalledInfoBarDelegate* AsThemePreviewInfobarDelegate();
   virtual ThreeDAPIInfoBarDelegate* AsThreeDAPIInfoBarDelegate();
@@ -242,7 +242,8 @@ class InfoBarDelegate {
 #endif
 
 #ifdef IE_REDCORE
-  virtual DownloadActivexInfobarDelegate* AsDownloadActivexInfobarDelegate(); //ysp+ {Activex distribute}
+  virtual DownloadActivexInfobarDelegate*
+  AsDownloadActivexInfobarDelegate();  // ysp+ {Activex distribute}
 #endif
 
   void set_infobar(InfoBar* infobar) { infobar_ = infobar; }

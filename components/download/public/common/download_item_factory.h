@@ -42,7 +42,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemFactory {
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& YSPUserName,  // YSP+ { User information isolation }
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,

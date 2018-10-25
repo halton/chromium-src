@@ -117,7 +117,7 @@ class IEDownloader {
  public:
   typedef base::Callback<void(int, const char*, int64_t)> DataReceivedCallback;
 
-  virtual ~IEDownloader(){};
+  virtual ~IEDownloader() { }
 
   virtual void RegisterCallback(const DataReceivedCallback& sink_callback) = 0;
   virtual void FinishDownload(bool isCancel) = 0;
@@ -125,6 +125,6 @@ class IEDownloader {
   virtual bool IsDownloading() = 0;
 };
 
-} //namespace IE
+}  // namespace IE
 
 #endif  // COMPONENTS_DOWNLOAD_PUBLIC_COMMON_DOWNLOAD_FILE_IE_H_

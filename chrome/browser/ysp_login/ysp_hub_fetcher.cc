@@ -1,4 +1,8 @@
-//ysp+ { login }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { login }
 #ifdef REDCORE
 #include "chrome/browser/ysp_login/ysp_hub_fetcher.h"
 
@@ -21,54 +25,47 @@ const char kInvalidDataResponseError[] = "Invalid Data reponse";
 
 }  // namespace
 
-YSPHubFetcher::YSPHubFetcher(
-  YSPHubFetcherDelegate* delegate,
-  net::URLRequestContextGetter* request_context)
-  : delegate_(delegate),
-  request_context_(request_context) {
-}
+YSPHubFetcher::YSPHubFetcher(YSPHubFetcherDelegate* delegate,
+                             net::URLRequestContextGetter* request_context)
+    : delegate_(delegate), request_context_(request_context) {}
 
 YSPHubFetcher::~YSPHubFetcher() {}
 
 void YSPHubFetcher::Start(const std::string& url) {
   url_ = url;
   content::BrowserThread::PostTask(
-    content::BrowserThread::UI, FROM_HERE,
-    base::Bind(&YSPHubFetcher::DoStart, base::Unretained(this)));
+      content::BrowserThread::UI, FROM_HERE,
+      base::Bind(&YSPHubFetcher::DoStart, base::Unretained(this)));
 }
 
 void YSPHubFetcher::DoStart() {
   data_fetcher_ =
-    net::URLFetcher::Create(GURL(url_), net::URLFetcher::GET, this);
+      net::URLFetcher::Create(GURL(url_), net::URLFetcher::GET, this);
   data_fetcher_->SetRequestContext(request_context_);
   data_fetcher_->Start();
 }
 
 void YSPHubFetcher::OnJsonParseSuccess(
-  std::unique_ptr<base::Value> parsed_json) {
+    std::unique_ptr<base::Value> parsed_json) {
   if (!parsed_json->is_dict()) {
     OnJsonParseFailure(kInvalidDataResponseError);
     return;
   }
 
-  delegate_->OnHubResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue>(
+  delegate_->OnHubResponseParseSuccess(std::unique_ptr<base::DictionaryValue>(
       static_cast<base::DictionaryValue*>(parsed_json.release())));
 }
 
-void YSPHubFetcher::OnJsonParseFailure(
-  const std::string& error) {
+void YSPHubFetcher::OnJsonParseFailure(const std::string& error) {
   delegate_->OnHubResponseParseFailure(error);
 }
 
 void YSPHubFetcher::OnURLFetchComplete(const net::URLFetcher* source) {
   CHECK_EQ(data_fetcher_.get(), source);
 
-  std::unique_ptr<net::URLFetcher> fetcher(
-    std::move(data_fetcher_));
+  std::unique_ptr<net::URLFetcher> fetcher(std::move(data_fetcher_));
 
-  if (!fetcher->GetStatus().is_success() ||
-    fetcher->GetResponseCode() != 200) {
+  if (!fetcher->GetStatus().is_success() || fetcher->GetResponseCode() != 200) {
     delegate_->OnHubRequestFailure();
     return;
   }
@@ -79,8 +76,7 @@ void YSPHubFetcher::OnURLFetchComplete(const net::URLFetcher* source) {
   // The parser will call us back via one of the callbacks.
   data_decoder::SafeJsonParser::Parse(
       content::ServiceManagerConnection::GetForProcess()->GetConnector(),
-      json_data,
-      base::Bind(&YSPHubFetcher::OnJsonParseSuccess, AsWeakPtr()),
+      json_data, base::Bind(&YSPHubFetcher::OnJsonParseSuccess, AsWeakPtr()),
       base::Bind(&YSPHubFetcher::OnJsonParseFailure, AsWeakPtr()));
 }
 #endif  // REDCORE

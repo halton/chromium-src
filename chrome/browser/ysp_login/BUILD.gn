@@ -1,4 +1,4 @@
-# //ysp+ { login }
+# // ysp+ { login }
 
 import("//build/config/ui.gni")
 

@@ -30,7 +30,7 @@ std::string GetYSPProductNameAndVersionForUserAgent() {
 }
 
 std::string GetYSPVersionNumber() {
- return YSP_PRODUCT_VERSION;
+  return YSP_PRODUCT_VERSION;
 }
 #endif
 
@@ -55,11 +55,11 @@ std::string GetOSType() {
 #elif defined(OS_MACOSX)
   return "Mac OS X";
 #elif defined(OS_CHROMEOS)
-# if defined(GOOGLE_CHROME_BUILD)
+#if defined(GOOGLE_CHROME_BUILD)
   return "Chrome OS";
-# else
+#else
   return "Chromium OS";
-# endif
+#endif
 #elif defined(OS_ANDROID)
   return "Android";
 #elif defined(OS_LINUX)

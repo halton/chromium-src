@@ -105,9 +105,9 @@ enum LoginDatabaseTableColumns {
   COLUMN_GENERATION_UPLOAD_STATUS,
   COLUMN_POSSIBLE_USERNAME_PAIRS,
 #ifdef REDCORE
-  COLUMN_YSP_APPNAME_VALUE, //YSP+ { passwords AD manager }
-  COLUMN_YSP_USERNAME_VALUE, //YSP+ { passwords AD manager }
-  COLUMN_YSP_LOGINTYPE_VALUE, //YSP+ { passwords AD manager }
+  COLUMN_YSP_APPNAME_VALUE,    // YSP+ { passwords AD manager }
+  COLUMN_YSP_USERNAME_VALUE,   // YSP+ { passwords AD manager }
+  COLUMN_YSP_LOGINTYPE_VALUE,  // YSP+ { passwords AD manager }
 #endif
   COLUMN_NUM  // Keep this last.
 };
@@ -149,8 +149,7 @@ void BindAddStatement(const PasswordForm& form,
   s->BindInt(COLUMN_TIMES_USED, form.times_used);
   base::Pickle form_data_pickle;
   autofill::SerializeFormData(form.form_data, &form_data_pickle);
-  s->BindBlob(COLUMN_FORM_DATA,
-              form_data_pickle.data(),
+  s->BindBlob(COLUMN_FORM_DATA, form_data_pickle.data(),
               form_data_pickle.size());
   s->BindInt64(COLUMN_DATE_SYNCED, form.date_synced.ToInternalValue());
   s->BindString16(COLUMN_DISPLAY_NAME, form.display_name);
@@ -167,9 +166,9 @@ void BindAddStatement(const PasswordForm& form,
   s->BindBlob(COLUMN_POSSIBLE_USERNAME_PAIRS, usernames_pickle.data(),
               usernames_pickle.size());
 #ifdef REDCORE
-  s->BindString16(COLUMN_YSP_APPNAME_VALUE, form.YSPAppName_value);
-  s->BindString16(COLUMN_YSP_USERNAME_VALUE, form.YSPUserName_value);
-  s->BindString(COLUMN_YSP_LOGINTYPE_VALUE, form.YSPLoginType_value);
+  s->BindString16(COLUMN_YSP_APPNAME_VALUE, form.ysp_app_name_value);
+  s->BindString16(COLUMN_YSP_USERNAME_VALUE, form.ysp_username_value);
+  s->BindString(COLUMN_YSP_LOGINTYPE_VALUE, form.ysp_login_type_value);
 #endif
 }
 
@@ -542,8 +541,7 @@ std::string GeneratePlaceholders(size_t count) {
 LoginDatabase::LoginDatabase(const base::FilePath& db_path)
     : db_path_(db_path) {}
 
-LoginDatabase::~LoginDatabase() {
-}
+LoginDatabase::~LoginDatabase() {}
 
 bool LoginDatabase::Init() {
   // Set pragmas for a small, private database (based on WebDatabase).
@@ -730,10 +728,10 @@ void LoginDatabase::ReportMetrics(const std::string& sync_username,
 
   bool syncing_account_saved = false;
   if (!sync_username.empty()) {
-    sql::Statement sync_statement(db_.GetCachedStatement(
-        SQL_FROM_HERE,
-        "SELECT username_value FROM logins "
-        "WHERE signon_realm == ?"));
+    sql::Statement sync_statement(
+        db_.GetCachedStatement(SQL_FROM_HERE,
+                               "SELECT username_value FROM logins "
+                               "WHERE signon_realm == ?"));
     sync_statement.BindString(
         0, GaiaUrls::GetInstance()->gaia_url().GetOrigin().spec());
 
@@ -753,8 +751,9 @@ void LoginDatabase::ReportMetrics(const std::string& sync_username,
                             4);
 
   sql::Statement empty_usernames_statement(db_.GetCachedStatement(
-      SQL_FROM_HERE, "SELECT COUNT(*) FROM logins "
-                     "WHERE blacklisted_by_user=0 AND username_value=''"));
+      SQL_FROM_HERE,
+      "SELECT COUNT(*) FROM logins "
+      "WHERE blacklisted_by_user=0 AND username_value=''"));
   if (empty_usernames_statement.Step()) {
     int empty_forms = empty_usernames_statement.ColumnInt(0);
     UMA_HISTOGRAM_COUNTS_100("PasswordManager.EmptyUsernames.CountInDatabase",
@@ -762,11 +761,12 @@ void LoginDatabase::ReportMetrics(const std::string& sync_username,
   }
 
   sql::Statement standalone_empty_usernames_statement(db_.GetCachedStatement(
-      SQL_FROM_HERE, "SELECT COUNT(*) FROM logins a "
-                     "WHERE a.blacklisted_by_user=0 AND a.username_value='' "
-                     "AND NOT EXISTS (SELECT * FROM logins b "
-                     "WHERE b.blacklisted_by_user=0 AND b.username_value!='' "
-                     "AND a.signon_realm = b.signon_realm)"));
+      SQL_FROM_HERE,
+      "SELECT COUNT(*) FROM logins a "
+      "WHERE a.blacklisted_by_user=0 AND a.username_value='' "
+      "AND NOT EXISTS (SELECT * FROM logins b "
+      "WHERE b.blacklisted_by_user=0 AND b.username_value!='' "
+      "AND a.signon_realm = b.signon_realm)"));
   if (standalone_empty_usernames_statement.Step()) {
     int num_entries = standalone_empty_usernames_statement.ColumnInt(0);
     UMA_HISTOGRAM_COUNTS_100(
@@ -1017,9 +1017,10 @@ bool LoginDatabase::RemoveLoginsCreatedBetween(base::Time delete_begin,
   }
 #endif
 
-  sql::Statement s(db_.GetCachedStatement(SQL_FROM_HERE,
-      "DELETE FROM logins WHERE "
-      "date_created >= ? AND date_created < ?"));
+  sql::Statement s(
+      db_.GetCachedStatement(SQL_FROM_HERE,
+                             "DELETE FROM logins WHERE "
+                             "date_created >= ? AND date_created < ?"));
   s.BindInt64(0, delete_begin.ToInternalValue());
   s.BindInt64(1, delete_end.is_null() ? std::numeric_limits<int64_t>::max()
                                       : delete_end.ToInternalValue());
@@ -1033,9 +1034,8 @@ bool LoginDatabase::RemoveLoginsSyncedBetween(base::Time delete_begin,
       SQL_FROM_HERE,
       "DELETE FROM logins WHERE date_synced >= ? AND date_synced < ?"));
   s.BindInt64(0, delete_begin.ToInternalValue());
-  s.BindInt64(1,
-              delete_end.is_null() ? base::Time::Max().ToInternalValue()
-                                   : delete_end.ToInternalValue());
+  s.BindInt64(1, delete_end.is_null() ? base::Time::Max().ToInternalValue()
+                                      : delete_end.ToInternalValue());
 
   return s.Run();
 }
@@ -1279,9 +1279,8 @@ bool LoginDatabase::GetLoginsSyncedBetween(
   sql::Statement s(
       db_.GetCachedStatement(SQL_FROM_HERE, synced_statement_.c_str()));
   s.BindInt64(0, begin.ToInternalValue());
-  s.BindInt64(1,
-              end.is_null() ? base::Time::Max().ToInternalValue()
-                            : end.ToInternalValue());
+  s.BindInt64(1, end.is_null() ? base::Time::Max().ToInternalValue()
+                               : end.ToInternalValue());
 
   return StatementToForms(&s, nullptr, forms);
 }
@@ -1546,9 +1545,10 @@ PasswordStoreChangeList LoginDatabase::SelectLogins(const PasswordForm& form) {
     " signon_realm, ssl_valid, preferred, date_created, blacklisted_by_user, "
     " scheme, password_type, possible_usernames, times_used, form_data, "
     " date_synced, display_name, icon_url,"
-    " federation_url, skip_zero_click, generation_upload_status, YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
-    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
-  BindAddStatement(form, encrypted_password, &s);
+    " federation_url, skip_zero_click, generation_upload_status,
+  YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+  ?)")); BindAddStatement(form, encrypted_password, &s);
   db_.set_error_callback(base::Bind(&AddCallback));
   const bool success = s.Run();
   db_.reset_error_callback();
@@ -1565,10 +1565,10 @@ PasswordStoreChangeList LoginDatabase::SelectLogins(const PasswordForm& form) {
     " signon_realm, ssl_valid, preferred, date_created, blacklisted_by_user, "
     " scheme, password_type, possible_usernames, times_used, form_data, "
     " date_synced, display_name, icon_url,"
-    " federation_url, skip_zero_click, generation_upload_status, YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
-    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
-  BindAddStatement(form, encrypted_password, &s);
-  if (s.Run()) {
+    " federation_url, skip_zero_click, generation_upload_status,
+  YSPAppName_value, YSPUserName_value, YSPLoginType_value) VALUES "
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+  ?)")); BindAddStatement(form, encrypted_password, &s); if (s.Run()) {
     list.push_back(PasswordStoreChange(PasswordStoreChange::REMOVE, form));
     list.push_back(PasswordStoreChange(PasswordStoreChange::ADD, form));
   }
