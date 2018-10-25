@@ -1,4 +1,5 @@
 // Copyright 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -501,7 +502,7 @@ void startAndRedirectNavigation(Browser* browser,
       }
     }
   }
-  // YSP+  }  /*URL Blacklist And Whitelist*/
+// YSP+  }  /*URL Blacklist And Whitelist*/
 #ifdef IE_REDCORE
   // YSP+ { Kernel switching
   if (web_contents->IsAutoSelect() && browser->UrlCompared(url, mode)) {
@@ -512,7 +513,7 @@ void startAndRedirectNavigation(Browser* browser,
           base::Bind(&chrome::SwitchRendererMode, browser, url, mode, true));
     }
   }
-  // YSP+ } /*Kernel switching*/
+// YSP+ } /*Kernel switching*/
 #endif
   // YSP+ { SingleSignOn config
   if (isUpdateSingleSignOnConfig(url)) {
@@ -2756,7 +2757,7 @@ void Browser::UpdateWindowForLoadingStateChanged(content::WebContents* source,
 #ifdef IE_REDCORE
   // ysp+{IE Embedded}
   TrySetIEConetentZoom(source);
-  // ysp+
+// ysp+
 #endif
 #endif
 }
@@ -3255,7 +3256,7 @@ static int stringmatchlen(const char* pattern,
           patternLen--;
         }
         break;
-        /** fall through */
+      /** fall through */
       default:
         if (!nocase) {
           if (pattern[0] != string[0])
@@ -3521,8 +3522,9 @@ void Browser::OnFindWindowsDomainUserInfoEnd(
   std::vector<std::unique_ptr<autofill::PasswordForm>>::const_iterator iter =
       results.begin();
   for (; iter != results.end(); iter++) {
-    if ((*iter)->ysp_app_name_value.empty() || (*iter)->username_value.empty() ||
-        (*iter)->password_value.empty() || (*iter)->ysp_username_value.empty())
+    if ((*iter)->ysp_app_name_value.empty() ||
+        (*iter)->username_value.empty() || (*iter)->password_value.empty() ||
+        (*iter)->ysp_username_value.empty())
       continue;
 
     std::string key = "onlyid";
@@ -3660,7 +3662,7 @@ void Browser::OnAutoLockScreenTimer(int64_t timeOutSec) {
 void Browser::OnConfigDataUpdated(const std::string& type,
                                   const std::string& data) {
   if (type == "pc") {
-    setStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
+    SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
     if (auto_lock_timer_.get()) {
       int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
@@ -3756,7 +3758,7 @@ void Browser::OnLoginRequestFailure(const std::string& error) {
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif
-  clearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
+  ClearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
@@ -3789,7 +3791,7 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif
-  clearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
+  ClearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
@@ -3822,7 +3824,7 @@ void Browser::OnLoginFailure(base::string16 message) {
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif
-  clearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
+  ClearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
@@ -3863,7 +3865,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
                                        server_url, device_id, user_id,
                                        company_id);
   }
-  // ysp+
+// ysp+
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif
@@ -3881,7 +3883,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
   }
 
   AppAutoUpdate();
-  setStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home pages
+  SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home pages
                              // }
   // ysp+ { private DNS
   std::string privateDNSString = "";
@@ -3917,7 +3919,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
   if (rootDict)
     base::JSONWriter::Write(*rootDict, &stringRootDict);
   content::YSPResourceReplaceInterceptor::SetValueFormPostTask(stringRootDict);
-  // YSP+ } //Resource Replace
+// YSP+ } //Resource Replace
 #ifdef SANGFOR_GM_SSL
   // YSP+ { sangfor GM ssl
   std::string stringGMrootDict = "";
@@ -3928,7 +3930,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HttpStreamParser::SetGMStreamValue, stringGMrootDict));
-  // YSP+ } //sangfor GM ssl
+// YSP+ } //sangfor GM ssl
 #endif
 
   // ysp+ {  ysp single sign on
@@ -3987,11 +3989,11 @@ void Browser::OnLogout() {
                                        server_url, device_id, user_id,
                                        company_id);
   }
-  // ysp+
+// ysp+
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif
-  clearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
+  ClearStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
@@ -4222,8 +4224,8 @@ void Browser::GetManagerLoginForms(const std::string& formListString,
           forms.origin = GURL(url);
           forms.action = GURL(url);
           forms.icon_url = GURL(icon_url);
-          if (!forms.signon_realm.empty() && !forms.ysp_app_name_value.empty() &&
-              !forms.origin.is_empty()) {
+          if (!forms.signon_realm.empty() &&
+              !forms.ysp_app_name_value.empty() && !forms.origin.is_empty()) {
             SaveLoginForms(this, forms);
           }
         }
@@ -4253,7 +4255,7 @@ void Browser::GetAllLoginForms(const std::string& formListString,
 // YSP+ } /*passwords AD manager*/
 
 // TODO (matianzhi): YSP+ { startup and home pages
-void Browser::setStartupAndHomePages() {
+void Browser::SetStartupAndHomePages() {
   base::ListValue* urlList = YSPLoginManager::GetInstance()->GetStartupPages();
   bool defaultMainPage = YSPLoginManager::GetInstance()->isStartupPages();
   PrefService* prefs = profile_->GetPrefs();
@@ -4289,7 +4291,7 @@ void Browser::setStartupAndHomePages() {
   }
 }
 
-void Browser::clearStartupAndHomePages() {
+void Browser::ClearStartupAndHomePages() {
   PrefService* prefs = profile_->GetPrefs();
   prefs->SetInteger(prefs::kRestoreOnStartup, 5);
   SessionStartupPref pref = SessionStartupPref::GetStartupPref(prefs);

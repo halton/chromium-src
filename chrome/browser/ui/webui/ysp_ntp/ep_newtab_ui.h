@@ -1,3 +1,7 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
 #ifndef CHROME_BROWSER_UI_WEBUI_EP_NEWTAB_UI_H
 #define CHROME_BROWSER_UI_WEBUI_EP_NEWTAB_UI_H
@@ -74,8 +78,8 @@ private:
   void BindLogout(const base::ListValue* args);
 
 private:
-  EPNewTabUI* m_pEpTabUI;
-  DISALLOW_COPY_AND_ASSIGN(EPHomePageMessageHandler);
+ EPNewTabUI* p_ep_tab_ui_;
+ DISALLOW_COPY_AND_ASSIGN(EPHomePageMessageHandler);
 };
 
 #endif // CHROME_BROWSER_UI_WEBUI_EP_NEWTAB_UI_H

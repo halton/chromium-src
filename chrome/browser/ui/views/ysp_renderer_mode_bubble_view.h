@@ -59,10 +59,10 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
 
  private:
   static RendererModeBubbleView* pRendererModeBubbleView;
-  views::LabelButton* pBlinkButton;
-  views::LabelButton* pSysIEButton;
-  Browser* pBrowser;
-  RendererMode rendererMode;
+  views::LabelButton* p_blink_button_;
+  views::LabelButton* p_sys_ie_button_;
+  Browser* p_browser_;
+  RendererMode renderer_mode_;
 };
 
 #endif  // CHROME_BROWSER_UI_VIEWS_YSP_RENDERER_MODE_BUBBLE_VIEW_H_

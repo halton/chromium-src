@@ -1,3 +1,7 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef _YSP_AVATAR_CONTROLLER_H_ 
 #define _YSP_AVATAR_CONTROLLER_H_ 
 
@@ -26,24 +30,24 @@ class LoginObserver;
 
 @interface yspAccountController : NSViewController {
 @private
-  //scoped_nsobject<NSImage> image_;
-  //NSString *userName_;
-  base::scoped_nsobject<NSView> titleView_;
-  base::scoped_nsobject<YSPLockView> lockView_;
-  base::scoped_nsobject<NSTextField> greetings_;
-  base::scoped_nsobject<NSButton> avatarButton_;
-  base::scoped_nsobject<NSButton> lockButton_;
-  base::scoped_nsobject<NSTextField> title_;
+ // scoped_nsobject<NSImage> image_;
+ // NSString *userName_;
+ base::scoped_nsobject<NSView> titleView_;
+ base::scoped_nsobject<YSPLockView> lockView_;
+ base::scoped_nsobject<NSTextField> greetings_;
+ base::scoped_nsobject<NSButton> avatarButton_;
+ base::scoped_nsobject<NSButton> lockButton_;
+ base::scoped_nsobject<NSTextField> title_;
 
-  base::scoped_nsobject<YSPLockViewController> lockViewController_;
+ base::scoped_nsobject<YSPLockViewController> lockViewController_;
 
-  scoped_ptr<LoginObserver> loginObserver_;
-  Browser* browser_;
-  id<YSPControllerDelegate> delegate_;
-  
-  // move from TabStripController
-  base::scoped_nsobject<CustomWindowControlsView> customWindowControls_;
-  base::scoped_nsobject<CrTrackingArea> customWindowControlsTrackingArea_;
+ scoped_ptr<LoginObserver> loginObserver_;
+ Browser* browser_;
+ id<YSPControllerDelegate> delegate_;
+
+ // move from TabStripController
+ base::scoped_nsobject<CustomWindowControlsView> customWindowControls_;
+ base::scoped_nsobject<CrTrackingArea> customWindowControlsTrackingArea_;
 }
 
 -(id)initWithView:(NSView *)titleView

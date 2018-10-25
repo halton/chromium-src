@@ -1,5 +1,9 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
-//ysp+ { show config }
+// ysp+ { show config }
 #include "chrome/browser/ui/webui/ysp_show_config/ep_show_config_ui.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/common/url_constants.h"
@@ -188,40 +192,40 @@ void EPShowConfigUI::OnIPLookupResponseParseFailure(const std::string& error) {
 
 /******************** EPShowConfigMessageHandler *************************/
 EPShowConfigMessageHandler::EPShowConfigMessageHandler(EPShowConfigUI* pEpTabUI)
-  :m_pEpTabUI(pEpTabUI) {
-}
+    : p_ep_tab_ui_(pEpTabUI) {}
 
 EPShowConfigMessageHandler::~EPShowConfigMessageHandler() {
   //EpLoginManager::LoginMgrInstance()->RemoveLoginEventHandle(this);
 }
 
 void EPShowConfigMessageHandler::BindFunction(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
 
-  m_pEpTabUI->GetParamString(args);
+  p_ep_tab_ui_->GetParamString(args);
 }
 
-//void EPShowConfigMessageHandler::BindGetDeviceInfoFun(const base::ListValue* args) {
-//  if (!m_pEpTabUI) {
+// void EPShowConfigMessageHandler::BindGetDeviceInfoFun(const base::ListValue*
+// args) {
+//  if (!p_ep_tab_ui_) {
 //    return;
 //  }
-//  m_pEpTabUI->GetDeviceInfo(args);
+//  p_ep_tab_ui_->GetDeviceInfo(args);
 //}
 
 void EPShowConfigMessageHandler::BindSetParamFun(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
-  m_pEpTabUI->SetParam(args);
+  p_ep_tab_ui_->SetParam(args);
 }
 
-//void EPShowConfigMessageHandler::BindGetCity(const base::ListValue* args) {
-//  if (!m_pEpTabUI || !args) {
+// void EPShowConfigMessageHandler::BindGetCity(const base::ListValue* args) {
+//  if (!p_ep_tab_ui_ || !args) {
 //    return;
 //  }
-//  m_pEpTabUI->GetCity(args);
+//  p_ep_tab_ui_->GetCity(args);
 //}
 
 void EPShowConfigMessageHandler::RegisterMessages() {
@@ -244,12 +248,11 @@ void EPShowConfigMessageHandler::RegisterMessages() {
 }
 
 /*
-void EPShowConfigMessageHandler::OnEpLoginEventFired(EP_LOGIN_STATUS emStatus, std::string& strLoginInfo) {
-  if (!m_pEpTabUI) {
-    return;
+void EPShowConfigMessageHandler::OnEpLoginEventFired(EP_LOGIN_STATUS emStatus,
+std::string& strLoginInfo) { if (!p_ep_tab_ui_) { return;
   }
 
-  m_pEpTabUI->OnLoginEventFired(emStatus, strLoginInfo);
+  p_ep_tab_ui_->OnLoginEventFired(emStatus, strLoginInfo);
 }
 */
 #endif

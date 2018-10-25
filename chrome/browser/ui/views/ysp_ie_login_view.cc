@@ -597,12 +597,12 @@ IELoginBtnView::IELoginBtnView(YspIEloginView* ie_login_view,
   for (; iter != info_vector.end(); iter++) {
     LoginInfoButton* pBtn = new LoginInfoButton(ie_login_view, *iter);
     AddChildView(pBtn);
-    buttonVec.push_back(pBtn);
+    button_vector_.push_back(pBtn);
   }
 }
 
 IELoginBtnView::~IELoginBtnView() {
-  buttonVec.clear();
+  button_vector_.clear();
 }
 
 void IELoginBtnView::Layout() {
@@ -614,8 +614,8 @@ void IELoginBtnView::Layout() {
   button_area.set_width(child_area.width());
   button_area.set_height(kButtonHeight);
 
-  std::vector<LoginInfoButton*>::const_iterator iter = buttonVec.begin();
-  for (; iter != buttonVec.end(); iter++) {
+  std::vector<LoginInfoButton*>::const_iterator iter = button_vector_.begin();
+  for (; iter != button_vector_.end(); iter++) {
     (*iter)->SetBoundsRect(button_area);
     button_area.set_y(button_area.y() + kButtonHeight);
   }

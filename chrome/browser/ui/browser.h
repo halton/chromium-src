@@ -1,4 +1,5 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -60,7 +61,7 @@
 #endif
 
 #if defined(REDCORE)
-#include "chrome/browser/ysp_login/ysp_login_manager.h"	//ysp+{IE Function Control}
+#include "chrome/browser/ysp_login/ysp_login_manager.h"  // ysp+{IE Function Control}
 #if defined(IE_REDCORE)
 #include "chrome/browser/ui/views/ysp_ie_login_view.h"
 #endif
@@ -117,7 +118,7 @@ class SurfaceId;
 }
 
 namespace autofill {
-  struct PasswordForm;
+struct PasswordForm;
 }
 
 class Browser : public TabStripModelObserver,
@@ -136,7 +137,7 @@ class Browser : public TabStripModelObserver,
                 public translate::ContentTranslateDriver::Observer,
 #if defined(REDCORE)
                 public ui::SelectFileDialog::Listener,
-                public YSPLoginManagerObserver {    //ysp+{IE Function Control}
+                public YSPLoginManagerObserver {  // ysp+{IE Function Control}
 #else
                 public ui::SelectFileDialog::Listener {
 #endif
@@ -183,11 +184,7 @@ class Browser : public TabStripModelObserver,
   };
 
 #if defined(REDCORE)
-  enum YSPLockStatus {
-    UNLOCKED,
-    SCREEN_LOCKED,
-    TOKEN_EXPIRED_LOCKED
-  };
+  enum YSPLockStatus{UNLOCKED, SCREEN_LOCKED, TOKEN_EXPIRED_LOCKED};
 #endif
 
   struct CreateParams {
@@ -470,14 +467,18 @@ class Browser : public TabStripModelObserver,
 
 #ifdef REDCORE
 #if defined(WATERMARK) && !defined(IE_REDCORE)
-  void SetWatermarkString(const std::vector<base::string16>& str, const uint32_t color, const int font_size);   //ysp+ { watermark }
+  void SetWatermarkString(const std::vector<base::string16>& str,
+                          const uint32_t color,
+                          const int font_size);  // ysp+ { watermark }
 #endif
-  void AppAutoUpdate();   //ysp+ { app auto update }
-  void AppAutoUpdate(const std::string& update_data);   //ysp+ { app auto update }
+  void AppAutoUpdate();  // ysp+ { app auto update }
+  void AppAutoUpdate(
+      const std::string& update_data);  // ysp+ { app auto update }
 
-  void SetPopup(); //YSP+ { window popup }
-  void ConfigIEPopupManager(const int& enableBlockPopup, const std::vector<std::wstring>& exceptions);
-  void SetLockStatus(YSPLockStatus status) { lock_status_  = status; }
+  void SetPopup();  // ysp+ { window popup }
+  void ConfigIEPopupManager(const int& enableBlockPopup,
+                            const std::vector<std::wstring>& exceptions);
+  void SetLockStatus(YSPLockStatus status) { lock_status_ = status; }
   void UpdateWatermark();
 #endif
 
@@ -573,28 +574,33 @@ class Browser : public TabStripModelObserver,
   bool RunUnloadListenerBeforeClosing(content::WebContents* web_contents);
 
 #if defined(REDCORE)
-  bool BlackUrlCompared(const GURL& host); //ysp+ { URL Blacklist And Whitelist }
-  bool WhiteUrlCompared(const GURL& host); //ysp+ { URL Blacklist And Whitelist }
-  //YSPLoginManagerObserver
-  void OnTokenStatusChanged(const std::string & type) override;
+  bool BlackUrlCompared(
+      const GURL& host);  // ysp+ { URL Blacklist And Whitelist }
+  bool WhiteUrlCompared(
+      const GURL& host);  // ysp+ { URL Blacklist And Whitelist }
+  // YSPLoginManagerObserver
+  void OnTokenStatusChanged(const std::string& type) override;
   void OnConfigDataUpdated(const std::string& type,
-    const std::string& data) override;
+                           const std::string& data) override;
   void OnLoginRequestFailure(const std::string& error) override;
   void OnLoginResponseParseFailure(const std::string& error) override;
   void OnLoginFailure(base::string16 message) override;
   void OnLoginSuccess(const base::string16& name,
-    const std::string& head_image_url) override;
+                      const std::string& head_image_url) override;
   void OnLogout() override;
 #if defined(IE_REDCORE)
-  bool UrlCompared(const GURL& host, RendererMode& mode) override; //YSP+ { Kernel switching }
-  void DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* userPwd) override;
-  void OnFindWindowsDomainUserInfoEnd(std::vector<std::unique_ptr<autofill::PasswordForm>> results);
-  
-  //ysp+{IE Function Control}
+  bool UrlCompared(const GURL& host,
+                   RendererMode& mode) override;  // ysp+ { Kernel switching }
+  void DidGetWindowsDomainUserInfo(base::string16* userName,
+                                   base::string16* userPwd) override;
+  void OnFindWindowsDomainUserInfoEnd(
+      std::vector<std::unique_ptr<autofill::PasswordForm>> results);
+
+  // ysp+{IE Function Control}
   std::wstring GetIEFunctionControlJsonString();
   void NotifyIEFunctionControl();
 #endif
-#endif // REDCORE
+#endif  // REDCORE
 
  private:
   friend class BrowserTest;
@@ -955,24 +961,34 @@ class Browser : public TabStripModelObserver,
 #ifdef REDCORE
   void OnAutoLockScreenTimer(int64_t timeOutSec);
 #ifdef IE_REDCORE
-  void GetKernelFromUrl(const GURL& host, std::string& coreVersion, std::string& coreEmulation);  //ysp+ {Kernel switching}
+  void GetKernelFromUrl(const GURL& host,
+                        std::string& coreVersion,
+                        std::string& coreEmulation);  // ysp+ {Kernel switching}
   void OnTimerSetIEEncUA(base::Time postTaskTime);
-  void MatchSystemIEVersion(RendererMode& mode); //ysp+ {Kernel switching}
-  void TrySetIEConetentZoom(content::WebContents* web_content);  //ysp+ {IE Embedded}
+  void MatchSystemIEVersion(RendererMode& mode);  // ysp+ {Kernel switching}
+  void TrySetIEConetentZoom(
+      content::WebContents* web_content);  // ysp+ {IE Embedded}
   void ClearIECookies();
   void ClearIECache();
 #endif
-  void SetExceptionForPopup(int type, std::string host, std::string setting); //YSP+ { window popup }
-  void GetManagerLoginForms(const std::string& formListString, const std::string& username, const std::string& password);
-  void GetAllLoginForms(const std::string& formListString, const std::string& username, const std::string& password);
-  //TODO (matianzhi): YSP+ { startup and home pages
-  void setStartupAndHomePages();
-  void clearStartupAndHomePages();
-  //YSP+ }
+  void SetExceptionForPopup(int type,
+                            std::string host,
+                            std::string setting);  // ysp+ { window popup }
+  void GetManagerLoginForms(const std::string& formListString,
+                            const std::string& username,
+                            const std::string& password);
+  void GetAllLoginForms(const std::string& formListString,
+                        const std::string& username,
+                        const std::string& password);
+  // TODO (matianzhi): YSP+ { startup and home pages
+  void SetStartupAndHomePages();
+  void ClearStartupAndHomePages();
+  // ysp+ }
   void UpdateStrategy();
-  void ClearPasswordForUserId(); //TODO(matianzhi) ysp+{clear user data}
-  void ClearUserDataForBrowser(std::string & userId); //TODO(matianzhi) ysp+{push server api}
-  void ClearedUserData(); //TODO(matianzhi) ysp+{push server api}
+  void ClearPasswordForUserId();  // TODO(matianzhi) ysp+{clear user data}
+  void ClearUserDataForBrowser(
+      std::string& userId);  // TODO(matianzhi) ysp+{push server api}
+  void ClearedUserData();    // TODO(matianzhi) ysp+{push server api}
 #endif
 
   // Data members /////////////////////////////////////////////////////////////
@@ -1128,7 +1144,7 @@ class Browser : public TabStripModelObserver,
   base::WeakPtrFactory<Browser> chrome_updater_factory_;
 
 #if defined(REDCORE)
-  base::WeakPtrFactory<Browser> crypto_ua_factory_;  //ysp+{IE CryptoUA}
+  base::WeakPtrFactory<Browser> crypto_ua_factory_;  // ysp+{IE CryptoUA}
 #endif
 
   // The following factory is used to close the frame at a later time.

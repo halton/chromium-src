@@ -1,9 +1,11 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 //
 //  ysp_lock_view.h
 //  
-//
 //  Created by 刘 崴 on 18/5/17.
-//
 //
 
 #ifndef ysp_lock_view_h

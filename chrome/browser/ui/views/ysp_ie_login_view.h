@@ -227,7 +227,7 @@ class IELoginBtnView : public views::View {
   void Layout() override;
 
  private:
-  std::vector<LoginInfoButton*> buttonVec;
+  std::vector<LoginInfoButton*> button_vector_;
 };
 
 class YspIEloginView : public views::View, public views::ButtonListener {

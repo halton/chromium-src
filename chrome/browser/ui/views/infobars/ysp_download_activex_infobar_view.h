@@ -1,6 +1,10 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef IE_REDCORE
 
-//ysp+ { activex download }
+// ysp+ { activex download }
 
 #ifndef CHROME_BROWSER_UI_VIEWS_INFOBARS_YSP_DOWNLOAD_ACTIVEX_INFOBAR_VIEW_H_
 #define CHROME_BROWSER_UI_VIEWS_INFOBARS_YSP_DOWNLOAD_ACTIVEX_INFOBAR_VIEW_H_

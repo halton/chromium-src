@@ -1,3 +1,7 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
 
 #include "chrome/browser/ui/webui/ysp_ntp/ep_newtab_ui.h"
@@ -382,54 +386,53 @@ void EPNewTabUI::OnIPLookupResponseParseFailure(const std::string& error) {
 
 /******************** EPHomePageMessageHandler *************************/
 EPHomePageMessageHandler::EPHomePageMessageHandler(EPNewTabUI* pEpTabUI)
-  :m_pEpTabUI(pEpTabUI) {
-}
+    : p_ep_tab_ui_(pEpTabUI) {}
 
 EPHomePageMessageHandler::~EPHomePageMessageHandler() {
   //EpLoginManager::LoginMgrInstance()->RemoveLoginEventHandle(this);
 }
 
 void EPHomePageMessageHandler::BindGetParamFun(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
 
-  m_pEpTabUI->GetParamString(args);
+  p_ep_tab_ui_->GetParamString(args);
 }
 
 void EPHomePageMessageHandler::BindGetDeviceInfoFun(const base::ListValue* args) {
-  if (!m_pEpTabUI) {
+  if (!p_ep_tab_ui_) {
     return;
   }
-  m_pEpTabUI->GetDeviceInfo(args);
+  p_ep_tab_ui_->GetDeviceInfo(args);
 }
 
 void EPHomePageMessageHandler::BindSetParamFun(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
-  m_pEpTabUI->SetParam(args);
+  p_ep_tab_ui_->SetParam(args);
 }
 
 void EPHomePageMessageHandler::BindGetCity(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
-  m_pEpTabUI->GetCity(args);
+  p_ep_tab_ui_->GetCity(args);
 }
 
 void EPHomePageMessageHandler::BindLogin(const base::ListValue* args) {
-  if (!m_pEpTabUI || !args) {
+  if (!p_ep_tab_ui_ || !args) {
     return;
   }
-  m_pEpTabUI->Login(args);
+  p_ep_tab_ui_->Login(args);
 }
 
 void EPHomePageMessageHandler::BindLogout(const base::ListValue* args) {
-  if (!m_pEpTabUI) {
+  if (!p_ep_tab_ui_) {
     return;
   }
-  m_pEpTabUI->Logout();
+  p_ep_tab_ui_->Logout();
 }
 
 void EPHomePageMessageHandler::RegisterMessages() {
@@ -460,12 +463,11 @@ void EPHomePageMessageHandler::RegisterMessages() {
 }
 
 /*
-void EPHomePageMessageHandler::OnEpLoginEventFired(EP_LOGIN_STATUS emStatus, std::string& strLoginInfo) {
-  if (!m_pEpTabUI) {
-    return;
+void EPHomePageMessageHandler::OnEpLoginEventFired(EP_LOGIN_STATUS emStatus,
+std::string& strLoginInfo) { if (!p_ep_tab_ui_) { return;
   }
 
-  m_pEpTabUI->OnLoginEventFired(emStatus, strLoginInfo);
+  p_ep_tab_ui_->OnLoginEventFired(emStatus, strLoginInfo);
 }
 */
 #endif

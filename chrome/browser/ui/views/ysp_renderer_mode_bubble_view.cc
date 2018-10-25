@@ -94,31 +94,32 @@ void RendererModeBubbleView::WindowClosing() {
 }
 
 void RendererModeBubbleView::Init() {
-  pBlinkButton =
+  p_blink_button_ =
       new views::LabelButton(this, l10n_util::GetStringUTF16(IDS_CHROME_CORE));
   gfx::ImageSkia* blinkImg =
       ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
           IDR_YSP_BLINK_CORE);
-  pBlinkButton->SetImageLabelSpacing(10);
-  pBlinkButton->SetImage(views::Button::STATE_NORMAL, *blinkImg);
+  p_blink_button_->SetImageLabelSpacing(10);
+  p_blink_button_->SetImage(views::Button::STATE_NORMAL, *blinkImg);
   // comment for compiling
   // views::Background* blinkBackGround = new RendererModeButtonBackGround;
-  // pBlinkButton->set_background(blinkBackGround);
-  // pBlinkButton->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,15));
-  // pBlinkButton->SetFontList(views::MenuConfig::instance().font_list);
+  // p_blink_button_->set_background(blinkBackGround);
+  // p_blink_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,15));
+  // p_blink_button_->SetFontList(views::MenuConfig::instance().font_list);
 
-  pSysIEButton =
+  p_sys_ie_button_ =
       new views::LabelButton(this, l10n_util::GetStringUTF16(IDS_IE_CORE));
   gfx::ImageSkia* sysIeImg =
       ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
           IDR_YSP_IE_CORE);
-  pSysIEButton->SetImageLabelSpacing(10);
-  pSysIEButton->SetImage(views::Button::STATE_NORMAL, *sysIeImg);
+  p_sys_ie_button_->SetImageLabelSpacing(10);
+  p_sys_ie_button_->SetImage(views::Button::STATE_NORMAL, *sysIeImg);
   // comment for compiling
   // views::Background* sysIeBackGround = new RendererModeButtonBackGround;
-  // pSysIEButton->set_background(sysIeBackGround);
-  // pSysIEButton->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4, 15));
-  // pSysIEButton->SetFontList(views::MenuConfig::instance().font_list);
+  // p_sys_ie_button_->set_background(sysIeBackGround);
+  // p_sys_ie_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,
+  // 15));
+  // p_sys_ie_button_->SetFontList(views::MenuConfig::instance().font_list);
 
   views::GridLayout* layout = new views::GridLayout(this);
   // SetLayoutManager(layout);
@@ -129,17 +130,17 @@ void RendererModeBubbleView::Init() {
                 views::GridLayout::USE_PREF, 0, 0);
 
   layout->StartRow(0, 0);
-  layout->AddView(pBlinkButton);
+  layout->AddView(p_blink_button_);
 
   layout->StartRow(1, 0);
-  layout->AddView(pSysIEButton);
+  layout->AddView(p_sys_ie_button_);
 
-  switch (rendererMode.core) {
+  switch (renderer_mode_.core) {
     case BLINK_CORE:
-      SetButtonSelected(pBlinkButton);
+      SetButtonSelected(p_blink_button_);
       break;
     case IE_CORE:
-      SetButtonSelected(pSysIEButton);
+      SetButtonSelected(p_sys_ie_button_);
       break;
     default:
       break;
@@ -156,19 +157,19 @@ views::View* RendererModeBubbleView::GetInitiallyFocusedView() {
 
 void RendererModeBubbleView::ButtonPressed(views::Button* sender,
                                            const ui::Event& event) {
-  if (pBrowser == NULL)
+  if (p_browser_ == NULL)
     return;
   GURL ysp_url;
   RendererMode mode;
-  if (sender == pBlinkButton && rendererMode.core != BLINK_CORE) {
+  if (sender == p_blink_button_ && renderer_mode_.core != BLINK_CORE) {
     mode.core = BLINK_CORE;
-    chrome::SwitchRendererMode(pBrowser, ysp_url, mode, false);
-  } else if (sender == pSysIEButton && rendererMode.core != IE_CORE) {
+    chrome::SwitchRendererMode(p_browser_, ysp_url, mode, false);
+  } else if (sender == p_sys_ie_button_ && renderer_mode_.core != IE_CORE) {
     int sysIEVer = base::win::GetSystemIEVersion();
     mode.core = IE_CORE;
     mode.ver = IE::DOCSYS;
     mode.emulation = (IE::IEEmulation)sysIEVer;
-    chrome::SwitchRendererMode(pBrowser, ysp_url, mode, false);
+    chrome::SwitchRendererMode(p_browser_, ysp_url, mode, false);
   }
   GetWidget()->Close();
 }
@@ -178,7 +179,7 @@ void RendererModeBubbleView::SetButtonSelected(
   if (pSelectButton == NULL)
     return;
   gfx::ImageSkia* img = NULL;
-  if (pSelectButton == pBlinkButton)
+  if (pSelectButton == p_blink_button_)
     img = ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
         IDR_YSP_BLINK_CORE_WHITE);
   else
@@ -195,10 +196,10 @@ RendererModeBubbleView::RendererModeBubbleView(views::View* anchor_view,
                                                const GURL& url,
                                                RendererMode mode)
     :  // BubbleDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
-      pBlinkButton(NULL),
-      pSysIEButton(NULL),
-      pBrowser(browser),
-      rendererMode(mode) {
+      p_blink_button_(NULL),
+      p_sys_ie_button_(NULL),
+      p_browser_(browser),
+      renderer_mode_(mode) {
   gfx::Insets inset;
   inset.Set(0, 0, 0, 0);
   set_margins(inset);

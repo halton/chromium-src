@@ -1,5 +1,9 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
-//ysp+ { show config }
+// ysp+ { show config }
 #ifndef CHROME_BROWSER_UI_WEBUI_EP_SHOW_CONFIG_UI_H
 #define CHROME_BROWSER_UI_WEBUI_EP_SHOW_CONFIG_UI_H
 #pragma once
@@ -67,8 +71,8 @@ private:
  // void BindGetCity(const base::ListValue* args);
 
 private:
-  EPShowConfigUI* m_pEpTabUI;
-  DISALLOW_COPY_AND_ASSIGN(EPShowConfigMessageHandler);
+ EPShowConfigUI* p_ep_tab_ui_;
+ DISALLOW_COPY_AND_ASSIGN(EPShowConfigMessageHandler);
 };
 
 #endif // CHROME_BROWSER_UI_WEBUI_EP_SHOW_CONFIG_UI_H

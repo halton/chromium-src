@@ -1,5 +1,9 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
-//ysp+ { login }
+// ysp+ { login }
 
 #ifndef CHROME_BROWSER_UI_YSP_PASSWORD_MANAGER_H_
 #define CHROME_BROWSER_UI_YSP_PASSWORD_MANAGER_H_

@@ -1,8 +1,9 @@
-#ifdef REDCORE
-//YSP+ { passwords AD manager }
-// Copyright 2013 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+#ifdef REDCORE
+// YSP+ { passwords AD manager }
 
 #include "chrome/browser/ui/webui/options/ysp_password_manager_handler.h"
 

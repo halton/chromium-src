@@ -1,4 +1,5 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -67,7 +68,7 @@ class ToolbarView;
 class TopContainerView;
 class WebContentsCloseHandler;
 #if defined(REDCORE)
-class YSPAccountView;    //ysp+ { custom ui }
+class YSPAccountView;  // ysp+ { custom ui }
 #endif // defined(REDCORE)
 
 namespace extensions {
@@ -716,7 +717,7 @@ class BrowserView : public BrowserWindow,
   views::View* overlay_view_ = nullptr;
 
 #if defined(REDCORE)
-  YSPAccountView* account_view_;    //ysp+ { custom ui }
+  YSPAccountView* account_view_;  // ysp+ { custom ui }
 #endif // defined(REDCORE)
 
   // The Bookmark Bar View for this window. Lazily created. May be null for

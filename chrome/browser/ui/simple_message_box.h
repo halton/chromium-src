@@ -1,4 +1,5 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,9 +27,11 @@ enum MessageBoxResult {
 };
 
 enum MessageBoxType {
+#if defined(IE_REDCORE)
   MESSAGE_BOX_TYPE_INFORMATION,  // Shows an OK button.
-  MESSAGE_BOX_TYPE_WARNING,      // Shows an OK button.
-  MESSAGE_BOX_TYPE_QUESTION,     // Shows YES and NO buttons.
+#endif
+  MESSAGE_BOX_TYPE_WARNING,   // Shows an OK button.
+  MESSAGE_BOX_TYPE_QUESTION,  // Shows YES and NO buttons.
 };
 
 // Shows a dialog box with the given |title| and |message|. If |parent| is

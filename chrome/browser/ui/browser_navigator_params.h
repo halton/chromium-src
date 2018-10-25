@@ -1,4 +1,5 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,7 +23,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "url/gurl.h"
 #if defined(REDCORE) && defined(IE_REDCORE)
-#include "content/common/IE/IEVersion.h"	//ysp+{IE Embedded}
+#include "content/common/IE/IEVersion.h"  // ysp+{IE Embedded}
 #endif
 
 class Browser;
@@ -257,10 +258,10 @@ struct NavigateParams {
   bool open_pwa_window_if_possible = false;
 
   #if defined(REDCORE) && defined(IE_REDCORE)
-  //ysp+ {IE Embedded}
+  // ysp+ {IE Embedded}
   RendererMode renderer_mode;
-  //ysp+
-  bool auto_select; //YSP+ { Kernel switching }
+  // ysp+
+  bool auto_select;  // ysp+ { Kernel switching }
   #endif
 
 
