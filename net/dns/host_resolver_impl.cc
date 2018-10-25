@@ -2104,39 +2104,44 @@ HostResolverImpl::~HostResolverImpl() {
   NetworkChangeNotifier::RemoveDNSObserver(this);
 }
 
-#ifdef REDCORE //ysp+ { private DNS
-std::unique_ptr<base::DictionaryValue> &HostResolverImpl::privateDNSDict_ = *(new std::unique_ptr<base::DictionaryValue>);
-void HostResolverImpl::SetPrivateDNSValue(const std::string & privateDNSString)
-{
-	if (!privateDNSString.empty()) {
-		std::unique_ptr<base::Value> privateDNSValue = base::JSONReader::Read(privateDNSString);
-		privateDNSDict_.reset(static_cast<base::DictionaryValue*>(privateDNSValue.release()));
-	}
-	else
-		privateDNSDict_.reset();
+// ysp+ { private DNS
+#ifdef REDCORE
+std::unique_ptr<base::DictionaryValue>& HostResolverImpl::private_dns_dict_ =
+    *(new std::unique_ptr<base::DictionaryValue>);
+
+void HostResolverImpl::SetPrivateDNSValue(const std::string& private_dns) {
+  if (private_dns.empty()) {
+    private_dns_dict_.reset();
+    return;
+  }
+  std::unique_ptr<base::Value> dns_value = base::JSONReader::Read(private_dns);
+  private_dns_dict_.reset(
+      static_cast<base::DictionaryValue*>(dns_value.release()));
 }
-base::ListValue* HostResolverImpl::privateDNSCompared(const std::string& Host)
-{
-	base::ListValue* privateDNSList = nullptr;
-	if (privateDNSDict_.get() && privateDNSDict_->GetList("list", &privateDNSList))
-		if (privateDNSList && !privateDNSList->empty()) {
-			for (size_t i = 0; i < privateDNSList->GetSize(); ++i) {
-				base::DictionaryValue* bmDict = nullptr;
-				if (privateDNSList->GetDictionary(i, &bmDict)) {
-					std::string domain;
-					bmDict->GetString("domain", &domain);
-					if (Host == domain) {
-						base::ListValue* addressList = nullptr;
-						if (bmDict->GetList("ip", &addressList)) {
-							return addressList;
-						}
-					}
-				}
-			}
-		}
-	return nullptr;
+
+base::ListValue* HostResolverImpl::PrivateDnsCompared(const std::string& host) {
+  base::ListValue* dns_list = nullptr;
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("list", &dns_list) && dns_list &&
+      !dns_list->empty()) {
+    for (size_t i = 0; i < dns_list->GetSize(); ++i) {
+      base::DictionaryValue* dns_dict = nullptr;
+      if (dns_list->GetDictionary(i, &dns_dict)) {
+        std::string domain;
+        dns_dict->GetString("domain", &domain);
+        if (host == domain) {
+          base::ListValue* ip_address = nullptr;
+          if (dns_dict->GetList("ip", &ip_address)) {
+            return ip_address;
+          }
+        }
+      }
+    }
+  }
+
+  return nullptr;
 }
-#endif //ysp+ }
+#endif  // REDCORE
 
 void HostResolverImpl::SetDnsClient(std::unique_ptr<DnsClient> dns_client) {
   // DnsClient and config must be updated before aborting DnsTasks, since doing

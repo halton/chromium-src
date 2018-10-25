@@ -3708,8 +3708,8 @@ void Browser::OnConfigDataUpdated(const std::string& type,
     if (!domain_list_string.empty() && !ysp_sso_token_string.empty()) {
       content::BrowserThread::PostTask(
           content::BrowserThread::IO, FROM_HERE,
-          base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn,
-                     domain_list_string, ysp_sso_token_string));
+          base::Bind(&net::URLRequestHttpJob::SetYspSso, domain_list_string,
+                     ysp_sso_token_string));
     }
     // ysp+ }
   } else if (type == "gatewayDomain") {
@@ -3779,7 +3779,7 @@ void Browser::OnLoginRequestFailure(const std::string& error) {
   // ysp+ {  ysp single sign on
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+      base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
@@ -3812,7 +3812,7 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
   // ysp+ {  ysp single sign on
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+      base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
@@ -3941,8 +3941,8 @@ void Browser::OnLoginSuccess(const base::string16& name,
   if (!domain_list_string.empty() && !ysp_sso_token_string.empty()) {
     content::BrowserThread::PostTask(
         content::BrowserThread::IO, FROM_HERE,
-        base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn,
-                   domain_list_string, ysp_sso_token_string));
+        base::Bind(&net::URLRequestHttpJob::SetYspSso, domain_list_string,
+                   ysp_sso_token_string));
   }
   // ysp+ }
 
@@ -4016,7 +4016,7 @@ void Browser::OnLogout() {
   // ysp+ {  ysp single sign on
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setYSPSingleSignOn, "", ""));
+      base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }

@@ -72,19 +72,14 @@
 #include "net/url_request/url_request_throttler_manager.h"
 #include "net/url_request/websocket_handshake_userdata_key.h"
 #include "url/origin.h"
+
 #ifdef REDCORE
-
+#include "base/json/json_file_value_serializer.h"
+#include "base/json/json_reader.h"
+#include "base/json/json_writer.h"
 #include "base/strings/string_number_conversions.h"
-#include "base/json/json_reader.h" //YSP+ { SingleSignOn config }
-#include "base/json/json_writer.h" //YSP+ { SingleSignOn config }
-#include "base/json/json_file_value_serializer.h" //YSP+ { SingleSignOn config }
-#include "crypto/ysp_crypto_header.h" //ysp+ { crypto http header }
-
-//ysp+ {
-// static
-static std::map<std::string, std::string>& global_headers_ = * new std::map<std::string, std::string>();
-//ysp+ }
-#endif /*REDCORE*/
+#include "crypto/ysp_crypto_header.h"
+#endif  // REDCORE
 
 #if defined(OS_ANDROID)
 #include "net/android/network_library.h"
@@ -95,6 +90,11 @@ static std::map<std::string, std::string>& global_headers_ = * new std::map<std:
 #include "net/reporting/reporting_header_parser.h"
 #include "net/reporting/reporting_service.h"
 #endif  // BUILDFLAG(ENABLE_REPORTING)
+
+#ifdef REDCORE
+static std::map<std::string, std::string>& global_headers_ =
+    *new std::map<std::string, std::string>();
+#endif  // REDCORE
 
 namespace {
 
@@ -329,76 +329,79 @@ void LogCookieUMA(const net::CookieList& cookie_list,
 
 namespace net {
 
-std::unique_ptr<base::DictionaryValue> &URLRequestHttpJob::SingleSignOnValue_ = * new std::unique_ptr<base::DictionaryValue>(nullptr);
-std::unique_ptr<base::ListValue> &URLRequestHttpJob::YSPSingleSignOnValue_ = *new std::unique_ptr<base::ListValue>(nullptr);
+std::unique_ptr<base::DictionaryValue>& URLRequestHttpJob::sso_value_ =
+    *new std::unique_ptr<base::DictionaryValue>(nullptr);
+std::unique_ptr<base::ListValue>& URLRequestHttpJob::ysp_sso_value_ =
+    *new std::unique_ptr<base::ListValue>(nullptr);
 
 #ifdef __APPLE__
-#pragma clang diagnostic push 
+#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
-std::string URLRequestHttpJob::YSPSSOTokenString_;
+std::string URLRequestHttpJob::ysp_sso_token_;
 #ifdef __APPLE__
 #pragma clang diagnostic pop
 #endif
-    
-std::unique_ptr<base::DictionaryValue> &URLRequestHttpJob::domainDict_ = *new std::unique_ptr<base::DictionaryValue>(nullptr);
+
+std::unique_ptr<base::DictionaryValue>& URLRequestHttpJob::domain_dict_ =
+    *new std::unique_ptr<base::DictionaryValue>(nullptr);
 
 #ifdef REDCORE
-//YSP+ { SingleSignOn config
-static int stringmatchlen(const char *pattern, int patternLen,
-  const char *string, int stringLen, int nocase) {
-  while (patternLen) {
+static int StringMatchLen(const char* pattern,
+                          int pattern_len,
+                          const char* string,
+                          int string_len,
+                          int nocase) {
+  while (pattern_len) {
     switch (pattern[0]) {
     case '*':
       while (pattern[1] == '*') {
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
-      if (patternLen == 1)
-        return 1; /** match */
-      while (stringLen) {
-        if (stringmatchlen(pattern + 1, patternLen - 1,
-          string, stringLen, nocase))
-          return 1; /** match */
+      if (pattern_len == 1)
+        return 1;  // match
+      while (string_len) {
+        if (StringMatchLen(pattern + 1, pattern_len - 1, string, string_len,
+                           nocase))
+          return 1;  // match
         string++;
-        stringLen--;
+        string_len--;
       }
-      return 0; /** no match */
+      return 0;  // no match
       break;
     case '?':
-      if (stringLen == 0)
-        return 0; /** no match */
+      if (string_len == 0)
+        return 0;  // no match
       string++;
-      stringLen--;
+      string_len--;
       break;
     case '[':
     {
       int inot, match;
 
       pattern++;
-      patternLen--;
+      pattern_len--;
       inot = pattern[0] == '^';
       if (inot) {
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
       match = 0;
       while (1) {
         if (pattern[0] == '\\') {
           pattern++;
-          patternLen--;
+          pattern_len--;
           if (pattern[0] == string[0])
             match = 1;
         }
         else if (pattern[0] == ']') {
           break;
-        }
-        else if (patternLen == 0) {
+        } else if (pattern_len == 0) {
           pattern--;
-          patternLen++;
+          pattern_len++;
           break;
-        }
-        else if (pattern[1] == '-' && patternLen >= 3) {
+        } else if (pattern[1] == '-' && pattern_len >= 3) {
           int start = pattern[0];
           int end = pattern[2];
           int c = string[0];
@@ -413,7 +416,7 @@ static int stringmatchlen(const char *pattern, int patternLen,
             c = tolower(c);
           }
           pattern += 2;
-          patternLen -= 2;
+          pattern_len -= 2;
           if (c >= start && c <= end)
             match = 1;
         }
@@ -428,88 +431,91 @@ static int stringmatchlen(const char *pattern, int patternLen,
           }
         }
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
       if (inot)
         match = !match;
       if (!match)
-        return 0; /** no match */
+        return 0;  // no match
       string++;
-      stringLen--;
+      string_len--;
       break;
     }
     case '\\':
-      if (patternLen >= 2) {
+      if (pattern_len >= 2) {
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
       break;
-      /** fall through */
+    // fall through
     default:
       if (!nocase) {
         if (pattern[0] != string[0])
-          return 0; /** no match */
+          return 0;  // no match
       }
       else {
         if (tolower((int)pattern[0]) != tolower((int)string[0]))
-          return 0; /** no match */
+          return 0;  //  no match
       }
       string++;
-      stringLen--;
+      string_len--;
       break;
     }
     pattern++;
-    patternLen--;
-    if (stringLen == 0) {
+    pattern_len--;
+    if (string_len == 0) {
       while (*pattern == '*') {
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
       break;
     }
   }
-  if (patternLen == 0 && stringLen == 0)
+  if (pattern_len == 0 && string_len == 0)
     return 1;
   return 0;
 }
 
-static int stringmatch(const char *pattern, const char *string, int nocase) {
-  return stringmatchlen(pattern, strlen(pattern), string, strlen(string), nocase);
+static int StringMatch(const char* pattern, const char* string, int nocase) {
+  return StringMatchLen(pattern, strlen(pattern), string, strlen(string),
+                        nocase);
 }
 
-bool URLRequestHttpJob::UrlCompared(const std::string& host, std::string *key) {
-  if (SingleSignOnValue_ == NULL)
+bool URLRequestHttpJob::UrlCompared(const std::string& host, std::string* key) {
+  if (sso_value_ == NULL)
     return false;
-  base::DictionaryValue* dataDict = SingleSignOnValue_.get();
-  if (!dataDict)
+
+  base::DictionaryValue* data_dict = sso_value_.get();
+  if (!data_dict)
     return false;
+
   int type = 0;
   int interval = 0;
-  dataDict->GetInteger("type", &type);
-  dataDict->GetInteger("interval", &interval);
-  base::ListValue* Position = nullptr;
+  data_dict->GetInteger("type", &type);
+  data_dict->GetInteger("interval", &interval);
+  base::ListValue* position = nullptr;
   if (type == 2) {
-    if (dataDict->GetList("hostList", &Position)) {
-      if (Position == NULL || Position->empty())
+    if (data_dict->GetList("hostList", &position)) {
+      if (position == NULL || position->empty())
         return false;
-      for (size_t i = 0; i < Position->GetSize(); ++i) {
-        base::DictionaryValue* bmDict = nullptr;
-        if (Position->GetDictionary(i, &bmDict)) {
+      for (size_t i = 0; i < position->GetSize(); ++i) {
+        base::DictionaryValue* dict_val = nullptr;
+        if (position->GetDictionary(i, &dict_val)) {
           std::string domain = "";
-          std::string timestampstr = "";
+          std::string timestamp_string = "";
           int64_t timestamp = 0;
-          SingleSignOnValue_->GetString("timestamp", &timestampstr);
-          bmDict->GetString("url", &domain);
-          base::StringToInt64(timestampstr, &timestamp);
-          if (stringmatch(host.c_str(), domain.c_str(), true)) {
-            bmDict->GetString("parameter", key);
+          sso_value_->GetString("timestamp", &timestamp_string);
+          dict_val->GetString("url", &domain);
+          base::StringToInt64(timestamp_string, &timestamp);
+          if (StringMatch(host.c_str(), domain.c_str(), true)) {
+            dict_val->GetString("parameter", key);
             while (true) {
-              if (timestampstr.empty()) {
-                SingleSignOnValue_->GetString("timestamp", &timestampstr);
+              if (timestamp_string.empty()) {
+                sso_value_->GetString("timestamp", &timestamp_string);
                 continue;
               }
               else {
-                base::StringToInt64(timestampstr, &timestamp);
+                base::StringToInt64(timestamp_string, &timestamp);
                 if ((base::Time::Now().ToTimeT() - timestamp) >= interval) {
                   continue;
                 }
@@ -517,8 +523,8 @@ bool URLRequestHttpJob::UrlCompared(const std::string& host, std::string *key) {
                   break;
               }
             }
-            timestampstr = "";
-            SingleSignOnValue_->SetString("timestamp", "");
+            timestamp_string = "";
+            sso_value_->SetString("timestamp", "");
             return true;
           }
         }
@@ -527,8 +533,7 @@ bool URLRequestHttpJob::UrlCompared(const std::string& host, std::string *key) {
   }
   return false;
 }
-//YSP+ } //SingleSignOn config
-#endif /*REDCORE*/
+#endif  // REDCORE
 
 // TODO(darin): make sure the port blocking code is not lost
 // static
@@ -658,123 +663,114 @@ void URLRequestHttpJob::Start() {
   request_info_.token_binding_referrer = request_->token_binding_referrer();
 
   #ifdef REDCORE
-  //ysp+ { ua
   std::map<std::string, std::string>::const_iterator iter =
-    global_headers_.begin();
-  std::string uaTypes = "";
+      global_headers_.begin();
+  std::string ua_type = "";
   std::string value = "";
   for (; iter != global_headers_.end(); ++iter) {
     std::string key = iter->first;
     std::string ua_value = iter->second;
-  if (key == "UAtypes") {
-    uaTypes = ua_value;
-    continue;
-  }
+    if (key == "UAtypes") {
+      ua_type = ua_value;
+      continue;
+    }
+
     if (!key.empty()) {
-       if (key == "User-Agent") {
-      if (uaTypes == "0") {
-        continue;
-      }
-      else if (uaTypes == "1") {
+      if (key == "User-Agent") {
+        if (ua_type == "0") {
+          continue;
+        } else if (ua_type == "1") {
+          value = http_user_agent_settings_->GetUserAgent();
+          value += " " + ua_value;
+        } else if (ua_type == "2") {
+          value = ua_value;
+        } else if (ua_type == "3") {
+          // crypto http header
+          value = http_user_agent_settings_->GetUserAgent();
+          if (YSPCryptoHeader::GetInstance()->isAddHeaders()) {
+            value += YSPCryptoHeader::GetInstance()->GetEncString();
+          }
+        } else {
+          value = http_user_agent_settings_->GetUserAgent();
+        }
+        request_info_.extra_headers.SetHeader(key, value);
+      } else {
         value = http_user_agent_settings_->GetUserAgent();
-        value += " " + ua_value;
+        request_info_.extra_headers.SetHeaderIfMissing(key, value);
       }
-      //ysp+ { crypto http header
-      else if (uaTypes == "3") {
-        value = http_user_agent_settings_->GetUserAgent();
-        if (YSPCryptoHeader::GetInstance()->isAddHeaders()) {
-          value += YSPCryptoHeader::GetInstance()->GetEncString();
+    }
+  }
+
+  if (domain_dict_) {
+    base::DictionaryValue* data_dict = domain_dict_.get();
+    if (data_dict && !data_dict->empty()) {
+      std::string strategy_id = "";
+      std::string company_id = "";
+      data_dict->GetString("strategyID", &strategy_id);
+      data_dict->GetString("companyID", &company_id);
+      base::ListValue* domain_list = nullptr;
+      if (data_dict->GetList("list", &domain_list)) {
+        if (domain_list && !domain_list->empty()) {
+          for (size_t i = 0; i < domain_list->GetSize(); i++) {
+            base::DictionaryValue* domain_and_gateway = nullptr;
+            if (domain_list->GetDictionary(i, &domain_and_gateway)) {
+              std::string domain = "";
+              domain_and_gateway->GetString("domain", &domain);
+              std::string url = "";
+              url = request_->url().spec();
+              // if (request_->url().host() == domain)
+              //{
+              std::string method = request_info_.method;
+              std::string uri = request_info_.url.PathForRequest();
+              std::string scheme = "HTTP";  // request_info_.url.scheme();
+              std::string spa_value = http_user_agent_settings_->GetUserAgent();
+              spa_value += YSPCryptoHeader::GetInstance()->GetHMACEncString(
+                  scheme + method, uri);
+              spa_value += " POLICYID(" + strategy_id + ") COMPANYID(" +
+                           company_id + ")";
+              request_info_.extra_headers.SetHeader("User-Agent", spa_value);
+              break;
+              //}
+            }
+          }
         }
       }
-      else if (uaTypes == "2")
-        value = ua_value;
-      //ysp+ } /*crypto http header*/
-      else {
-        value = http_user_agent_settings_->GetUserAgent();
-      }
-      request_info_.extra_headers.SetHeader(key, value);
     }
-    else {
-      value = http_user_agent_settings_->GetUserAgent();
-      request_info_.extra_headers.SetHeaderIfMissing(key, value);
-    }
-     }
   }
-  //ysp+ }
 
-  //YSP+ { sdp
-  if (domainDict_) {
-	  base::DictionaryValue* dataDict = domainDict_.get();
-	  if (dataDict && !dataDict->empty()) {
-		  std::string strategy_id = "";
-		  std::string company_id = "";
-		  dataDict->GetString("strategyID", &strategy_id);
-		  dataDict->GetString("companyID", &company_id);
-		  base::ListValue* domainList = nullptr;
-		  if (dataDict->GetList("list", &domainList))
-		  {
-			  if (domainList && !domainList->empty())
-			  {
-				  for (size_t i = 0; i < domainList->GetSize(); i++)
-				  {
-					  base::DictionaryValue* domainAndGateway = nullptr;
-					  if (domainList->GetDictionary(i, &domainAndGateway))
-					  {
-						  std::string domain = "";
-						  domainAndGateway->GetString("domain", &domain);
-						  std::string url = "";
-						  url = request_->url().spec();
-						  //if (request_->url().host() == domain)
-						  //{
-						  std::string method = request_info_.method;
-						  std::string uri = request_info_.url.PathForRequest();
-						  std::string scheme = "HTTP";// request_info_.url.scheme();
-						  std::string spaValue = http_user_agent_settings_->GetUserAgent();
-						  spaValue += YSPCryptoHeader::GetInstance()->GetHMACEncString(scheme + method, uri);
-						  spaValue += " POLICYID(" + strategy_id + ") COMPANYID(" + company_id + ")";
-						  request_info_.extra_headers.SetHeader("User-Agent", spaValue);
-						  break;
-						  //}
-					  }
-				  }
-			  }
-		  }
-	  }
-  }
-  //YSP+ } /*sdp*/
-
-  //YSP+ { SingleSignOn config
-  if (SingleSignOnValue_) {
-    base::DictionaryValue* dataDict = SingleSignOnValue_.get();
-    if (dataDict) {
+  if (sso_value_) {
+    base::DictionaryValue* data_dict = sso_value_.get();
+    if (data_dict) {
       int type = 0;
-      dataDict->GetInteger("type", &type);
+      data_dict->GetInteger("type", &type);
       if (type == 1) {
-        std::string singleSignOn = "";
-        std::string singleSignOnCookie = "";
-        base::DictionaryValue* cookieDict = nullptr;
+        std::string sso_string = "";
+        std::string sso_cookie = "";
+        base::DictionaryValue* cookie_dict = nullptr;
         std::string name = "";
         std::string domain = "";
         std::string path = "";
         //std::string maxAge = "";
-        bool httpOnly = false;
+        bool http_only = false;
         bool secure = false;
         CookieOptions options;
-        dataDict->GetDictionary("cookie", &cookieDict);
-        cookieDict->GetString("name", &name);
-        cookieDict->GetString("domain", &domain);
-        cookieDict->GetString("path", &path);
-        cookieDict->GetBoolean("httpOnly", &httpOnly);
-        cookieDict->GetBoolean("secure", &secure);
-        cookieDict->GetString("value", &singleSignOn);
-        if (!httpOnly)
+        data_dict->GetDictionary("cookie", &cookie_dict);
+        cookie_dict->GetString("name", &name);
+        cookie_dict->GetString("domain", &domain);
+        cookie_dict->GetString("path", &path);
+        cookie_dict->GetBoolean("http_only", &http_only);
+        cookie_dict->GetBoolean("secure", &secure);
+        cookie_dict->GetString("value", &sso_string);
+        if (!http_only)
           options.set_include_httponly();
         else
           options.set_exclude_httponly();
+
         // FIXME(halton): CL https://codereview.chromium.org/2633663003 remove set_enforce_strict_secure
         // if (secure)
         //   options.set_enforce_strict_secure();
-        singleSignOnCookie += name + "=" + singleSignOn + "; domain=" + domain + "; path=" + path;
+        sso_cookie +=
+            name + "=" + sso_string + "; domain=" + domain + "; path=" + path;
         scoped_refptr<SharedBoolean> callback_pending = new SharedBoolean(false);
         scoped_refptr<SharedBoolean> save_next_cookie_running = new SharedBoolean(true);
         // FIXME(halton): impl SetCookieWithOptionsAsync
@@ -784,7 +780,7 @@ void URLRequestHttpJob::Start() {
         //                save_next_cookie_running,
         //                callback_pending));
         // request_->context()->cookie_store()->SetCookieWithOptionsAsync(
-        //     request_->url(), singleSignOnCookie, options, callback);
+        //     request_->url(), sso_cookie, options, callback);
       } else if (type == 3) {
         std::string token = "";
         if (UrlCompared(request_->url().host(), &token)) {
@@ -794,9 +790,9 @@ void URLRequestHttpJob::Start() {
       else if (type == 2) {
         std::string token = "";
         std::string url_str = "";
-        base::DictionaryValue* urlDict = nullptr;
-        dataDict->GetDictionary("cookie", &urlDict);
-        urlDict->GetString("url", &url_str);
+        base::DictionaryValue* url_dict = nullptr;
+        data_dict->GetDictionary("cookie", &url_dict);
+        url_dict->GetString("url", &url_str);
         if (UrlCompared(request_->url().spec(), &token)) {
           if (url_str.find("?") != std::string::npos)
             url_str += "&" + token;
@@ -810,25 +806,24 @@ void URLRequestHttpJob::Start() {
   //YSP+ } /*SingleSignOn config*/
 
   //ysp+ { ysp single sign on
-  if (YSPSingleSignOnValue_) {
-	  base::ListValue* YSPSSOList = YSPSingleSignOnValue_.get();
-	  if (YSPSSOList) {
-		  for (size_t i = 0; i < YSPSSOList->GetSize(); ++i) {
-			  std::string domain = "";
-			  YSPSSOList->GetString(i, &domain);
-			  DLOG(INFO) << "ysp sso request url: " << request_->url() << " domain url: " << GURL(domain);
-			  if (request_->url() == GURL(domain)) {
-				  if (!YSPSSOTokenString_.empty()) {
-					  request_info_.extra_headers.AddHeaderFromString(YSPSSOTokenString_);
-					  break;
-				  }
-			  }
-		  }
-	  }
+  if (ysp_sso_value_) {
+    base::ListValue* ysp_sso_list = ysp_sso_value_.get();
+    if (ysp_sso_list) {
+      for (size_t i = 0; i < ysp_sso_list->GetSize(); ++i) {
+        std::string domain = "";
+        ysp_sso_list->GetString(i, &domain);
+        DLOG(INFO) << "ysp sso request url: " << request_->url()
+                   << " domain url: " << GURL(domain);
+        if (request_->url() == GURL(domain)) {
+          if (!ysp_sso_token_.empty()) {
+            request_info_.extra_headers.AddHeaderFromString(ysp_sso_token_);
+            break;
+          }
+        }
+      }
+    }
   }
-
-  //ysp+ }
-#endif /*REDCORE*/
+#endif  // REDCORE
 
   // This should be kept in sync with the corresponding code in
   // URLRequest::GetUserAgent.
@@ -2043,56 +2038,53 @@ void URLRequestHttpJob::NotifyURLRequestDestroyed() {
   if (network_quality_estimator)
     network_quality_estimator->NotifyURLRequestDestroyed(*request());
 }
+
 #ifdef REDCORE
-//ysp+ {
 // static
-void URLRequestHttpJob::addGlobalHeader(std::string key, std::string value) {
+void URLRequestHttpJob::AddGlobalHeader(const std::string& key,
+                                        const std::string& value) {
   global_headers_[key] = value;
 }
 
-void URLRequestHttpJob::clearHeader() {
+// static
+void URLRequestHttpJob::ClearHeader() {
   global_headers_.clear();
 }
 
-//ysp+ }
-//YSP+ { SingleSignOn config
 // static
-void URLRequestHttpJob::setSSOConfigValue(const std::string& configValue) {
-  if (!configValue.empty()) {
-    std::unique_ptr<base::Value> dictSSOValue = base::JSONReader::Read(configValue);
-    SingleSignOnValue_.reset(static_cast<base::DictionaryValue*>(dictSSOValue.release()));
+void URLRequestHttpJob::SetSsoConfigValue(const std::string& config_value) {
+  if (!config_value.empty()) {
+    std::unique_ptr<base::Value> sso_value =
+        base::JSONReader::Read(config_value);
+    sso_value_.reset(static_cast<base::DictionaryValue*>(sso_value.release()));
   } else
-    SingleSignOnValue_.reset();
+    sso_value_.reset();
 }
-//YSP+ }/*SingleSignOn config*/
-//YSP+ { spa
 //static
-void URLRequestHttpJob::SetDomainDictValue(const std::string & domainDictString)
-{
-	if (!domainDictString.empty())
-	{
-		 std::unique_ptr<base::Value> domainValue = base::JSONReader::Read(domainDictString);
-		domainDict_.reset(static_cast<base::DictionaryValue*>(domainValue.release()));
-	}
-	else
-		domainDict_.reset();
+void URLRequestHttpJob::SetDomainDictValue(const std::string& domain_dict) {
+  if (!domain_dict.empty()) {
+    std::unique_ptr<base::Value> domain_value =
+        base::JSONReader::Read(domain_dict);
+    domain_dict_.reset(
+        static_cast<base::DictionaryValue*>(domain_value.release()));
+  } else {
+    domain_dict_.reset();
+  }
 }
-//YSP+ }/*spa*/
-//ysp+ { ysp single sign on
-void URLRequestHttpJob::setYSPSingleSignOn(const std::string & domainString, const std::string& token)
-{
-	if (!domainString.empty()) {
-		 std::unique_ptr<base::Value> dictYSPSSOValue = base::JSONReader::Read(domainString);
-		YSPSingleSignOnValue_.reset(static_cast<base::ListValue*>(dictYSPSSOValue.release()));
-	}
-	else
-		YSPSingleSignOnValue_.reset();
-	if (!token.empty())
-		YSPSSOTokenString_ = token;
-	else
-		YSPSSOTokenString_ = "";
+
+// static
+void URLRequestHttpJob::SetYspSso(const std::string& domain,
+                                  const std::string& token) {
+  if (!domain.empty()) {
+    std::unique_ptr<base::Value> ysp_sso_dict = base::JSONReader::Read(domain);
+    ysp_sso_value_.reset(static_cast<base::ListValue*>(ysp_sso_dict.release()));
+  } else {
+    ysp_sso_value_.reset();
+  }
+
+  ysp_sso_token_ = token.empty() ? "" : token;
 }
-//ysp+ }
-#endif /*REDCORE*/
+
+#endif  // REDCORE
 
 }  // namespace net

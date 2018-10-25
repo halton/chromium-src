@@ -46,12 +46,12 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
                                 const std::string& scheme);
 
 #ifdef REDCORE
-  static void addGlobalHeader(std::string key, std::string value);
-  static void clearHeader();
-  static void setSSOConfigValue(const std::string& configValue);//YSP+ { SingleSignOn config }
-  static void setYSPSingleSignOn(const std::string& domainString, const std::string& token); //ysp+ { ysp single sign on }
-  static void SetDomainDictValue(const std::string & domainDictString);//YSP+ { spa }
-#endif /*REDCORE*/
+  static void AddGlobalHeader(const std::string& key, const std::string& value);
+  static void ClearHeader();
+  static void SetSsoConfigValue(const std::string& config_value);
+  static void SetYspSso(const std::string& domain, const std::string& token);
+  static void SetDomainDictValue(const std::string& domain_dict);
+#endif  // REDCORE
 
   void SetRequestHeadersCallback(RequestHeadersCallback callback) override;
   void SetResponseHeadersCallback(ResponseHeadersCallback callback) override;
@@ -186,18 +186,22 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
   HttpResponseHeaders* GetResponseHeaders() const;
 
 #ifdef REDCORE
-  bool UrlCompared(const std::string& host, std::string *key);//YSP+ { SingleSignOn config }
-#endif /*REDCORE*/
+  // YSP+ { SingleSignOn config }
+  bool UrlCompared(const std::string& host, std::string* key);
+#endif  // REDCORE
 
   RequestPriority priority_;
 
   HttpRequestInfo request_info_;
   const HttpResponseInfo* response_info_;
 
-  static std::unique_ptr<base::DictionaryValue> &SingleSignOnValue_; //YSP+ { SingleSignOn config }
-  static std::unique_ptr<base::ListValue> &YSPSingleSignOnValue_; //ysp+ { ysp single sign on }
-  static std::string YSPSSOTokenString_; //ysp+ { ysp single sign on }
-  static std::unique_ptr<base::DictionaryValue> &domainDict_; //YSP+ { sdp }
+#ifdef REDCORE
+  static std::unique_ptr<base::DictionaryValue>& sso_value_;
+  static std::unique_ptr<base::ListValue>& ysp_sso_value_;
+  static std::string ysp_sso_token_;
+  static std::unique_ptr<base::DictionaryValue>& domain_dict_;
+#endif  // REDCORE
+
   // Auth states for proxy and origin server.
   AuthState proxy_auth_state_;
   AuthState server_auth_state_;

@@ -176,9 +176,7 @@ class NET_EXPORT CanonicalCookie {
   bool IsCanonical() const;
 
 #ifdef REDCORE
-  const std::string& YSPUserName() const {
-    return ysp_username_;
-  }  // YSP+ { User information isolation }
+  const std::string& YSPUserName() const { return ysp_username_; }
 #endif
 
   // Returns the cookie line (e.g. "cookie1=value1; cookie2=value2") represented

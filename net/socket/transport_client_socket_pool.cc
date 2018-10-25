@@ -317,52 +317,65 @@ int TransportConnectJob::DoTransportConnect() {
   }
 
 #ifdef REDCORE
-		int rv = ERR_IO_PENDING;
-		std::string hostandport = addresses_.begin()->ToString();
-		std::string ip = std::string(hostandport, 0, hostandport.find(':'));
-		std::string port = std::string(hostandport, hostandport.find(':') + 1, hostandport.length());
-		std::string host = params_->destination().hostname();
-		std::string comparedHost = "";
-		if (port == "80" || port == "443")
-			comparedHost = host;
-		else
-			comparedHost = host + ":" + port;
-		std::string device_id = "", username = "", access_cmd = "", server_ip = "";
-		int timeDiff = 0;
-		access_cmd = "tcp/" + port;
-		std::string key = "dJjCl43TR4TkcEO2W9aW4rJGFMYaWe9oFrtfhMNVzSM=";
-		std::string hmac_key = "02LbTG8yoariufYrbigLgvax4lYhWtND5AFLDcf2EGeu4/bd3VxovZwFNAkdC4PowALnosuDhZKkUKm/41Rx8g==";
+  int rv = ERR_IO_PENDING;
+  std::string host_and_port = addresses_.begin()->ToString();
+  std::string ip = std::string(host_and_port, 0, host_and_port.find(':'));
+  std::string port = std::string(host_and_port, host_and_port.find(':') + 1,
+                                 host_and_port.length());
+  std::string host = params_->destination().hostname();
+  std::string comparedHost = "";
+  if (port == "80" || port == "443")
+    comparedHost = host;
+  else
+    comparedHost = host + ":" + port;
 
-		if (DomainCompared(comparedHost, &device_id, &username, &server_ip, timeDiff))
-		{
-			if (!device_id.empty() && !username.empty() && !ip.empty() && !port.empty() && !server_ip.empty())
-			{
-				device_id.assign("dJjCl43TR4TkcEO2");
-				server_ip = std::string(server_ip, 0, server_ip.find(':'));
-				YSPRedcoreSpaPacket udp_packet;
-				int ret = udp_packet.InitValues(device_id, username_, access_cmd, server_ip, key, hmac_key, timeDiff);
-				udp_packet.SendUdpPacket(base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
-				DLOG(INFO) << "redcore_spa_knock: " << ret << " device_id: " << device_id
-					<< " username: " << username << " access_cmd: " << access_cmd << " server_ip: " << server_ip;
-				//std::this_thread::sleep_for(10);
-				base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
-				rv = transport_socket_->Connect(base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
-			}
-		}
-		else if (comparedHost == host_)
-		{
-			device_id.assign("dJjCl43TR4TkcEO2");
-			server_ip = ip;
-			YSPRedcoreSpaPacket udp_packet;
-			int ret = udp_packet.InitValues(device_id, username_, access_cmd, server_ip, key, hmac_key, 0);
-			udp_packet.SendUdpPacket(base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
-			DLOG(INFO) << "login redcore_spa_knock:" << ret << " device_id: " << device_id
-				<< " username: " << username << " access_cmd: " << access_cmd << " server_ip: " << server_ip;
-			base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
-			rv = transport_socket_->Connect(base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
-		}
-		else
-			rv = transport_socket_->Connect(base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
+  std::string device_id = "";
+  std::string username = "";
+  std::string access_cmd = "";
+  std::string server_ip = "";
+  int time_diff = 0;
+  access_cmd = "tcp/" + port;
+  std::string key = "dJjCl43TR4TkcEO2W9aW4rJGFMYaWe9oFrtfhMNVzSM=";
+  std::string hmac_key =
+      "02LbTG8yoariufYrbigLgvax4lYhWtND5AFLDcf2EGeu4/"
+      "bd3VxovZwFNAkdC4PowALnosuDhZKkUKm/41Rx8g==";
+
+  if (DomainCompared(comparedHost, &device_id, &username, &server_ip,
+                     time_diff)) {
+    if (!device_id.empty() && !username.empty() && !ip.empty() &&
+        !port.empty() && !server_ip.empty()) {
+      device_id.assign("dJjCl43TR4TkcEO2");
+      server_ip = std::string(server_ip, 0, server_ip.find(':'));
+      YSPRedcoreSpaPacket udp_packet;
+      int ret = udp_packet.InitValues(device_id, username_, access_cmd,
+                                      server_ip, key, hmac_key, time_diff);
+      udp_packet.SendUdpPacket(base::Bind(&TransportConnectJob::OnIOComplete,
+                                          base::Unretained(this)));
+      DLOG(INFO) << "redcore_spa_knock: " << ret << " device_id: " << device_id
+                 << " username: " << username << " access_cmd: " << access_cmd
+                 << " server_ip: " << server_ip;
+      base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
+      rv = transport_socket_->Connect(base::Bind(
+          &TransportConnectJob::OnIOComplete, base::Unretained(this)));
+    }
+  } else if (comparedHost == host_) {
+    device_id.assign("dJjCl43TR4TkcEO2");
+    server_ip = ip;
+    YSPRedcoreSpaPacket udp_packet;
+    int ret = udp_packet.InitValues(device_id, username_, access_cmd, server_ip,
+                                    key, hmac_key, 0);
+    udp_packet.SendUdpPacket(
+        base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
+    DLOG(INFO) << "login redcore_spa_knock:" << ret
+               << " device_id: " << device_id << " username: " << username
+               << " access_cmd: " << access_cmd << " server_ip: " << server_ip;
+    base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
+    rv = transport_socket_->Connect(
+        base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
+  } else {
+    rv = transport_socket_->Connect(
+        base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));
+  }
 
 #else
 // I'm not sure whether this line should be here. (by webb)
@@ -370,7 +383,7 @@ int TransportConnectJob::DoTransportConnect() {
 
   int rv = transport_socket_->Connect(base::BindOnce(
       &TransportConnectJob::OnIOComplete, base::Unretained(this)));
-#endif //REDCORE 
+#endif  // REDCORE
 
   if (rv == ERR_IO_PENDING && try_ipv6_connect_with_ipv4_fallback) {
     fallback_timer_.Start(
@@ -381,73 +394,84 @@ int TransportConnectJob::DoTransportConnect() {
 }
 
 #ifdef REDCORE
-    
+
 #ifdef __APPLE__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif
-std::unique_ptr<base::DictionaryValue> TransportConnectJob::domainDict_ = nullptr;
+
+std::unique_ptr<base::DictionaryValue> TransportConnectJob::domain_dict_ =
+    nullptr;
 std::string TransportConnectJob::device_id_ = "";
 std::string TransportConnectJob::username_ = "";
 std::string TransportConnectJob::host_ = "";
+
 #ifdef __APPLE__
 #pragma clang diagnostic pop
 #endif
-    
-    //static
-void TransportConnectJob::SetLoginSpaValue(const std::string& device_id, const std::string& username, const std::string& host)
-{
-	device_id_ = device_id; username_ = username; host_ = host;
-}
-//static
-void TransportConnectJob::SetDomainDictValue(const std::string & domainDictString)
-{
-	if (!domainDictString.empty())
-	{
-		std::unique_ptr<base::Value> domainValue = base::JSONReader::Read(domainDictString);
-		domainDict_.reset(static_cast<base::DictionaryValue*>(domainValue.release()));
-	}
-	else
-		domainDict_.reset();
+
+// static
+void TransportConnectJob::SetLoginSpaValue(const std::string& device_id,
+                                           const std::string& username,
+                                           const std::string& host) {
+  device_id_ = device_id;
+  username_ = username;
+  host_ = host;
 }
 
-bool TransportConnectJob::DomainCompared(const std::string & host, std::string * device_id, std::string * username, std::string * server_ip, int timeDiff)
-{
-	if (domainDict_ && !domainDict_->empty())
-	{
-		domainDict_->GetString("deviceID", device_id);
-		domainDict_->GetString("username", username);
-		domainDict_->GetInteger("timeDifference", &timeDiff);
-		base::ListValue* domainList = nullptr;
-		if (domainDict_->GetList("list", &domainList))
-		{
-			if (domainList && !domainList->empty())
-			{
-				for (size_t i = 0; i < domainList->GetSize(); i++)
-				{
-					base::DictionaryValue* domainAndGateway = nullptr;
-					if (domainList->GetDictionary(i, &domainAndGateway))
-					{
-						std::string domain = "", url_host = "";
-						domainAndGateway->GetString("domain", &domain);
-						GURL url = GURL(domain);
-						if (url.port() != "")
-							url_host = url.host() + ":" + url.port();
-						else
-							url_host = url.host();
-						if (host == url_host)
-						{
-							domainAndGateway->GetString("gatewayHost", server_ip);
-							return true;
-						}
-					}
-				}
-			}
-		}
-	}
-	return false;
+//static
+void TransportConnectJob::SetDomainDictValue(
+    const std::string& domain_dict_string) {
+  if (!domain_dict_string.empty()) {
+    domain_dict_.reset();
+    return;
+  }
+
+  std::unique_ptr<base::Value> domainValue =
+      base::JSONReader::Read(domain_dict_string);
+  domain_dict_.reset(
+      static_cast<base::DictionaryValue*>(domainValue.release()));
 }
-#endif
+
+bool TransportConnectJob::DomainCompared(const std::string& host,
+                                         std::string* device_id,
+                                         std::string* username,
+                                         std::string* server_ip,
+                                         int time_diff) {
+  if (!domain_dict_ || domain_dict_->empty())
+    return false;
+
+  domain_dict_->GetString("deviceID", device_id);
+  domain_dict_->GetString("username", username);
+  domain_dict_->GetInteger("timeDifference", &time_diff);
+
+  base::ListValue* domain_list = nullptr;
+  if (!domain_dict_->GetList("list", &domain_list) || !domain_list ||
+      domain_list->empty()) {
+    return false;
+  }
+
+  for (size_t i = 0; i < domain_list->GetSize(); i++) {
+    base::DictionaryValue* domain_and_gateway = nullptr;
+    if (domain_list->GetDictionary(i, &domain_and_gateway)) {
+      std::string domain = "";
+      domain_and_gateway->GetString("domain", &domain);
+      GURL url = GURL(domain);
+
+      std::string url_host = "";
+      if (url.port() != "")
+        url_host = url.host() + ":" + url.port();
+      else
+        url_host = url.host();
+
+      if (host == url_host) {
+        domain_and_gateway->GetString("gatewayHost", server_ip);
+        return true;
+      }
+    }
+  }
+}
+#endif  // REDCORE
 
 int TransportConnectJob::DoTransportConnectComplete(int result) {
   if (result == OK) {

@@ -176,11 +176,16 @@ class NET_EXPORT CookieMonster : public CookieStore {
   void DeleteAllCreatedInTimeRangeAsync(
       const CookieDeletionInfo::TimeRange& creation_range,
       DeleteCallback callback) override;
+
 #ifdef REDCORE
   //TODO (matianzhi): YSP+ { clear user data }
-  void DeleteAllForUserIdAsync(const std::string& userid,
+  void DeleteAllForUserId(const std::string& user_id, DeleteCallback callback);
+
+  // TODO (matianzhi): YSP+ { clear user data }
+  void DeleteAllForUserIdAsync(const std::string& user_id,
                                DeleteCallback callback) override;
 #endif
+
   void DeleteAllMatchingInfoAsync(CookieDeletionInfo delete_info,
                                   DeleteCallback callback) override;
   void DeleteSessionCookiesAsync(DeleteCallback) override;
@@ -385,12 +390,6 @@ class NET_EXPORT CookieMonster : public CookieStore {
   void DeleteAllCreatedInTimeRange(
       const CookieDeletionInfo::TimeRange& creation_range,
       DeleteCallback callback);
-
-#ifdef REDCORE
-  //TODO (matianzhi): YSP+ { clear user data
-  void DeleteAllForUserId(const std::string& userid,
-                          DeleteCallback callback);
-#endif
 
   void DeleteAllMatchingInfo(net::CookieDeletionInfo delete_info,
                              DeleteCallback callback);

@@ -4,7 +4,7 @@
 
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 
-#include <openssl/aes.h>  // YSP+ { config cryptor }
+#include <openssl/aes.h>
 #include <locale>
 #include <utility>
 
@@ -13,29 +13,28 @@
 #include "base/files/file_util.h"
 #include "base/guid.h"
 #include "base/json/json_file_value_serializer.h"
-#include "base/json/json_reader.h"  // YSP+ { config cryptor }
+#include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/native_library.h"
 #include "base/path_service.h"
-#include "base/strings/string_number_conversions.h"  // YSP+ { SingleSignOn config }
+#include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
-#include "base/win/windows_version.h"  // YSP+ { system version }
+#include "base/win/windows_version.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/themes/theme_properties.h"
 #include "chrome/browser/ysp_login/ysp_us_report_fetcher.h"
-#include "chrome/common/channel_info.h"  // YSP+ { app version }
+#include "chrome/common/channel_info.h"
 #include "chrome/common/chrome_paths.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/generated_resources.h"
 #include "components/metrics/metrics_pref_names.h"
 #include "components/prefs/pref_service.h"
-#include "components/version_info/version_info.h"  // YSP+ { app version }
-#include "components/version_info/version_info.h"  // ysp+ { crypto http header }
+#include "components/version_info/version_info.h"
 #include "content/public/browser/browser_thread.h"
-#include "crypto/ysp_crypto_header.h"  // ysp+ { crypto http header }
-#include "net/base/mime_util.h"        // YSP+ { Fetcher resource }
+#include "crypto/ysp_crypto_header.h"
+#include "net/base/mime_util.h"
 #include "net/url_request/url_request_http_job.h"
 #include "ui/base/l10n/l10n_util.h"
 
@@ -2222,7 +2221,7 @@ void YSPLoginManager::ClearCache() {
   single_signon_info_.reset();
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setSSOConfigValue, ""));
+      base::Bind(&net::URLRequestHttpJob::SetSsoConfigValue, ""));
   // YSP+ } /*SingleSignOn config*/
   login_status_code_ = false;
   application_status_code_ = false;
@@ -2243,7 +2242,7 @@ void YSPLoginManager::Logout() {
   SetLoginStatus(SATUS_LOGOUT);  // ysp+ { auto get config }
   ntp_login_status_ = false;
   // Once user does logout manually, the auto_login becomes false.
-  net::URLRequestHttpJob::clearHeader();
+  net::URLRequestHttpJob::ClearHeader();
   std::vector<YSPLoginManagerObserver*>::iterator iter = observers_.begin();
   for (; iter != observers_.end(); ++iter) {
     (*iter)->OnLogout();
@@ -2358,7 +2357,7 @@ void YSPLoginManager::OnSingleSignOnRequestFailure() {
   DLOG(INFO) << "YSPLoginManager::OnSingleSignOnRequestFailure";
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setSSOConfigValue, ""));
+      base::Bind(&net::URLRequestHttpJob::SetSsoConfigValue, ""));
 }
 
 void YSPLoginManager::OnSingleSignOnResponseParseSuccess(
@@ -2378,7 +2377,7 @@ void YSPLoginManager::OnSingleSignOnResponseParseFailure(
              << ")";
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::URLRequestHttpJob::setSSOConfigValue, ""));
+      base::Bind(&net::URLRequestHttpJob::SetSsoConfigValue, ""));
 }
 
 void YSPLoginManager::OnSingleSignOnResponseParseSuccessInternal(
@@ -2401,7 +2400,7 @@ void YSPLoginManager::OnSingleSignOnResponseParseSuccessInternal(
       base::JSONWriter::Write(*data_dict, &singlesignon_string);
       content::BrowserThread::PostTask(
           content::BrowserThread::IO, FROM_HERE,
-          base::Bind(&net::URLRequestHttpJob::setSSOConfigValue,
+          base::Bind(&net::URLRequestHttpJob::SetSsoConfigValue,
                      singlesignon_string));
     }
   }
@@ -3432,7 +3431,7 @@ void YSPLoginManager::AddHeaders() {
           if (iter.value().is_string()) {
             std::string value;
             iter.value().GetAsString(&value);
-            net::URLRequestHttpJob::addGlobalHeader(iter.key(), value);
+            net::URLRequestHttpJob::AddGlobalHeader(iter.key(), value);
           }
         }
       }

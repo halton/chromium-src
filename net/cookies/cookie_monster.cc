@@ -1886,7 +1886,7 @@ void CookieMonster::DoCookieCallbackForHostOrDomain(
 }
 
 #if defined(REDCORE)
-void CookieMonster::DeleteAllForUserId(const std::string& userid,
+void CookieMonster::DeleteAllForUserId(const std::string& user_id,
                                        DeleteCallback callback) {
   DCHECK(thread_checker_.CalledOnValidThread());
 
@@ -1896,7 +1896,7 @@ void CookieMonster::DeleteAllForUserId(const std::string& userid,
     CanonicalCookie* cc = curit->second.get();
     ++it;
 
-    if (cc->YSPUserName() == userid) {
+    if (cc->YSPUserName() == user_id) {
       InternalDeleteCookie(curit, true, /*sync_to_store*/
                            DELETE_COOKIE_EXPLICIT);
       ++num_deleted;
@@ -1909,16 +1909,15 @@ void CookieMonster::DeleteAllForUserId(const std::string& userid,
                               : base::OnceClosure()));
 }
 
-void CookieMonster::DeleteAllForUserIdAsync(const std::string& userid,
+void CookieMonster::DeleteAllForUserIdAsync(const std::string& user_id,
                                             DeleteCallback callback) {
   DoCookieCallback(base::BindOnce(
       // base::Unretained is safe as DoCookieCallbackForURL stores
       // the callback on |*this|, so the callback will not outlive
       // the object.
-      &CookieMonster::DeleteAllForUserId, base::Unretained(this), userid,
+      &CookieMonster::DeleteAllForUserId, base::Unretained(this), user_id,
       std::move(callback)));
 }
-//ysp+
 #endif
 
 }  // namespace net

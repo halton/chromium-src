@@ -99,7 +99,10 @@ namespace disk_cache {
   bool EntryImpl::cache_crypt_status_ = false;
   const char key[] = "WFMxTBb4EODsRgyMibiERdMnT6qpyGDZ";
 
-  static void EncryptValueFormFile(int64_t offset, const char* data, int size, char* enc_data) {
+  static void EncryptValueFormFile(int64_t offset,
+                                   const char* data,
+                                   int size,
+                                   char* enc_data) {
     int i = 0;
     int key_len = strlen(key);
     char ckey;
@@ -109,7 +112,10 @@ namespace disk_cache {
     }
   }
 
-  void DecryptValueFormFile(int64_t offset, char* data, int size, const char* dec_data) {
+  void DecryptValueFormFile(int64_t offset,
+                            char* data,
+                            int size,
+                            const char* dec_data) {
     int i = 0;
     int key_len = strlen(key);
     char ckey;
@@ -122,9 +128,12 @@ namespace disk_cache {
 
 class YspEncryptCallback : public base::RefCountedThreadSafe<YspEncryptCallback> {
 public:
-  YspEncryptCallback(int offset, char *out, int out_len, char *in,
-    net::CompletionOnceCallback callback);
-  void OnCompleted(int arg);
+ YspEncryptCallback(int offset,
+                    char* out,
+                    int out_len,
+                    char* in,
+                    net::CompletionOnceCallback callback);
+ void OnCompleted(int arg);
 
 protected:
   virtual ~YspEncryptCallback();
@@ -141,14 +150,16 @@ private:
 YspEncryptCallback::~YspEncryptCallback() {
 }
 
-YspEncryptCallback::YspEncryptCallback(int offset, char *out, int out_len, char *in,
-  net::CompletionOnceCallback callback)
-  :offset_(offset),
-  out_(out),
-  in_buf_(in),
-  len_(out_len),
-  callback_(std::move(callback)) {
-}
+YspEncryptCallback::YspEncryptCallback(int offset,
+                                       char* out,
+                                       int out_len,
+                                       char* in,
+                                       net::CompletionOnceCallback callback)
+    : offset_(offset),
+      out_(out),
+      in_buf_(in),
+      len_(out_len),
+      callback_(std::move(callback)) {}
 
 void YspEncryptCallback::OnCompleted(int status) {
   DecryptValueFormFile(offset_, out_, len_, in_buf_);
@@ -162,7 +173,7 @@ void YspEncryptCallback::OnCompleted(int status) {
   in_buf_ = NULL;
 }
 
-#endif
+#endif  // REDCORE
 
 // This class handles individual memory buffers that store data before it is
 // sent to disk. The buffer can start at any offset, but if we try to write to
@@ -1153,21 +1164,24 @@ int EntryImpl::InternalReadData(int index,
   bool completed;
 #ifdef REDCORE
   //YSP+ { cache encryption
-  if (cache_crypt_status_ && address.is_separate_file() && !backend_->GetFileName(address).empty()) {
-	  char* enc_data = new char[buf_len];
-	  memset(enc_data, 0, buf_len);
+  if (cache_crypt_status_ && address.is_separate_file() &&
+      !backend_->GetFileName(address).empty()) {
+    char* enc_data = new char[buf_len];
+    memset(enc_data, 0, buf_len);
     if (io_callback) {
       delete io_callback;
-      YspEncryptCallback *obj = new YspEncryptCallback(offset, buf->data(), buf_len, enc_data, std::move(callback));
-      io_callback = new SyncCallback(this, buf, base::Bind(&YspEncryptCallback::OnCompleted, obj),
-        net::NetLogEventType::ENTRY_READ_DATA);
+      YspEncryptCallback* obj = new YspEncryptCallback(
+          offset, buf->data(), buf_len, enc_data, std::move(callback));
+      io_callback = new SyncCallback(
+          this, buf, base::Bind(&YspEncryptCallback::OnCompleted, obj),
+          net::NetLogEventType::ENTRY_READ_DATA);
     }
 
     if (!file->Read(enc_data, buf_len, file_offset, io_callback, &completed)) {
-        if (io_callback)
-            io_callback->Discard();
-        DoomImpl();
-        return net::ERR_CACHE_READ_FAILURE;
+      if (io_callback)
+        io_callback->Discard();
+      DoomImpl();
+      return net::ERR_CACHE_READ_FAILURE;
     }
     if (completed) {
       DecryptValueFormFile(offset, buf->data(), buf_len, enc_data);
@@ -1176,13 +1190,14 @@ int EntryImpl::InternalReadData(int index,
   }
   else {
   //YSP+ }
-#endif
-	  if (!file->Read(buf->data(), buf_len, file_offset, io_callback, &completed)) {
-		  if (io_callback)
-			  io_callback->Discard();
-		  DoomImpl();
-		  return net::ERR_CACHE_READ_FAILURE;
-	  }
+#endif  // REDCORE
+    if (!file->Read(buf->data(), buf_len, file_offset, io_callback,
+                    &completed)) {
+      if (io_callback)
+        io_callback->Discard();
+      DoomImpl();
+      return net::ERR_CACHE_READ_FAILURE;
+    }
 #ifdef REDCORE
   } //YSP+ { cache encryption }
 #endif
@@ -1616,21 +1631,22 @@ bool EntryImpl::Flush(int index, int min_len) {
     return false;
 #ifdef REDCORE
   //YSP+ { cache encryption
-  if (cache_crypt_status_ && address.is_separate_file() && !backend_->GetFileName(address).empty()) {
-	  char* enc_data = new char[len];
-	  memset(enc_data, 0, len);
-	  EncryptValueFormFile(offset, user_buffers_[index]->Data(), len, enc_data);
-	  if (!file->Write(enc_data, len, offset, NULL, NULL)) {
-		  delete[] enc_data;
-		  return false;
-	  }
-	  delete[] enc_data;
+  if (cache_crypt_status_ && address.is_separate_file() &&
+      !backend_->GetFileName(address).empty()) {
+    char* enc_data = new char[len];
+    memset(enc_data, 0, len);
+    EncryptValueFormFile(offset, user_buffers_[index]->Data(), len, enc_data);
+    if (!file->Write(enc_data, len, offset, NULL, NULL)) {
+      delete[] enc_data;
+      return false;
+    }
+    delete[] enc_data;
   }
   else {
   //YSP+ }
-#endif
-	  if (!file->Write(user_buffers_[index]->Data(), len, offset, NULL, NULL))
-		  return false;
+#endif  // REDCORE
+    if (!file->Write(user_buffers_[index]->Data(), len, offset, NULL, NULL))
+      return false;
 #ifdef REDCORE
   } //YSP+ { cache encryption }
 #endif

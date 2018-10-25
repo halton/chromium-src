@@ -169,7 +169,8 @@ class NET_EXPORT_PRIVATE EntryImpl
   // Returns the number of blocks needed to store an EntryStore.
   static int NumBlocksForEntry(int key_size);
 #ifdef REDCORE
-  static void SetCacheStatus(bool status) { cache_crypt_status_ = status; } //YSP+ { cache encryption }
+  // YSP+ { cache encryption }
+  static void SetCacheStatus(bool status) { cache_crypt_status_ = status; }
 #endif
 
   // Entry interface.

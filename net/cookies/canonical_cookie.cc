@@ -57,7 +57,7 @@
 #include "url/url_util.h"
 
 #ifdef REDCORE
-#include "crypto/ysp_crypto_encryption.h" //YSP+ { User information isolation }
+#include "crypto/ysp_crypto_encryption.h"
 #endif
 
 using base::Time;

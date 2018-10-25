@@ -38,7 +38,8 @@
 
 #ifdef REDCORE
 // AES DES and SMS4 crypt
-#include "chrome/browser/ysp_login/ysp_login_manager.h" //ysp+{disable rbutton menu}
+// ysp+{disable rbutton menu}
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "crypto/ysp_crypto_encryption.h"
 #endif
 
@@ -954,7 +955,8 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
   sql::Statement& smt = *statement;
   bool ok = true;
 #ifdef REDCORE
-  std::string username = YSPCryptoCSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
+  // YSP+ { User information isolation }
+  std::string username = YSPCryptoCSingleton::GetInstance()->GetUserId();
 #endif
   while (smt.Step()) {
     ++num_cookies_read_;
@@ -983,25 +985,25 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
    else
       dec_value = value;
 #endif
-    std::unique_ptr<CanonicalCookie> cc(std::make_unique<CanonicalCookie>(
-        smt.ColumnString(2),                           // name
+   std::unique_ptr<CanonicalCookie> cc(std::make_unique<CanonicalCookie>(
+       smt.ColumnString(2),  // name
 #ifdef REDCORE
        dec_value,
 #else
-        value,                                         // value
+        value,  // value
 #endif
-        smt.ColumnString(1),                           // domain
-        smt.ColumnString(5),                           // path
-        Time::FromInternalValue(smt.ColumnInt64(0)),   // creation_utc
-        Time::FromInternalValue(smt.ColumnInt64(6)),   // expires_utc
-        Time::FromInternalValue(smt.ColumnInt64(10)),  // last_access_utc
-        smt.ColumnInt(7) != 0,                         // secure
-        smt.ColumnInt(8) != 0,                         // http_only
-        DBCookieSameSiteToCookieSameSite(
-            static_cast<DBCookieSameSite>(smt.ColumnInt(9))),  // samesite
-        DBCookiePriorityToCookiePriority(
-            static_cast<DBCookiePriority>(smt.ColumnInt(13)))  // priority
-        ));
+       smt.ColumnString(1),                           // domain
+       smt.ColumnString(5),                           // path
+       Time::FromInternalValue(smt.ColumnInt64(0)),   // creation_utc
+       Time::FromInternalValue(smt.ColumnInt64(6)),   // expires_utc
+       Time::FromInternalValue(smt.ColumnInt64(10)),  // last_access_utc
+       smt.ColumnInt(7) != 0,                         // secure
+       smt.ColumnInt(8) != 0,                         // http_only
+       DBCookieSameSiteToCookieSameSite(
+           static_cast<DBCookieSameSite>(smt.ColumnInt(9))),  // samesite
+       DBCookiePriorityToCookiePriority(
+           static_cast<DBCookiePriority>(smt.ColumnInt(13)))  // priority
+       ));
     DLOG_IF(WARNING, cc->CreationDate() > Time::Now())
         << L"CreationDate too recent";
     if (cc->IsCanonical()) {

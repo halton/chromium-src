@@ -378,11 +378,11 @@ component("net") {
     defines += [ "NET_DISABLE_BROTLI" ]
   }
 
-  if (is_ie_redcore) {
+  # TODO(halton): enable gm support for non-win
+  if (is_redcore || is_win) {
     sources += [
-      # YSP
-      "http/gm_sangfor_interface.cc",
-      "http/gm_sangfor_interface.h",
+      "http/gm_stream.cc",
+      "http/gm_stream.h",
     ]
   }
   deps = [
@@ -1053,8 +1053,6 @@ component("net") {
       "socket/transport_client_socket.h",
       "socket/transport_client_socket_pool.cc",
       "socket/transport_client_socket_pool.h",
-      "socket/ysp_spa_packet.h",
-      "socket/ysp_spa_packet.cc",
       "socket/udp_client_socket.cc",
       "socket/udp_client_socket.h",
       "socket/udp_net_log_parameters.cc",
@@ -1070,6 +1068,8 @@ component("net") {
       "socket/websocket_transport_client_socket_pool.h",
       "socket/websocket_transport_connect_sub_job.cc",
       "socket/websocket_transport_connect_sub_job.h",
+      "socket/ysp_spa_packet.cc",
+      "socket/ysp_spa_packet.h",
       "spdy/bidirectional_stream_spdy_impl.cc",
       "spdy/bidirectional_stream_spdy_impl.h",
       "spdy/buffered_spdy_framer.cc",

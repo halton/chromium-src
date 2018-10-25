@@ -129,9 +129,15 @@ class NET_EXPORT_PRIVATE TransportConnectJob : public ConnectJob {
       RaceResult race_result);
 
 #ifdef REDCORE
-  static void SetDomainDictValue(const std::string& domainDictString);
-  static void SetLoginSpaValue(const std::string& device_id, const std::string& username, const std::string& host);
-  bool DomainCompared(const std::string& host, std::string* device_id, std::string* username, std::string* server_ip, int timeDiff);
+  static void SetDomainDictValue(const std::string& domain_dict_string);
+  static void SetLoginSpaValue(const std::string& device_id,
+                               const std::string& username,
+                               const std::string& host);
+  bool DomainCompared(const std::string& host,
+                      std::string* device_id,
+                      std::string* username,
+                      std::string* server_ip,
+                      int time_diff);
 #endif
 
  private:
@@ -176,8 +182,8 @@ class NET_EXPORT_PRIVATE TransportConnectJob : public ConnectJob {
   static std::string device_id_;
   static std::string username_;
   static std::string host_;
-  static std::string localIp_;
-  static std::unique_ptr<base::DictionaryValue> domainDict_;
+  static std::string local_ip_;
+  static std::unique_ptr<base::DictionaryValue> domain_dict_;
 #endif
 
   std::unique_ptr<StreamSocket> fallback_transport_socket_;
