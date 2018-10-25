@@ -67,12 +67,14 @@ STDMETHODIMP UIATextProvider::get_SupportedTextSelection(
   return E_NOTIMPL;
 }
 
-//ysp+ {IE Embedded}
-UI_BASE_EXPORT bool CreateTextProviderInstance(const string16 & value, bool editable, IUnknown ** provider)
-{
-  return  base::win::UIATextProvider::CreateTextProvider(value, editable, provider);
+#ifdef REDCORE
+UI_BASE_EXPORT bool CreateTextProviderInstance(const string16& value,
+                                               bool editable,
+                                               IUnknown** provider) {
+  return base::win::UIATextProvider::CreateTextProvider(value, editable,
+                                                        provider);
 }
-//ysp+
+#endif  // REDCORE
 
 }  // namespace win
 }  // namespace base

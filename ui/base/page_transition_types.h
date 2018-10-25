@@ -100,11 +100,15 @@ enum PageTransition {
 
 #ifdef IE_REDCORE
   PAGE_TRANSITION_IE_NEWWINDOW = 10,
-#endif
+#endif  // IE_REDCORE
 
-  // Corresponds to a visit generated for a keyword. See description of
-  // KEYWORD for more details.
+// Corresponds to a visit generated for a keyword. See description of
+// KEYWORD for more details.
+#ifdef IE_REDCORE
   PAGE_TRANSITION_KEYWORD_GENERATED = 11,
+#else
+  PAGE_TRANSITION_KEYWORD_GENERATED = 10,
+#endif  // IE_REDCORE
 
   // ADDING NEW CORE VALUE? Be sure to update the LAST_CORE and CORE_MASK
   // values below.  Also update CoreTransitionString().

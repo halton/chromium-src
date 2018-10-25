@@ -83,11 +83,8 @@ class VIEWS_EXPORT ImageView : public View {
   views::PaintInfo::ScaleType GetPaintScaleType() const override;
 
 #ifdef REDCORE
-  //ysp+ {
-  void SetDrawCircle(bool circle) {
-    draw_circle_ = circle;
-  }
-#endif
+  void SetDrawCircle(bool circle) { draw_circle_ = circle; }
+#endif  // REDCORE
 
  private:
   friend class ImageViewTest;
@@ -135,8 +132,8 @@ class VIEWS_EXPORT ImageView : public View {
   void* last_painted_bitmap_pixels_;
 
 #ifdef REDCORE
-  bool draw_circle_;    //ysp+
-#endif
+  bool draw_circle_;
+#endif  // REDCORE
 
   DISALLOW_COPY_AND_ASSIGN(ImageView);
 };

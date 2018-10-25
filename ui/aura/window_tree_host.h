@@ -219,9 +219,7 @@ class AURA_EXPORT WindowTreeHost : public ui::internal::InputMethodDelegate,
   virtual base::flat_map<std::string, std::string> GetKeyboardLayoutMap() = 0;
 
 #if defined(REDCORE) && defined(WATERMARK) && defined(IE_REDCORE)
-  //ysp+{}
-  virtual void OnLockScreenChanged(bool isLock);
-  //
+  virtual void OnLockScreenChanged(bool is_lock);
 #endif
 
  protected:

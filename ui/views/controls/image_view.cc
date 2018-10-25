@@ -218,7 +218,6 @@ void ImageView::OnPaintImage(gfx::Canvas* canvas) {
     return;
 
 #ifdef REDCORE
-  //ysp+ {
   if (draw_circle_) {
     int corner_radius = image_bounds.width()/2;
     SkPath clipPath;
@@ -231,8 +230,7 @@ void ImageView::OnPaintImage(gfx::Canvas* canvas) {
         SkIntToScalar(corner_radius));
     canvas->ClipPath(clipPath, true);
   }
-  //ysp+ }
-#endif
+#endif  // REDCORE
 
   if (image_bounds.size() != gfx::Size(image.width(), image.height())) {
     // Resize case

@@ -63,9 +63,11 @@ class UI_BASE_EXPORT UIATextProvider
   string16 value_;
 };
 
+#ifdef REDCORE
 UI_BASE_EXPORT bool CreateTextProviderInstance(const string16& value,
-                                              bool editable,
-                                              IUnknown** provider);
+                                               bool editable,
+                                               IUnknown** provider);
+#endif  // REDCORE
 
 }  // win
 }  // base

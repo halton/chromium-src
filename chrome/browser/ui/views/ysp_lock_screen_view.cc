@@ -1,13 +1,14 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_lock_screen_view.h"
 
 #include "base/strings/utf_string_conversions.h"
-
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/browser/ui/views/ysp_account_view.h"    //ysp+ { custom ui }
-#include "chrome/browser/ui/views/ysp_lock_screen_view.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/grit/generated_resources.h"
 #include "chrome/grit/theme_resources.h"
@@ -28,15 +29,13 @@
 #include "ui/aura/window_tree_host.h"
 #endif
 
-void YSPLockScreenView::ShowLockedScreen(BrowserView *browser_view)
-{
+void YSPLockScreenView::ShowLockedScreen(BrowserView* browser_view) {
   //static YSPLockScreenView * locked_view = new YSPLockScreenView(browser_view);
 }
 
-YSPLockScreenView::YSPLockScreenView(views::ButtonListener *listener, BrowserView *browser_view)
-      : browser_view_(browser_view),
-        is_locked_(false)
-{
+YSPLockScreenView::YSPLockScreenView(views::ButtonListener* listener,
+                                     BrowserView* browser_view)
+    : browser_view_(browser_view), is_locked_(false) {
   if (!browser_view)
     return;
 
@@ -95,31 +94,29 @@ YSPLockScreenView::YSPLockScreenView(views::ButtonListener *listener, BrowserVie
 
 }
 
-YSPLockScreenView::~YSPLockScreenView()
-{
-	YSPLoginManager::GetInstance()->RemoveObserver(this);
+YSPLockScreenView::~YSPLockScreenView() {
+  YSPLoginManager::GetInstance()->RemoveObserver(this);
 }
 
-static int GetLeftTop(int window_width, int view_width)
-{
+static int GetLeftTop(int window_width, int view_width) {
   return (window_width > view_width) ? (window_width - view_width) / 2 : 0;
 }
 
-void YSPLockScreenView::Lock(Browser::YSPLockStatus status)
-{
+void YSPLockScreenView::Lock(Browser::YSPLockStatus status) {
   PrefService *pref = g_browser_process->local_state();
   if (status != pref->GetInteger(prefs::kYSPLockScreen))
     pref->SetInteger(prefs::kYSPLockScreen, status);
 }
 
-void YSPLockScreenView::LockInternal(Browser::YSPLockStatus status)
-{
+void YSPLockScreenView::LockInternal(Browser::YSPLockStatus status) {
   if (!is_locked_) {
     is_locked_ = true;
     if (status == Browser::SCREEN_LOCKED)
-      info_label_->SetText(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE));
+      info_label_->SetText(
+          l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE));
     else if (status == Browser::TOKEN_EXPIRED_LOCKED)
-      info_label_->SetText(l10n_util::GetStringUTF16(IDS_YSP_FLOAT_LOGIN_WINDOW_VIEW_TITLE));
+      info_label_->SetText(
+          l10n_util::GetStringUTF16(IDS_YSP_FLOAT_LOGIN_WINDOW_VIEW_TITLE));
     else
       NOTREACHED();
     const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
@@ -143,15 +140,13 @@ void YSPLockScreenView::LockInternal(Browser::YSPLockStatus status)
   }
 }
 
-void YSPLockScreenView::Unlock()
-{
+void YSPLockScreenView::Unlock() {
   PrefService *pref = g_browser_process->local_state();
   if (pref->GetInteger(prefs::kYSPLockScreen) != Browser::UNLOCKED)
     pref->SetInteger(prefs::kYSPLockScreen, Browser::UNLOCKED);
 }
 
-void YSPLockScreenView::UnlockInternal()
-{
+void YSPLockScreenView::UnlockInternal() {
   if (is_locked_) {
     is_locked_ = false;
     browser_view_->SetVisible(true);
@@ -172,24 +167,23 @@ void YSPLockScreenView::UnlockInternal()
 void YSPLockScreenView::Submit()
 {
   std::string text = base::UTF16ToUTF8(password_text_->text());
-  if (g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen) == Browser::TOKEN_EXPIRED_LOCKED) {
-    YSPLoginManager::GetInstance()->StartLogin(YSPLoginManager::GetInstance()->GetLastCID(),
-                                               YSPLoginManager::GetInstance()->GetLastUID(),
-                                               text);
+  if (g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen) ==
+      Browser::TOKEN_EXPIRED_LOCKED) {
+    YSPLoginManager::GetInstance()->StartLogin(
+        YSPLoginManager::GetInstance()->GetLastCID(),
+        YSPLoginManager::GetInstance()->GetLastUID(), text);
     return;
   }
 
   if (YSPLoginManager::GetInstance()->isValidPassword(text)) {
     Unlock();
-  }
-  else {
+  } else {
     error_prompt_->SetVisible(true);
     InvalidateLayout();
   }
 }
 
-void YSPLockScreenView::Layout()
-{
+void YSPLockScreenView::Layout() {
   // TODO (LIUWEI) hard code for now
   SetBorder(views::CreateSolidBorder(1, SK_ColorBLACK));
   gfx::Rect bound = bounds();
@@ -228,68 +222,55 @@ void YSPLockScreenView::Layout()
   // check/restore the lock state in this case
 
   Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
-    g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
+      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
   if (lock != Browser::UNLOCKED)
     LockInternal(lock);
 }
 
-void YSPLockScreenView::OnLoginRequestFailure(const std::string& error)
-{
-}
+void YSPLockScreenView::OnLoginRequestFailure(const std::string& error) {}
 
-void YSPLockScreenView::OnLoginResponseParseFailure(const std::string& error)
-{
-}
+void YSPLockScreenView::OnLoginResponseParseFailure(const std::string& error) {}
 
-void YSPLockScreenView::OnLoginFailure(base::string16 message)
-{
-}
+void YSPLockScreenView::OnLoginFailure(base::string16 message) {}
 
-void YSPLockScreenView::OnLoginSuccess(const base::string16 & name, const std::string & head_image_url)
-{
-}
+void YSPLockScreenView::OnLoginSuccess(const base::string16& name,
+                                       const std::string& head_image_url) {}
 
-void YSPLockScreenView::OnLogout()
-{
-}
+void YSPLockScreenView::OnLogout() {}
 
-void YSPLockScreenView::OnTokenStatusChanged(const std::string& type)
-{
+void YSPLockScreenView::OnTokenStatusChanged(const std::string& type) {
   if (type == "TokenExpired") {
     Lock(Browser::TOKEN_EXPIRED_LOCKED);
-  }
-  else if (type == "TokenAvailable") {
+  } else if (type == "TokenAvailable") {
     if (is_locked_)
       Unlock();
-  }
-  else if (type == "failure") {
+  } else if (type == "failure") {
     error_prompt_->SetVisible(true);
     InvalidateLayout();
   }
 }
 
-
-bool YSPLockScreenView::HandleContextMenu(const content::ContextMenuParams & params)
-{
+bool YSPLockScreenView::HandleContextMenu(
+    const content::ContextMenuParams& params) {
   return false;
 }
 
-void YSPLockScreenView::ButtonPressed(views::Button * sender, const ui::Event & event)
-{
+void YSPLockScreenView::ButtonPressed(views::Button* sender,
+                                      const ui::Event& event) {
   if (sender == login_button_) {
     // TODO: (LIUWEI) Implement it
     Submit();
   }
 }
 
-void YSPLockScreenView::ContentsChanged(views::Textfield * sender, const base::string16 & new_contents)
-{
+void YSPLockScreenView::ContentsChanged(views::Textfield* sender,
+                                        const base::string16& new_contents) {
   bool enable = password_text_->text().length() > 0;
   login_button_->SetEnabled(enable);
 }
 
-bool YSPLockScreenView::HandleKeyEvent(views::Textfield * sender, const ui::KeyEvent & key_event)
-{
+bool YSPLockScreenView::HandleKeyEvent(views::Textfield* sender,
+                                       const ui::KeyEvent& key_event) {
   // TODO: (LIUWEI)
   if (key_event.key_code() == ui::VKEY_RETURN) {
     if (password_text_->text().length() > 0)
@@ -300,14 +281,13 @@ bool YSPLockScreenView::HandleKeyEvent(views::Textfield * sender, const ui::KeyE
   return false;
 }
 
-void YSPLockScreenView::OnLockStatusChanged()
-{
+void YSPLockScreenView::OnLockStatusChanged() {
   Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
-                                  g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
-  if (lock)
-    LockInternal(lock);
-  else
-    UnlockInternal();
-}
+      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
 
-#endif
+  if (lock) {
+    LockInternal(lock);
+  } else {
+    UnlockInternal();
+  }
+}
