@@ -1,4 +1,5 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -154,9 +155,10 @@ class URL_EXPORT Origin {
     return !unique() ? tuple_.host() : base::EmptyString();
   }
   uint16_t port() const { return !unique() ? tuple_.port() : 0; }
- 
-  bool opaque() const { return nonce_.has_value(); }
 
+#if defined(IE_REDCORE)
+  bool opaque() const { return nonce_.has_value(); }
+#endif
   // TODO(dcheng): Rename this to opaque().
   bool unique() const { return tuple_.IsInvalid(); }
 

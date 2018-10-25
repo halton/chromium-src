@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Copyright (c) 2012 The Chromium Authors. All rights reserved.
+# Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -19,9 +20,9 @@ from grit import util
 from grit.node import include
 from grit.node import message
 from grit.node import structure
-# //ysp+ { localization
+# // ysp+ { localization
 from grit.format.yspbrowser import processor
-# //ysp+ }
+# // ysp+ }
 
 
 PACK_FILE_VERSION = 5
