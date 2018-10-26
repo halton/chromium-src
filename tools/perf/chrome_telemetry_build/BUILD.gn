@@ -64,7 +64,7 @@ group("telemetry_chrome_test") {
     ]
 
     # TODO(GYP): These should be provided automatically through data_deps.
-    data += [ "$root_out_dir/redcore.exe.pdb" ]     # //ysp* { change executable name. }
+    data += [ "$root_out_dir/redcore.exe.pdb" ]  # //ysp* { change executable name. }
     if (is_component_build) {
       data += [
         "$root_out_dir/base.dll.pdb",
@@ -84,9 +84,7 @@ group("telemetry_chrome_test_without_chrome") {
     "//third_party/catapult:telemetry_chrome_test_support",
   ]
   if (!is_android) {
-    data_deps += [
-      "//third_party/catapult/telemetry:bitmaptools",
-    ]
+    data_deps += [ "//third_party/catapult/telemetry:bitmaptools" ]
   }
 
   data = [

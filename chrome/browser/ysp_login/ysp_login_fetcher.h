@@ -71,8 +71,8 @@ class YSPLoginFetcher : public base::SupportsWeakPtr<YSPLoginFetcher>,
   std::unique_ptr<net::URLFetcher> data_fetcher_;
   std::string auto_config_flags_old_ = "";    // ysp+ { auto get config }
   static std::string auto_config_flags_now_;  // ysp+ { auto get config }
-  int frequency = 0;                       // ysp+ { auto get config }
-  static bool auto_get_config_;              // ysp+ { auto get config }
+  int frequency = 0;                          // ysp+ { auto get config }
+  static bool auto_get_config_;               // ysp+ { auto get config }
   std::vector<std::string> header_list_;
 
   DISALLOW_COPY_AND_ASSIGN(YSPLoginFetcher);

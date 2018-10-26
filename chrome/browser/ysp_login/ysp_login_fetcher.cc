@@ -31,13 +31,13 @@ const char kMultipartBoundary[] = "------xdcehKrkohmfeHiyreFnWifghoDl------";
 
 }  // namespace
 std::string YSPLoginFetcher::auto_config_flags_now_ =
-    "";                                       // ysp+ { auto get config }
+    "";                                         // ysp+ { auto get config }
 bool YSPLoginFetcher::auto_get_config_ = true;  // ysp+ { auto get config }
 YSPLoginFetcher::YSPLoginFetcher(YSPLoginFetcherDelegate* delegate,
                                  net::URLRequestContextGetter* request_context)
     : delegate_(delegate), request_context_(request_context) {
   auto_config_flags_now_.assign("");  // ysp+ { auto get config }
-  auto_get_config_ = true;           // ysp+ { auto get config }
+  auto_get_config_ = true;            // ysp+ { auto get config }
 }
 
 YSPLoginFetcher::~YSPLoginFetcher() {}

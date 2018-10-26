@@ -8,12 +8,13 @@
 #include <stddef.h>
 
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
 #include "ui/views/controls/button/button.h"
-#include "ui/views/controls/textfield/textfield_controller.h"
+#include "ui/views/controls/image_view.h"
 #include "ui/views/controls/textfield/textfield.h"
-#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "ui/views/controls/textfield/textfield_controller.h"
 
 namespace views {
 class GridLayout;
@@ -33,8 +34,7 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                           public YSPLoginManagerObserver {
  public:
   static void ShowLockedScreen(BrowserView* browser_view);
-  YSPLockScreenView(views::ButtonListener* listener,
-                    BrowserView* browser_view);
+  YSPLockScreenView(views::ButtonListener* listener, BrowserView* browser_view);
   ~YSPLockScreenView() override;
 #if 0
   static void ShowBubble(
@@ -44,9 +44,9 @@ class YSPLockScreenView : public content::WebContentsDelegate,
     base::string16& user_name,
     gfx::ImageSkia* head_image);
 #endif
-  //static bool IsShowing();
-  //static void Hide();
-  //static void SetAndRefreshAvatar(gfx::ImageSkia* head_image);
+  // static bool IsShowing();
+  // static void Hide();
+  // static void SetAndRefreshAvatar(gfx::ImageSkia* head_image);
   bool IsLocked() { return is_locked_; }
   void Lock(Browser::YSPLockStatus status);
   void Unlock();
@@ -55,8 +55,8 @@ class YSPLockScreenView : public content::WebContentsDelegate,
   void Submit();
   // views::View implementation.
   void Layout() override;
-  //void OnMouseReleased(const ui::MouseEvent& event) override;
-  //void OnMouseExited(const ui::MouseEvent& event) override;
+  // void OnMouseReleased(const ui::MouseEvent& event) override;
+  // void OnMouseExited(const ui::MouseEvent& event) override;
 
   // YSPLoginManagerObserver:
   void OnLoginRequestFailure(const std::string& error) override;
@@ -88,7 +88,7 @@ class YSPLockScreenView : public content::WebContentsDelegate,
   void ResetView();
 #endif
 
-  //ViewState view_state_;
+// ViewState view_state_;
 #if 0
   // Creates views
   views::View* CreateLoginSubview(views::View** focus_view,
@@ -122,4 +122,4 @@ class YSPLockScreenView : public content::WebContentsDelegate,
   DISALLOW_COPY_AND_ASSIGN(YSPLockScreenView);
 };
 
-#endif //CHROME_BROWSER_UI_VIEWS_YSP_LOGIN_VIEW_H_
+#endif  // CHROME_BROWSER_UI_VIEWS_YSP_LOGIN_VIEW_H_

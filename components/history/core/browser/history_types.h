@@ -72,7 +72,7 @@ class VisitRow {
   VisitRow(URLID arg_url_id,
            base::Time arg_visit_time,
 #ifdef REDCORE
-           const std::string& 
+           const std::string&
                arg_ysp_username,  // YSP+ { User information isolation }
 #endif
            VisitID arg_referring_visit,

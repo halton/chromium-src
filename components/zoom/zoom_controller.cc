@@ -171,19 +171,19 @@ bool ZoomController::SetZoomLevelByClient(
     std::string host =
         net::GetHostOrSpecFromURL(content::HostZoomMap::GetURLFromEntry(entry));
     zoom_map->SetZoomLevelForHost(host, zoom_level);
-  // #ifdef REDCORE
-  // #ifdef IE_REDCORE
-  // //ysp+{IE Embedded}
-  // RendererMode mode= web_contents()->GetRendererMode();
-  // if (mode.core == IE_CORE) {
-  //  content::WebContentsIE* pIEContent =
-  // static_cast<content::WebContentsIE*>(web_contents());
-  // int percent = GetZoomPercent();
-  // pIEContent->SetBrowserZoom(percent);
-  // }
-  // // ysp+
-  // #endif
-  // #endif
+    // #ifdef REDCORE
+    // #ifdef IE_REDCORE
+    // //ysp+{IE Embedded}
+    // RendererMode mode= web_contents()->GetRendererMode();
+    // if (mode.core == IE_CORE) {
+    //  content::WebContentsIE* pIEContent =
+    // static_cast<content::WebContentsIE*>(web_contents());
+    // int percent = GetZoomPercent();
+    // pIEContent->SetBrowserZoom(percent);
+    // }
+    // // ysp+
+    // #endif
+    // #endif
   }
 
   DCHECK(!event_data_);

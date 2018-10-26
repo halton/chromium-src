@@ -27,8 +27,8 @@ source_set("ysp_login") {
   ]
 
   public_deps = [
-    "//components/bookmarks/common",
     "//components/bookmarks/browser",
+    "//components/bookmarks/common",
   ]
 
   deps = [

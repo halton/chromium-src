@@ -322,12 +322,12 @@ void DownloadHistory::LoadHistoryDownloads(std::unique_ptr<InfoVector> infos) {
     download::DownloadItem* item = notifier_.GetManager()->CreateDownloadItem(
         it->guid, loading_id_, it->current_path, it->target_path,
 #ifdef REDCORE
-        it->ysp_username, //YSP+ { User information isolation }
+        it->ysp_username,  // YSP+ { User information isolation }
 #endif /*REDCORE*/
-        it->url_chain,
-        it->referrer_url, it->site_url, it->tab_url, it->tab_referrer_url,
-        it->mime_type, it->original_mime_type, it->start_time, it->end_time,
-        it->etag, it->last_modified, it->received_bytes, it->total_bytes,
+        it->url_chain, it->referrer_url, it->site_url, it->tab_url,
+        it->tab_referrer_url, it->mime_type, it->original_mime_type,
+        it->start_time, it->end_time, it->etag, it->last_modified,
+        it->received_bytes, it->total_bytes,
         std::string(),  // TODO(asanka): Need to persist and restore hash of
                         // partial file for an interrupted download. No need to
                         // store hash for a completed file.

@@ -350,8 +350,8 @@ DownloadItemImpl::DownloadItemImpl(
       is_updating_observers_(false),
 #ifdef REDCORE
       ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),        // ysp+
-      is_update_(false),          // ysp+
+      is_doc_view_(false),          // ysp+
+      is_update_(false),            // ysp+
 #endif
 #if defined(IE_REDCORE)
       is_ie_download_(false),  // ysp+
@@ -410,8 +410,8 @@ DownloadItemImpl::DownloadItemImpl(
       download_source_(info.download_source),
 #ifdef REDCORE
       ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),        // ysp+
-      is_update_(false),          // ysp+
+      is_doc_view_(false),          // ysp+
+      is_update_(false),            // ysp+
 #endif
 #if defined(IE_REDCORE)
       is_ie_download_(false),  // ysp+
@@ -448,8 +448,8 @@ DownloadItemImpl::DownloadItemImpl(
       is_updating_observers_(false),
 #ifdef REDCORE
       ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),        // ysp+
-      is_update_(false),          // ysp+
+      is_doc_view_(false),          // ysp+
+      is_update_(false),            // ysp+
 #endif
 #if defined(IE_REDCORE)
       is_ie_download_(false),  // ysp+
@@ -1162,11 +1162,11 @@ ResumeMode DownloadItemImpl::GetResumeMode() const {
       break;
 
     case DOWNLOAD_INTERRUPT_REASON_SERVER_NO_RANGE:
-      // The server disagreed with the file offset that we sent.
+    // The server disagreed with the file offset that we sent.
 
     case DOWNLOAD_INTERRUPT_REASON_FILE_HASH_MISMATCH:
-      // The file on disk was found to not match the expected hash. Discard and
-      // start from beginning.
+    // The file on disk was found to not match the expected hash. Discard and
+    // start from beginning.
 
     case DOWNLOAD_INTERRUPT_REASON_FILE_TOO_SHORT:
       // The [possibly persisted] file offset disagreed with the file on disk.
