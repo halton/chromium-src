@@ -1,12 +1,16 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
-//ysp+
+// ysp+
 
 #ifndef CHROME_BROWSER_YSP_UPDATE_YS_UPDATE_MANAGER_H_
 #define CHROME_BROWSER_YSP_UPDATE_YS_UPDATE_MANAGER_H_
 
 #include <memory.h>
 #include <string.h>
-//#include <vector.h>
+// #include <vector.h>
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -15,11 +19,11 @@
 #include "components/download/public/common/download_item.h"
 
 namespace net {
-  class URLRequestContext;
+class URLRequestContext;
 }
 
 namespace content {
-  class WebContents;
+class WebContents;
 }
 
 // Singleton class
@@ -27,7 +31,7 @@ class YSPUpdateManager : public base::SupportsWeakPtr<YSPUpdateManager>,
                          public base::RefCounted<YSPUpdateManager>,
                          public YSPUpdateFetcherDelegate,
                          public download::DownloadItem::Observer {
-public:
+ public:
   YSPUpdateManager();
 
   static YSPUpdateManager* GetInstance();
@@ -36,12 +40,12 @@ public:
                      const std::string& server_url,
                      const std::string& userId,
                      const std::string& companyId,
-					 const std::string& accessToken);
+                     const std::string& accessToken);
 
   // YSPUpdateFetcherDelegate:
   void OnUpdateRequestFailure() override;
   void OnUpdateResponseParseSuccess(
-    std::unique_ptr<base::DictionaryValue> response_data) override;
+      std::unique_ptr<base::DictionaryValue> response_data) override;
   void OnUpdateResponseParseFailure(const std::string& error) override;
 
   // download::DownloadItem::Observer:
@@ -49,14 +53,16 @@ public:
   void OnDownloadRemoved(download::DownloadItem* download) override;
 
   void OnAutoUpdateDownload(const std::string& update_data);
-  void OnAutoUpdateDownload(std::unique_ptr<base::DictionaryValue> response_data, bool enable = true);
+  void OnAutoUpdateDownload(
+      std::unique_ptr<base::DictionaryValue> response_data,
+      bool enable = true);
   void StartDownload(const GURL& package_url, base::FilePath updateFilePath);
 
-private:
+ private:
   ~YSPUpdateManager() override;
   void DownloadStarted(download::DownloadItem* item,
                        download::DownloadInterruptReason interrupt_reason);
-  
+
   bool started_;
   YSPUpdateFetcher* update_fetcher_;
   content::WebContents* web_contents_;

@@ -1,5 +1,9 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
-//ysp+
+// ysp+
 
 #ifndef CHROME_BROWSER_YSP_UPDATE_YS_PAC_MANAGER_H_
 #define CHROME_BROWSER_YSP_UPDATE_YS_PAC_MANAGER_H_
@@ -10,22 +14,22 @@
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "components/download/public/common/download_item.h"
 #include "components/download/public/common/download_interrupt_reasons.h"
+#include "components/download/public/common/download_item.h"
 
 namespace net {
-  class URLRequestContext;
+class URLRequestContext;
 }
 
 namespace content {
-  class WebContents;
+class WebContents;
 }
 
 // Singleton class
 class YSPPACManager : public base::SupportsWeakPtr<YSPPACManager>,
                       public base::RefCounted<YSPPACManager>,
                       public download::DownloadItem::Observer {
-public:
+ public:
   YSPPACManager();
 
   static YSPPACManager* GetInstance();
@@ -36,7 +40,7 @@ public:
   void OnDownloadUpdated(download::DownloadItem* download) override;
   void OnDownloadRemoved(download::DownloadItem* download) override;
 
-private:
+ private:
   ~YSPPACManager() override;
   void StartDownload(const GURL& package_url);
   void DownloadStarted(download::DownloadItem* item,

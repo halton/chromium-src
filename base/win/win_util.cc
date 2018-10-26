@@ -210,8 +210,8 @@ bool IsKeyboardPresentOnSlate(std::string* reason, HWND hwnd) {
   }
 
   // This function should be only invoked for machines with touch screens.
-  if ((GetSystemMetrics(SM_DIGITIZER) & NID_INTEGRATED_TOUCH)
-        != NID_INTEGRATED_TOUCH) {
+  if ((GetSystemMetrics(SM_DIGITIZER) & NID_INTEGRATED_TOUCH) !=
+      NID_INTEGRATED_TOUCH) {
     if (reason) {
       *reason += "NID_INTEGRATED_TOUCH\n";
       result = true;
@@ -249,7 +249,7 @@ bool IsKeyboardPresentOnSlate(std::string* reason, HWND hwnd) {
   // 3. If step 1 and 2 fail then we check attached keyboards and return true
   //    if we find ACPI\* or HID\VID* keyboards.
 
-  typedef BOOL (WINAPI* GetAutoRotationState)(PAR_STATE state);
+  typedef BOOL(WINAPI * GetAutoRotationState)(PAR_STATE state);
 
   GetAutoRotationState get_rotation_state =
       reinterpret_cast<GetAutoRotationState>(::GetProcAddress(
@@ -264,8 +264,8 @@ bool IsKeyboardPresentOnSlate(std::string* reason, HWND hwnd) {
       // the current configuration, then we can assume that this is a desktop
       // or a traditional laptop.
       if (reason) {
-        *reason += (auto_rotation_state & AR_NOSENSOR) ? "AR_NOSENSOR\n" :
-                                                         "AR_NOT_SUPPORTED\n";
+        *reason += (auto_rotation_state & AR_NOSENSOR) ? "AR_NOSENSOR\n"
+                                                       : "AR_NOT_SUPPORTED\n";
         result = true;
       } else {
         return true;
@@ -273,9 +273,11 @@ bool IsKeyboardPresentOnSlate(std::string* reason, HWND hwnd) {
     }
   }
 
-  const GUID KEYBOARD_CLASS_GUID =
-      { 0x4D36E96B, 0xE325,  0x11CE,
-          { 0xBF, 0xC1, 0x08, 0x00, 0x2B, 0xE1, 0x03, 0x18 } };
+  const GUID KEYBOARD_CLASS_GUID = {
+      0x4D36E96B,
+      0xE325,
+      0x11CE,
+      {0xBF, 0xC1, 0x08, 0x00, 0x2B, 0xE1, 0x03, 0x18}};
 
   // Query for all the keyboard devices.
   HDEVINFO device_info =
@@ -290,17 +292,15 @@ bool IsKeyboardPresentOnSlate(std::string* reason, HWND hwnd) {
   // the count is more than 1 we assume that a keyboard is present. This is
   // under the assumption that there will always be one keyboard device.
   for (DWORD i = 0;; ++i) {
-    SP_DEVINFO_DATA device_info_data = { 0 };
+    SP_DEVINFO_DATA device_info_data = {0};
     device_info_data.cbSize = sizeof(device_info_data);
     if (!SetupDiEnumDeviceInfo(device_info, i, &device_info_data))
       break;
 
     // Get the device ID.
     wchar_t device_id[MAX_DEVICE_ID_LEN];
-    CONFIGRET status = CM_Get_Device_ID(device_info_data.DevInst,
-                                        device_id,
-                                        MAX_DEVICE_ID_LEN,
-                                        0);
+    CONFIGRET status = CM_Get_Device_ID(device_info_data.DevInst, device_id,
+                                        MAX_DEVICE_ID_LEN, 0);
     if (status == CR_SUCCESS) {
       // To reduce the scope of the hack we only look for ACPI and HID\\VID
       // prefixes in the keyboard device ids.
@@ -327,11 +327,9 @@ static bool g_crash_on_process_detach = false;
 void GetNonClientMetrics(NONCLIENTMETRICS_XP* metrics) {
   DCHECK(metrics);
   metrics->cbSize = sizeof(*metrics);
-  const bool success = !!SystemParametersInfo(
-      SPI_GETNONCLIENTMETRICS,
-      metrics->cbSize,
-      reinterpret_cast<NONCLIENTMETRICS*>(metrics),
-      0);
+  const bool success =
+      !!SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics->cbSize,
+                             reinterpret_cast<NONCLIENTMETRICS*>(metrics), 0);
   DCHECK(success);
 }
 
@@ -390,8 +388,7 @@ bool SetBooleanValueForPropertyStore(IPropertyStore* property_store,
     return false;
   }
 
-  return SetPropVariantValueForPropertyStore(property_store,
-                                             property_key,
+  return SetPropVariantValueForPropertyStore(property_store, property_key,
                                              property_value);
 }
 
@@ -404,8 +401,7 @@ bool SetStringValueForPropertyStore(IPropertyStore* property_store,
     return false;
   }
 
-  return SetPropVariantValueForPropertyStore(property_store,
-                                             property_key,
+  return SetPropVariantValueForPropertyStore(property_store, property_key,
                                              property_value);
 }
 
@@ -429,19 +425,19 @@ bool SetAppIdForPropertyStore(IPropertyStore* property_store,
   // See http://msdn.microsoft.com/en-us/library/dd378459%28VS.85%29.aspx
   DCHECK(lstrlen(app_id) < 64 && wcschr(app_id, L' ') == NULL);
 
-  return SetStringValueForPropertyStore(property_store,
-                                        PKEY_AppUserModel_ID,
+  return SetStringValueForPropertyStore(property_store, PKEY_AppUserModel_ID,
                                         app_id);
 }
 
 static const char16 kAutoRunKeyPath[] =
     L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
-bool AddCommandToAutoRun(HKEY root_key, const string16& name,
+bool AddCommandToAutoRun(HKEY root_key,
+                         const string16& name,
                          const string16& command) {
   RegKey autorun_key(root_key, kAutoRunKeyPath, KEY_SET_VALUE);
   return (autorun_key.WriteValue(name.c_str(), command.c_str()) ==
-      ERROR_SUCCESS);
+          ERROR_SUCCESS);
 }
 
 bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name) {
@@ -655,8 +651,8 @@ void EnableFlicks(HWND hwnd) {
 
 void DisableFlicks(HWND hwnd) {
   ::SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
-      reinterpret_cast<HANDLE>(TABLET_DISABLE_FLICKS |
-          TABLET_DISABLE_FLICKFALLBACKKEYS));
+            reinterpret_cast<HANDLE>(TABLET_DISABLE_FLICKS |
+                                     TABLET_DISABLE_FLICKFALLBACKKEYS));
 }
 
 bool IsProcessPerMonitorDpiAware() {
@@ -721,28 +717,30 @@ ScopedDeviceRegisteredWithManagementForTesting::
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 BASE_EXPORT int GetSystemIEVersion() {
-	const wchar_t szFilename[] = L"mshtml.dll";
-	DWORD dwMajorVersion = 0, dwMinorVersion = 0;
-	DWORD dwBuildNumber = 0, dwRevisionNumber = 0;
-	DWORD dwHandle = 0;
-	DWORD dwVerInfoSize = GetFileVersionInfoSize(szFilename, &dwHandle);
-	if (dwVerInfoSize) {
-		LPVOID lpBuffer = LocalAlloc(LPTR, dwVerInfoSize);
-		if (lpBuffer) {
-			if (GetFileVersionInfo(szFilename, dwHandle, dwVerInfoSize, lpBuffer)) {
-				VS_FIXEDFILEINFO * lpFixedFileInfo = NULL;
-				UINT nFixedFileInfoSize = 0;
-				if (VerQueryValue(lpBuffer, TEXT("\\"), (LPVOID*)&lpFixedFileInfo, &nFixedFileInfoSize) && (nFixedFileInfoSize)) {
-					dwMajorVersion = HIWORD(lpFixedFileInfo->dwFileVersionMS);
-					dwMinorVersion = LOWORD(lpFixedFileInfo->dwFileVersionMS);
-					dwBuildNumber = HIWORD(lpFixedFileInfo->dwFileVersionLS);
-					dwRevisionNumber = LOWORD(lpFixedFileInfo->dwFileVersionLS);
-				}
-			}
-			LocalFree(lpBuffer);
-		}
-	}
-	return dwMajorVersion;
+  const wchar_t szFilename[] = L"mshtml.dll";
+  DWORD dwMajorVersion = 0, dwMinorVersion = 0;
+  DWORD dwBuildNumber = 0, dwRevisionNumber = 0;
+  DWORD dwHandle = 0;
+  DWORD dwVerInfoSize = GetFileVersionInfoSize(szFilename, &dwHandle);
+  if (dwVerInfoSize) {
+    LPVOID lpBuffer = LocalAlloc(LPTR, dwVerInfoSize);
+    if (lpBuffer) {
+      if (GetFileVersionInfo(szFilename, dwHandle, dwVerInfoSize, lpBuffer)) {
+        VS_FIXEDFILEINFO* lpFixedFileInfo = NULL;
+        UINT nFixedFileInfoSize = 0;
+        if (VerQueryValue(lpBuffer, TEXT("\\"), (LPVOID*)&lpFixedFileInfo,
+                          &nFixedFileInfoSize) &&
+            (nFixedFileInfoSize)) {
+          dwMajorVersion = HIWORD(lpFixedFileInfo->dwFileVersionMS);
+          dwMinorVersion = LOWORD(lpFixedFileInfo->dwFileVersionMS);
+          dwBuildNumber = HIWORD(lpFixedFileInfo->dwFileVersionLS);
+          dwRevisionNumber = LOWORD(lpFixedFileInfo->dwFileVersionLS);
+        }
+      }
+      LocalFree(lpBuffer);
+    }
+  }
+  return dwMajorVersion;
 }
 #endif
 

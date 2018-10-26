@@ -1,5 +1,8 @@
-// Copyright 2016 The Redcore Authors. All rights reserved.
-//ysp+ { watermark }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ysp+ { watermark }
 
 #ifndef CC_YSP_WATERMARK_LAYER_H_
 #define CC_YSP_WATERMARK_LAYER_H_
@@ -15,23 +18,22 @@
 namespace cc {
 
 class CC_EXPORT YSPWatermarkLayer : public Layer {
-public:
-  static scoped_refptr<YSPWatermarkLayer> Create(
-    const LayerSettings& settings);
+ public:
+  static scoped_refptr<YSPWatermarkLayer> Create(const LayerSettings& settings);
 
-  void PrepareForCalculateDrawProperties(
-    const gfx::Size& device_viewport, float device_scale_factor);
+  void PrepareForCalculateDrawProperties(const gfx::Size& device_viewport,
+                                         float device_scale_factor);
 
   scoped_ptr<LayerImpl> CreateLayerImpl(LayerTreeImpl* tree_impl) override;
 
   // Layer overrides.
   void PushPropertiesTo(LayerImpl* layer) override;
 
-protected:
+ protected:
   explicit YSPWatermarkLayer(const LayerSettings& settings);
   bool HasDrawableContent() const override;
 
-private:
+ private:
   ~YSPWatermarkLayer() override;
 
   skia::RefPtr<SkTypeface> typeface_;
@@ -40,5 +42,5 @@ private:
 };
 
 }  // namespace cc
-#endif //WATERMARK
+#endif  // WATERMARK
 #endif  // CC_YSP_WATERMARK_LAYER_H_

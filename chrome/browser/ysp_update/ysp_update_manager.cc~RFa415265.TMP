@@ -8,8 +8,8 @@
 #include "chrome/browser/ysp_update/ysp_update_manager.h"
 
 #if defined(OS_WIN)
-#include <comdef.h>
 #include <Iphlpapi.h>
+#include <comdef.h>
 #include <shellapi.h>
 #include "setupapi.h"
 #endif
@@ -250,9 +250,9 @@ chrome::MessageBoxResult YSPShowMessageBox(
   if (chrome::internal::g_should_skip_message_box_for_test)
     return chrome::MESSAGE_BOX_RESULT_YES;
 
-// Views dialogs cannot be shown outside the UI thread message loop or if
-// the ResourceBundle is not initialized yet. Fallback to logging with a
-// default response or a Windows MessageBox.
+    // Views dialogs cannot be shown outside the UI thread message loop or if
+    // the ResourceBundle is not initialized yet. Fallback to logging with a
+    // default response or a Windows MessageBox.
 #if defined(OS_WIN)
   if (!base::MessageLoopForUI::IsCurrent() ||
       !base::RunLoop::IsRunningOnCurrentThread() ||

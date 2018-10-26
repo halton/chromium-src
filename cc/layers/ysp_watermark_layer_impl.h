@@ -1,5 +1,5 @@
 // Copyright 2016 The Redcore Authors. All rights reserved.
-//ysp+ { watermark }
+// ysp+ { watermark }
 
 #ifndef CC_LAYERS_YSP_WATERMARK_LAYER_IMPL_H_
 #define CC_LAYERS_YSP_WATERMARK_LAYER_IMPL_H_
@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "base/strings/string16.h"
 #include "base/memory/ptr_util.h"
+#include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "cc/base/cc_export.h"
 #include "cc/debug/debug_rect_history.h"
@@ -30,9 +30,8 @@ class PaintTimeCounter;
 
 class CC_EXPORT YSPWatermarkLayerImpl : public LayerImpl {
  public:
-  static scoped_ptr<YSPWatermarkLayerImpl> Create(
-      LayerTreeImpl* tree_impl,
-      int id) {
+  static scoped_ptr<YSPWatermarkLayerImpl> Create(LayerTreeImpl* tree_impl,
+                                                  int id) {
     return make_scoped_ptr(new YSPWatermarkLayerImpl(tree_impl, id));
   }
   ~YSPWatermarkLayerImpl() override;
@@ -84,18 +83,18 @@ class CC_EXPORT YSPWatermarkLayerImpl : public LayerImpl {
 
   int MeasureText(SkPaint* paint, const std::string& text, int size) const;
   void DrawText(SkCanvas* canvas,
-    SkPaint* paint,
-    const base::string16& text,
-    SkPaint::Align align,
-    int size,
-    int x,
-    int y) const;
+                SkPaint* paint,
+                const base::string16& text,
+                SkPaint::Align align,
+                int size,
+                int x,
+                int y) const;
   void DrawText(SkCanvas* canvas,
-    SkPaint* paint,
-    const base::string16& text,
-    SkPaint::Align align,
-    int size,
-    const SkPoint& pos) const;
+                SkPaint* paint,
+                const base::string16& text,
+                SkPaint::Align align,
+                int size,
+                const SkPoint& pos) const;
 
   SkRect DrawWatermark(SkCanvas* canvas) const;
 
@@ -118,5 +117,5 @@ class CC_EXPORT YSPWatermarkLayerImpl : public LayerImpl {
 };
 
 }  // namespace cc
-#endif //WATERMARK
+#endif  // WATERMARK
 #endif  // CC_LAYERS_YSP_WATERMARK_LAYER_IMPL_H_

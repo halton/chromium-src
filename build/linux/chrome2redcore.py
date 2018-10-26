@@ -10,7 +10,7 @@ import sys
 outdir = sys.argv[1]
 files = [
 	"chrome",
-  "chrome_sandbox",
+    "chrome_sandbox",
 	"chrome_100_percent.pak",
 	"chrome_200_percent.pak"
 ]

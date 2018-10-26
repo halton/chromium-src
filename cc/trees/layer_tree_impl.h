@@ -30,12 +30,12 @@ namespace base {
 namespace trace_event {
 class TracedValue;
 }
-}
+}  // namespace base
 
 namespace viz {
 class ClientResourceProvider;
 class ContextProvider;
-}
+}  // namespace viz
 
 namespace cc {
 

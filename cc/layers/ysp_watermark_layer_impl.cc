@@ -1,6 +1,9 @@
-// Copyright 2016 The Redcore Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
-//ysp+ { watermark }
+// ysp+ { watermark }
 
 #include "cc/layers/ysp_watermark_layer_impl.h"
 #include <stddef.h>
@@ -11,6 +14,7 @@
 
 #include "base/numerics/safe_conversions.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "base/trace_event/trace_event_argument.h"
 #include "cc/debug/debug_colors.h"
@@ -27,11 +31,10 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/effects/SkColorMatrixFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
+#include "ui/base/resource/resource_bundle.h"
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/size.h"
 #include "ui/gfx/geometry/size_conversions.h"
-#include "ui/base/resource/resource_bundle.h"
-#include "base/strings/utf_string_conversions.h"
 
 namespace cc {
 
@@ -49,7 +52,7 @@ static inline SkPaint CreatePaint() {
   swizzle_matrix.fMat[3 + 5 * 3] = 1;
 
   skia::RefPtr<SkColorFilter> filter =
-    skia::AdoptRef(SkColorMatrixFilter::Create(swizzle_matrix));
+      skia::AdoptRef(SkColorMatrixFilter::Create(swizzle_matrix));
   paint.setColorFilter(filter.get());
 #endif
   paint.setTextEncoding(SkPaint::kUTF16_TextEncoding);
@@ -71,25 +74,22 @@ double YSPWatermarkLayerImpl::Graph::UpdateUpperBound() {
   return current_upper_bound;
 }
 
-YSPWatermarkLayerImpl::YSPWatermarkLayerImpl(LayerTreeImpl* tree_impl,
-                                                 int id)
-    : LayerImpl(tree_impl, id),
-      internal_contents_scale_(1.f) {
-}
+YSPWatermarkLayerImpl::YSPWatermarkLayerImpl(LayerTreeImpl* tree_impl, int id)
+    : LayerImpl(tree_impl, id), internal_contents_scale_(1.f) {}
 
 YSPWatermarkLayerImpl::~YSPWatermarkLayerImpl() {}
 
 scoped_ptr<LayerImpl> YSPWatermarkLayerImpl::CreateLayerImpl(
-  LayerTreeImpl* tree_impl) {
+    LayerTreeImpl* tree_impl) {
   return YSPWatermarkLayerImpl::Create(tree_impl, id());
 }
 
 void YSPWatermarkLayerImpl::AcquireResource(
-  ResourceProvider* resource_provider) {
-
+    ResourceProvider* resource_provider) {
   watermark_string_ = ResourceBundle::GetSharedInstance().watermark_string();
   watermark_color_ = ResourceBundle::GetSharedInstance().watermark_color();
-  watermark_font_size_ = ResourceBundle::GetSharedInstance().watermark_font_size();
+  watermark_font_size_ =
+      ResourceBundle::GetSharedInstance().watermark_font_size();
 
   for (auto& resource : resources_) {
     if (!resource_provider->InUseByConsumer(resource->id())) {
@@ -99,10 +99,10 @@ void YSPWatermarkLayerImpl::AcquireResource(
   }
 
   scoped_ptr<ScopedResource> resource =
-    ScopedResource::Create(resource_provider);
+      ScopedResource::Create(resource_provider);
   resource->Allocate(internal_content_bounds_,
-    ResourceProvider::TEXTURE_HINT_IMMUTABLE,
-    resource_provider->best_texture_format());
+                     ResourceProvider::TEXTURE_HINT_IMMUTABLE,
+                     resource_provider->best_texture_format());
   resources_.push_back(std::move(resource));
 }
 
@@ -117,7 +117,7 @@ void YSPWatermarkLayerImpl::ReleaseUnmatchedSizeResources(
 }
 
 bool YSPWatermarkLayerImpl::WillDraw(DrawMode draw_mode,
-                                       ResourceProvider* resource_provider) {
+                                     ResourceProvider* resource_provider) {
   if (draw_mode == DRAW_MODE_RESOURCELESS_SOFTWARE)
     return false;
 
@@ -133,14 +133,13 @@ bool YSPWatermarkLayerImpl::WillDraw(DrawMode draw_mode,
   return LayerImpl::WillDraw(draw_mode, resource_provider);
 }
 
-void YSPWatermarkLayerImpl::AppendQuads(
-    RenderPass* render_pass,
-    AppendQuadsData* append_quads_data) {
+void YSPWatermarkLayerImpl::AppendQuads(RenderPass* render_pass,
+                                        AppendQuadsData* append_quads_data) {
   if (!resources_.back()->id())
     return;
 
   SharedQuadState* shared_quad_state =
-    render_pass->CreateAndAppendSharedQuadState();
+      render_pass->CreateAndAppendSharedQuadState();
   PopulateScaledSharedQuadState(shared_quad_state, internal_contents_scale_);
 
   gfx::Rect quad_rect(internal_content_bounds_);
@@ -149,23 +148,15 @@ void YSPWatermarkLayerImpl::AppendQuads(
   bool premultiplied_alpha = true;
   gfx::PointF uv_top_left(0.f, 0.f);
   gfx::PointF uv_bottom_right(1.f, 1.f);
-  const float vertex_opacity[] = { 1.f, 1.f, 1.f, 1.f };
+  const float vertex_opacity[] = {1.f, 1.f, 1.f, 1.f};
   bool flipped = false;
   bool nearest_neighbor = false;
   TextureDrawQuad* quad =
-    render_pass->CreateAndAppendDrawQuad<TextureDrawQuad>();
-  quad->SetNew(shared_quad_state,
-    quad_rect,
-    opaque_rect,
-    visible_quad_rect,
-    resources_.back()->id(),
-    premultiplied_alpha,
-    uv_top_left,
-    uv_bottom_right,
-    SK_ColorTRANSPARENT,
-    vertex_opacity,
-    flipped,
-    nearest_neighbor);
+      render_pass->CreateAndAppendDrawQuad<TextureDrawQuad>();
+  quad->SetNew(shared_quad_state, quad_rect, opaque_rect, visible_quad_rect,
+               resources_.back()->id(), premultiplied_alpha, uv_top_left,
+               uv_bottom_right, SK_ColorTRANSPARENT, vertex_opacity, flipped,
+               nearest_neighbor);
   ValidateQuadResources(quad);
 }
 
@@ -182,12 +173,12 @@ void YSPWatermarkLayerImpl::UpdateWatermarkTexture(
     canvas_size.set(0, 0);
 
   if (canvas_size.width() != internal_content_bounds_.width() ||
-    canvas_size.height() != internal_content_bounds_.height() ||
-    !watermark_surface_) {
+      canvas_size.height() != internal_content_bounds_.height() ||
+      !watermark_surface_) {
     TRACE_EVENT0("cc", "ResizeHudCanvas");
 
     watermark_surface_ = skia::AdoptRef(SkSurface::NewRasterN32Premul(
-      internal_content_bounds_.width(), internal_content_bounds_.height()));
+        internal_content_bounds_.width(), internal_content_bounds_.height()));
   }
 
   {
@@ -195,7 +186,7 @@ void YSPWatermarkLayerImpl::UpdateWatermarkTexture(
     watermark_surface_->getCanvas()->clear(SkColorSetARGB(0, 0, 0, 0));
     watermark_surface_->getCanvas()->save();
     watermark_surface_->getCanvas()->scale(internal_contents_scale_,
-      internal_contents_scale_);
+                                           internal_contents_scale_);
 
     DrawWatermark(watermark_surface_->getCanvas());
 
@@ -205,12 +196,13 @@ void YSPWatermarkLayerImpl::UpdateWatermarkTexture(
   TRACE_EVENT0("cc", "UploadHudTexture");
   SkImageInfo info;
   size_t row_bytes = 0;
-  const void* pixels = watermark_surface_->getCanvas()->peekPixels(&info, &row_bytes);
+  const void* pixels =
+      watermark_surface_->getCanvas()->peekPixels(&info, &row_bytes);
   DCHECK(pixels);
   DCHECK(info.colorType() == kN32_SkColorType);
   resource_provider->CopyToResource(resources_.back()->id(),
-    static_cast<const uint8_t*>(pixels),
-    internal_content_bounds_);
+                                    static_cast<const uint8_t*>(pixels),
+                                    internal_content_bounds_);
 }
 
 void YSPWatermarkLayerImpl::ReleaseResources() {
@@ -222,7 +214,8 @@ gfx::Rect YSPWatermarkLayerImpl::GetEnclosingRectInTargetSpace() const {
   return GetScaledEnclosingRectInTargetSpace(internal_contents_scale_);
 }
 
-void YSPWatermarkLayerImpl::SetTypeface(const skia::RefPtr<SkTypeface>& typeface) {
+void YSPWatermarkLayerImpl::SetTypeface(
+    const skia::RefPtr<SkTypeface>& typeface) {
   if (typeface_ == typeface)
     return;
 
@@ -276,7 +269,7 @@ void YSPWatermarkLayerImpl::DrawText(SkCanvas* canvas,
   paint->setTextSize(size);
   paint->setTextAlign(align);
   paint->setTypeface(typeface_.get());
-  canvas->drawText(text.c_str(), text.length()*2, x, y, *paint);
+  canvas->drawText(text.c_str(), text.length() * 2, x, y, *paint);
 
   paint->setAntiAlias(anti_alias);
 }
@@ -290,8 +283,7 @@ void YSPWatermarkLayerImpl::DrawText(SkCanvas* canvas,
   DrawText(canvas, paint, text, align, size, pos.x(), pos.y());
 }
 
-SkRect YSPWatermarkLayerImpl::DrawWatermark(
-    SkCanvas* canvas) const {
+SkRect YSPWatermarkLayerImpl::DrawWatermark(SkCanvas* canvas) const {
   const int kPadding = 4;
   const int kGap = 6;
 
@@ -317,42 +309,42 @@ SkRect YSPWatermarkLayerImpl::DrawWatermark(
   SkRect title_bounds = SkRect::MakeXYWH(
       left + kPadding, kPadding, kGraphWidth + kHistogramWidth + kGap + 2,
       kTitleFontHeight);
-  SkRect text_bounds =
-      SkRect::MakeXYWH(left + kPadding, title_bounds.bottom() + 2 * kPadding,
-                       kGraphWidth + kHistogramWidth + kGap + 2, watermark_font_size_);
+  SkRect text_bounds = SkRect::MakeXYWH(
+      left + kPadding, title_bounds.bottom() + 2 * kPadding,
+      kGraphWidth + kHistogramWidth + kGap + 2, watermark_font_size_);
 
-  //const base::string16 value_text = L"SAMPLE WATERMARK";
+  // const base::string16 value_text = L"SAMPLE WATERMARK";
   int watermark_item_loop = 0;
   int max_display_width = 0;
-  for (; watermark_item_loop < static_cast<int>(watermark_string_.size()); watermark_item_loop++) {
-    int display_text_width = paint.measureText(watermark_string_[watermark_item_loop].c_str(), watermark_string_[watermark_item_loop].length() *2);
+  for (; watermark_item_loop < static_cast<int>(watermark_string_.size());
+       watermark_item_loop++) {
+    int display_text_width =
+        paint.measureText(watermark_string_[watermark_item_loop].c_str(),
+                          watermark_string_[watermark_item_loop].length() * 2);
     if (display_text_width > max_display_width)
       max_display_width = display_text_width;
   }
   watermark_item_loop = 0;
 
   paint.setColor(watermark_color_);
-  int kColWidth = watermark_font_size_*2 + max_display_width;
-  int kRowHeight = watermark_font_size_*1.5;
+  int kColWidth = watermark_font_size_ * 2 + max_display_width;
+  int kRowHeight = watermark_font_size_ * 1.5;
   int ox = text_bounds.left() - (float)height / 1.4;
-  int dist = sqrt(width*width + height*height);
+  int dist = sqrt(width * width + height * height);
   int y = text_bounds.bottom();
   int xMax = ox + dist;
   int yMax = y + dist;
   while (y < yMax) {
     int x = ox;
-    int display_text_width = paint.measureText(watermark_string_[watermark_item_loop].c_str(), watermark_string_[watermark_item_loop].length() * 2);
+    int display_text_width =
+        paint.measureText(watermark_string_[watermark_item_loop].c_str(),
+                          watermark_string_[watermark_item_loop].length() * 2);
     x += (kColWidth - display_text_width) / 2;
     while (x < xMax) {
       canvas->save();
       canvas->rotate(SkIntToScalar(-45));
-      DrawText(canvas,
-        &paint,
-        watermark_string_[watermark_item_loop],
-        SkPaint::kLeft_Align,
-        watermark_font_size_,
-        x,
-        y);
+      DrawText(canvas, &paint, watermark_string_[watermark_item_loop],
+               SkPaint::kLeft_Align, watermark_font_size_, x, y);
       canvas->restore();
       x += kColWidth;
     }
@@ -374,4 +366,4 @@ void YSPWatermarkLayerImpl::AsValueInto(
 }
 
 }  // namespace cc
-#endif //WATERMARK
+#endif  // WATERMARK
