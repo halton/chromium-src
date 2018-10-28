@@ -98,9 +98,7 @@ class DownloadHistoryData : public base::SupportsUserData::Data {
     // TODO(qinmin): avoid creating a new copy each time.
     info_.reset(new history::DownloadRow(i));
   }
-  void clear_info() {
-    info_.reset();
-  }
+  void clear_info() { info_.reset(); }
 
  private:
   static const char kKey[];
@@ -112,8 +110,7 @@ class DownloadHistoryData : public base::SupportsUserData::Data {
   DISALLOW_COPY_AND_ASSIGN(DownloadHistoryData);
 };
 
-const char DownloadHistoryData::kKey[] =
-  "DownloadItem DownloadHistoryData";
+const char DownloadHistoryData::kKey[] = "DownloadItem DownloadHistoryData";
 
 history::DownloadRow GetDownloadRow(download::DownloadItem* item) {
   std::string by_ext_id, by_ext_name;
@@ -213,8 +210,7 @@ typedef std::vector<history::DownloadRow> InfoVector;
 
 DownloadHistory::HistoryAdapter::HistoryAdapter(
     history::HistoryService* history)
-    : history_(history) {
-}
+    : history_(history) {}
 DownloadHistory::HistoryAdapter::~HistoryAdapter() {}
 
 void DownloadHistory::HistoryAdapter::QueryDownloads(
@@ -229,7 +225,8 @@ void DownloadHistory::HistoryAdapter::CreateDownload(
 }
 
 void DownloadHistory::HistoryAdapter::UpdateDownload(
-    const history::DownloadRow& data, bool should_commit_immediately) {
+    const history::DownloadRow& data,
+    bool should_commit_immediately) {
   history_->UpdateDownload(data, should_commit_immediately);
 }
 
@@ -258,12 +255,13 @@ DownloadHistory::DownloadHistory(content::DownloadManager* manager,
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
   content::DownloadManager::DownloadVector items;
   notifier_.GetManager()->GetAllDownloads(&items);
-  for (content::DownloadManager::DownloadVector::const_iterator
-       it = items.begin(); it != items.end(); ++it) {
+  for (content::DownloadManager::DownloadVector::const_iterator it =
+           items.begin();
+       it != items.end(); ++it) {
     OnDownloadCreated(notifier_.GetManager(), *it);
   }
-  history_->QueryDownloads(base::Bind(
-      &DownloadHistory::QueryCallback, weak_ptr_factory_.GetWeakPtr()));
+  history_->QueryDownloads(base::Bind(&DownloadHistory::QueryCallback,
+                                      weak_ptr_factory_.GetWeakPtr()));
 }
 
 DownloadHistory::~DownloadHistory() {
@@ -314,8 +312,8 @@ void DownloadHistory::LoadHistoryDownloads(std::unique_ptr<InfoVector> infos) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
   DCHECK(notifier_.GetManager());
 
-  for (InfoVector::const_iterator it = infos->begin();
-       it != infos->end(); ++it) {
+  for (InfoVector::const_iterator it = infos->begin(); it != infos->end();
+       ++it) {
     loading_id_ = history::ToContentDownloadId(it->id);
     download::DownloadItem::DownloadState history_download_state =
         history::ToContentDownloadState(it->state);
@@ -323,7 +321,7 @@ void DownloadHistory::LoadHistoryDownloads(std::unique_ptr<InfoVector> infos) {
         it->guid, loading_id_, it->current_path, it->target_path,
 #ifdef REDCORE
         it->ysp_username,  // YSP+ { User information isolation }
-#endif /*REDCORE*/
+#endif                     /*REDCORE*/
         it->url_chain, it->referrer_url, it->site_url, it->tab_url,
         it->tab_referrer_url, it->mime_type, it->original_mime_type,
         it->start_time, it->end_time, it->etag, it->last_modified,
@@ -346,8 +344,8 @@ void DownloadHistory::LoadHistoryDownloads(std::unique_ptr<InfoVector> infos) {
     }
 #if BUILDFLAG(ENABLE_EXTENSIONS)
     if (!it->by_ext_id.empty() && !it->by_ext_name.empty()) {
-      new extensions::DownloadedByExtension(
-          item, it->by_ext_id, it->by_ext_name);
+      new extensions::DownloadedByExtension(item, it->by_ext_id,
+                                            it->by_ext_name);
       item->UpdateObservers();
     }
 #endif
@@ -376,10 +374,8 @@ void DownloadHistory::MaybeAddToHistory(download::DownloadItem* item) {
   bool removing = removing_ids_.find(download_id) != removing_ids_.end();
 
   // TODO(benjhayden): Remove IsTemporary().
-  if (download_crx_util::IsExtensionDownload(*item) ||
-      item->IsTemporary() ||
-      (data->state() != DownloadHistoryData::NOT_PERSISTED) ||
-      removing)
+  if (download_crx_util::IsExtensionDownload(*item) || item->IsTemporary() ||
+      (data->state() != DownloadHistoryData::NOT_PERSISTED) || removing)
     return;
 
   data->SetState(DownloadHistoryData::PERSISTING);
@@ -390,16 +386,15 @@ void DownloadHistory::MaybeAddToHistory(download::DownloadItem* item) {
     data->set_info(GetDownloadRow(item));
   }
 
-  history_->CreateDownload(*data->info(), base::Bind(
-      &DownloadHistory::ItemAdded, weak_ptr_factory_.GetWeakPtr(),
-      download_id));
+  history_->CreateDownload(
+      *data->info(), base::Bind(&DownloadHistory::ItemAdded,
+                                weak_ptr_factory_.GetWeakPtr(), download_id));
   for (Observer& observer : observers_)
     observer.OnDownloadStored(item, *data->info());
 }
 
 void DownloadHistory::ItemAdded(uint32_t download_id, bool success) {
-  if (removed_while_adding_.find(download_id) !=
-      removed_while_adding_.end()) {
+  if (removed_while_adding_.find(download_id) != removed_while_adding_.end()) {
     removed_while_adding_.erase(download_id);
     if (success)
       ScheduleRemoveDownload(download_id);
@@ -432,11 +427,8 @@ void DownloadHistory::ItemAdded(uint32_t download_id, bool success) {
   }
   data->SetState(DownloadHistoryData::PERSISTED);
 
-  UMA_HISTOGRAM_CUSTOM_COUNTS("Download.HistorySize2",
-                              history_size_,
-                              1/*min*/,
-                              (1 << 23)/*max*/,
-                              (1 << 7)/*num_buckets*/);
+  UMA_HISTOGRAM_CUSTOM_COUNTS("Download.HistorySize2", history_size_, 1 /*min*/,
+                              (1 << 23) /*max*/, (1 << 7) /*num_buckets*/);
   ++history_size_;
 
   // Notify the observer about the change in the persistence state.
@@ -483,8 +475,8 @@ void DownloadHistory::OnDownloadUpdated(content::DownloadManager* manager,
       ShouldUpdateHistory(data->info(), current_info);
   bool should_update =
       (should_update_result != ShouldUpdateHistoryResult::NO_UPDATE);
-  UMA_HISTOGRAM_ENUMERATION("Download.HistoryPropagatedUpdate",
-                            should_update, 2);
+  UMA_HISTOGRAM_ENUMERATION("Download.HistoryPropagatedUpdate", should_update,
+                            2);
   if (should_update) {
     history_->UpdateDownload(
         current_info,

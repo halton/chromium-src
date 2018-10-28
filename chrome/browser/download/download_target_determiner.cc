@@ -55,16 +55,16 @@
 #endif
 
 #ifdef REDCORE
-//ysp+ {
-#include "chrome/browser/ysp_login/ysp_login_manager.h"
-#include "base/strings/utf_string_conversions.h"   //ysp+
-#include "chrome/browser/ui/simple_message_box.h"
-#include "chrome/grit/generated_resources.h"
-#include "ui/base/l10n/l10n_util.h"
+// ysp+ {
+#include "base/strings/utf_string_conversions.h"  // ysp+
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/browser_window.h"
-//ysp+ }
+#include "chrome/browser/ui/simple_message_box.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "chrome/grit/generated_resources.h"
+#include "ui/base/l10n/l10n_util.h"
+// ysp+ }
 #endif /*REDCORE*/
 
 using content::BrowserThread;
@@ -80,11 +80,10 @@ const base::FilePath::CharType kCrdownloadSuffix[] =
 // single bool. A host is considered visited before if prior visible visits were
 // found in history and the first such visit was earlier than the most recent
 // midnight.
-void VisitCountsToVisitedBefore(
-    const base::Callback<void(bool)>& callback,
-    bool found_visits,
-    int count,
-    base::Time first_visit) {
+void VisitCountsToVisitedBefore(const base::Callback<void(bool)>& callback,
+                                bool found_visits,
+                                int count,
+                                base::Time first_visit) {
   callback.Run(
       found_visits && count > 0 &&
       (first_visit.LocalMidnight() < base::Time::Now().LocalMidnight()));
@@ -97,8 +96,7 @@ bool g_is_adobe_reader_up_to_date_ = false;
 
 }  // namespace
 
-DownloadTargetDeterminerDelegate::~DownloadTargetDeterminerDelegate() {
-}
+DownloadTargetDeterminerDelegate::~DownloadTargetDeterminerDelegate() {}
 
 DownloadTargetDeterminer::DownloadTargetDeterminer(
     DownloadItem* download,
@@ -196,7 +194,7 @@ void DownloadTargetDeterminer::DoLoop() {
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoGenerateTargetPath() {
+DownloadTargetDeterminer::DoGenerateTargetPath() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(local_path_.empty());
   DCHECK_EQ(confirmation_reason_, DownloadConfirmationReason::NONE);
@@ -252,12 +250,9 @@ DownloadTargetDeterminer::Result
     std::string default_filename(
         l10n_util::GetStringUTF8(IDS_DEFAULT_DOWNLOAD_FILENAME));
     base::FilePath generated_filename = net::GenerateFileName(
-        download_->GetURL(),
-        download_->GetContentDisposition(),
+        download_->GetURL(), download_->GetContentDisposition(),
         GetProfile()->GetPrefs()->GetString(prefs::kDefaultCharset),
-        suggested_filename,
-        download_->GetMimeType(),
-        default_filename);
+        suggested_filename, download_->GetMimeType(), default_filename);
     confirmation_reason_ = NeedsConfirmation(generated_filename);
     base::FilePath target_directory;
     if (confirmation_reason_ != DownloadConfirmationReason::NONE) {
@@ -291,7 +286,7 @@ DownloadTargetDeterminer::Result
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoNotifyExtensions() {
+DownloadTargetDeterminer::DoNotifyExtensions() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
 
@@ -301,7 +296,8 @@ DownloadTargetDeterminer::Result
       download_->GetState() != DownloadItem::IN_PROGRESS)
     return CONTINUE;
 
-  delegate_->NotifyExtensions(download_, virtual_path_,
+  delegate_->NotifyExtensions(
+      download_, virtual_path_,
       base::Bind(&DownloadTargetDeterminer::NotifyExtensionsDone,
                  weak_ptr_factory_.GetWeakPtr()));
   return QUIT_DOLOOP;
@@ -324,8 +320,9 @@ void DownloadTargetDeterminer::NotifyExtensionsDone(
     // last_download_path/music/foo.mp3, then last_download_path will accumulate
     // the subdirectory /music/ so that the next download may end up in
     // Downloads/music/music/music/bar.mp3.
-    base::FilePath new_path(download_prefs_->DownloadPath().Append(
-        suggested_path).NormalizePathSeparators());
+    base::FilePath new_path(download_prefs_->DownloadPath()
+                                .Append(suggested_path)
+                                .NormalizePathSeparators());
     // Do not pass a mime type to GenerateSafeFileName so that it does not force
     // the filename to have an extension if the (Chrome) extension does not
     // suggest it.
@@ -341,7 +338,7 @@ void DownloadTargetDeterminer::NotifyExtensionsDone(
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoReserveVirtualPath() {
+DownloadTargetDeterminer::DoReserveVirtualPath() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
 
@@ -490,33 +487,31 @@ void DownloadTargetDeterminer::RequestConfirmationDone(
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoDetermineLocalPath() {
+DownloadTargetDeterminer::DoDetermineLocalPath() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(local_path_.empty());
 
 #ifdef REDCORE
-  //ysp+ {
+  // ysp+ {
   if (!download_->is_update() &&
       !YSPLoginManager::GetInstance()->GetDownloadFileAllowed(virtual_path_)) {
     ScheduleCallbackAndDeleteSelf(
         download::DOWNLOAD_INTERRUPT_REASON_FILE_BLOCKED);
 
     chrome::ShowWarningMessageBox(
-      NULL,
-      l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
-      l10n_util::GetStringUTF16(IDS_YSP_FILE_FILTERED_MESSAGE));
+        NULL, l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
+        l10n_util::GetStringUTF16(IDS_YSP_FILE_FILTERED_MESSAGE));
 
     return QUIT_DOLOOP;
   }
-  //ysp+ }
+// ysp+ }
 #endif /*REDCORE*/
 
   next_state_ = STATE_DETERMINE_MIME_TYPE;
 
   delegate_->DetermineLocalPath(
-      download_,
-      virtual_path_,
+      download_, virtual_path_,
       base::Bind(&DownloadTargetDeterminer::DetermineLocalPathDone,
                  weak_ptr_factory_.GetWeakPtr()));
   return QUIT_DOLOOP;
@@ -542,7 +537,7 @@ void DownloadTargetDeterminer::DetermineLocalPathDone(
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoDetermineMimeType() {
+DownloadTargetDeterminer::DoDetermineMimeType() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(!local_path_.empty());
@@ -629,7 +624,7 @@ void IsHandledBySafePlugin(content::ResourceContext* resource_context,
 #endif  // BUILDFLAG(ENABLE_PLUGINS)
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoDetermineIfHandledSafely() {
+DownloadTargetDeterminer::DoDetermineIfHandledSafely() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(!local_path_.empty());
@@ -672,7 +667,7 @@ void DownloadTargetDeterminer::DetermineIfHandledSafelyDone(
 #endif
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoDetermineIfAdobeReaderUpToDate() {
+DownloadTargetDeterminer::DoDetermineIfAdobeReaderUpToDate() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
   next_state_ = STATE_CHECK_DOWNLOAD_URL;
@@ -710,7 +705,7 @@ void DownloadTargetDeterminer::DetermineIfAdobeReaderUpToDateDone(
 #endif
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoCheckDownloadUrl() {
+DownloadTargetDeterminer::DoCheckDownloadUrl() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   next_state_ = STATE_CHECK_VISITED_REFERRER_BEFORE;
@@ -720,8 +715,7 @@ DownloadTargetDeterminer::Result
     return CONTINUE;
 
   delegate_->CheckDownloadUrl(
-      download_,
-      virtual_path_,
+      download_, virtual_path_,
       base::Bind(&DownloadTargetDeterminer::CheckDownloadUrlDone,
                  weak_ptr_factory_.GetWeakPtr()));
   return QUIT_DOLOOP;
@@ -737,7 +731,7 @@ void DownloadTargetDeterminer::CheckDownloadUrlDone(
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoCheckVisitedReferrerBefore() {
+DownloadTargetDeterminer::DoCheckVisitedReferrerBefore() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   next_state_ = STATE_DETERMINE_INTERMEDIATE_PATH;
 
@@ -801,7 +795,7 @@ void DownloadTargetDeterminer::CheckVisitedReferrerBeforeDone(
 }
 
 DownloadTargetDeterminer::Result
-    DownloadTargetDeterminer::DoDetermineIntermediatePath() {
+DownloadTargetDeterminer::DoDetermineIntermediatePath() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(!local_path_.empty());
@@ -876,9 +870,9 @@ DownloadTargetDeterminer::Result
 #endif
   unconfirmed_format.append(kUnconfirmedFormatSuffix);
 
-  base::FilePath::StringType file_name = base::StringPrintf(
-      unconfirmed_format.c_str(),
-      base::RandInt(0, kUnconfirmedUniquifierRange));
+  base::FilePath::StringType file_name =
+      base::StringPrintf(unconfirmed_format.c_str(),
+                         base::RandInt(0, kUnconfirmedUniquifierRange));
   intermediate_path_ = local_path_.DirName().Append(file_name);
   return COMPLETE;
 }
@@ -1006,10 +1000,9 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
 
   // User-initiated extension downloads from pref-whitelisted sources are not
   // considered dangerous.
-  if (download_->HasUserGesture() &&
-      is_extension_download &&
-      download_crx_util::OffStoreInstallAllowedByPrefs(
-          GetProfile(), *download_)) {
+  if (download_->HasUserGesture() && is_extension_download &&
+      download_crx_util::OffStoreInstallAllowedByPrefs(GetProfile(),
+                                                       *download_)) {
     return DownloadFileType::NOT_DANGEROUS;
   }
 
@@ -1043,8 +1036,7 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
   return danger_level;
 }
 
-void DownloadTargetDeterminer::OnDownloadDestroyed(
-    DownloadItem* download) {
+void DownloadTargetDeterminer::OnDownloadDestroyed(DownloadItem* download) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK_EQ(download_, download);
   ScheduleCallbackAndDeleteSelf(

@@ -36,8 +36,8 @@
 
 #ifdef REDCORE
 #include "chrome/browser/ui/browser_list.h"
-#include "components/ysp_doc_view/ysp_doc_view_manager.h"   //ysp+
-#endif /*REDCORE*/
+#include "components/ysp_doc_view/ysp_doc_view_manager.h"  // ysp+
+#endif                                                     /*REDCORE*/
 
 namespace {
 
@@ -110,10 +110,9 @@ void DownloadShelfUIControllerDelegate::OnNewDownloadReady(
 
 #endif  // !OS_ANDROID
 
-} // namespace
+}  // namespace
 
-DownloadUIController::Delegate::~Delegate() {
-}
+DownloadUIController::Delegate::~Delegate() {}
 
 DownloadUIController::DownloadUIController(content::DownloadManager* manager,
                                            std::unique_ptr<Delegate> delegate)
@@ -128,7 +127,7 @@ DownloadUIController::DownloadUIController(content::DownloadManager* manager,
     delegate_.reset(new DownloadNotificationManager(
         Profile::FromBrowserContext(manager->GetBrowserContext())));
   }
-#else  // defined(OS_CHROMEOS)
+#else   // defined(OS_CHROMEOS)
   if (!delegate_) {
     delegate_.reset(new DownloadShelfUIControllerDelegate(
         Profile::FromBrowserContext(manager->GetBrowserContext())));
@@ -136,8 +135,7 @@ DownloadUIController::DownloadUIController(content::DownloadManager* manager,
 #endif  // defined(OS_ANDROID)
 }
 
-DownloadUIController::~DownloadUIController() {
-}
+DownloadUIController::~DownloadUIController() {}
 
 void DownloadUIController::OnDownloadCreated(content::DownloadManager* manager,
                                              download::DownloadItem* item) {
@@ -207,27 +205,28 @@ void DownloadUIController::OnDownloadUpdated(content::DownloadManager* manager,
   delegate_->OnNewDownloadReady(item);
 
 #ifdef REDCORE
-  //ysp+ {
+  // ysp+
   YSPDocViewManager* dvm = YSPDocViewManager::GetInstance();
   if (item && dvm->IsDocViewType(item->GetTargetFilePath())) {
     item->set_is_doc_view(true);
     dvm->SetDelegate(this);
     item->AddObserver(dvm);
-  }
-  else
+  } else {
     item->set_is_doc_view(false);
-  //ysp+ }
+  }
 #endif /*REDCORE*/
 }
 
 #ifdef REDCORE
-//ysp+ {
+// ysp+ {
 // YSPDocViewManagerDelegate:
 void DownloadUIController::OnDocViewRequestFailure() {
   DLOG(INFO) << "DownloadUIController::OnDocViewRequestFailure";
 }
 
-void DownloadUIController::OnDocViewRequestSuccess(download::DownloadItem* download, const std::string& doc_url) {
+void DownloadUIController::OnDocViewRequestSuccess(
+    download::DownloadItem* download,
+    const std::string& doc_url) {
   if (!download)
     return;
 
@@ -238,11 +237,11 @@ void DownloadUIController::OnDocViewRequestSuccess(download::DownloadItem* downl
   Browser* browser = BrowserList::GetInstance()->get(0);
   if (browser) {
     browser->window()->GetDownloadShelf()->Hide();
-    browser->OpenURL(content::OpenURLParams(
-        GURL(doc_url), content::Referrer(),
-        WindowOpenDisposition::NEW_FOREGROUND_TAB, ui::PAGE_TRANSITION_LINK,
-        false));
+    browser->OpenURL(
+        content::OpenURLParams(GURL(doc_url), content::Referrer(),
+                               WindowOpenDisposition::NEW_FOREGROUND_TAB,
+                               ui::PAGE_TRANSITION_LINK, false));
   }
 }
-//ysp+ }
+// ysp+ }
 #endif /*REDCORE*/

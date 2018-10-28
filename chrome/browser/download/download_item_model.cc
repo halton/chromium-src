@@ -296,7 +296,7 @@ base::string16 InterruptReasonMessage(
   return status_text;
 }
 
-} // namespace
+}  // namespace
 
 // -----------------------------------------------------------------------------
 // DownloadItemModel
@@ -365,8 +365,8 @@ base::string16 DownloadItemModel::GetTabProgressStatusText() const {
     base::i18n::AdjustStringForLocaleDirection(&total_text);
 
     base::i18n::AdjustStringForLocaleDirection(&received_size);
-    amount = l10n_util::GetStringFUTF16(
-        IDS_DOWNLOAD_TAB_PROGRESS_SIZE, received_size, total_text);
+    amount = l10n_util::GetStringFUTF16(IDS_DOWNLOAD_TAB_PROGRESS_SIZE,
+                                        received_size, total_text);
   } else {
     amount.assign(received_size);
   }
@@ -379,9 +379,9 @@ base::string16 DownloadItemModel::GetTabProgressStatusText() const {
   if (download_->IsPaused()) {
     time_remaining = l10n_util::GetStringUTF16(IDS_DOWNLOAD_PROGRESS_PAUSED);
   } else if (download_->TimeRemaining(&remaining)) {
-    time_remaining = ui::TimeFormat::Simple(ui::TimeFormat::FORMAT_REMAINING,
-                                            ui::TimeFormat::LENGTH_SHORT,
-                                            remaining);
+    time_remaining =
+        ui::TimeFormat::Simple(ui::TimeFormat::FORMAT_REMAINING,
+                               ui::TimeFormat::LENGTH_SHORT, remaining);
   }
 
   if (time_remaining.empty()) {
@@ -389,8 +389,8 @@ base::string16 DownloadItemModel::GetTabProgressStatusText() const {
     return l10n_util::GetStringFUTF16(
         IDS_DOWNLOAD_TAB_PROGRESS_STATUS_TIME_UNKNOWN, speed_text, amount);
   }
-  return l10n_util::GetStringFUTF16(
-      IDS_DOWNLOAD_TAB_PROGRESS_STATUS, speed_text, amount, time_remaining);
+  return l10n_util::GetStringFUTF16(IDS_DOWNLOAD_TAB_PROGRESS_STATUS,
+                                    speed_text, amount, time_remaining);
 }
 
 base::string16 DownloadItemModel::GetTooltipText(const gfx::FontList& font_list,
@@ -439,8 +439,8 @@ base::string16 DownloadItemModel::GetWarningText(const gfx::FontList& font_list,
                                         elided_filename);
     }
     case download::DOWNLOAD_DANGER_TYPE_POTENTIALLY_UNWANTED: {
-      return l10n_util::GetStringFUTF16(
-          IDS_PROMPT_DOWNLOAD_CHANGES_SETTINGS, elided_filename);
+      return l10n_util::GetStringFUTF16(IDS_PROMPT_DOWNLOAD_CHANGES_SETTINGS,
+                                        elided_filename);
     }
     case download::DOWNLOAD_DANGER_TYPE_NOT_DANGEROUS:
     case download::DOWNLOAD_DANGER_TYPE_MAYBE_DANGEROUS_CONTENT:
@@ -471,8 +471,8 @@ int64_t DownloadItemModel::GetCompletedBytes() const {
 }
 
 int64_t DownloadItemModel::GetTotalBytes() const {
-  return download_->AllDataSaved() ? download_->GetReceivedBytes() :
-                                     download_->GetTotalBytes();
+  return download_->AllDataSaved() ? download_->GetReceivedBytes()
+                                   : download_->GetTotalBytes();
 }
 
 // TODO(asanka,rdsmith): Once 'open' moves exclusively to the
@@ -582,8 +582,7 @@ bool DownloadItemModel::ShouldRemoveFromShelfWhenComplete() const {
       // TODO(asanka): The logic for deciding opening behavior should be in a
       //               central location. http://crbug.com/167702
       return (download_crx_util::IsExtensionDownload(*download_) ||
-              download_->IsTemporary() ||
-              download_->GetOpenWhenComplete() ||
+              download_->IsTemporary() || download_->GetOpenWhenComplete() ||
               download_->ShouldOpenFileBasedOnExtension());
 
     case DownloadItem::COMPLETE:
@@ -607,21 +606,20 @@ bool DownloadItemModel::ShouldRemoveFromShelfWhenComplete() const {
 
 bool DownloadItemModel::ShouldShowDownloadStartedAnimation() const {
   return !download_->IsSavePackageDownload() &&
-      !download_crx_util::IsExtensionDownload(*download_);
+         !download_crx_util::IsExtensionDownload(*download_);
 }
 
 bool DownloadItemModel::ShouldShowInShelf() const {
 #ifdef REDCORE
-  //ysp+ {
+  // ysp+ {
   if (download_ && download_->is_update())
     return false;
-  
-  if (download_ && 
-    download_->GetFileExternallyRemoved() && 
-    download_->is_doc_view()) {
+
+  if (download_ && download_->GetFileExternallyRemoved() &&
+      download_->is_doc_view()) {
     return false;
   }
-  //ysp+ }
+// ysp+ }
 #endif /*REDCORE*/
   const DownloadItemModelData* data = DownloadItemModelData::Get(download_);
   if (data)
@@ -710,15 +708,17 @@ base::string16 DownloadItemModel::GetProgressSizesString() const {
   int64_t total = GetTotalBytes();
   if (total > 0) {
     ui::DataUnits amount_units = ui::GetByteDisplayUnits(total);
-    base::string16 simple_size = ui::FormatBytesWithUnits(size, amount_units, false);
+    base::string16 simple_size =
+        ui::FormatBytesWithUnits(size, amount_units, false);
 
     // In RTL locales, we render the text "size/total" in an RTL context. This
     // is problematic since a string such as "123/456 MB" is displayed
     // as "MB 123/456" because it ends with an LTR run. In order to solve this,
     // we mark the total string as an LTR string if the UI layout is
     // right-to-left so that the string "456 MB" is treated as an LTR run.
-    base::string16 simple_total = base::i18n::GetDisplayStringInLTRDirectionality(
-        ui::FormatBytesWithUnits(total, amount_units, true));
+    base::string16 simple_total =
+        base::i18n::GetDisplayStringInLTRDirectionality(
+            ui::FormatBytesWithUnits(total, amount_units, true));
     size_ratio = l10n_util::GetStringFUTF16(IDS_DOWNLOAD_STATUS_SIZES,
                                             simple_size, simple_total);
   } else {
@@ -732,8 +732,8 @@ base::string16 DownloadItemModel::GetInProgressStatusString() const {
 
   TimeDelta time_remaining;
   // time_remaining is only known if the download isn't paused.
-  bool time_remaining_known = (!download_->IsPaused() &&
-                               download_->TimeRemaining(&time_remaining));
+  bool time_remaining_known =
+      (!download_->IsPaused() && download_->TimeRemaining(&time_remaining));
 
   // Indication of progress. (E.g.:"100/200 MB" or "100MB")
   base::string16 size_ratio = GetProgressSizesString();
