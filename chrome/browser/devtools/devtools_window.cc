@@ -66,11 +66,10 @@
 #include "ui/events/keycodes/dom/keycode_converter.h"
 #include "ui/events/keycodes/keyboard_code_conversion.h"
 #include "ui/events/keycodes/keyboard_codes.h"
-#ifdef REDCORE
+
 #ifdef IE_REDCORE
-#include "content/browser/web_contents/web_contents_ie.h"	//ysp+{IE Embedded}
-#endif
-#endif
+#include "content/browser/web_contents/web_contents_ie.h"
+#endif  // IE_REDCORE
 
 using base::DictionaryValue;
 using blink::WebInputEvent;
@@ -685,17 +684,13 @@ void DevToolsWindow::ToggleDevToolsWindow(
     bool force_open,
     const DevToolsToggleAction& action,
     const std::string& settings) {
-#ifdef REDCORE
 #ifdef IE_REDCORE
-  //ysp+{IE Embedded}
   RendererMode mode = inspected_web_contents->GetRendererMode();
   if (mode.core == IE_CORE) {
 	  HandleIEDevTools(inspected_web_contents);
 	  return;
   }
-  //
-#endif
-#endif
+#endif  // IE_REDCORE
 
   scoped_refptr<DevToolsAgentHost> agent(
       DevToolsAgentHost::GetOrCreateFor(inspected_web_contents));
@@ -1629,23 +1624,20 @@ WebContents* DevToolsWindow::GetInspectedWebContents() {
              : NULL;
 }
 
-#ifdef REDCORE
 #ifdef IE_REDCORE
-//ysp+{IE Embedded}
 void DevToolsWindow::HandleIEDevTools(content::WebContents * web_contents) {
 	if (web_contents == NULL)
 		return;
 	RendererMode mode = web_contents->GetRendererMode();
 	if (mode.core != IE_CORE)
 		return;
-	content::WebContentsIE* pIEContent = static_cast<content::WebContentsIE*>(web_contents);
-	bool isOpen = pIEContent->IsDevToolsOpened();
+        content::WebContentsIE* pIEContent =
+            static_cast<content::WebContentsIE*>(web_contents);
+        bool isOpen = pIEContent->IsDevToolsOpened();
 	bool show = !isOpen;
 	pIEContent->ShowDevTools(show);
 }
-//
-#endif
-#endif
+#endif  // IE_REDCORE
 
 void DevToolsWindow::LoadCompleted() {
   Show(action_on_load_);

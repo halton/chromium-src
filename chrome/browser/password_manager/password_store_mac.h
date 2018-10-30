@@ -34,7 +34,7 @@ class PasswordStoreMac : public password_manager::PasswordStoreDefault {
 #ifdef REDCORE
   password_manager::PasswordStoreChangeList SaveLoginForEnterplorerImpl(
       const autofill::PasswordForm& form) override;
-#endif
+#endif  // REDCORE
 
  private:
   ~PasswordStoreMac() override;

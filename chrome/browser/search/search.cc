@@ -370,7 +370,8 @@ bool HandleNewTabURLRewrite(GURL* url,
     *url = details.url;
     return true;
   }
-#endif
+#endif  // REDCORE
+
   return false;
 }
 

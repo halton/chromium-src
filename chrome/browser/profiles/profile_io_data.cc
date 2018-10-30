@@ -177,7 +177,8 @@
 
 #ifdef REDCORE
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
-#endif /*REDCORE*/
+#endif  // REDCORE
+
 using content::BrowserContext;
 using content::BrowserThread;
 using content::ResourceContext;
@@ -1378,7 +1379,7 @@ void ProfileIOData::DestroyResourceContext() {
 //  if (transport_security_state_)
 //    transport_security_state_->SetReportSender(nullptr);
 //  certificate_report_sender_.reset();
-#endif
+#endif  // REDCORE
 }
 
 std::unique_ptr<net::HttpCache> ProfileIOData::CreateHttpFactory(

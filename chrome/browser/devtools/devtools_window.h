@@ -214,11 +214,9 @@ class DevToolsWindow : public DevToolsUIBindings::Delegate,
 
   content::WebContents* GetInspectedWebContents();
 
-#ifdef REDCORE
 #ifdef IE_REDCORE
-  static void HandleIEDevTools(content::WebContents* web_contents);	//ysp+{IE Embedded}
-#endif
-#endif
+  static void HandleIEDevTools(content::WebContents* web_contents);
+#endif  // IE_REDCORE
 
  private:
   friend class DevToolsWindowTesting;
