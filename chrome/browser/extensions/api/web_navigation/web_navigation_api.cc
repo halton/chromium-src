@@ -463,13 +463,13 @@ void WebNavigationTabObserver::HandleError(
 #ifdef REDCORE
 #ifdef IE_REDCORE
 //ysp+{IE SWA}
-void WebNavigationTabObserver::OnGetLoginContext(content::RenderFrameHost * render_frame_host,
- const std::string & url, const std::string & userName, const std::string & userPwd) {
+void WebNavigationTabObserver::OnGetLoginContext(content::RenderFrameHost* render_frame_host,
+ const std::string& url, const std::string& user_name, const std::string& user_pwd) {
  DVLOG(2) << "OnGetLoginContext("
    << "render_frame_host=" << render_frame_host
    << ", login_url=" << url
-   << ", user_name=" << userName
-   << ", user_password=" << userPwd << ")";
+   << ", user_name=" << user_name
+   << ", user_password=" << user_pwd << ")";
 
 //  helpers::DispathOnLogin(web_contents(), render_frame_host, url, userName, userPwd);
 }

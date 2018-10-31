@@ -2239,21 +2239,21 @@ bool TabsSetIEAutoLoginInfoFunction::RunAsync() {
  std::unique_ptr<tabs::SetIEAutoLoginInfo::Params> params(
    tabs::SetIEAutoLoginInfo::Params::Create(*args_));
  EXTENSION_FUNCTION_VALIDATE(params);
- int tabID = params->tab_id;
- std::wstring frameXpath = base::UTF8ToUTF16(params->frame_xpath);
- std::wstring nameXpath = base::UTF8ToUTF16(params->name_xpath);
- std::wstring nameValue = base::UTF8ToUTF16(params->name_value);
- std::wstring pwdXpath = base::UTF8ToUTF16(params->pwd_xpath);
- std::wstring pwdValue = base::UTF8ToUTF16(params->pwd_value);
- std::wstring loginXpath = base::UTF8ToUTF16(params->login_xpath);
- if (tabID < 0)
+ int tab_id = params->tab_id;
+ std::wstring frame_xpath = base::UTF8ToUTF16(params->frame_xpath);
+ std::wstring name_xpath = base::UTF8ToUTF16(params->name_xpath);
+ std::wstring name_value = base::UTF8ToUTF16(params->name_value);
+ std::wstring pwd_xpath = base::UTF8ToUTF16(params->pwd_xpath);
+ std::wstring pwd_value = base::UTF8ToUTF16(params->pwd_value);
+ std::wstring login_xpath = base::UTF8ToUTF16(params->login_xpath);
+ if (tab_id < 0)
    return false;
- WebContents* web_contents = GetWebContents(tabID);
+ WebContents* web_contents = GetWebContents(tab_id);
  if (web_contents) {
    RendererMode mode= web_contents->GetRendererMode();
    if (mode.core == IE_CORE) {
      content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
-     pIEContent->SetIEAutoLoginInfo(frameXpath, nameXpath, nameValue, pwdXpath, pwdValue, loginXpath);
+     pIEContent->SetIEAutoLoginInfo(frame_xpath, name_xpath, name_value, pwd_xpath, pwd_value, login_xpath);
    }
  }
 #endif /*IE_REDCORE*/
@@ -2293,20 +2293,20 @@ bool TabsStartListenIELoginFunction::RunAsync() {
    tabs::StartListenIELogin::Params::Create(*args_));
  EXTENSION_FUNCTION_VALIDATE(params);
 
- int tabID = params->tab_id;
+ int tab_id = params->tab_id;
  std::wstring url = base::UTF8ToUTF16(params->url);
- std::wstring frameXpath = base::UTF8ToUTF16(params->frame_xpath);
- std::wstring nameXpath = base::UTF8ToUTF16(params->name_xpath);
- std::wstring pwdXpath = base::UTF8ToUTF16(params->pwd_xpath);
-std::wstring loginXpath = base::UTF8ToUTF16(params->login_xpath);
- if (tabID < 0)
+ std::wstring frame_xpath = base::UTF8ToUTF16(params->frame_xpath);
+ std::wstring name_xpath = base::UTF8ToUTF16(params->name_xpath);
+ std::wstring pwd_xpath = base::UTF8ToUTF16(params->pwd_xpath);
+std::wstring login_xpath = base::UTF8ToUTF16(params->login_xpath);
+ if (tab_id < 0)
    return false;
- WebContents* web_contents = GetWebContents(tabID);
+ WebContents* web_contents = GetWebContents(tab_id);
  if (web_contents) {
    RendererMode mode = web_contents->GetRendererMode();
    if (mode.core == IE_CORE) {
      content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
-     pIEContent->SetListenLoginXPath(url, frameXpath, nameXpath, pwdXpath, loginXpath);
+     pIEContent->SetListenLoginXPath(url, frame_xpath, name_xpath, pwd_xpath, login_xpath);
    }
  }
 #endif /*IE_REDCORE*/

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //ysp+ { crypto http header }
@@ -9,21 +9,21 @@
 #include <string>
 #include "crypto/crypto_export.h"
 
-class CRYPTO_EXPORT YSPCryptoHeader {
+class CRYPTO_EXPORT YspCryptoHeader {
  public:
-  static YSPCryptoHeader * GetInstance();
-  void SetTimeDiff(const int timeDiff) { timeDiff_ = timeDiff; }
-  void Init(std::string crypto_key);
-  std::string EncryptString(const std::string plaintext);
-  std::string DecryptString(const std::string ciphertext);
+  static YspCryptoHeader* GetInstance();
+  void SetTimeDiff(const int time_diff) { time_diff_ = time_diff; }
+  void Init(const std::string& crypto_key);
+  std::string EncryptString(const std::string& plain_text);
+  std::string DecryptString(const std::string& cipher_text);
   bool isAddHeaders();
   std::string GetEncString();
-  std::string GetHMACEncString(const std::string messageType, const std::string uri);
+  std::string GetHMACEncString(const std::string& message_type, const std::string& uri);
 
  private:
-  YSPCryptoHeader(){};
-  static YSPCryptoHeader *m_pInstance;
-  int timeDiff_ = 0;
+  YspCryptoHeader():time_diff_(0){};
+  static YspCryptoHeader* instance_;
+  int time_diff_;
 };
 
 #endif //CRYPTO_YSP_CRYPTO_HEADER_H_

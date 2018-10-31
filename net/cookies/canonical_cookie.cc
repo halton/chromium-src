@@ -124,7 +124,7 @@ CanonicalCookie::CanonicalCookie(const std::string& name,
       httponly_(httponly),
       same_site_(same_site),
 #ifdef REDCORE
-      ysp_username_(YSPCryptoCSingleton::GetInstance()->GetUserId()),
+      ysp_username_(YspCryptoSingleton::GetInstance()->GetUserId()),
 #endif
       priority_(priority) {}
 

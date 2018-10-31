@@ -1,7 +1,13 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //ysp+ { crypto http header }
+
+#include "crypto/ysp_crypto_header.h"
+
+#include <map>
+#include <set>
+#include <openssl/aes.h>
 
 #include "base/json/json_reader.h"
 #include "base/values.h"
@@ -9,14 +15,9 @@
 #include "base/base64.h"
 #include "base/time/time.h"
 #include "base/strings/string_number_conversions.h"
-
-#include <openssl/aes.h>
 #include "base/strings/string_util.h"
-#include "crypto/ysp_crypto_header.h"
-#include "crypto/hmac.h"
 
-#include <map>
-#include <set>
+#include "crypto/hmac.h"
 
 #define SHA1_DIGEST_LENGTH	20
 #define SHA256_DIGEST_LENGTH	32
@@ -36,10 +37,10 @@ class HeaderCryptor{
  public:
    HeaderCryptor();
   ~HeaderCryptor();
-  bool EncryptString(const std::string& plaintext,
-                     std::string* ciphertext);
-  bool DecryptString(const std::string& ciphertext,
-                     std::string* plaintext);
+  bool EncryptString(const std::string& plain_text,
+                     std::string* cipher_text);
+  bool DecryptString(const std::string& cipher_text,
+                     std::string* plain_text);
 };
 
 HeaderCryptor::HeaderCryptor() {
@@ -47,8 +48,8 @@ HeaderCryptor::HeaderCryptor() {
 
 HeaderCryptor::~HeaderCryptor() {}
 
-bool HeaderCryptor::EncryptString(const std::string& plaintext,
-  std::string* ciphertext) {
+bool HeaderCryptor::EncryptString(const std::string& plain_text,
+  std::string* cipher_text) {
   AES_KEY aes_key;
   char key_data[17] = {0};
   memcpy(key_data, cryptoHeaderkey::pwd, 8);
@@ -57,8 +58,8 @@ bool HeaderCryptor::EncryptString(const std::string& plaintext,
     AES_BLOCK_SIZE * 8, &aes_key) != 0) {
     return false;
   }
-  const size_t out_size = plaintext.size();
-  std::string pla_padding = plaintext;
+  const size_t out_size = plain_text.size();
+  std::string pla_padding = plain_text;
   int offset = AES_BLOCK_SIZE - out_size % AES_BLOCK_SIZE;
   size_t out_size_new = out_size + offset;
   char padding[AES_BLOCK_SIZE];
@@ -73,12 +74,12 @@ bool HeaderCryptor::EncryptString(const std::string& plaintext,
 
   AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(pla_padding.data()), out_ptr,
     pla_padding.size(), &aes_key, ivec, AES_ENCRYPT);
-  ciphertext->swap(result);
+  cipher_text->swap(result);
   return true;
 }
 
-bool HeaderCryptor::DecryptString(const std::string& ciphertext,
-  std::string* plaintext) {
+bool HeaderCryptor::DecryptString(const std::string& cipher_text,
+  std::string* plain_text) {
   AES_KEY aes_key;
   char key_data[17] = { 0 };
   memcpy(key_data, cryptoHeaderkey::pwd, 8);
@@ -87,7 +88,7 @@ bool HeaderCryptor::DecryptString(const std::string& ciphertext,
     AES_BLOCK_SIZE * 8, &aes_key) != 0) {
     return false;
   }
-  const size_t out_size = ciphertext.size();
+  const size_t out_size = cipher_text.size();
   std::string result;
   uint8_t* out_ptr =
     reinterpret_cast<uint8_t*>(base::WriteInto(&result, out_size + 1));
@@ -95,24 +96,24 @@ bool HeaderCryptor::DecryptString(const std::string& ciphertext,
   uint8_t ivec[AES_BLOCK_SIZE] = { 0 };
   memcpy(ivec, cryptoHeaderkey::iv, AES_BLOCK_SIZE);
 
-  AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(ciphertext.data()), out_ptr,
-    ciphertext.size(), &aes_key, ivec, AES_DECRYPT);
+  AES_cbc_encrypt(reinterpret_cast<const uint8_t*>(cipher_text.data()), out_ptr,
+    cipher_text.size(), &aes_key, ivec, AES_DECRYPT);
   size_t length = result.length();
   int offset = result.c_str()[length - 1];
-  plaintext->clear();
-  plaintext->assign(result, 0, length - offset);
+  plain_text->clear();
+  plain_text->assign(result, 0, length - offset);
   return true;
 }
 } //namespace
 
-YSPCryptoHeader* YSPCryptoHeader::m_pInstance = nullptr;
-YSPCryptoHeader * YSPCryptoHeader::GetInstance() {
-    if(m_pInstance == nullptr)  //判断是否第一次调用
-        m_pInstance = new YSPCryptoHeader();
-    return m_pInstance;
+YspCryptoHeader* YspCryptoHeader::instance_ = nullptr;
+YspCryptoHeader * YspCryptoHeader::GetInstance() {
+    if(instance_ == nullptr)  //判断是否第一次调用
+        instance_ = new YspCryptoHeader();
+    return instance_;
 }
 
-void YSPCryptoHeader::Init(std::string crypto_key) {
+void YspCryptoHeader::Init(const std::string& crypto_key) {
   if (crypto_key.empty())
     return;
   cryptoHeaderkey::flags = crypto_key.data()[0];
@@ -137,34 +138,34 @@ void YSPCryptoHeader::Init(std::string crypto_key) {
   //DLOG(INFO) << "cryptokey::pwd:" << cryptokey::pwd << " cryptokey::sal:" << cryptokey::sal << " cryptokey::iv" << cryptokey::iv;
 }
 
-std::string YSPCryptoHeader::EncryptString(const std::string plaintext) {
-    std::string ciphertext;
-  if (!plaintext.empty()) {
+std::string YspCryptoHeader::EncryptString(const std::string& plain_text) {
+    std::string cipher_text;
+  if (!plain_text.empty()) {
     HeaderCryptor Aes_Crypted_;
-    Aes_Crypted_.EncryptString(plaintext, &ciphertext);
+    Aes_Crypted_.EncryptString(plain_text, &cipher_text);
   }
-    return ciphertext;
+    return cipher_text;
 }
-std::string YSPCryptoHeader::DecryptString(const std::string ciphertext) {
-    std::string plaintext;
-  if (!ciphertext.empty()) {
+std::string YspCryptoHeader::DecryptString(const std::string& cipher_text) {
+    std::string plain_text;
+  if (!cipher_text.empty()) {
     HeaderCryptor Aes_Crypted_;
-    Aes_Crypted_.DecryptString(ciphertext, &plaintext);
+    Aes_Crypted_.DecryptString(cipher_text, &plain_text);
   }
-    return plaintext;
+    return plain_text;
 }
 
-bool YSPCryptoHeader::isAddHeaders()
+bool YspCryptoHeader::isAddHeaders()
 {
   if (cryptoHeaderkey::flags == '3')
     return true;
   return false;
 }
 
-std::string YSPCryptoHeader::GetEncString()
+std::string YspCryptoHeader::GetEncString()
 {
   std::string base64_enc_timeStamp;
-	std::string timeStamp = base::Int64ToString((base::Time::Now().ToTimeT() + timeDiff_));
+	std::string timeStamp = base::Int64ToString((base::Time::Now().ToTimeT() + time_diff_));
   std::string enc_timeStamp = EncryptString(timeStamp);
 
   //DLOG(INFO) << "enc_timeStamp: " << base::HexEncode(enc_timeStamp.c_str(), enc_timeStamp.length());
@@ -178,10 +179,10 @@ std::string YSPCryptoHeader::GetEncString()
   return " (" + base64_enc_timeStamp + ")";
 }
 
-std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, const std::string uri)
+std::string YspCryptoHeader::GetHMACEncString(const std::string& message_type, const std::string& uri)
 {
 	int type = 1; //1:sha1, 2:sha256, 3:sm3
-	//std::string method = "HTTP" + messageType;
+	//std::string method = "HTTP" + message_type;
 
 	int clientID = 352234625;
 	char client_id[64] = {0};
@@ -189,9 +190,9 @@ std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, con
 	sprintf(client_id, "%x", clientID);clientIDHex.assign(client_id);
 	char time_stamp[64] = {0};
 #ifdef WIN32
-	sprintf(time_stamp, "%I64x", (base::Time::Now().ToTimeT() + timeDiff_));
+	sprintf(time_stamp, "%I64x", (base::Time::Now().ToTimeT() + time_diff_));
 #else
-	sprintf(time_stamp, "%lx", (base::Time::Now().ToTimeT() + timeDiff_));
+	sprintf(time_stamp, "%lx", (base::Time::Now().ToTimeT() + time_diff_));
 #endif
 	std::string timeStampHex; timeStampHex.assign(time_stamp);
 	//std::string key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
@@ -204,8 +205,8 @@ std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, con
 	//memcpy(key, cryptoHeaderkey::iv, 16);
 	key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
         std::string value = "1#" + base::IntToString(type) + "#" + clientIDHex +
-                            "#" + timeStampHex + "#" + messageType + "#" + uri;
-	std::string ciphertext = "1" + base::IntToString(type) + clientIDHex + timeStampHex;
+                            "#" + timeStampHex + "#" + message_type + "#" + uri;
+	std::string cipher_text = "1" + base::IntToString(type) + clientIDHex + timeStampHex;
 	if (type == 1) {
 		unsigned char digestSha1[SHA1_DIGEST_LENGTH] = { '\0' };
 
@@ -220,7 +221,7 @@ std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, con
                     digest += digestSha1[i];
                 }
                 base::Base64Encode(digest, &digest_base64);
-                ciphertext.append(digest_base64);
+                cipher_text.append(digest_base64);
                 
                 DLOG(INFO) << "HMAC SHA1 hex : " << base::HexEncode(digestSha1, SHA1_DIGEST_LENGTH);
             }
@@ -237,7 +238,7 @@ std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, con
                 for (size_t i = 0; i < SHA256_DIGEST_LENGTH; i++)
                     digest += digestSha256[i];
                 base::Base64Encode(digest, &digest_base64);
-                ciphertext.append(digest_base64);
+                cipher_text.append(digest_base64);
                 
                 DLOG(INFO) << "HMAC SHA256 hex : " << base::HexEncode(digestSha256, SHA256_DIGEST_LENGTH);
             }
@@ -251,13 +252,13 @@ std::string YSPCryptoHeader::GetHMACEncString(const std::string messageType, con
 		for (size_t i = 0; i < SM3_HMAC_SIZE; i++)
 			digest += digestSm3[i];
 		base::Base64Encode(digest, &digest_base64);
-		ciphertext.append(digest_base64);
+		cipher_text.append(digest_base64);
 
 		DLOG(INFO) << "HMAC SM3 hex : " << base::HexEncode(digestSm3, SM3_HMAC_SIZE);
 	}
-	DLOG(INFO) << "HMAC ciphertext: " << " (" + ciphertext + ")";
+	DLOG(INFO) << "HMAC cipher_text: " << " (" + cipher_text + ")";
 	DLOG(INFO) << "value: " << value;
-	return " (" + ciphertext + ")";
+	return " (" + cipher_text + ")";
 }
 
 //YSP+ { SM3

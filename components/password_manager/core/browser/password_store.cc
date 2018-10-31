@@ -37,10 +37,8 @@ using autofill::PasswordForm;
 namespace password_manager {
 
 PasswordStore::GetLoginsRequest::GetLoginsRequest(
-    const PasswordStoreConsumer* consumer)
-// comment just for compiling
-// : consumer_weak_(consumer->GetWeakPtr())
-{
+    PasswordStoreConsumer* consumer)
+    : consumer_weak_(consumer->GetWeakPtr()) {
   origin_task_runner_ = base::SequencedTaskRunnerHandle::Get();
 }
 
@@ -250,8 +248,7 @@ void PasswordStore::GetLoginsForSameOrganizationName(
                           this, signon_realm, base::Passed(&request)));
 }
 
-void PasswordStore::GetAutofillableLogins(
-    const PasswordStoreConsumer* consumer) {
+void PasswordStore::GetAutofillableLogins(PasswordStoreConsumer* consumer) {
   Schedule(&PasswordStore::GetAutofillableLoginsImpl, consumer);
 }
 
@@ -607,12 +604,11 @@ void PasswordStore::ClearAllEnterprisePasswordHashImpl() {
 
 void PasswordStore::Schedule(
     void (PasswordStore::*func)(std::unique_ptr<GetLoginsRequest>),
-    const PasswordStoreConsumer* consumer) {
+    PasswordStoreConsumer* consumer) {
   std::unique_ptr<GetLoginsRequest> request(new GetLoginsRequest(consumer));
-  // comment just for compiling
-  // consumer->cancelable_task_tracker()->PostTask(
-  //     background_task_runner_.get(), FROM_HERE,
-  //     base::BindOnce(func, this, std::move(request)));
+  consumer->cancelable_task_tracker()->PostTask(
+      background_task_runner_.get(), FROM_HERE,
+      base::BindOnce(func, this, std::move(request)));
 }
 
 void PasswordStore::WrapModificationTask(ModificationTask task) {

@@ -956,7 +956,7 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
   bool ok = true;
 #ifdef REDCORE
   // YSP+ { User information isolation }
-  std::string username = YSPCryptoCSingleton::GetInstance()->GetUserId();
+  std::string username = YspCryptoSingleton::GetInstance()->GetUserId();
 #endif
   while (smt.Step()) {
     ++num_cookies_read_;
@@ -981,7 +981,7 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
 #ifdef REDCORE
    //ysp+ { AES DES and SMS4 crypt
    if (value.find("[[]]") != std::string::npos)
-      dec_value = YSPCryptoCSingleton::GetInstance()->DecryptString(smt.ColumnString(3));
+      dec_value = YspCryptoSingleton::GetInstance()->DecryptString(smt.ColumnString(3));
    else
       dec_value = value;
 #endif
@@ -1388,11 +1388,11 @@ void SQLitePersistentCookieStore::Backend::Commit() {
         add_smt.BindString(1, po->cc().Domain());
         add_smt.BindString(2, po->cc().Name());
 #ifdef REDCORE
-        if (YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt())
-          myenc_value = YSPCryptoCSingleton::GetInstance()->EncryptString(po->cc().Value());
+        if (YspCryptoSingleton::GetInstance()->GetShouldEncrypt())
+          myenc_value = YspCryptoSingleton::GetInstance()->EncryptString(po->cc().Value());
 #endif
 #ifdef REDCORE
-        if (!YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt() &&
+        if (!YspCryptoSingleton::GetInstance()->GetShouldEncrypt() &&
             crypto_ && crypto_->ShouldEncrypt()) {
 #else
         if (crypto_ && crypto_->ShouldEncrypt()) {
@@ -1414,7 +1414,7 @@ void SQLitePersistentCookieStore::Backend::Commit() {
         }
 #ifdef REDCORE
         //ysp+ { AES DES and SMS4 crypt
-        if (YSPCryptoCSingleton::GetInstance()->GetShouldEncrypt()) {
+        if (YspCryptoSingleton::GetInstance()->GetShouldEncrypt()) {
            add_smt.BindString(3, myenc_value);
            add_smt.BindBlob(4, "", 0);  // encrypted_value
          }

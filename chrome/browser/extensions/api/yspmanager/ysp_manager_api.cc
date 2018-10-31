@@ -1,6 +1,9 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 // YSP+
 
-#include "chrome/browser/extensions/api/yspmanager/yspmanager_api.h"
+#include "chrome/browser/extensions/api/yspmanager/ysp_manager_api.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 
 namespace extensions {

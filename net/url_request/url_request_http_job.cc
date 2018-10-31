@@ -687,8 +687,8 @@ void URLRequestHttpJob::Start() {
         } else if (ua_type == "3") {
           // crypto http header
           value = http_user_agent_settings_->GetUserAgent();
-          if (YSPCryptoHeader::GetInstance()->isAddHeaders()) {
-            value += YSPCryptoHeader::GetInstance()->GetEncString();
+          if (YspCryptoHeader::GetInstance()->isAddHeaders()) {
+            value += YspCryptoHeader::GetInstance()->GetEncString();
           }
         } else {
           value = http_user_agent_settings_->GetUserAgent();
@@ -724,7 +724,7 @@ void URLRequestHttpJob::Start() {
               std::string uri = request_info_.url.PathForRequest();
               std::string scheme = "HTTP";  // request_info_.url.scheme();
               std::string spa_value = http_user_agent_settings_->GetUserAgent();
-              spa_value += YSPCryptoHeader::GetInstance()->GetHMACEncString(
+              spa_value += YspCryptoHeader::GetInstance()->GetHMACEncString(
                   scheme + method, uri);
               spa_value += " POLICYID(" + strategy_id + ") COMPANYID(" +
                            company_id + ")";

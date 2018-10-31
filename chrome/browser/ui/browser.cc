@@ -3902,9 +3902,9 @@ void Browser::OnLoginSuccess(const base::string16& name,
   std::string userId = YSPLoginManager::GetInstance()->GetValueForKey(
       uuidKey);  // YSP+ { User information isolation }
   if (!cryptkey.empty()) {
-    YSPCryptoCSingleton::GetInstance()->Init(cryptkey);
+    YspCryptoSingleton::GetInstance()->Init(cryptkey);
   }
-  YSPCryptoCSingleton::GetInstance()->SetUserId(
+  YspCryptoSingleton::GetInstance()->SetUserId(
       userId);  // YSP+ { User information isolation }
   // ysp+ } /*AES DES and SMS4 crypt*/
 
@@ -3999,7 +3999,7 @@ void Browser::OnLogout() {
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
                  ""));  // ysp+ { private DNS }
-  YSPCryptoCSingleton::GetInstance()->SetUserId(
+  YspCryptoSingleton::GetInstance()->SetUserId(
       "");  // YSP+ { User information isolation }
   content::YSPResourceReplaceInterceptor::SetValueFormPostTask(
       "");  // ysp+ { Resource Replace }
@@ -4059,7 +4059,7 @@ std::wstring Browser::GetIEFunctionControlJsonString() {
     FunctionControl->SetString(
         "userAgentString",
         version_info::GetYSPProductNameAndVersionForUserAgent() +
-            YSPCryptoHeader::GetInstance()->GetEncString());
+            YspCryptoHeader::GetInstance()->GetEncString());
     base::TimeDelta delayTime = base::TimeDelta::FromSeconds(60);
     if (ie_crypto_ua_timer_.get()) {
       ie_crypto_ua_timer_->Stop();

@@ -4077,8 +4077,8 @@ void YSPLoginManager::UpdateLoginManagerSettings() {
   std::string crypt_header_key = GetCryptoHeaderKey();
   std::string ua_types = GetUserAgentTypes();
   if (ua_types == "3") {
-    YSPCryptoHeader::GetInstance()->Init((ua_types + crypt_header_key));
-    YSPCryptoHeader::GetInstance()->SetTimeDiff(GetTimeDifference());
+    YspCryptoHeader::GetInstance()->Init((ua_types + crypt_header_key));
+    YspCryptoHeader::GetInstance()->SetTimeDiff(GetTimeDifference());
   }
 
   AddHeaders();

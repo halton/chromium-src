@@ -38,7 +38,7 @@ class PasswordStoreConsumer {
 
   // The base::CancelableTaskTracker can be used for cancelling the
   // tasks associated with the consumer.
-  const base::CancelableTaskTracker* cancelable_task_tracker() {
+  base::CancelableTaskTracker* cancelable_task_tracker() {
     return &cancelable_task_tracker_;
   }
 

@@ -260,7 +260,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       uint32_t download_id,
       const download::DownloadCreateInfo& info) override {
 #ifdef REDCORE
-    std::string YSPUserName = YSPCryptoCSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
+    std::string YSPUserName = YspCryptoSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
     return new download::DownloadItemImpl(delegate, download_id, YSPUserName, info);
 #else
     return new download::DownloadItemImpl(delegate, download_id, info);
@@ -276,7 +276,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       std::unique_ptr<download::DownloadRequestHandleInterface> request_handle)
       override {
 #ifdef REDCORE
-      std::string YSPUserName = YSPCryptoCSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
+      std::string YSPUserName = YspCryptoSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
     return new download::DownloadItemImpl(delegate, download_id, YSPUserName, path, url,
                                           mime_type, std::move(request_handle));
 #else

@@ -206,7 +206,7 @@ class PasswordStore : protected PasswordStoreSync,
   // Gets the complete list of PasswordForms that are not blacklist entries--and
   // are thus auto-fillable. |consumer| will be notified on completion.
   // The request will be cancelled if the consumer is destroyed.
-  virtual void GetAutofillableLogins(const PasswordStoreConsumer* consumer);
+  virtual void GetAutofillableLogins(PasswordStoreConsumer* consumer);
 
   // Same as above, but also fills in affiliation and branding information for
   // Android credentials.
@@ -329,7 +329,7 @@ class PasswordStore : protected PasswordStoreSync,
   // results and send them to the consumer on the consumer's message loop.
   class GetLoginsRequest {
    public:
-    explicit GetLoginsRequest(const PasswordStoreConsumer* consumer);
+    explicit GetLoginsRequest(PasswordStoreConsumer* consumer);
     ~GetLoginsRequest();
 
     // Removes any credentials in |results| that were saved before the cutoff,
@@ -536,7 +536,7 @@ class PasswordStore : protected PasswordStoreSync,
   // Schedule the given |func| to be run in the PasswordStore's own sequence
   // with responses delivered to |consumer| on the current sequence.
   void Schedule(void (PasswordStore::*func)(std::unique_ptr<GetLoginsRequest>),
-                const PasswordStoreConsumer* consumer);
+                PasswordStoreConsumer* consumer);
 
   // Wrapper method called on the destination sequence that invokes |task| and
   // then calls back into the source sequence to notify observers that the

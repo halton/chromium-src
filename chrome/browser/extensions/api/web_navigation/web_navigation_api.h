@@ -76,7 +76,7 @@ class WebNavigationTabObserver
 #ifdef REDCORE
 #ifdef IE_REDCORE
   void OnGetLoginContext(content::RenderFrameHost* render_frame_host,
-  const std::string& url, const std::string& userName, const std::string& userPwd) override;    //ysp+{IE SWA}
+  const std::string& url, const std::string& user_name, const std::string& user_pwd) override;    //ysp+{IE SWA}
 #endif /*IE_REDCORE*/
   void OnLoginSuccessNotice(content::RenderFrameHost* render_frame_host,
    const std::string& status, const std::string& manager_url,
