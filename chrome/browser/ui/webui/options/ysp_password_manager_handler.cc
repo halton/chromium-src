@@ -275,13 +275,15 @@ void YSPPasswordManagerHandler::SetPasswordList(
 	//DLOG(INFO) << "icon_url: " << saved_password->icon_url.spec();
 	if (saved_password->YSPAppName_value.empty())
 		continue;
-	std::string uuidKey = "onlyid";
-	std::string loggingstatus = "loggingStatus";
-	std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
-	std::string loginstatus = YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
-	if (loginstatus != "100")
-		username = "";
-	if (saved_password->YSPUserName_value != base::UTF8ToUTF16(username))
+        std::string uuid_key = "onlyid";
+        std::string logging_status = "loggingStatus";
+        std::string username =
+            YSPLoginManager::GetInstance()->GetValueForKey(uuid_key);
+        std::string login_status =
+            YSPLoginManager::GetInstance()->GetValueForKey(logging_status);
+        if (login_status != "100")
+          username = "";
+        if (saved_password->YSPUserName_value != base::UTF8ToUTF16(username))
 		continue;
 
     entries.Append(entry.release());
@@ -357,46 +359,64 @@ void YSPPasswordManagerHandler::SaveADPasswordListsInternal(const std::string& e
 			autofill::PasswordForm forms;
 			const base::DictionaryValue* entry = nullptr;
 			if (entries->GetDictionary(i, &entry)) {
-				std::string YSPappName, YSPuserName, userName, password, showUrl, origin, iconUrl;
-				std::string uuidKey = "onlyid";
-				YSPuserName = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
-				entry->GetString(kAppNameField, &YSPappName);
-				entry->GetString(kShownUrlField, &showUrl);
-				entry->GetString(kUsernameField, &userName);
-				entry->GetString(kPasswordField, &password);
-				entry->GetString(kOriginField, &origin);
-				entry->GetString(kIconUrlField, &iconUrl);
-				forms.YSPAppName_value = base::UTF8ToUTF16(YSPappName);
-				forms.YSPUserName_value = base::UTF8ToUTF16(YSPuserName);
-				forms.origin = GURL(origin);
-				forms.action = GURL(origin);
-				forms.icon_url = GURL(iconUrl);
-				forms.signon_realm = GURL(origin).GetOrigin().spec();
-				if (password_store) {
-					if (!password.empty()) {
-						if (!passwordIsSpace(password)) {
-							autofill::PasswordForm old_primary_key, new_forms;
-							if (RemoveLogin(forms, &old_primary_key)) {
-								new_forms.username_element = old_primary_key.username_element;
-								new_forms.password_element = old_primary_key.password_element;
-								new_forms.form_data = old_primary_key.form_data;
-							}
-							new_forms.signon_realm = forms.signon_realm;
-							new_forms.origin = forms.origin;
-							new_forms.YSPAppName_value = forms.YSPAppName_value;
-							new_forms.YSPUserName_value = forms.YSPUserName_value;
-							new_forms.YSPLoginType_value = old_primary_key.YSPLoginType_value;
-							new_forms.action = forms.action;
-							new_forms.icon_url = forms.icon_url;
-							new_forms.username_value = base::UTF8ToUTF16(userName);
-							new_forms.password_value = base::UTF8ToUTF16(password);
-							password_store->UpdateLoginWithPrimaryKey(new_forms, old_primary_key);
-						}
-					}
-				}
-				DLOG(INFO) << "YSPappname: " << YSPappName << " showUrl: " << showUrl << " username: " << userName << " password: " << password;
-			}
-		}
+                          std::string ysp_app_name, ysp_username, username,
+                              password, show_url, origin, icon_url;
+                          std::string uuid_key = "onlyid";
+                          ysp_username =
+                              YSPLoginManager::GetInstance()->GetValueForKey(
+                                  uuid_key);
+                          entry->GetString(kAppNameField, &ysp_app_name);
+                          entry->GetString(kShownUrlField, &show_url);
+                          entry->GetString(kUsernameField, &username);
+                          entry->GetString(kPasswordField, &password);
+                          entry->GetString(kOriginField, &origin);
+                          entry->GetString(kIconUrlField, &icon_url);
+                          forms.YSPAppName_value =
+                              base::UTF8ToUTF16(ysp_app_name);
+                          forms.YSPUserName_value =
+                              base::UTF8ToUTF16(ysp_username);
+                          forms.origin = GURL(origin);
+                          forms.action = GURL(origin);
+                          forms.icon_url = GURL(icon_url);
+                          forms.signon_realm = GURL(origin).GetOrigin().spec();
+                          if (password_store) {
+                            if (!password.empty()) {
+                              if (!passwordIsSpace(password)) {
+                                autofill::PasswordForm old_primary_key,
+                                    new_forms;
+                                if (RemoveLogin(forms, &old_primary_key)) {
+                                  new_forms.username_element =
+                                      old_primary_key.username_element;
+                                  new_forms.password_element =
+                                      old_primary_key.password_element;
+                                  new_forms.form_data =
+                                      old_primary_key.form_data;
+                                }
+                                new_forms.signon_realm = forms.signon_realm;
+                                new_forms.origin = forms.origin;
+                                new_forms.YSPAppName_value =
+                                    forms.YSPAppName_value;
+                                new_forms.YSPUserName_value =
+                                    forms.YSPUserName_value;
+                                new_forms.YSPLoginType_value =
+                                    old_primary_key.YSPLoginType_value;
+                                new_forms.action = forms.action;
+                                new_forms.icon_url = forms.icon_url;
+                                new_forms.username_value =
+                                    base::UTF8ToUTF16(username);
+                                new_forms.password_value =
+                                    base::UTF8ToUTF16(password);
+                                password_store->UpdateLoginWithPrimaryKey(
+                                    new_forms, old_primary_key);
+                              }
+                            }
+                                }
+                                DLOG(INFO) << "YSPappname: " << ysp_app_name
+                                           << " show_url: " << show_url
+                                           << " username: " << username
+                                           << " password: " << password;
+                        }
+                }
 	}
 }
 

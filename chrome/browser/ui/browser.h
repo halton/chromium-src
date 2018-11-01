@@ -591,8 +591,8 @@ class Browser : public TabStripModelObserver,
 #if defined(IE_REDCORE)
   bool UrlCompared(const GURL& host,
                    RendererMode& mode) override;  // ysp+ { Kernel switching }
-  void DidGetWindowsDomainUserInfo(base::string16* userName,
-                                   base::string16* userPwd) override;
+  void DidGetWindowsDomainUserInfo(base::string16* username,
+                                   base::string16* password) override;
   void OnFindWindowsDomainUserInfoEnd(
       std::vector<std::unique_ptr<autofill::PasswordForm>> results);
 
@@ -961,10 +961,11 @@ class Browser : public TabStripModelObserver,
 #ifdef REDCORE
   void OnAutoLockScreenTimer(int64_t timeOutSec);
 #ifdef IE_REDCORE
-  void GetKernelFromUrl(const GURL& host,
-                        std::string& coreVersion,
-                        std::string& coreEmulation);  // ysp+ {Kernel switching}
-  void OnTimerSetIEEncUA(base::Time postTaskTime);
+  void GetKernelFromUrl(
+      const GURL& host,
+      std::string& core_version,
+      std::string& core_emulation);  // ysp+ {Kernel switching}
+  void OnTimerSetIEEncUA(base::Time post_task_time);
   void MatchSystemIEVersion(RendererMode& mode);  // ysp+ {Kernel switching}
   void TrySetIEConetentZoom(
       content::WebContents* web_content);  // ysp+ {IE Embedded}
@@ -974,10 +975,10 @@ class Browser : public TabStripModelObserver,
   void SetExceptionForPopup(int type,
                             std::string host,
                             std::string setting);  // ysp+ { window popup }
-  void GetManagerLoginForms(const std::string& formListString,
+  void GetManagerLoginForms(const std::string& form_list_string,
                             const std::string& username,
                             const std::string& password);
-  void GetAllLoginForms(const std::string& formListString,
+  void GetAllLoginForms(const std::string& form_list_string,
                         const std::string& username,
                         const std::string& password);
   // TODO (matianzhi): YSP+ { startup and home pages
@@ -987,7 +988,7 @@ class Browser : public TabStripModelObserver,
   void UpdateStrategy();
   void ClearPasswordForUserId();  // TODO(matianzhi) ysp+{clear user data}
   void ClearUserDataForBrowser(
-      std::string& userId);  // TODO(matianzhi) ysp+{push server api}
+      std::string& user_id);  // TODO(matianzhi) ysp+{push server api}
   void ClearedUserData();    // TODO(matianzhi) ysp+{push server api}
 #endif
 

@@ -457,7 +457,7 @@ void OpaqueBrowserFrameViewLayout::LayoutTitleBar(views::View* host) {
           std::max(0, available_space_trailing_x_ - kCaptionSpacing -
                           available_space_leading_x_ - kIconTitleSpacing);
       window_title_->SetBounds(available_space_leading_x_ + kIconTitleSpacing,
-                               window_icon_bounds_.y(), 
+                               window_icon_bounds_.y(),
 #ifdef REDCORE
                                text_width, 14);
 #else

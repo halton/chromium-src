@@ -287,15 +287,15 @@ bool OpaqueBrowserFrameView::IsWithinAvatarMenuButtons(
       return false;
   }
   return false;
-  gfx::Rect accountRect(0, 0, 70, 60);
-  accountRect.set_x(GetMirroredXForRect(accountRect));
-  // DLOG(INFO) << "IsWithinAvatarMenuButtons: " 
-  // << point.x() 
+  gfx::Rect account_rect(0, 0, 70, 60);
+  account_rect.set_x(GetMirroredXForRect(account_rect));
+  // DLOG(INFO) << "IsWithinAvatarMenuButtons: "
+  // << point.x()
   // << ", " << point.y()
-  // << ". (" << accountRect.x() << ", " << accountRect.y()
-  // << ", " << accountRect.width() << ", " << accountRect.height()
+  // << ". (" << account_rect.x() << ", " << account_rect.y()
+  // << ", " << account_rect.width() << ", " << account_rect.height()
   // << ")";
-  bool ret = accountRect.Contains(point);
+  bool ret = account_rect.Contains(point);
   //DLOG(INFO) << "IsWithinAvatarMenuButtons ret: " << ret;
   return ret;
 #endif
@@ -395,7 +395,7 @@ void OpaqueBrowserFrameView::GetWindowMask(const gfx::Size& size,
 
   views::GetDefaultWindowMask(
       size, frame()->GetCompositor()->device_scale_factor(), window_mask);
-#endif      
+#endif
 }
 
 void OpaqueBrowserFrameView::ResetWindowControls() {
@@ -472,7 +472,7 @@ void OpaqueBrowserFrameView::ButtonPressed(views::Button* sender,
       Layout();
     }
   }
-#endif  
+#endif
 }
 
 void OpaqueBrowserFrameView::OnMenuButtonClicked(views::MenuButton* source,

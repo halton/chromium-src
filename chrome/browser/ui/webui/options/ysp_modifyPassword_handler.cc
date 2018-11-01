@@ -7,27 +7,27 @@
 #include "chrome/browser/ui/webui/options/ysp_modifyPassword_handler.h"
 #include "content/public/browser/web_ui.h"
 
-namespace options 
-{
-	YSPModifyPasswordHandler::YSPModifyPasswordHandler() 
-	{
-		YSPLoginManager::GetInstance()->AddObserver(this);
+namespace options {
+YSPModifyPasswordHandler::YSPModifyPasswordHandler() {
+  YSPLoginManager::GetInstance()->AddObserver(this);
 	}
-	
-	YSPModifyPasswordHandler::~YSPModifyPasswordHandler() 
-	{
-		YSPLoginManager::GetInstance()->RemoveObserver(this);
+
+        YSPModifyPasswordHandler::~YSPModifyPasswordHandler() {
+          YSPLoginManager::GetInstance()->RemoveObserver(this);
 	}
 
 	void YSPModifyPasswordHandler::RegisterMessages()
 	{
-		web_ui()->RegisterMessageCallback("checkIfCanModifyPassword", 
-										  base::Bind(&YSPModifyPasswordHandler::BindCheckIfCanModifyPassword,
-										  base::Unretained(this)));
+          web_ui()->RegisterMessageCallback(
+              "checkIfCanModifyPassword",
+              base::Bind(
+                  &YSPModifyPasswordHandler::BindCheckIfCanModifyPassword,
+                  base::Unretained(this)));
 
-		web_ui()->RegisterMessageCallback("modifyPassword",
-										  base::Bind(&YSPModifyPasswordHandler::BindModifyPassword,
-										  base::Unretained(this)));
+          web_ui()->RegisterMessageCallback(
+              "modifyPassword",
+              base::Bind(&YSPModifyPasswordHandler::BindModifyPassword,
+                         base::Unretained(this)));
 	}
 
 	void YSPModifyPasswordHandler::BindCheckIfCanModifyPassword(const base::ListValue* args)

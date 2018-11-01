@@ -1,6 +1,8 @@
-#ifdef IE_REDCORE
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-//ysp+ { activex download }
+// ysp+ { activex download }
 
 #include "chrome/browser/ui/views/infobars/ysp_download_activex_infobar_view.h"
 
@@ -173,5 +175,3 @@ int DownloadActivexInfobarView::NonLabelWidth() const {
   width += no_prompt_button_ ? no_prompt_button_->width() : 0;
   return width + ((link_->text().empty() || !width) ? 0 : (layout_provider->GetDistanceMetric(views::DISTANCE_RELATED_LABEL_HORIZONTAL)));
 }
-
-#endif

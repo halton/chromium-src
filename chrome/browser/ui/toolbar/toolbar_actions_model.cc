@@ -296,8 +296,9 @@ size_t ToolbarActionsModel::FindNewPositionFromLastKnownGood(
 
 bool ToolbarActionsModel::ShouldAddExtension(
     const extensions::Extension* extension) {
-	if (extension->id() == "pgigkojhmdneillbbpcajchbggkphhjp") //YSP+ { push server api }
-		return false;
+  if (extension->id() ==
+      "pgigkojhmdneillbbpcajchbggkphhjp")  // YSP+ { push server api }
+    return false;
   // In incognito mode, don't add any extensions that aren't incognito-enabled.
   if (profile_->IsOffTheRecord() &&
       !extensions::util::IsIncognitoEnabled(extension->id(), profile_))

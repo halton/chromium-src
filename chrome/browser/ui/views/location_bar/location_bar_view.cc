@@ -111,7 +111,7 @@
 #include "ui/views/controls/label.h"
 #include "ui/views/widget/widget.h"
 #ifdef IE_REDCORE
-#include "chrome/browser/ui/views/location_bar/ysp_renderer_mode_view.h"	//ysp+{}
+#include "chrome/browser/ui/views/location_bar/ysp_renderer_mode_view.h"  // ysp+{}
 #endif
 
 #if defined(OS_CHROMEOS)

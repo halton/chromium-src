@@ -1,6 +1,10 @@
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifdef REDCORE
 
-//ysp+ { login }
+// ysp+ { login }
 
 #include "chrome/browser/ui/views/ysp_login_view.h"
 
@@ -26,7 +30,7 @@ namespace {
 
 const int kFixedLoginViewWidth = 260;
 const int kFixedLogoutViewWidth = 220;
-//const int kTitleViewNativeWidgetOffset = 8;
+// const int kTitleViewNativeWidgetOffset = 8;
 const int kHeaderNavItemWidth = 80;
 const int kPaddingMargin = 16;
 const int kRowPaddingLarge = 32;

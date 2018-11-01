@@ -34,10 +34,10 @@ class YspPopupView;
 class YspIEloginView;
 
 struct LoginBtnInfo {
-  base::string16 appName;
-  base::string16 appUrl;
-  base::string16 loginName;
-  base::string16 loginPwd;
+  base::string16 app_name;
+  base::string16 app_url;
+  base::string16 login_name;
+  base::string16 login_pwd;
 
  public:
   LoginBtnInfo();

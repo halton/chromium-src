@@ -651,13 +651,13 @@ void LoginHandler::ShowLoginPrompt(const GURL& request_url,
       LoginHandler::MakeInputForPasswordManager(request_url, *auth_info));
 
 #ifdef REDCORE  // YSP+ { passwords AD manager
-  std::string uuidKey = "onlyid";
-  std::string loggingstatus = "loggingStatus";
-  std::string loginstatus =
-      YSPLoginManager::GetInstance()->GetValueForKey(loggingstatus);
-  if (loginstatus == "100")
+  std::string uuid_key = "onlyid";
+  std::string logging_status = "loggingStatus";
+  std::string login_status =
+      YSPLoginManager::GetInstance()->GetValueForKey(logging_status);
+  if (login_status == "100")
     observed_form.ysp_username_value = base::UTF8ToUTF16(
-        YSPLoginManager::GetInstance()->GetValueForKey(uuidKey));
+        YSPLoginManager::GetInstance()->GetValueForKey(uuid_key));
 #endif  // YSP+ } /*passwords AD manager*/
 
   handler->BuildViewWithPasswordManager(authority, explanation,

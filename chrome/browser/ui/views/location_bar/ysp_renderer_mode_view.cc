@@ -46,42 +46,42 @@ void YspRendererModeView::SetToggled(RendererMode mode) {
   renderer_mode_ = mode;
   // comment UpdateIcon just for compiling
   // UpdateIcon();
-  base::string16 tipStr = L"";
+  base::string16 tip_str = L"";
   if (renderer_mode_.core == BLINK_CORE)
-    tipStr = l10n_util::GetStringUTF16(IDS_CHROME_CORE);
+    tip_str = l10n_util::GetStringUTF16(IDS_CHROME_CORE);
   else if (renderer_mode_.core == IE_CORE) {
     if (base::win::GetSystemIEVersion() < 8)
-      tipStr = l10n_util::GetStringUTF16(IDS_IE_CORE);
+      tip_str = l10n_util::GetStringUTF16(IDS_IE_CORE);
     else {
       if (renderer_mode_.emulation == IE::EMULATION7)
-        tipStr = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_7) + L" + ";
+        tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_7) + L" + ";
       else if (renderer_mode_.emulation == IE::EMULATION8)
-        tipStr = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_8) + L" + ";
+        tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_8) + L" + ";
       else if (renderer_mode_.emulation == IE::EMULATION9)
-        tipStr = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_9) + L" + ";
+        tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_9) + L" + ";
       else if (renderer_mode_.emulation == IE::EMULATION10)
-        tipStr = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_10) + L" + ";
+        tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_10) + L" + ";
       else if (renderer_mode_.emulation == IE::EMULATION11)
-        tipStr = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_11) + L" + ";
+        tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_11) + L" + ";
 
       if (renderer_mode_.ver == IE::DOC6)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_6);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_6);
       else if (renderer_mode_.ver == IE::DOC7)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_7);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_7);
       else if (renderer_mode_.ver == IE::DOC8)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_8);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_8);
       else if (renderer_mode_.ver == IE::DOC9)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_9);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_9);
       else if (renderer_mode_.ver == IE::DOC10)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_10);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_10);
       else if (renderer_mode_.ver == IE::DOC11)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_11);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_11);
       else if (renderer_mode_.ver == IE::DOCSYS)
-        tipStr = tipStr + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_SYS);
+        tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_SYS);
     }
   }
   // no implements in super class, comment it by webb.
-  // SetTooltipText(tipStr);
+  // SetTooltipText(tip_str);
 }
 
 void YspRendererModeView::OnExecuting(

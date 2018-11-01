@@ -48,22 +48,22 @@ void DownloadActivexInfobarDelegate::Create(BrowserView* browser_view,
 
 void DownloadActivexInfobarDelegate::ClearAllActivexInfoBar(
     BrowserView* browser_view) {
-  TabStripModel* pTabModel = NULL;
-  pTabModel = browser_view->browser()->tab_strip_model();
-  if (pTabModel == NULL)
+  TabStripModel* tab_model = NULL;
+  tab_model = browser_view->browser()->tab_strip_model();
+  if (tab_model == NULL)
     return;
-  int count = pTabModel->count();
+  int count = tab_model->count();
   int i = 0;
   for (i = 0; i < count; i++)  // Get All InfoBarService
   {
-    content::WebContents* webcontent = pTabModel->GetWebContentsAt(i);
+    content::WebContents* webcontent = tab_model->GetWebContentsAt(i);
     if (webcontent == NULL)
       continue;
     InfoBarService* infobar_service = NULL;
     infobar_service = InfoBarService::FromWebContents(webcontent);
     if (infobar_service == NULL)
       continue;
-    std::vector<infobars::InfoBar*> willRemoveInfoBar;
+    std::vector<infobars::InfoBar*> will_remove_infobar;
     size_t j = 0;
     for (j = 0; j < infobar_service->infobar_count();
          j++)  // Find All ActivexInfobar for every InfoBarService
@@ -73,10 +73,11 @@ void DownloadActivexInfobarDelegate::ClearAllActivexInfoBar(
         continue;
       if (bar->delegate()->GetIdentifier() ==
           infobars::InfoBarDelegate::DOWNLOAD_ACTIVEX_INFOBAR_DELEGATE)
-        willRemoveInfoBar.push_back(bar);
+        will_remove_infobar.push_back(bar);
     }
-    std::vector<infobars::InfoBar*>::iterator iter = willRemoveInfoBar.begin();
-    for (; iter != willRemoveInfoBar.end(); iter++)  // Remove ActivexInfobar
+    std::vector<infobars::InfoBar*>::iterator iter =
+        will_remove_infobar.begin();
+    for (; iter != will_remove_infobar.end(); iter++)  // Remove ActivexInfobar
     {
       infobar_service->RemoveInfoBar(*iter);
     }

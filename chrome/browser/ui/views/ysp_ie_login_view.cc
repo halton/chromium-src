@@ -109,9 +109,9 @@ const LoginBtnInfo& LoginInfoButton::GetBtnInfo() const {
 
 void LoginInfoButton::SetBtnInfo(const LoginBtnInfo& info) {
   btn_info_ = info;
-  SetAccessibleName(info.appName);
-  label_->SetText(info.appName);
-  label_desc->SetText(info.appUrl);
+  SetAccessibleName(info.app_name);
+  label_->SetText(info.app_name);
+  label_desc->SetText(info.app_url);
 }
 
 void LoginInfoButton::SetTextColor(ButtonState for_state, SkColor color) {
@@ -221,7 +221,7 @@ gfx::Size LoginInfoButton::GetPreferredSize() const {
     return cached_preferred_size_;
 
   // Use a temporary label copy for sizing to avoid calculation side-effects.
-  views::Label label(btn_info_.appName);
+  views::Label label(btn_info_.app_name);
   label.SetShadows(label_->shadows());
 
   if (style() == STYLE_BUTTON) {
@@ -517,13 +517,13 @@ void YspIEloginView::Layout() {
     scroll_area.set_height(kButtonHeight * button_info_vector_.size() + 2);
   scroll_view_->SetBoundsRect(scroll_area);
 
-  views::View* contView = scroll_view_->contents();
+  views::View* cont_view = scroll_view_->contents();
   int scrollbar_width = 0;
   // comment just for compiling
   // if(button_info_vector_.size()>3)
   // 	scrollbar_width = scroll_view_->GetScrollBarWidth();
-  contView->SetSize(gfx::Size(scroll_area.width() - scrollbar_width - 2,
-                              kButtonHeight * button_info_vector_.size()));
+  cont_view->SetSize(gfx::Size(scroll_area.width() - scrollbar_width - 2,
+                               kButtonHeight * button_info_vector_.size()));
 }
 
 YspPopupView::YspPopupView(Browser* browser,
@@ -595,9 +595,9 @@ IELoginBtnView::IELoginBtnView(YspIEloginView* ie_login_view,
                                const std::vector<LoginBtnInfo> info_vector) {
   std::vector<LoginBtnInfo>::const_iterator iter = info_vector.begin();
   for (; iter != info_vector.end(); iter++) {
-    LoginInfoButton* pBtn = new LoginInfoButton(ie_login_view, *iter);
-    AddChildView(pBtn);
-    button_vector_.push_back(pBtn);
+    LoginInfoButton* login_button = new LoginInfoButton(ie_login_view, *iter);
+    AddChildView(login_button);
+    button_vector_.push_back(login_button);
   }
 }
 

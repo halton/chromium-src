@@ -1,6 +1,8 @@
-#ifdef REDCORE
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-//ysp+ { login }
+// ysp+ { login }
 
 #include "chrome/browser/ui/views/ysp_account_view.h"
 
@@ -97,15 +99,13 @@ void YSPAvatarView::OnPaint(gfx::Canvas* canvas) {
   if (is_circle_) {
     gfx::Rect image_bounds(bounds());
     int corner_radius = image_bounds.width() / 2;
-    SkPath clipPath;
-    SkRect clipRect = SkRect::MakeXYWH(
-      image_bounds.x(), image_bounds.y(),
-      image_bounds.width(), image_bounds.height());
-    clipPath.addRoundRect(
-      clipRect,
-      SkIntToScalar(corner_radius),
-      SkIntToScalar(corner_radius));
-    canvas->ClipPath(clipPath, true);
+    SkPath clip_path;
+    SkRect clip_rect =
+        SkRect::MakeXYWH(image_bounds.x(), image_bounds.y(),
+                         image_bounds.width(), image_bounds.height());
+    clip_path.addRoundRect(clip_rect, SkIntToScalar(corner_radius),
+                           SkIntToScalar(corner_radius));
+    canvas->ClipPath(clip_path, true);
   }
   views::Label::OnPaint(canvas);
 }
@@ -424,9 +424,9 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
   std::string md5 = "";
   base::FilePath path;
   base::PathService::Get(chrome::DIR_USER_DATA, &path);
-  base::string16 strPath = path.value();
-  strPath += L"\\Activex\\" + info.filename;
-  FILE* file = _wfopen(strPath.c_str(), L"rb");
+  base::string16 str_path = path.value();
+  str_path += L"\\Activex\\" + info.filename;
+  FILE* file = _wfopen(str_path.c_str(), L"rb");
   if (file == NULL) {
     content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
       base::Bind(&YSPAccountView::OnSumMD5, weakFactoryForUI.GetWeakPtr(), md5, info));
@@ -458,8 +458,8 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
 }
 
 void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) {
-  std::wstring md5WStr = base::ASCIIToUTF16(md5);
-  if (md5WStr != info.md5)
+  std::wstring md5_wstr = base::ASCIIToUTF16(md5);
+  if (md5_wstr != info.md5)
     DownloadActivexInfobarDelegate::Create(browser_view_, info);
 }
 #endif
@@ -488,5 +488,3 @@ views::View* YSPAccountView::TargetForRect(View* root, const gfx::Rect& rect)
 {
   return this;
 }
-
-#endif

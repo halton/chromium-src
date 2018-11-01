@@ -335,17 +335,17 @@ namespace {
 #if defined(IE_REDCORE)
 class PwdConsumer : public password_manager::PasswordStoreConsumer {
  public:
-  PwdConsumer(Browser* browser) : pBrower(browser) {}
+  PwdConsumer(Browser* browser) : p_brower(browser) {}
   ~PwdConsumer() override{};
 
   void OnGetPasswordStoreResults(
       std::vector<std::unique_ptr<autofill::PasswordForm>> results) override {
-    if (pBrower)
-      pBrower->OnFindWindowsDomainUserInfoEnd(std::move(results));
+    if (p_brower)
+      p_brower->OnFindWindowsDomainUserInfoEnd(std::move(results));
   }
 
  private:
-  Browser* pBrower;
+  Browser* p_brower;
 };
 #endif
 
@@ -401,65 +401,65 @@ MaybeCreateHostedAppController(Browser* browser) {
 }  // namespace
 
 #ifdef REDCORE  // YSP+ { SingleSignOn config
-static int stringmatch(const char* pattern, const char* string, int nocase);
-std::string getHostForDomain(std::string domain) {
+static int StringMatch(const char* pattern, const char* string, int no_case);
+std::string GetHostForDomain(std::string domain) {
   std::string host = "*" + domain;
 
   return host;
 }
-bool isUpdateSingleSignOnConfig(GURL& url) {
+bool IsUpdateSingleSignOnConfig(GURL& url) {
   int interval;
   int type = 0;
-  int frequencyType = 0;
-  std::string singlesignon_interval = "";
-  base::DictionaryValue* rootDict =
+  int frequency_type = 0;
+  std::string single_sign_on_interval = "";
+  base::DictionaryValue* root_dict =
       YSPLoginManager::GetInstance()->GetManagedSingleSignOnConfig();
-  if (rootDict) {
-    rootDict->GetInteger("interval", &interval);
-    rootDict->GetInteger("frequencyType", &frequencyType);
-    rootDict->GetInteger("type", &type);
+  if (root_dict) {
+    root_dict->GetInteger("interval", &interval);
+    root_dict->GetInteger("frequency_type", &frequency_type);
+    root_dict->GetInteger("type", &type);
     if (type != 0) {
       if (type == 1) {
-        base::DictionaryValue* positionDict = nullptr;
-        rootDict->GetDictionary("cookie", &positionDict);
-        if (!positionDict)
+        base::DictionaryValue* position_dict = nullptr;
+        root_dict->GetDictionary("cookie", &position_dict);
+        if (!position_dict)
           return false;
-        std::string cookieDomain = "";
-        positionDict->GetString("domain", &cookieDomain);
-        rootDict->GetString("timestamp", &singlesignon_interval);
+        std::string cookie_domain = "";
+        position_dict->GetString("domain", &cookie_domain);
+        root_dict->GetString("timestamp", &single_sign_on_interval);
         int64_t timestamp = 0;
-        base::StringToInt64(singlesignon_interval, &timestamp);
-        if (stringmatch(getHostForDomain(cookieDomain).c_str(),
+        base::StringToInt64(single_sign_on_interval, &timestamp);
+        if (StringMatch(GetHostForDomain(cookie_domain).c_str(),
                         url.host().c_str(), true)) {
-          if (frequencyType == 1)  // only once
+          if (frequency_type == 1)  // only once
             return false;
-          else if (frequencyType == 2)  // each
+          else if (frequency_type == 2)  // each
             return true;
-          else if (frequencyType == 3) {
+          else if (frequency_type == 3) {
             if ((base::Time::Now().ToTimeT() - timestamp) >= interval)
               return true;
             return false;
           }
         }
       } else {
-        base::ListValue* positionList = nullptr;
-        rootDict->GetList("urls", &positionList);
-        if (positionList == NULL || positionList->empty())
+        base::ListValue* position_list = nullptr;
+        root_dict->GetList("urls", &position_list);
+        if (position_list == NULL || position_list->empty())
           return false;
-        for (size_t i = 0; i < positionList->GetSize(); ++i) {
-          base::DictionaryValue* positionDict = nullptr;
-          positionList->GetDictionary(i, &positionDict);
-          std::string SSOHost = "";
-          positionDict->GetString("url", &SSOHost);
-          rootDict->GetString("timestamp", &singlesignon_interval);
+        for (size_t i = 0; i < position_list->GetSize(); ++i) {
+          base::DictionaryValue* position_dict = nullptr;
+          position_list->GetDictionary(i, &position_dict);
+          std::string sso_host = "";
+          position_dict->GetString("url", &sso_host);
+          root_dict->GetString("timestamp", &single_sign_on_interval);
           int64_t timestamp = 0;
-          base::StringToInt64(singlesignon_interval, &timestamp);
-          if (stringmatch(SSOHost.c_str(), url.spec().c_str(), true)) {
-            if (frequencyType == 1)  // only once
+          base::StringToInt64(single_sign_on_interval, &timestamp);
+          if (StringMatch(sso_host.c_str(), url.spec().c_str(), true)) {
+            if (frequency_type == 1)  // only once
               return false;
-            else if (frequencyType == 2)  // each
+            else if (frequency_type == 2)  // each
               return true;
-            else if (frequencyType == 3) {
+            else if (frequency_type == 3) {
               if ((base::Time::Now().ToTimeT() - timestamp) >= interval)
                 return true;
               return false;
@@ -516,7 +516,7 @@ void startAndRedirectNavigation(Browser* browser,
 // YSP+ } /*Kernel switching*/
 #endif
   // YSP+ { SingleSignOn config
-  if (isUpdateSingleSignOnConfig(url)) {
+  if (IsUpdateSingleSignOnConfig(url)) {
     YSPLoginManager::GetInstance()->GetSingleSignOnConfig();
   }
   // YSP+ } /*SingleSignOn config*/
@@ -1244,10 +1244,10 @@ void Browser::TabInsertedAt(TabStripModel* tab_strip_model,
 #if defined(REDCORE) && defined(IE_REDCORE)
   // ysp+{IE Function Control}
   if (contents->GetRendererMode().core == IE_CORE) {
-    content::WebContentsIE* pIEContent =
+    content::WebContentsIE* p_ie_content =
         dynamic_cast<content::WebContentsIE*>(contents);
-    std::wstring jsonStr = GetIEFunctionControlJsonString();
-    pIEContent->SendFunctionControl(jsonStr);
+    std::wstring json_str = GetIEFunctionControlJsonString();
+    p_ie_content->SendFunctionControl(json_str);
   }
 #endif  // ysp+
 }
@@ -3032,22 +3032,22 @@ void Browser::SetPopup() {
 #ifdef IE_REDCORE
   std::vector<std::wstring> exceptions;  // for config ie popup manager
 #endif
-  int defaultPopup = 0;
-  base::ListValue* hostList = nullptr;
-  base::DictionaryValue* popupRootDict =
+  int default_popup = 0;
+  base::ListValue* host_list = nullptr;
+  base::DictionaryValue* popup_root_dict =
       YSPLoginManager::GetInstance()->GetPopupSetting();
-  if (popupRootDict) {
-    popupRootDict->GetInteger("popupBlock", &defaultPopup);
-    popupRootDict->GetList("popupException", &hostList);
+  if (popup_root_dict) {
+    popup_root_dict->GetInteger("popupBlock", &default_popup);
+    popup_root_dict->GetList("popupException", &host_list);
   }
-  if (defaultPopup == 2)
+  if (default_popup == 2)
     SetExceptionForPopup(2, "", "allow");
-  else if (defaultPopup == 3) {
+  else if (default_popup == 3) {
     SetExceptionForPopup(2, "", "block");
-    if (hostList && !hostList->empty()) {
-      for (size_t i = 0; i < hostList->GetSize(); ++i) {
+    if (host_list && !host_list->empty()) {
+      for (size_t i = 0; i < host_list->GetSize(); ++i) {
         std::string old_host, host = "";
-        hostList->GetString(i, &old_host);
+        host_list->GetString(i, &old_host);
         if (!old_host.empty()) {
 #ifdef IE_REDCORE
           exceptions.push_back(base::ASCIIToUTF16(old_host));
@@ -3070,59 +3070,59 @@ void Browser::SetPopup() {
     }
   }
 #ifdef IE_REDCORE
-  ConfigIEPopupManager(defaultPopup,
+  ConfigIEPopupManager(default_popup,
                        exceptions);  // config IE popup window manager
 #endif
 }
 
 #ifdef IE_REDCORE
 void Browser::ConfigIEPopupManager(
-    const int& enableBlockPopup,
+    const int& enable_block_popup,
     const std::vector<std::wstring>& exceptions) {
-  // enableBlockPopup, 3: enable popup manager, 2:disable popup manager, other:
-  // not modify
+  // enable_block_popup, 3: enable popup manager, 2:disable popup manager,
+  // other: not modify
 
-  const wchar_t* enableBlockPopupSubKey =
+  const wchar_t* enable_block_popup_sub_key =
       L"Software\\Microsoft\\Internet Explorer\\New Windows";
-  base::win::RegKey blockPopupKey;
-  long ret = blockPopupKey.Open(HKEY_CURRENT_USER, enableBlockPopupSubKey,
-                                KEY_ALL_ACCESS);
+  base::win::RegKey block_popup_key;
+  long ret = block_popup_key.Open(HKEY_CURRENT_USER, enable_block_popup_sub_key,
+                                  KEY_ALL_ACCESS);
   if (ret == ERROR_SUCCESS) {
-    if (enableBlockPopup == 3)
-      ret = blockPopupKey.WriteValue(L"PopupMgr",
-                                     (DWORD)1);  // enable IE Popup Manager
-    else if (enableBlockPopup == 2)
-      ret = blockPopupKey.WriteValue(L"PopupMgr",
-                                     (DWORD)0);  // disable IE Popup Manager
+    if (enable_block_popup == 3)
+      ret = block_popup_key.WriteValue(L"PopupMgr",
+                                       (DWORD)1);  // enable IE Popup Manager
+    else if (enable_block_popup == 2)
+      ret = block_popup_key.WriteValue(L"PopupMgr",
+                                       (DWORD)0);  // disable IE Popup Manager
     if (ret != ERROR_SUCCESS)
       LOG(WARNING) << L"modify IE popup manager failed, error code is  " << ret;
-    blockPopupKey.Close();
+    block_popup_key.Close();
   }
-  if (exceptions.empty() || enableBlockPopup != 3)
+  if (exceptions.empty() || enable_block_popup != 3)
     return;
 
   // add exceptions
-  const wchar_t* allowSubKey =
+  const wchar_t* allow_sub_key =
       L"Software\\Microsoft\\Internet Explorer\\New Windows\\Allow";
-  base::win::RegKey allowKey;
-  ret = allowKey.Open(HKEY_CURRENT_USER, allowSubKey, KEY_ALL_ACCESS);
+  base::win::RegKey allow_key;
+  ret = allow_key.Open(HKEY_CURRENT_USER, allow_sub_key, KEY_ALL_ACCESS);
   if (ret == ERROR_FILE_NOT_FOUND)
-    ret = allowKey.Create(HKEY_CURRENT_USER, allowSubKey, KEY_ALL_ACCESS);
+    ret = allow_key.Create(HKEY_CURRENT_USER, allow_sub_key, KEY_ALL_ACCESS);
   if (ret == ERROR_SUCCESS) {
     unsigned char buff[2] = {0};
     std::vector<std::wstring>::const_iterator iter = exceptions.begin();
     for (; iter != exceptions.end(); iter++) {
-      ret = allowKey.WriteValue(iter->c_str(), buff, 2, REG_BINARY);
+      ret = allow_key.WriteValue(iter->c_str(), buff, 2, REG_BINARY);
       if (ret != ERROR_SUCCESS)
         LOG(WARNING) << L"add IE popup window exception failed, url is "
                      << *iter << L" error code is " << ret;
     }
-    allowKey.Close();
+    allow_key.Close();
   }
 }
 
 // ysp+{IE CryptoUA}
-void Browser::OnTimerSetIEEncUA(base::Time postTaskTime) {}
+void Browser::OnTimerSetIEEncUA(base::Time post_task_time) {}
 #endif
 // YSP+ } /*window popup*/
 
@@ -3142,13 +3142,13 @@ void Browser::TrySetIEConetentZoom(content::WebContents* web_content) {
     return;
   RendererMode mode = web_content->GetRendererMode();
   if (mode.core == IE_CORE && web_content->IsLoading() == false) {
-    zoom::ZoomController* pZoomCtr =
+    zoom::ZoomController* p_zoom_ctr =
         zoom::ZoomController::FromWebContents(web_content);
-    if (pZoomCtr) {
-      int zoomPercent = pZoomCtr->GetZoomPercent();
-      content::WebContentsIE* pIEContent =
+    if (p_zoom_ctr) {
+      int zoom_percent = p_zoom_ctr->GetZoomPercent();
+      content::WebContentsIE* p_ie_content =
           static_cast<content::WebContentsIE*>(web_content);
-      pIEContent->SetBrowserZoom(zoomPercent);
+      p_ie_content->SetBrowserZoom(zoom_percent);
     }
   }
 }
@@ -3166,26 +3166,26 @@ void Browser::ClearIECache() {
 #endif
 
 // YSP+ { Kernel switching
-static int stringmatchlen(const char* pattern,
-                          int patternLen,
+static int StringMatchlen(const char* pattern,
+                          int pattern_len,
                           const char* string,
-                          int stringLen,
-                          int nocase) {
-  while (patternLen) {
+                          int string_len,
+                          int no_case) {
+  while (pattern_len) {
     switch (pattern[0]) {
       case '*':
         while (pattern[1] == '*') {
           pattern++;
-          patternLen--;
+          pattern_len--;
         }
-        if (patternLen == 1)
+        if (pattern_len == 1)
           return 1; /** match */
-        while (stringLen) {
-          if (stringmatchlen(pattern + 1, patternLen - 1, string, stringLen,
-                             nocase))
+        while (string_len) {
+          if (StringMatchlen(pattern + 1, pattern_len - 1, string, string_len,
+                             no_case))
             return 1; /** match */
           string++;
-          stringLen--;
+          string_len--;
         }
         return 0; /** no match */
         break;
@@ -3193,26 +3193,26 @@ static int stringmatchlen(const char* pattern,
         int inot, match;
 
         pattern++;
-        patternLen--;
+        pattern_len--;
         inot = pattern[0] == '^';
         if (inot) {
           pattern++;
-          patternLen--;
+          pattern_len--;
         }
         match = 0;
         while (1) {
           if (pattern[0] == '\\') {
             pattern++;
-            patternLen--;
+            pattern_len--;
             if (pattern[0] == string[0])
               match = 1;
           } else if (pattern[0] == ']') {
             break;
-          } else if (patternLen == 0) {
+          } else if (pattern_len == 0) {
             pattern--;
-            patternLen++;
+            pattern_len++;
             break;
-          } else if (pattern[1] == '-' && patternLen >= 3) {
+          } else if (pattern[1] == '-' && pattern_len >= 3) {
             int start = pattern[0];
             int end = pattern[2];
             int c = string[0];
@@ -3221,17 +3221,17 @@ static int stringmatchlen(const char* pattern,
               start = end;
               end = t;
             }
-            if (nocase) {
+            if (no_case) {
               start = tolower(start);
               end = tolower(end);
               c = tolower(c);
             }
             pattern += 2;
-            patternLen -= 2;
+            pattern_len -= 2;
             if (c >= start && c <= end)
               match = 1;
           } else {
-            if (!nocase) {
+            if (!no_case) {
               if (pattern[0] == string[0])
                 match = 1;
             } else {
@@ -3240,25 +3240,25 @@ static int stringmatchlen(const char* pattern,
             }
           }
           pattern++;
-          patternLen--;
+          pattern_len--;
         }
         if (inot)
           match = !match;
         if (!match)
           return 0; /** no match */
         string++;
-        stringLen--;
+        string_len--;
         break;
       }
       case '\\':
-        if (patternLen >= 2) {
+        if (pattern_len >= 2) {
           pattern++;
-          patternLen--;
+          pattern_len--;
         }
         break;
       /** fall through */
       default:
-        if (!nocase) {
+        if (!no_case) {
           if (pattern[0] != string[0])
             return 0; /** no match */
         } else {
@@ -3266,27 +3266,27 @@ static int stringmatchlen(const char* pattern,
             return 0; /** no match */
         }
         string++;
-        stringLen--;
+        string_len--;
         break;
     }
     pattern++;
-    patternLen--;
-    if (stringLen == 0) {
+    pattern_len--;
+    if (string_len == 0) {
       while (*pattern == '*') {
         pattern++;
-        patternLen--;
+        pattern_len--;
       }
       break;
     }
   }
-  if (patternLen == 0 && stringLen == 0)
+  if (pattern_len == 0 && string_len == 0)
     return 1;
   return 0;
 }
 
-static int stringmatch(const char* pattern, const char* string, int nocase) {
-  return stringmatchlen(pattern, strlen(pattern), string, strlen(string),
-                        nocase);
+static int StringMatch(const char* pattern, const char* string, int no_case) {
+  return StringMatchlen(pattern, strlen(pattern), string, strlen(string),
+                        no_case);
 }
 
 #ifdef IE_REDCORE
@@ -3356,31 +3356,31 @@ static void ParseStringToUrl(std::string string_str, std::string* url_string) {
   *url_string = string_str;
 }
 
-static void DoGetKernelFromUrl(base::ListValue* kernelList,
-                               std::string& coreVersion,
-                               std::string& coreEmulation) {
-  if (kernelList->empty())
+static void DoGetKernelFromUrl(base::ListValue* kernel_list,
+                               std::string& core_version,
+                               std::string& core_emulation) {
+  if (kernel_list->empty())
     return;
-  int maxLength = 0;
+  int max_length = 0;
   std::string version, emulation;
-  for (size_t i = 0; i < kernelList->GetSize(); ++i) {
-    base::DictionaryValue* bmDict = nullptr;
-    kernelList->GetDictionary(i, &bmDict);
-    if (bmDict == NULL)
+  for (size_t i = 0; i < kernel_list->GetSize(); ++i) {
+    base::DictionaryValue* bm_dict = nullptr;
+    kernel_list->GetDictionary(i, &bm_dict);
+    if (bm_dict == NULL)
       continue;
     std::string url = "";
-    bmDict->GetString("url", &url);
+    bm_dict->GetString("url", &url);
     int len = url.length();
-    if (maxLength < len) {
-      maxLength = len;
-      bmDict->GetString("kernel", &coreVersion);
-      bmDict->GetString("ieEmulation", &coreEmulation);
-    } else if (maxLength == len) {
+    if (max_length < len) {
+      max_length = len;
+      bm_dict->GetString("kernel", &core_version);
+      bm_dict->GetString("ieEmulation", &core_emulation);
+    } else if (max_length == len) {
       if ((url.find('*') == std::string::npos) ||
           (url.find('?') == std::string::npos)) {
-        if (coreVersion.empty() && coreEmulation.empty()) {
-          bmDict->GetString("kernel", &coreVersion);
-          bmDict->GetString("ieEmulation", &coreEmulation);
+        if (core_version.empty() && core_emulation.empty()) {
+          bm_dict->GetString("kernel", &core_version);
+          bm_dict->GetString("ieEmulation", &core_emulation);
         }
       }
     }
@@ -3388,93 +3388,93 @@ static void DoGetKernelFromUrl(base::ListValue* kernelList,
 }
 
 void Browser::GetKernelFromUrl(const GURL& host,
-                               std::string& coreVersion,
-                               std::string& coreEmulation) {
-  base::DictionaryValue* rootDict =
+                               std::string& core_version,
+                               std::string& core_emulation) {
+  base::DictionaryValue* root_dict =
       YSPLoginManager::GetInstance()->GetManagedKernels();
-  if (rootDict == NULL)
+  if (root_dict == NULL)
     return;
-  base::ListValue* iecore = nullptr;
-  rootDict->GetList("coreSelect", &iecore);
-  if (iecore == NULL || iecore->empty())
+  base::ListValue* ie_core = nullptr;
+  root_dict->GetList("coreSelect", &ie_core);
+  if (ie_core == NULL || ie_core->empty())
     return;
-  base::ListValue listKernel;
-  for (size_t i = 0; i < iecore->GetSize(); ++i) {
-    base::DictionaryValue* bmDict = nullptr;
-    iecore->GetDictionary(i, &bmDict);
-    if (bmDict == NULL)
+  base::ListValue list_kernel;
+  for (size_t i = 0; i < ie_core->GetSize(); ++i) {
+    base::DictionaryValue* bm_dict = nullptr;
+    ie_core->GetDictionary(i, &bm_dict);
+    if (bm_dict == NULL)
       continue;
     std::string url_string, string_str;
-    bmDict->GetString("url", &string_str);
+    bm_dict->GetString("url", &string_str);
     if (string_str.empty())
       return;
     ParseStringToUrl(string_str, &url_string);
     DLOG(INFO) << " url_string: " << url_string << " url: " << host.spec();
-    if (stringmatch(url_string.c_str(), host.spec().c_str(), true)) {
+    if (StringMatch(url_string.c_str(), host.spec().c_str(), true)) {
       std::string core_version, core_emulation;
-      std::unique_ptr<base::DictionaryValue> coreDict =
+      std::unique_ptr<base::DictionaryValue> core_dict =
           std::unique_ptr<base::DictionaryValue>(new base::DictionaryValue);
-      bmDict->GetString("kernel", &core_version);
-      bmDict->GetString("ieEmulation", &core_emulation);
-      coreDict->SetString("url", string_str);
-      coreDict->SetString("kernel", core_version);
-      coreDict->SetString("ieEmulation", core_emulation);
-      listKernel.Append(std::move(coreDict));
+      bm_dict->GetString("kernel", &core_version);
+      bm_dict->GetString("ieEmulation", &core_emulation);
+      core_dict->SetString("url", string_str);
+      core_dict->SetString("kernel", core_version);
+      core_dict->SetString("ieEmulation", core_emulation);
+      list_kernel.Append(std::move(core_dict));
     }
   }
-  DoGetKernelFromUrl(&listKernel, coreVersion, coreEmulation);
+  DoGetKernelFromUrl(&list_kernel, core_version, core_emulation);
 }
 
 void Browser::MatchSystemIEVersion(RendererMode& mode) {
   if (mode.core != IE_CORE)
     return;
-  int sysIEVer = base::win::GetSystemIEVersion();
-  if (sysIEVer < 8) {
+  int system_ie_version = base::win::GetSystemIEVersion();
+  if (system_ie_version < 8) {
     mode.ver = IE::DOCNONE;
     mode.emulation = IE::EMULATION7;
     return;
   }
-  if ((int)mode.emulation > sysIEVer)
-    mode.emulation = (IE::IEEmulation)sysIEVer;
-  if ((int)mode.ver > sysIEVer)
-    mode.ver = (IE::IEVersion)sysIEVer;
+  if ((int)mode.emulation > system_ie_version)
+    mode.emulation = (IE::IEEmulation)system_ie_version;
+  if ((int)mode.ver > system_ie_version)
+    mode.ver = (IE::IEVersion)system_ie_version;
 }
 
 bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
-  std::string coreVer = "";
-  std::string coreEmulation = "";
-  GetKernelFromUrl(host, coreVer, coreEmulation);
-  DLOG(INFO) << "host: " << host.spec() << " coreVer: " << coreVer
-             << " coreEmulation: " << coreEmulation;
-  if (coreEmulation.empty() == false) {
+  std::string core_version = "";
+  std::string core_emulation = "";
+  GetKernelFromUrl(host, core_version, core_emulation);
+  DLOG(INFO) << "host: " << host.spec() << " core_version: " << core_version
+             << " core_emulation: " << core_emulation;
+  if (core_emulation.empty() == false) {
     mode.core = IE_CORE;
-    if (coreEmulation == "emulation7")
+    if (core_emulation == "emulation7")
       mode.emulation = IE::EMULATION7;
-    else if (coreEmulation == "emulation8")
+    else if (core_emulation == "emulation8")
       mode.emulation = IE::EMULATION8;
-    else if (coreEmulation == "emulation9")
+    else if (core_emulation == "emulation9")
       mode.emulation = IE::EMULATION9;
-    else if (coreEmulation == "emulation10")
+    else if (core_emulation == "emulation10")
       mode.emulation = IE::EMULATION10;
-    else if (coreEmulation == "emulation11")
+    else if (core_emulation == "emulation11")
       mode.emulation = IE::EMULATION11;
-    else if (coreEmulation == "chrome")
+    else if (core_emulation == "chrome")
       mode.core = BLINK_CORE;
 
-    if (mode.core == IE_CORE && coreVer.empty() == false) {
-      if (coreVer == "IE6")
+    if (mode.core == IE_CORE && core_version.empty() == false) {
+      if (core_version == "IE6")
         mode.ver = IE::DOC6;
-      else if (coreVer == "IE7")
+      else if (core_version == "IE7")
         mode.ver = IE::DOC7;
-      else if (coreVer == "IE8")
+      else if (core_version == "IE8")
         mode.ver = IE::DOC8;
-      else if (coreVer == "IE9")
+      else if (core_version == "IE9")
         mode.ver = IE::DOC9;
-      else if (coreVer == "IE10")
+      else if (core_version == "IE10")
         mode.ver = IE::DOC10;
-      else if (coreVer == "IE11")
+      else if (core_version == "IE11")
         mode.ver = IE::DOC11;
-      else if (coreVer == "Auto")
+      else if (core_version == "Auto")
         mode.ver = IE::DOCSYS;
 
       MatchSystemIEVersion(mode);
@@ -3485,35 +3485,35 @@ bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
 }
 // YSP+ }//Kernel switching
 
-void Browser::DidGetWindowsDomainUserInfo(base::string16* userName,
-                                          base::string16* userPwd) {
-  if (userName == NULL || userPwd == NULL)
+void Browser::DidGetWindowsDomainUserInfo(base::string16* username,
+                                          base::string16* userpwd) {
+  if (username == NULL || userpwd == NULL)
     return;
-  scoped_refptr<password_manager::PasswordStore> pPasswordStore;
-  pPasswordStore = PasswordStoreFactory::GetForProfile(
+  scoped_refptr<password_manager::PasswordStore> p_password_store;
+  p_password_store = PasswordStoreFactory::GetForProfile(
       profile(), ServiceAccessType::EXPLICIT_ACCESS);
-  if (pPasswordStore == NULL)
+  if (p_password_store == NULL)
     return;
 
   btn_infos_.clear();
-  PwdConsumer* pConsumer = new PwdConsumer(this);
-  pPasswordStore->GetAutofillableLogins(pConsumer);
+  PwdConsumer* p_consumer = new PwdConsumer(this);
+  p_password_store->GetAutofillableLogins(p_consumer);
   // comment just for compiling by webb
   // (base::MessageLoop)(base::MessageLoop::current())->Run(true);
-  delete pConsumer;
-  pConsumer = NULL;
+  delete p_consumer;
+  p_consumer = NULL;
 
   LoginBtnInfo info;
   if (btn_infos_.size() > 1) {
-    YspPopupView* loginView = NULL;
-    loginView = new YspPopupView(this, btn_infos_);
-    info = loginView->DoModel();
-    delete loginView;
+    YspPopupView* login_view = NULL;
+    login_view = new YspPopupView(this, btn_infos_);
+    info = login_view->DoModel();
+    delete login_view;
   } else if (btn_infos_.size() == 1) {
     info = btn_infos_.at(0);
   }
-  *userName = info.loginName;
-  *userPwd = info.loginPwd;
+  *username = info.login_name;
+  *userpwd = info.login_pwd;
   btn_infos_.clear();
 }
 
@@ -3528,13 +3528,13 @@ void Browser::OnFindWindowsDomainUserInfoEnd(
       continue;
 
     std::string key = "onlyid";
-    std::string userID = YSPLoginManager::GetInstance()->GetValueForKey(key);
-    if (base::UTF8ToUTF16(userID) == (*iter)->ysp_username_value) {
+    std::string user_id = YSPLoginManager::GetInstance()->GetValueForKey(key);
+    if (base::UTF8ToUTF16(user_id) == (*iter)->ysp_username_value) {
       LoginBtnInfo info;
-      info.appName = (*iter)->ysp_app_name_value;
-      info.appUrl = base::UTF8ToUTF16((*iter)->signon_realm);
-      info.loginName = (*iter)->username_value;
-      info.loginPwd = (*iter)->password_value;
+      info.app_name = (*iter)->ysp_app_name_value;
+      info.app_url = base::UTF8ToUTF16((*iter)->signon_realm);
+      info.login_name = (*iter)->username_value;
+      info.login_pwd = (*iter)->password_value;
       btn_infos_.push_back(info);
     }
   }
@@ -3545,14 +3545,14 @@ void Browser::OnFindWindowsDomainUserInfoEnd(
 
 // ysp+ { URL Blacklist And Whitelist
 bool Browser::BlackUrlCompared(const GURL& host) {
-  base::DictionaryValue* rootDict =
+  base::DictionaryValue* root_dict =
       YSPLoginManager::GetInstance()->GetWebsiteListEnabled();
-  base::ListValue* urllist = nullptr;
-  if (rootDict && rootDict->GetList("websiteList", &urllist)) {
-    if (urllist && !urllist->empty()) {
-      for (size_t i = 0; i < urllist->GetSize(); ++i) {
+  base::ListValue* url_list = nullptr;
+  if (root_dict && root_dict->GetList("websiteList", &url_list)) {
+    if (url_list && !url_list->empty()) {
+      for (size_t i = 0; i < url_list->GetSize(); ++i) {
         std::string url;
-        urllist->GetString(i, &url);
+        url_list->GetString(i, &url);
         std::string url_host, url_port;
         int num = url.find(':');
         if (num == -1) {
@@ -3562,7 +3562,7 @@ bool Browser::BlackUrlCompared(const GURL& host) {
           url_host.assign(url, 0, num);
           url_port.assign(url, num + 1, url.length() - num - 1);
         }
-        if (stringmatch(url_host.c_str(), host.host().c_str(), true)) {
+        if (StringMatch(url_host.c_str(), host.host().c_str(), true)) {
           if (url_port.empty() && !host.has_port()) {
             return true;
           } else if (!url_port.empty() && host.has_port()) {
@@ -3577,14 +3577,14 @@ bool Browser::BlackUrlCompared(const GURL& host) {
 }
 
 bool Browser::WhiteUrlCompared(const GURL& host) {
-  base::DictionaryValue* rootDict =
+  base::DictionaryValue* root_dict =
       YSPLoginManager::GetInstance()->GetWebsiteListEnabled();
-  base::ListValue* urllist = nullptr;
-  if (rootDict && rootDict->GetList("websiteList", &urllist)) {
-    if (urllist && !urllist->empty()) {
-      for (size_t i = 0; i < urllist->GetSize(); ++i) {
+  base::ListValue* url_list = nullptr;
+  if (root_dict && root_dict->GetList("websiteList", &url_list)) {
+    if (url_list && !url_list->empty()) {
+      for (size_t i = 0; i < url_list->GetSize(); ++i) {
         std::string url;
-        urllist->GetString(i, &url);
+        url_list->GetString(i, &url);
         std::string url_host, url_port;
         int num = url.find(':');
         if (num == -1) {
@@ -3594,7 +3594,7 @@ bool Browser::WhiteUrlCompared(const GURL& host) {
           url_host.assign(url, 0, num);
           url_port.assign(url, num + 1, url.length() - num - 1);
         }
-        if (stringmatch(url_host.c_str(), host.host().c_str(), true)) {
+        if (StringMatch(url_host.c_str(), host.host().c_str(), true)) {
           if (url_port.empty() && !host.has_port()) {
             return false;
           } else if (!url_port.empty() && host.has_port()) {
@@ -3630,32 +3630,32 @@ void Browser::OnTokenStatusChanged(const std::string& type) {
   // ysp+
 }
 
-void Browser::OnAutoLockScreenTimer(int64_t timeOutSec) {
+void Browser::OnAutoLockScreenTimer(int64_t time_out_sec) {
 #ifdef OS_WIN
   LASTINPUTINFO info;
   info.cbSize = sizeof(LASTINPUTINFO);
   if (::GetLastInputInfo(&info) == TRUE) {
-    base::TimeDelta timeNoInput =
+    base::TimeDelta time_no_input =
         base::TimeDelta::FromMilliseconds(::GetTickCount() - info.dwTime);
-    int64_t sec = timeNoInput.InSeconds();
-    if (sec > timeOutSec) {
-      BrowserView* browserView = BrowserView::GetBrowserViewForBrowser(this);
-      views::View* view = browserView->frame()->GetFrameView();
-      OpaqueBrowserFrameView* opaqueView =
+    int64_t sec = time_no_input.InSeconds();
+    if (sec > time_out_sec) {
+      BrowserView* browser_view = BrowserView::GetBrowserViewForBrowser(this);
+      views::View* view = browser_view->frame()->GetFrameView();
+      OpaqueBrowserFrameView* opaque_view =
           static_cast<OpaqueBrowserFrameView*>(view);
-      if (opaqueView)
-        opaqueView->LockScreen(SCREEN_LOCKED);
+      if (opaque_view)
+        opaque_view->LockScreen(SCREEN_LOCKED);
     }
   }
 #endif  // OS_WIN
   if (auto_lock_timer_.get()) {
-    base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+    base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
     auto_lock_timer_->Stop();
-    if (timeOutSec > 0)
+    if (time_out_sec > 0)
       auto_lock_timer_->Start(
-          FROM_HERE, delayTime,
+          FROM_HERE, delay_time,
           base::Bind(&Browser::OnAutoLockScreenTimer,
-                     crypto_ua_factory_.GetWeakPtr(), timeOutSec));
+                     crypto_ua_factory_.GetWeakPtr(), time_out_sec));
   }
 }
 
@@ -3666,11 +3666,11 @@ void Browser::OnConfigDataUpdated(const std::string& type,
                                // pages }
     if (auto_lock_timer_.get()) {
       int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
-      base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+      base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
       auto_lock_timer_->Stop();
       if (time > 0)
         auto_lock_timer_->Start(
-            FROM_HERE, delayTime,
+            FROM_HERE, delay_time,
             base::Bind(&Browser::OnAutoLockScreenTimer,
                        crypto_ua_factory_.GetWeakPtr(), time));
     }
@@ -3721,32 +3721,32 @@ void Browser::OnConfigDataUpdated(const std::string& type,
           YSPLoginManager::GetInstance()->GetValueForKey(lastUuid);
       std::string strategy_id = YSPLoginManager::GetInstance()->GetActivelId();
       std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
-      base::ListValue* gatewayDomainList = nullptr;
-      base::DictionaryValue domainDict;
+      base::ListValue* gateway_domain_list = nullptr;
+      base::DictionaryValue domain_dict;
       std::unique_ptr<base::Value> gatewayDomainValue =
           std::unique_ptr<base::Value>(base::JSONReader::Read(data));
-      gatewayDomainList =
+      gateway_domain_list =
           (static_cast<base::ListValue*>(gatewayDomainValue.release()));
-      if (gatewayDomainList && !gatewayDomainList->empty()) {
-        domainDict.SetString("deviceID", device_id);
-        domainDict.SetString("username", username);
-        domainDict.SetString("strategyID", strategy_id);
-        domainDict.SetString("companyID", company_id);
-        domainDict.SetInteger(
+      if (gateway_domain_list && !gateway_domain_list->empty()) {
+        domain_dict.SetString("deviceID", device_id);
+        domain_dict.SetString("username", username);
+        domain_dict.SetString("strategyID", strategy_id);
+        domain_dict.SetString("companyID", company_id);
+        domain_dict.SetInteger(
             "timeDifference",
             YSPLoginManager::GetInstance()->GetTimeDifference());
-        domainDict.Set("list", std::unique_ptr<base::ListValue>(
-                                   gatewayDomainList->DeepCopy()));
-        std::string domainDictString = "";
-        base::JSONWriter::Write(domainDict, &domainDictString);
+        domain_dict.Set("list", std::unique_ptr<base::ListValue>(
+                                    gateway_domain_list->DeepCopy()));
+        std::string domain_dict_string = "";
+        base::JSONWriter::Write(domain_dict, &domain_dict_string);
         content::BrowserThread::PostTask(
             content::BrowserThread::IO, FROM_HERE,
             base::Bind(&net::TransportConnectJob::SetDomainDictValue,
-                       domainDictString));
+                       domain_dict_string));
         content::BrowserThread::PostTask(
             content::BrowserThread::IO, FROM_HERE,
             base::Bind(&net::URLRequestHttpJob::SetDomainDictValue,
-                       domainDictString));
+                       domain_dict_string));
       }
     }
   }
@@ -3873,11 +3873,11 @@ void Browser::OnLoginSuccess(const base::string16& name,
 
   int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
   if (auto_lock_timer_.get()) {
-    base::TimeDelta delayTime = base::TimeDelta::FromSeconds(10);
+    base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
     auto_lock_timer_->Stop();
     if (time > 0)
       auto_lock_timer_->Start(
-          FROM_HERE, delayTime,
+          FROM_HERE, delay_time,
           base::Bind(&Browser::OnAutoLockScreenTimer,
                      crypto_ua_factory_.GetWeakPtr(), time));
   }
@@ -3886,23 +3886,24 @@ void Browser::OnLoginSuccess(const base::string16& name,
   SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home pages
                              // }
   // ysp+ { private DNS
-  std::string privateDNSString = "";
-  base::DictionaryValue* privateDNSDict =
+  std::string private_dns_string = "";
+  base::DictionaryValue* private_dns_dict =
       YSPLoginManager::GetInstance()->GetPrivateDNS();
-  if (privateDNSDict)
-    base::JSONWriter::Write(*privateDNSDict, &privateDNSString);
+  if (private_dns_dict)
+    base::JSONWriter::Write(*private_dns_dict, &private_dns_string);
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue, privateDNSString));
+      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+                 private_dns_string));
   // ysp+ }
 
   // ysp+ { AES DES and SMS4 crypt
-  std::string cryptkey = YSPLoginManager::GetInstance()->GetEncryptionAndKey();
-  std::string uuidKey = "onlyid";  // YSP+ { User information isolation }
+  std::string crypt_key = YSPLoginManager::GetInstance()->GetEncryptionAndKey();
+  std::string uuid_key = "onlyid";  // YSP+ { User information isolation }
   std::string userId = YSPLoginManager::GetInstance()->GetValueForKey(
-      uuidKey);  // YSP+ { User information isolation }
-  if (!cryptkey.empty()) {
-    YspCryptoSingleton::GetInstance()->Init(cryptkey);
+      uuid_key);  // YSP+ { User information isolation }
+  if (!crypt_key.empty()) {
+    YspCryptoSingleton::GetInstance()->Init(crypt_key);
   }
   YspCryptoSingleton::GetInstance()->SetUserId(
       userId);  // YSP+ { User information isolation }
@@ -3913,23 +3914,25 @@ void Browser::OnLoginSuccess(const base::string16& name,
           ->GetCacheEncryption());  // YSP+ { cache encryption }
 
   // ysp+ { Resource Replace
-  std::string stringRootDict = "";
-  base::DictionaryValue* rootDict =
+  std::string string_root_dict = "";
+  base::DictionaryValue* root_dict =
       YSPLoginManager::GetInstance()->GetManagedResourceReplace();
-  if (rootDict)
-    base::JSONWriter::Write(*rootDict, &stringRootDict);
-  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(stringRootDict);
+  if (root_dict)
+    base::JSONWriter::Write(*root_dict, &string_root_dict);
+  content::YSPResourceReplaceInterceptor::SetValueFormPostTask(
+      string_root_dict);
 // YSP+ } //Resource Replace
 #ifdef SANGFOR_GM_SSL
   // YSP+ { sangfor GM ssl
-  std::string stringGMrootDict = "";
-  base::DictionaryValue* GMrootDict =
+  std::string string_gm_root_dict = "";
+  base::DictionaryValue* gm_room_dict =
       YSPLoginManager::GetInstance()->GetManagedGMStream();
-  if (GMrootDict)
-    base::JSONWriter::Write(*GMrootDict, &stringGMrootDict);
+  if (gm_room_dict)
+    base::JSONWriter::Write(*gm_room_dict, &string_gm_root_dict);
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HttpStreamParser::SetGMStreamValue, stringGMrootDict));
+      base::Bind(&net::HttpStreamParser::SetGMStreamValue,
+                 string_gm_root_dict));
 // YSP+ } //sangfor GM ssl
 #endif
 
@@ -3952,24 +3955,24 @@ void Browser::OnLoginSuccess(const base::string16& name,
   // YSP+ } /* disable drag */
 
   // ysp+ { passwords AD manager
-  std::string formListString = "";
-  base::ListValue* formList =
+  std::string form_list_string = "";
+  base::ListValue* form_list =
       YSPLoginManager::GetInstance()->GetManagedADProxyAuth();
-  std::string passwdFlag = "password";
+  std::string passwd_flag = "password";
   std::string username =
-      YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+      YSPLoginManager::GetInstance()->GetValueForKey(uuid_key);
   std::string password =
-      YSPLoginManager::GetInstance()->GetValueForKey(passwdFlag);
-  if (formList)
-    base::JSONWriter::Write(*formList, &formListString);
+      YSPLoginManager::GetInstance()->GetValueForKey(passwd_flag);
+  if (form_list)
+    base::JSONWriter::Write(*form_list, &form_list_string);
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&Browser::GetAllLoginForms, base::Unretained(this),
-                 formListString, username, password));
+                 form_list_string, username, password));
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&Browser::GetManagerLoginForms, base::Unretained(this),
-                 formListString, username, password));
+                 form_list_string, username, password));
   // YSP+ } /*passwords AD manager*/
 }
 
@@ -4038,57 +4041,57 @@ void Browser::OnLogout() {
 //    }
 //}
 std::wstring Browser::GetIEFunctionControlJsonString() {
-  base::DictionaryValue rootDict;
-  std::unique_ptr<base::DictionaryValue> FunctionControl =
+  base::DictionaryValue root_dict;
+  std::unique_ptr<base::DictionaryValue> function_control =
       std::unique_ptr<base::DictionaryValue>(new base::DictionaryValue);
-  FunctionControl->SetBoolean(
+  function_control->SetBoolean(
       "mouseRightButtonEnabled",
       YSPLoginManager::GetInstance()->GetMouseRightButtonEnabled());
-  FunctionControl->SetBoolean(
+  function_control->SetBoolean(
       "cutCopyEnabled", YSPLoginManager::GetInstance()->GetCutCopyEnabled());
-  FunctionControl->SetBoolean(
+  function_control->SetBoolean(
       "printEnabled", YSPLoginManager::GetInstance()->GetPrintEnabled());
-  FunctionControl->SetBoolean(
+  function_control->SetBoolean(
       "saveFileEnabled", YSPLoginManager::GetInstance()->GetSaveFileEnabled());
-  std::string uaType = "";
-  std::string uaStr = "";
-  YSPLoginManager::GetInstance()->GetUserAgent(&uaType, &uaStr);
-  if (uaType == "1")
-    FunctionControl->SetString("userAgentString", uaStr);
-  else if (uaType == "3") {
-    FunctionControl->SetString(
+  std::string ua_type = "";
+  std::string ua_string = "";
+  YSPLoginManager::GetInstance()->GetUserAgent(&ua_type, &ua_string);
+  if (ua_type == "1")
+    function_control->SetString("userAgentString", ua_string);
+  else if (ua_type == "3") {
+    function_control->SetString(
         "userAgentString",
         version_info::GetYSPProductNameAndVersionForUserAgent() +
             YspCryptoHeader::GetInstance()->GetEncString());
-    base::TimeDelta delayTime = base::TimeDelta::FromSeconds(60);
+    base::TimeDelta delay_time = base::TimeDelta::FromSeconds(60);
     if (ie_crypto_ua_timer_.get()) {
       ie_crypto_ua_timer_->Stop();
-      ie_crypto_ua_timer_->Start(FROM_HERE, delayTime,
+      ie_crypto_ua_timer_->Start(FROM_HERE, delay_time,
                                  base::Bind(&Browser::NotifyIEFunctionControl,
                                             crypto_ua_factory_.GetWeakPtr()));
     }
   } else
-    FunctionControl->SetString("userAgentString", "");
-  rootDict.Set("ieFunctionControl", std::move(FunctionControl));
+    function_control->SetString("userAgentString", "");
+  root_dict.Set("ieFunctionControl", std::move(function_control));
   std::string buff = "";
-  base::JSONWriter::Write(rootDict, &buff);
-  std::wstring jsonStr = base::UTF8ToUTF16(buff);
-  return jsonStr;
+  base::JSONWriter::Write(root_dict, &buff);
+  std::wstring json_str = base::UTF8ToUTF16(buff);
+  return json_str;
 }
 
 void Browser::NotifyIEFunctionControl() {
-  std::wstring jsonStr = GetIEFunctionControlJsonString();
+  std::wstring json_str = GetIEFunctionControlJsonString();
   int count = tab_strip_model_->count();
   int i = 0;
   for (i = 0; i < count; i++) {
-    WebContents* pContent = tab_strip_model_->GetWebContentsAt(i);
-    if (pContent == NULL || pContent->GetRendererMode().core != IE_CORE)
+    WebContents* p_content = tab_strip_model_->GetWebContentsAt(i);
+    if (p_content == NULL || p_content->GetRendererMode().core != IE_CORE)
       continue;
-    content::WebContentsIE* pIEContent =
-        static_cast<content::WebContentsIE*>(pContent);
-    if (pIEContent == NULL)
+    content::WebContentsIE* p_ie_content =
+        static_cast<content::WebContentsIE*>(p_content);
+    if (p_ie_content == NULL)
       continue;
-    pIEContent->SendFunctionControl(jsonStr);
+    p_ie_content->SendFunctionControl(json_str);
   }
 }
 
@@ -4123,46 +4126,46 @@ static void SaveLoginForms(Browser* browser,
 
 static void RemoveLoginForms(password_manager::PasswordStore* password_store,
                              const autofill::PasswordForm& form,
-                             const std::string& formListString,
+                             const std::string& form_list_string,
                              const std::string& username,
                              const std::string& password) {
-  base::ListValue* formList = nullptr;
-  if (!formListString.empty()) {
-    std::unique_ptr<base::Value> formValue =
-        base::JSONReader::Read(formListString);
-    formList = (static_cast<base::ListValue*>(formValue.release()));
+  base::ListValue* form_list = nullptr;
+  if (!form_list_string.empty()) {
+    std::unique_ptr<base::Value> form_value =
+        base::JSONReader::Read(form_list_string);
+    form_list = (static_cast<base::ListValue*>(form_value.release()));
   }
-  if (formList && !formList->empty()) {
-    for (size_t i = 0; i < formList->GetSize(); ++i) {
+  if (form_list && !form_list->empty()) {
+    for (size_t i = 0; i < form_list->GetSize(); ++i) {
       autofill::PasswordForm forms;
-      base::DictionaryValue* bmDict = nullptr;
-      if (formList->GetDictionary(i, &bmDict)) {
+      base::DictionaryValue* bm_dict = nullptr;
+      if (form_list->GetDictionary(i, &bm_dict)) {
         int type = 1;
-        if (bmDict && !bmDict->empty()) {
-          bmDict->GetInteger("type", &type);
+        if (bm_dict && !bm_dict->empty()) {
+          bm_dict->GetInteger("type", &type);
           if (type == 1)
             continue;
-          int userLoginType;
-          std::string uuidKey = "onlyid";
-          std::string appName, url, icon_url;
-          bmDict->GetString("name", &appName);
-          bmDict->GetString("url", &url);
-          bmDict->GetString("logoUrl", &icon_url);
-          bmDict->GetInteger("loginType", &userLoginType);
+          int user_login_type;
+          std::string uuid_key = "onlyid";
+          std::string app_name, url, icon_url;
+          bm_dict->GetString("name", &app_name);
+          bm_dict->GetString("url", &url);
+          bm_dict->GetString("logoUrl", &icon_url);
+          bm_dict->GetInteger("loginType", &user_login_type);
           if (url.find("://") == std::string::npos)
             url = "http://" + url;
-          if (userLoginType == 1) {
-            std::string loginName;
-            bmDict->GetString("alias", &loginName);
-            if (!loginName.empty()) {
-              forms.username_value = base::UTF8ToUTF16(loginName);
+          if (user_login_type == 1) {
+            std::string login_name;
+            bm_dict->GetString("alias", &login_name);
+            if (!login_name.empty()) {
+              forms.username_value = base::UTF8ToUTF16(login_name);
               forms.password_value = base::UTF8ToUTF16(password);
             }
           }
           forms.signon_realm = GURL(url).GetOrigin().spec();
-          forms.ysp_app_name_value = base::UTF8ToUTF16(appName);
+          forms.ysp_app_name_value = base::UTF8ToUTF16(app_name);
           forms.ysp_username_value = base::UTF8ToUTF16(username);
-          forms.ysp_login_type_value = userLoginType;
+          forms.ysp_login_type_value = user_login_type;
           forms.origin = GURL(url);
           forms.icon_url = GURL(icon_url);
           if (forms.ysp_login_type_value == form.ysp_login_type_value &&
@@ -4181,46 +4184,46 @@ static void RemoveLoginForms(password_manager::PasswordStore* password_store,
   }
 }
 
-void Browser::GetManagerLoginForms(const std::string& formListString,
+void Browser::GetManagerLoginForms(const std::string& form_list_string,
                                    const std::string& username,
                                    const std::string& password) {
-  base::ListValue* formList = nullptr;
-  if (!formListString.empty()) {
-    std::unique_ptr<base::Value> formValue =
-        base::JSONReader::Read(formListString);
-    formList = (static_cast<base::ListValue*>(formValue.release()));
+  base::ListValue* form_list = nullptr;
+  if (!form_list_string.empty()) {
+    std::unique_ptr<base::Value> form_value =
+        base::JSONReader::Read(form_list_string);
+    form_list = (static_cast<base::ListValue*>(form_value.release()));
   }
-  if (formList && !formList->empty()) {
-    for (size_t i = 0; i < formList->GetSize(); ++i) {
+  if (form_list && !form_list->empty()) {
+    for (size_t i = 0; i < form_list->GetSize(); ++i) {
       autofill::PasswordForm forms;
-      base::DictionaryValue* bmDict = nullptr;
-      if (formList->GetDictionary(i, &bmDict)) {
+      base::DictionaryValue* bm_dict = nullptr;
+      if (form_list->GetDictionary(i, &bm_dict)) {
         int type = 1;
-        if (bmDict && !bmDict->empty()) {
-          bmDict->GetInteger("type", &type);
+        if (bm_dict && !bm_dict->empty()) {
+          bm_dict->GetInteger("type", &type);
           if (type == 1)
             continue;
-          int userLoginType;
-          std::string uuidKey = "onlyid";
-          std::string appName, url, icon_url;
-          bmDict->GetString("name", &appName);
-          bmDict->GetString("url", &url);
-          bmDict->GetString("logoUrl", &icon_url);
-          bmDict->GetInteger("loginType", &userLoginType);
+          int user_login_type;
+          std::string uuid_key = "onlyid";
+          std::string app_name, url, icon_url;
+          bm_dict->GetString("name", &app_name);
+          bm_dict->GetString("url", &url);
+          bm_dict->GetString("logoUrl", &icon_url);
+          bm_dict->GetInteger("loginType", &user_login_type);
           if (url.find("://") == std::string::npos)
             url = "http://" + url;
-          if (userLoginType == 1) {
-            std::string loginName;
-            bmDict->GetString("alias", &loginName);
-            if (!loginName.empty()) {
-              forms.username_value = base::UTF8ToUTF16(loginName);
+          if (user_login_type == 1) {
+            std::string login_name;
+            bm_dict->GetString("alias", &login_name);
+            if (!login_name.empty()) {
+              forms.username_value = base::UTF8ToUTF16(login_name);
               forms.password_value = base::UTF8ToUTF16(password);
             }
           }
           forms.signon_realm = GURL(url).GetOrigin().spec();
-          forms.ysp_app_name_value = base::UTF8ToUTF16(appName);
+          forms.ysp_app_name_value = base::UTF8ToUTF16(app_name);
           forms.ysp_username_value = base::UTF8ToUTF16(username);
-          forms.ysp_login_type_value = userLoginType;
+          forms.ysp_login_type_value = user_login_type;
           forms.origin = GURL(url);
           forms.action = GURL(url);
           forms.icon_url = GURL(icon_url);
@@ -4234,7 +4237,7 @@ void Browser::GetManagerLoginForms(const std::string& formListString,
   }
 }
 
-void Browser::GetAllLoginForms(const std::string& formListString,
+void Browser::GetAllLoginForms(const std::string& form_list_string,
                                const std::string& username,
                                const std::string& password) {
   scoped_refptr<password_manager::PasswordStore> password_store =
@@ -4245,8 +4248,8 @@ void Browser::GetAllLoginForms(const std::string& formListString,
     password_store->GetYSPAllLogins(&matched_forms);
     for (auto& login : matched_forms) {
       if (login->ysp_username_value == base::UTF8ToUTF16(username)) {
-        RemoveLoginForms(password_store.get(), *login, formListString, username,
-                         password);
+        RemoveLoginForms(password_store.get(), *login, form_list_string,
+                         username, password);
       }
     }
     matched_forms.clear();
@@ -4256,27 +4259,27 @@ void Browser::GetAllLoginForms(const std::string& formListString,
 
 // TODO (matianzhi): YSP+ { startup and home pages
 void Browser::SetStartupAndHomePages() {
-  base::ListValue* urlList = YSPLoginManager::GetInstance()->GetStartupPages();
-  bool defaultMainPage = YSPLoginManager::GetInstance()->isStartupPages();
+  base::ListValue* url_list = YSPLoginManager::GetInstance()->GetStartupPages();
+  bool default_main_page = YSPLoginManager::GetInstance()->isStartupPages();
   PrefService* prefs = profile_->GetPrefs();
   SessionStartupPref pref = SessionStartupPref::GetStartupPref(prefs);
-  if (urlList && defaultMainPage) {
+  if (url_list && default_main_page) {
     // settings::StartupPagesHandler handler;
-    std::vector<GURL> startupPages;
-    for (size_t i = 0; i < urlList->GetSize(); ++i) {
-      base::DictionaryValue* urlDict = nullptr;
-      urlList->GetDictionary(i, &urlDict);
-      if (urlDict && !urlDict->empty()) {
+    std::vector<GURL> startup_pages;
+    for (size_t i = 0; i < url_list->GetSize(); ++i) {
+      base::DictionaryValue* url_dict = nullptr;
+      url_list->GetDictionary(i, &url_dict);
+      if (url_dict && !url_dict->empty()) {
         std::string url;
-        urlDict->GetString("url", &url);
+        url_dict->GetString("url", &url);
         if (i == 0) {
           prefs->SetBoolean(prefs::kHomePageIsNewTabPage, false);
           prefs->SetString(prefs::kHomePage, GURL(url).spec());
         }
-        startupPages.push_back(GURL(url));
+        startup_pages.push_back(GURL(url));
       }
     }
-    pref.urls = startupPages;
+    pref.urls = startup_pages;
     if (pref.urls.empty())
       pref.type = SessionStartupPref::DEFAULT;
     SessionStartupPref::SetStartupPref(prefs, pref);
@@ -4377,7 +4380,7 @@ void ClearPnaclCacheOnIOThread(base::Time begin,
 }
 
 void Browser::ClearPasswordForUserId() {
-  std::string userid = YSPLoginManager::GetInstance()->GetUserId();
+  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
   password_manager::PasswordStore* password_store =
       PasswordStoreFactory::GetForProfile(profile_,
                                           ServiceAccessType::EXPLICIT_ACCESS)
@@ -4386,7 +4389,7 @@ void Browser::ClearPasswordForUserId() {
     std::vector<std::unique_ptr<autofill::PasswordForm>> matched_forms;
     password_store->GetYSPAllLogins(&matched_forms);
     for (auto& login : matched_forms) {
-      if (login->ysp_username_value == base::UTF8ToUTF16(userid)) {
+      if (login->ysp_username_value == base::UTF8ToUTF16(user_id)) {
         password_store->RemoveLogin(*login);
       }
     }
@@ -4395,32 +4398,32 @@ void Browser::ClearPasswordForUserId() {
 
 // FIXME(halton): how to pass callback
 /*
-static void ClearCookiesOnIOThread(const std::string& userid,
+static void ClearCookiesOnIOThread(const std::string& user_id,
 net::URLRequestContextGetter* rq_context, const base::Closure& callback) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
   net::CookieStore* cookie_store =
       rq_context->GetURLRequestContext()->cookie_store();
   if (cookie_store) {
     // FIXME(halton): how to pass callback
-    // cookie_store->DeleteAllForUserIdAsync(userid,
+    // cookie_store->DeleteAllForUserIdAsync(user_id,
 IgnoreArgument<int>(callback));
   }
 }
 */
 
-void Browser::ClearUserDataForBrowser(std::string& userid) {
+void Browser::ClearUserDataForBrowser(std::string& user_id) {
   history::HistoryService* history_service =
       HistoryServiceFactory::GetForProfile(profile_,
                                            ServiceAccessType::EXPLICIT_ACCESS);
   if (history_service) {
     //清除历史记录
-    history_service->ClearHistoryForUser(userid);
+    history_service->ClearHistoryForUser(user_id);
   }
   content::DownloadManager* download_manager =
       content::BrowserContext::GetDownloadManager(profile_);
   if (download_manager) {
     //清除下载记录
-    download_manager->RemoveDownloadsForUserid(userid);
+    download_manager->RemoveDownloadsForUserid(user_id);
     DownloadPrefs* download_prefs =
         DownloadPrefs::FromDownloadManager(download_manager);
     download_prefs->SetSaveFilePath(download_prefs->DownloadPath());
@@ -4433,7 +4436,7 @@ void Browser::ClearUserDataForBrowser(std::string& userid) {
   /*
   content::BrowserThread::PostTask(
     content::BrowserThread::IO, FROM_HERE,
-    base::Bind(&ClearCookiesOnIOThread, userid, std::move(sb_context),
+    base::Bind(&ClearCookiesOnIOThread, user_id, std::move(sb_context),
       UIThreadTrampoline(
         base::Bind(&Browser::ClearedUserData,
           weak_factory_.GetWeakPtr()))));

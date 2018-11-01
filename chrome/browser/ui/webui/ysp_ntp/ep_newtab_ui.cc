@@ -159,72 +159,73 @@ EPNewTabUI::~EPNewTabUI() {
 
 void EPNewTabUI::GetParamString(const base::ListValue* args) {
   DLOG(INFO) << "EPNewTabUI::GetParamString";
-  std::string strParam = "";
-  if (!args || !args->GetString(0, &strParam)) {
+  std::string str_param = "";
+  if (!args || !args->GetString(0, &str_param)) {
     return;
   }
 
-  if (strParam.compare("loggingStatus") == 0 && is_login_) {
+  if (str_param.compare("loggingStatus") == 0 && is_login_) {
     YSPLoginManager::GetInstance()->GetUserfetcher();
   }
 
-  std::string strResult =
-    YSPLoginManager::GetInstance()->GetValueForKey(strParam);
-  DLOG(INFO) << "EPNewTabUI::GetParamString: " << strParam << ", return: " << strResult;
+  std::string str_result =
+      YSPLoginManager::GetInstance()->GetValueForKey(str_param);
+  DLOG(INFO) << "EPNewTabUI::GetParamString: " << str_param
+             << ", return: " << str_result;
 
-  base::Value key(strParam);
-  base::Value value(strResult);
-  std::string strFunctionName = "HOMEBROWSER.getParamCallback";
-  web_ui()->CallJavascriptFunctionUnsafe(strFunctionName, key, value);
+  base::Value key(str_param);
+  base::Value value(str_result);
+  std::string str_function_name = "HOMEBROWSER.getParamCallback";
+  web_ui()->CallJavascriptFunctionUnsafe(str_function_name, key, value);
 }
 
 void EPNewTabUI::SetParam(const base::ListValue* args) {
-  std::string strParam1 = "";
-  if (!args || !args->GetString(0, &strParam1)) {
+  std::string str_param1 = "";
+  if (!args || !args->GetString(0, &str_param1)) {
     return;
   }
 
-  if (strParam1.compare("initialized") == 0) {
-    DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1;
+  if (str_param1.compare("initialized") == 0) {
+    DLOG(INFO) << "EPNewTabUI::SetParam: " << str_param1;
     YSPLoginManager::GetInstance()->set_web_initialized(true);
     return;
-  }
-  else if (strParam1.compare("autoLogin") == 0) {
-    bool bParam2 = false;
-    if (!args->GetBoolean(1, &bParam2))
+  } else if (str_param1.compare("autoLogin") == 0) {
+    bool b_param2 = false;
+    if (!args->GetBoolean(1, &b_param2))
       return;
-    DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1 << " = " << bParam2;
-    YSPLoginManager::GetInstance()->set_auto_login(bParam2);
-  }
-  else if (strParam1.compare("managerAddress") == 0) {
-    std::string bParam2 = "";
-    if (!args->GetString(1, &bParam2))
+    DLOG(INFO) << "EPNewTabUI::SetParam: " << str_param1 << " = " << b_param2;
+    YSPLoginManager::GetInstance()->set_auto_login(b_param2);
+  } else if (str_param1.compare("managerAddress") == 0) {
+    std::string b_param2 = "";
+    if (!args->GetString(1, &b_param2))
       return;
-    DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1 << " = " << bParam2;
-    YSPLoginManager::GetInstance()->SetManageServer(bParam2);
-  }
-	else if (strParam1.compare("setApplicationStatus") == 0) {
-		std::string applicationId = "";
-		bool applictionStatus = false;
-		if (!args->GetString(1, &applicationId) || !args->GetBoolean(2, &applictionStatus))
-			return;
-		DLOG(INFO) << "EPNewTabUI::SetParam: " << strParam1 << " = " << applicationId << " applictionStatus" << applictionStatus;
-		YSPLoginManager::GetInstance()->PutApplictionStatusFetch(applicationId, applictionStatus);
-	}
-  
-  base::Value key(strParam1);
-  std::string strFunctionName = "HOMEBROWSER.setParamCallback";
-  web_ui()->CallJavascriptFunctionUnsafe(strFunctionName, key);
+    DLOG(INFO) << "EPNewTabUI::SetParam: " << str_param1 << " = " << b_param2;
+    YSPLoginManager::GetInstance()->SetManageServer(b_param2);
+  } else if (str_param1.compare("setApplicationStatus") == 0) {
+    std::string application_id = "";
+    bool appliction_status = false;
+    if (!args->GetString(1, &application_id) ||
+        !args->GetBoolean(2, &appliction_status))
+      return;
+    DLOG(INFO) << "EPNewTabUI::SetParam: " << str_param1 << " = "
+               << application_id << " appliction_status" << appliction_status;
+    YSPLoginManager::GetInstance()->PutApplictionStatusFetch(application_id,
+                                                             appliction_status);
+        }
+
+        base::Value key(str_param1);
+        std::string str_function_name = "HOMEBROWSER.setParamCallback";
+        web_ui()->CallJavascriptFunctionUnsafe(str_function_name, key);
 }
 
 void EPNewTabUI::GetDeviceInfo(const base::ListValue* args) {
   DLOG(INFO) << "EPNewTabUI::GetDeviceInfo";
 
-  std::string strDeviceInfo = YSPLoginManager::GetInstance()->GetDeviceInfo();
+  std::string str_device_info = YSPLoginManager::GetInstance()->GetDeviceInfo();
 
-  base::Value deviceInfo(strDeviceInfo);
-  std::string strFunctionName = "HOMEBROWSER.getDeviceInfoCallback";
-  web_ui()->CallJavascriptFunctionUnsafe(strFunctionName, deviceInfo);
+  base::Value device_info(str_device_info);
+  std::string str_function_name = "HOMEBROWSER.getDeviceInfoCallback";
+  web_ui()->CallJavascriptFunctionUnsafe(str_function_name, device_info);
 }
 
 void EPNewTabUI::GetCity(const base::ListValue* args) {
@@ -240,13 +241,15 @@ void EPNewTabUI::GetCity(const base::ListValue* args) {
 
 void EPNewTabUI::Login(const base::ListValue* args) {
   DLOG(INFO) << "EPNewTabUI::Login";
-  std::string strDomain = "";
-  std::string strEmail = "";
-  std::string strPassword = "";
-  if (!args || !args->GetString(0, &strDomain) || !args->GetString(1, &strEmail) || !args->GetString(2, &strPassword)) {
+  std::string str_domain = "";
+  std::string str_email = "";
+  std::string str_password = "";
+  if (!args || !args->GetString(0, &str_domain) ||
+      !args->GetString(1, &str_email) || !args->GetString(2, &str_password)) {
     return;
   }
-  YSPLoginManager::GetInstance()->StartLogin(strDomain, strEmail, strPassword);
+  YSPLoginManager::GetInstance()->StartLogin(str_domain, str_email,
+                                             str_password);
 }
 
 void EPNewTabUI::Logout() {
@@ -267,12 +270,12 @@ void EPNewTabUI::OnLoginRequestFailure(const std::string& error) {
     return;
   DLOG(INFO) << "EPNewTabUI::OnLoginRequestFailure";
 
-  std::string strParam = "loggingStatus";
+  std::string str_param = "loggingStatus";
   base::Value str(error);
-  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &status,  &str);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &status, &str);
 }
 
 void EPNewTabUI::OnLoginResponseParseFailure(const std::string& error) {
@@ -280,12 +283,12 @@ void EPNewTabUI::OnLoginResponseParseFailure(const std::string& error) {
     return;
   DLOG(INFO) << "EPNewTabUI::OnLoginResponseParseFailure";
 
-  std::string strParam = "loggingStatus";
+  std::string str_param = "loggingStatus";
   base::Value str(error);
-  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &status, &str);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &status, &str);
 }
 
 void EPNewTabUI::OnLoginFailure(base::string16 message) {
@@ -294,12 +297,12 @@ void EPNewTabUI::OnLoginFailure(base::string16 message) {
   DLOG(INFO) << "EPNewTabUI::OnLoginFailure";
   is_login_ = false;
 
-  std::string strParam = "loggingStatus";
+  std::string str_param = "loggingStatus";
   base::Value str(message);
-  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &status, &str);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &status, &str);
 }
 
 void EPNewTabUI::OnLoginSuccess(const base::string16& name,
@@ -311,12 +314,12 @@ void EPNewTabUI::OnLoginSuccess(const base::string16& name,
   is_login_ = true;
   DLOG(INFO) << "EPNewTabUI::OnLoginSuccess";
 
-  std::string strParam = "loggingStatus";
+  std::string str_param = "loggingStatus";
   base::Value str("login");
-  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &status, &str);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &status, &str);
 }
 
 void EPNewTabUI::OnLogout() {
@@ -325,12 +328,12 @@ void EPNewTabUI::OnLogout() {
   if (!YSPLoginManager::GetInstance()->get_web_initialized())
     return;
 
-  std::string strParam = "loggingStatus";
+  std::string str_param = "loggingStatus";
   base::Value str("logout");
-  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+  base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &status, &str);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &status, &str);
 }
 
 void EPNewTabUI::OnConfigDataUpdated(const std::string& type,
@@ -341,8 +344,8 @@ void EPNewTabUI::OnConfigDataUpdated(const std::string& type,
   DLOG(INFO) << "EPNewTabUI::OnConfigDataUpdated";
   base::Value msg(type);
   base::Value value(data);
-  std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-  CallJsFunc2(strFunctionName, &value, &msg);
+  std::string str_function_name = "HOMEBROWSER.configDataChanged";
+  CallJsFunc2(str_function_name, &value, &msg);
 }
 
 void EPNewTabUI::OnTokenStatusChanged(const std::string & type)
@@ -350,12 +353,13 @@ void EPNewTabUI::OnTokenStatusChanged(const std::string & type)
   if (type == "TokenAvailable")
   {
     is_login_ = true;
-    std::string strParam = "loggingStatus";
+    std::string str_param = "loggingStatus";
     base::Value str("login");
-    base::Value status(YSPLoginManager::GetInstance()->GetValueForKey(strParam));
+    base::Value status(
+        YSPLoginManager::GetInstance()->GetValueForKey(str_param));
 
-    std::string strFunctionName = "HOMEBROWSER.configDataChanged";
-    CallJsFunc2(strFunctionName, &status, &str);
+    std::string str_function_name = "HOMEBROWSER.configDataChanged";
+    CallJsFunc2(str_function_name, &status, &str);
   }
 }
 
@@ -375,9 +379,9 @@ void EPNewTabUI::OnIPLookupResponseParseSuccess(
   std::string strCityInfo;
   base::JSONWriter::Write(*response_data, &strCityInfo);
 
-  base::Value cityInfo(strCityInfo);
-  std::string strFunctionName = "HOMEBROWSER.getCityCallback";
-  web_ui()->CallJavascriptFunctionUnsafe(strFunctionName, cityInfo);
+  base::Value city_info(strCityInfo);
+  std::string str_function_name = "HOMEBROWSER.getCityCallback";
+  web_ui()->CallJavascriptFunctionUnsafe(str_function_name, city_info);
 }
 
 void EPNewTabUI::OnIPLookupResponseParseFailure(const std::string& error) {
