@@ -511,8 +511,7 @@ class SessionStorageHolder : public base::SupportsUserData::Data {
  public:
   SessionStorageHolder()
       : session_storage_namespaces_awaiting_close_(
-            new std::map<int, SessionStorageNamespaceMap>) {
-  }
+            new std::map<int, SessionStorageNamespaceMap>) {}
 
   ~SessionStorageHolder() override {
     // Its important to delete the map on the IO thread to avoid deleting
@@ -1547,7 +1546,7 @@ RenderProcessHostImpl::RenderProcessHostImpl(
                 ,
                 ChildProcessImportance::NORMAL
 #endif
-                ),
+              ),
       id_(ChildProcessHostImpl::GenerateChildProcessUniqueId()),
       browser_context_(browser_context),
       storage_partition_impl_(storage_partition_impl),
@@ -1648,17 +1647,16 @@ void RenderProcessHostImpl::ShutDownInProcessRenderer() {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 // ysp+ {IE Embedded}
-void RenderProcessHostImpl::SetTridentCore(bool useIE) {
-  useIE_ = useIE;
+void RenderProcessHostImpl::SetTridentCore(bool use_ie) {
+  use_ie_ = use_ie;
 }
 
 bool RenderProcessHostImpl::UseTridentCore() {
-  return useIE_;
+  return use_ie_;
 }
 
-ResourceMessageFilter * RenderProcessHostImpl::GetResMsgFilter()
-{
-	return resMsgFilter;
+ResourceMessageFilter* RenderProcessHostImpl::GetResMsgFilter() {
+  return res_msg_filter_;
 }
 #endif
 
@@ -1778,8 +1776,8 @@ bool RenderProcessHostImpl::Init() {
 #if defined(OS_ANDROID)
   // Initialize the java audio manager so that media session tests will pass.
   // See internal b/29872494.
-  static_cast<media::AudioManagerAndroid*>(media::AudioManager::Get())->
-      InitializeIfNeeded();
+  static_cast<media::AudioManagerAndroid*>(media::AudioManager::Get())
+      ->InitializeIfNeeded();
 #endif  // defined(OS_ANDROID)
 
   CreateMessageFilters();
@@ -2299,8 +2297,8 @@ void RenderProcessHostImpl::GetRoute(
     int32_t routing_id,
     blink::mojom::AssociatedInterfaceProviderAssociatedRequest request) {
   DCHECK(request.is_pending());
-  associated_interface_provider_bindings_.AddBinding(
-      this, std::move(request), routing_id);
+  associated_interface_provider_bindings_.AddBinding(this, std::move(request),
+                                                     routing_id);
 }
 
 void RenderProcessHostImpl::GetAssociatedInterface(
@@ -2556,8 +2554,8 @@ mojom::RouteProvider* RenderProcessHostImpl::GetRemoteRouteProvider() {
 
 void RenderProcessHostImpl::AddRoute(int32_t routing_id,
                                      IPC::Listener* listener) {
-  CHECK(!listeners_.Lookup(routing_id)) << "Found Routing ID Conflict: "
-                                        << routing_id;
+  CHECK(!listeners_.Lookup(routing_id))
+      << "Found Routing ID Conflict: " << routing_id;
   listeners_.AddWithID(listener, routing_id);
 }
 
@@ -3460,11 +3458,11 @@ void RenderProcessHostImpl::Cleanup() {
   for (auto& observer : observers_)
     observer.RenderProcessHostDestroyed(this);
   NotificationService::current()->Notify(
-      NOTIFICATION_RENDERER_PROCESS_TERMINATED,
-      Source<RenderProcessHost>(this), NotificationService::NoDetails());
+      NOTIFICATION_RENDERER_PROCESS_TERMINATED, Source<RenderProcessHost>(this),
+      NotificationService::NoDetails());
 
   if (connection_filter_id_ !=
-        ServiceManagerConnection::kInvalidConnectionFilterId) {
+      ServiceManagerConnection::kInvalidConnectionFilterId) {
     ServiceManagerConnection* service_manager_connection =
         BrowserContext::GetServiceManagerConnectionFor(browser_context_);
     connection_filter_controller_->DisableFilter();
@@ -4327,7 +4325,7 @@ void RenderProcessHostImpl::UpdateProcessPriority() {
       ,
       GetEffectiveImportance()
 #endif
-          );
+  );
 
   const bool should_background_changed =
       priority_.is_background() != priority.is_background();

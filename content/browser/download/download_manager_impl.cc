@@ -86,12 +86,12 @@
 
 #ifdef REDCORE
 #ifdef IE_REDCORE
-#include "components/download/public/common/download_file_ie.h"  //ysp+{IE Embedded}
-#include "net/http/http_response_headers.h"  //ysp+{IE Embedded}
+#include "components/download/public/common/download_file_ie.h"  // ysp+{IE Embedded}
+#include "net/http/http_response_headers.h"  // ysp+{IE Embedded}
 #endif
-#include "base/strings/utf_string_conversions.h"  //ysp+
-#include "url/url_util.h"  //ysp+
-#include "crypto/ysp_crypto_encryption.h" //YSP+ { User information isolation }
+#include "base/strings/utf_string_conversions.h"  // ysp+
+#include "crypto/ysp_crypto_encryption.h"  // YSP+ { User information isolation }
+#include "url/url_util.h"                  // ysp+
 #endif
 
 namespace content {
@@ -219,7 +219,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -246,10 +246,9 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
     return new download::DownloadItemImpl(
         delegate, guid, download_id, current_path, target_path,
 #ifdef REDCORE
-        YSPUserName, //YSP+ { User information isolation }
+        ysp_username,  // YSP+ { User information isolation }
 #endif
-        url_chain,
-        referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
+        url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
         original_mime_type, start_time, end_time, etag, last_modified,
         received_bytes, total_bytes, hash, state, danger_type, interrupt_reason,
         opened, last_access_time, transient, received_slices);
@@ -260,8 +259,11 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       uint32_t download_id,
       const download::DownloadCreateInfo& info) override {
 #ifdef REDCORE
-    std::string YSPUserName = YspCryptoSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
-    return new download::DownloadItemImpl(delegate, download_id, YSPUserName, info);
+    std::string ysp_username =
+        YspCryptoSingleton::GetInstance()
+            ->GetUserId();  // YSP+ { User information isolation }
+    return new download::DownloadItemImpl(delegate, download_id, ysp_username,
+                                          info);
 #else
     return new download::DownloadItemImpl(delegate, download_id, info);
 #endif
@@ -276,12 +278,14 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       std::unique_ptr<download::DownloadRequestHandleInterface> request_handle)
       override {
 #ifdef REDCORE
-      std::string YSPUserName = YspCryptoSingleton::GetInstance()->GetUserId(); //YSP+ { User information isolation }
-    return new download::DownloadItemImpl(delegate, download_id, YSPUserName, path, url,
-                                          mime_type, std::move(request_handle));
-#else
-    return new download::DownloadItemImpl(delegate, download_id, path, url,
-                                          mime_type, std::move(request_handle));
+    std::string ysp_username =
+        YspCryptoSingleton::GetInstance()
+            ->GetUserId();  // YSP+ { User information isolation }
+    return new download::DownloadItemImpl(delegate, download_id, ysp_username,
+                                          path, url, mime_type,
+                                          std::move(request_handle));
+#else return new download::DownloadItemImpl(
+        delegate, download_id, path, url, mime_type, std::move(request_handle));
 #endif
   }
 };
@@ -330,7 +334,7 @@ DownloadManagerImpl::DownloadManagerImpl(BrowserContext* browser_context)
       next_download_id_(download::DownloadItem::kInvalidId),
       is_history_download_id_retrieved_(false),
 #if defined(REDCORE) && defined(IE_REDCORE)
-      download_file_init_flag_(false), //ysp+{IE Embedded}
+      download_file_init_flag_(false),  // ysp+{IE Embedded}
 #endif
       weak_factory_(this) {
   DCHECK(browser_context);
@@ -355,10 +359,11 @@ DownloadManagerImpl::DownloadManagerImpl(BrowserContext* browser_context)
       &DownloadManagerImpl::OnInProgressDownloadManagerInitialized,
       weak_factory_.GetWeakPtr()));
 
-  #if defined(REDCORE) && defined(IE_REDCORE)
-        std::unique_ptr<download::IEDownloadFileFactory> ief(new download::IEDownloadFileFactory());
-        ie_file_factory_ = std::move(ief);
-  #endif    
+#if defined(REDCORE) && defined(IE_REDCORE)
+  std::unique_ptr<download::IEDownloadFileFactory> ief(
+      new download::IEDownloadFileFactory());
+  ie_file_factory_ = std::move(ief);
+#endif
 }
 
 DownloadManagerImpl::~DownloadManagerImpl() {
@@ -422,14 +427,13 @@ void DownloadManagerImpl::OnHistoryNextIdRetrived(uint32_t next_id) {
 }
 
 #ifdef IE_REDCORE
-  void DownloadManagerImpl::RegisterCallbackSucceeded()
-    { download_file_init_flag_ = true; }
+void DownloadManagerImpl::RegisterCallbackSucceeded() {
+  download_file_init_flag_ = true;
+}
 #endif
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-void DownloadManagerImpl::OnGetNextidForIE(uint32_t id)
-{
-}
+void DownloadManagerImpl::OnGetNextidForIE(uint32_t id) {}
 #endif
 
 void DownloadManagerImpl::DetermineDownloadTarget(
@@ -933,8 +937,8 @@ void DownloadManagerImpl::DownloadUrl(
     DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
     base::Callback<void(uint32_t)> got_id(
-      base::Bind(&DownloadManagerImpl::DownloadUrlForIE,
-        weak_factory_.GetWeakPtr(), base::Passed(&params)));
+        base::Bind(&DownloadManagerImpl::DownloadUrlForIE,
+                   weak_factory_.GetWeakPtr(), base::Passed(&params)));
     download_file_init_flag_ = false;
     GetNextId(got_id);
     // comment just for cmpl
@@ -982,7 +986,7 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
     const base::FilePath& current_path,
     const base::FilePath& target_path,
 #ifdef REDCORE
-    const std::string& YSPUserName, //YSP+ { User information isolation }
+    const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
@@ -1018,13 +1022,12 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
   download::DownloadItemImpl* item = item_factory_->CreatePersistedItem(
       this, guid, id, current_path, target_path,
 #ifdef REDCORE
-      YSPUserName, //YSP+ { User information isolation }
+      ysp_username,  // YSP+ { User information isolation }
 #endif
-      url_chain, referrer_url,
-      site_url, tab_url, tab_refererr_url, mime_type, original_mime_type,
-      start_time, end_time, etag, last_modified, received_bytes, total_bytes,
-      hash, state, danger_type, interrupt_reason, opened, last_access_time,
-      transient, received_slices);
+      url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
+      original_mime_type, start_time, end_time, etag, last_modified,
+      received_bytes, total_bytes, hash, state, danger_type, interrupt_reason,
+      opened, last_access_time, transient, received_slices);
   DownloadItemUtils::AttachInfo(item, GetBrowserContext(), nullptr);
   downloads_[id] = base::WrapUnique(item);
   downloads_by_guid_[guid] = item;
@@ -1089,7 +1092,7 @@ int DownloadManagerImpl::NonMaliciousInProgressCount() const {
         it.second->GetDangerType() !=
             download::DOWNLOAD_DANGER_TYPE_DANGEROUS_HOST &&
 #ifdef REDCORE
-        !(it.second->is_update()) &&   //ysp+
+        !(it.second->is_update()) &&  // ysp+
 #endif
         it.second->GetDangerType() !=
             download::DOWNLOAD_DANGER_TYPE_POTENTIALLY_UNWANTED) {
@@ -1345,51 +1348,55 @@ bool DownloadManagerImpl::IsNextIdInitialized() const {
 }
 
 #if defined(REDCORE)
-//TODO (matianzhi): YSP+ { clear user data
-void DownloadManagerImpl::RemoveDownloadsForUserid(std::string & userid) {
+// TODO(matianzhi): YSP+ { clear user data
+void DownloadManagerImpl::RemoveDownloadsForUserid(const std::string& userid) {
   for (const auto& it : downloads_) {
     download::DownloadItemImpl* download = it.second.get();
     if (download->GetState() != download::DownloadItem::IN_PROGRESS &&
-      download->GetYSPUserName() == userid) {
+        download->GetYSPUserName() == userid) {
       download->Remove();
     }
     DownloadRemoved(download);
   }
 }
-//ysp+ }
+// ysp+ }
 #endif
 
 #if defined(IE_REDCORE)
-void DownloadManagerImpl::DownloadUrlForIE(std::unique_ptr<download::DownloadUrlParameters> params, uint32_t id)
-{
+void DownloadManagerImpl::DownloadUrlForIE(
+    std::unique_ptr<download::DownloadUrlParameters> params,
+    uint32_t id) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
-  std::string responHeaderStr = "";
+  std::string response_header_str = "";
 
-  responHeaderStr = base::UTF16ToASCII(params->IEDownloadResponseheader());
+  response_header_str = base::UTF16ToASCII(params->IEDownloadResponseheader());
   std::string old_value = "\r\n";
-  std::string new_value(1,'\0');
+  std::string new_value(1, '\0');
   while (true) {
     size_t pos = 0;
-    if ((pos = responHeaderStr.find(old_value)) != std::string::npos)
-      responHeaderStr.replace(pos, old_value.length(), new_value);
+    if ((pos = response_header_str.find(old_value)) != std::string::npos)
+      response_header_str.replace(pos, old_value.length(), new_value);
     else
       break;
   }
 
   scoped_refptr<net::HttpResponseHeaders> header(
-    new net::HttpResponseHeaders(responHeaderStr));
-  int contentLength=header->GetContentLength();
+      new net::HttpResponseHeaders(response_header_str));
+  int contentLength = header->GetContentLength();
   if (contentLength == -1)
     contentLength = 0;
 
   std::unique_ptr<download::DownloadCreateInfo> create_info;
   net::NetLogWithSource netLog;
-  std::unique_ptr<download::DownloadSaveInfo> saveInfo (new download::DownloadSaveInfo);
-  // create_info.reset(new download::DownloadCreateInfo(base::Time::Now(), contentLength, netLog, std::move(saveInfo)));
-  header->EnumerateHeader(nullptr, "Content-Disposition", &create_info->content_disposition);
-	header->GetMimeType(&(create_info->mime_type));
- 	header->GetMimeType(&(create_info->original_mime_type));
+  std::unique_ptr<download::DownloadSaveInfo> saveInfo(
+      new download::DownloadSaveInfo);
+  // create_info.reset(new download::DownloadCreateInfo(base::Time::Now(),
+  // contentLength, netLog, std::move(saveInfo)));
+  header->EnumerateHeader(nullptr, "Content-Disposition",
+                          &create_info->content_disposition);
+  header->GetMimeType(&(create_info->mime_type));
+  header->GetMimeType(&(create_info->original_mime_type));
   // create_info->referrer_url = params->referrer().url;
   create_info->tab_url = params->url();
   create_info->url_chain.push_back(params->url());
@@ -1404,20 +1411,23 @@ void DownloadManagerImpl::DownloadUrlForIE(std::unique_ptr<download::DownloadUrl
     base::FilePath website_save_directory;  // Unused
     bool skip_dir_check = false;            // Unused
     delegate_->GetSaveDir(GetBrowserContext(), &website_save_directory,
-      &default_download_directory, &skip_dir_check);
+                          &default_download_directory, &skip_dir_check);
   }
 
-    net::NetLogWithSource nls;
-    net::NetLogWithSource& nls_ = nls;
+  net::NetLogWithSource nls;
+  net::NetLogWithSource& nlws = nls;
   // Create the download file and start the download.
-    std::unique_ptr<download::DownloadFile> download_file(ie_file_factory_->CreateFile(
-    std::move(create_info->save_info), default_download_directory,params->url(),
-    params->referrer(), delegate_ && delegate_->GenerateFileHash(),
-    params->IEDownloader()->GetWeakPtr(), nls_,
-    download->DestinationObserverAsWeakPtr()));
+  std::unique_ptr<download::DownloadFile> download_file(
+      ie_file_factory_->CreateFile(std::move(create_info->save_info),
+                                   default_download_directory, params->url(),
+                                   params->referrer(),
+                                   delegate_ && delegate_->GenerateFileHash(),
+                                   params->IEDownloader()->GetWeakPtr(), nlws,
+                                   download->DestinationObserverAsWeakPtr()));
 
-  download->Start(std::move(download_file), std::move(create_info->request_handle),
-                  *create_info, nullptr, nullptr);
+  download->Start(std::move(download_file),
+                  std::move(create_info->request_handle), *create_info, nullptr,
+                  nullptr);
 
   // For interrupted downloads, Start() will transition the state to
   // IN_PROGRESS and consumers will be notified via OnDownloadUpdated().
@@ -1428,11 +1438,11 @@ void DownloadManagerImpl::DownloadUrlForIE(std::unique_ptr<download::DownloadUrl
   // just for cmpl
   // FOR_EACH_OBSERVER(Observer, observers_, OnDownloadCreated(this, download));
 
-  //std::unique_ptr<DownloadUrlParameters::OnStartedCallback> callback;
+  // std::unique_ptr<DownloadUrlParameters::OnStartedCallback> callback;
 
-  //StartDownloadWithId(std::move(create_info), NULL, callback.get(), true, id);
+  // StartDownloadWithId(std::move(create_info), NULL, callback.get(), true,
+  // id);
 }
-
 
 #endif
 

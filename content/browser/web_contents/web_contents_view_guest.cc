@@ -47,10 +47,10 @@ WebContentsViewGuest::WebContentsViewGuest(
   *delegate_view = this;
 }
 
-WebContentsViewGuest::~WebContentsViewGuest() {
-}
+WebContentsViewGuest::~WebContentsViewGuest() {}
 
-void WebContentsViewGuest::OnWebContentDestroying() {};
+void WebContentsViewGuest::OnWebContentDestroying() {}
+
 gfx::NativeView WebContentsViewGuest::GetNativeView() const {
   return platform_view_->GetNativeView();
 }
@@ -133,7 +133,8 @@ void WebContentsViewGuest::CreateView(const gfx::Size& initial_size,
 }
 
 RenderWidgetHostViewBase* WebContentsViewGuest::CreateViewForWidget(
-    RenderWidgetHost* render_widget_host, bool is_guest_view_hack) {
+    RenderWidgetHost* render_widget_host,
+    bool is_guest_view_hack) {
   if (render_widget_host->GetView()) {
     // During testing, the view will already be set up in most cases to the
     // test view, so we don't want to clobber it with a real one. To verify that
@@ -157,8 +158,7 @@ RenderWidgetHostViewBase* WebContentsViewGuest::CreateViewForPopupWidget(
   return platform_view_->CreateViewForPopupWidget(render_widget_host);
 }
 
-void WebContentsViewGuest::SetPageTitle(const base::string16& title) {
-}
+void WebContentsViewGuest::SetPageTitle(const base::string16& title) {}
 
 void WebContentsViewGuest::RenderViewCreated(RenderViewHost* host) {
   platform_view_->RenderViewCreated(host);
@@ -182,8 +182,7 @@ bool WebContentsViewGuest::IsEventTracking() const {
   return false;
 }
 
-void WebContentsViewGuest::CloseTabAfterEventTracking() {
-}
+void WebContentsViewGuest::CloseTabAfterEventTracking() {}
 #endif
 
 WebContents* WebContentsViewGuest::web_contents() {
@@ -228,13 +227,12 @@ void WebContentsViewGuest::ShowContextMenu(RenderFrameHost* render_frame_host,
   platform_view_delegate_view_->ShowContextMenu(render_frame_host, params);
 }
 
-void WebContentsViewGuest::StartDragging(
-    const DropData& drop_data,
-    WebDragOperationsMask ops,
-    const gfx::ImageSkia& image,
-    const gfx::Vector2d& image_offset,
-    const DragEventSourceInfo& event_info,
-    RenderWidgetHostImpl* source_rwh) {
+void WebContentsViewGuest::StartDragging(const DropData& drop_data,
+                                         WebDragOperationsMask ops,
+                                         const gfx::ImageSkia& image,
+                                         const gfx::Vector2d& image_offset,
+                                         const DragEventSourceInfo& event_info,
+                                         RenderWidgetHostImpl* source_rwh) {
   WebContentsImpl* embedder_web_contents = guest_->embedder_web_contents();
   embedder_web_contents->GetBrowserPluginEmbedder()->StartDrag(guest_);
   RenderViewHostImpl* embedder_render_view_host =
@@ -245,8 +243,8 @@ void WebContentsViewGuest::StartDragging(
       embedder_render_view_host->GetDelegate()->GetDelegateView();
   if (view) {
     RecordAction(base::UserMetricsAction("BrowserPlugin.Guest.StartDrag"));
-    view->StartDragging(
-        drop_data, ops, image, image_offset, event_info, source_rwh);
+    view->StartDragging(drop_data, ops, image, image_offset, event_info,
+                        source_rwh);
   } else {
     embedder_web_contents->SystemDragEnded(source_rwh);
   }

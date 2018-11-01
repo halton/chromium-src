@@ -37,7 +37,7 @@ bool WebContentsDelegate::ShouldTransferNavigation(
 bool WebContentsDelegate::CanOverscrollContent() const { return false; }
 
 
-void WebContentsDelegate::DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* userPwd){}
+void WebContentsDelegate::DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* password){}
 
 bool WebContentsDelegate::ShouldSuppressDialogs(WebContents* source) {
   return false;

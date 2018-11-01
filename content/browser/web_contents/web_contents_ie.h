@@ -53,11 +53,11 @@
 struct RendererMode;
 
 namespace IE {
-  class BrowserHostEventDelegant;
+class BrowserHostEventDelegant;
 }
 
 namespace net {
-  class URLFetcher;
+class URLFetcher;
 }
 
 namespace content {
@@ -100,7 +100,7 @@ struct LoadURLParams;
 class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
                                      public net::URLFetcherDelegate {
  public:
-  WebContentsIE(BrowserContext* browser_context);
+  explicit WebContentsIE(BrowserContext* browser_context);
   ~WebContentsIE() override;
 
   void Init(const WebContents::CreateParams& params) override;
@@ -168,8 +168,8 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   void OnURLFetchComplete(const net::URLFetcher* source) override;
 
   bool LoadUrl(const NavigationController::LoadURLParams& params);
-  void OnFinishNavigate(GURL& url, std::vector<GURL>& favicon_urls);
-  void OnLoadUrlInNewContent(GURL& url,
+  void OnFinishNavigate(const GURL& url, const std::vector<GURL>& favicon_urls);
+  void OnLoadUrlInNewContent(const GURL& url,
                              int flag,
                              bool* cancel,
                              IDispatch** dispatch);
@@ -234,7 +234,7 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   net::CookieList cookie_list_temp_;
   bool is_navigate_stopped_;
   bool need_fire_unload_event_;
-  bool is_new_window_;  //是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
+  bool is_new_window_;  // 是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
   base::WeakPtrFactory<WebContentsIE> weak_factory_for_io_;
   std::wstring query_dns_json_string_;
   base::WeakPtrFactory<WebContentsIE> self_;
@@ -242,6 +242,6 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   DISALLOW_COPY_AND_ASSIGN(WebContentsIE);
 };
 
-} //namespace content
+}  // namespace content
 
 #endif  // CONTENT_BROWSER_WEB_CONTENTS_WEB_CONTENTS_IE_H_

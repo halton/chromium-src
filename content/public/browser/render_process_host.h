@@ -339,7 +339,7 @@ class CONTENT_EXPORT RenderProcessHost : public IPC::Sender,
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 //ysp+ {IE Embedded}
-  virtual void SetTridentCore(bool useIE) = 0;
+  virtual void SetTridentCore(bool use_ie) = 0;
   virtual bool UseTridentCore() = 0 ;
 #endif
 

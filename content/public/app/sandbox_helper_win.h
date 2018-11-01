@@ -17,7 +17,8 @@ namespace content {
 // DLL and linked in.
 void InitializeSandboxInfo(sandbox::SandboxInterfaceInfo* sandbox_info);
 #if defined(REDCORE) && defined(IE_REDCORE)
-void InitializeSandboxInfo(sandbox::SandboxInterfaceInfo* sandbox_info, bool enableDEP);	//ysp+ {IE Embedded}
+void InitializeSandboxInfo(sandbox::SandboxInterfaceInfo* sandbox_info,
+                           bool enable_dep);  // ysp+ {IE Embedded}
 #endif
 }  // namespace content
 

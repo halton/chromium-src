@@ -69,7 +69,7 @@ namespace base {
 class CommandLine;
 class MessageLoop;
 class SharedPersistentMemoryAllocator;
-}
+}  // namespace base
 
 namespace viz {
 class GpuClient;
@@ -208,11 +208,11 @@ class CONTENT_EXPORT RenderProcessHostImpl
       RenderProcessHost::KeepAliveClientType) override;
   void DecrementKeepAliveRefCount(
       RenderProcessHost::KeepAliveClientType) override;
-  #if defined(REDCORE) && defined(IE_REDCORE)
-    void SetTridentCore(bool useIE) override; 
-    bool UseTridentCore() override;
-    ResourceMessageFilter* GetResMsgFilter();
-  #endif    
+#if defined(REDCORE) && defined(IE_REDCORE)
+  void SetTridentCore(bool use_ie) override;
+  bool UseTridentCore() override;
+  ResourceMessageFilter* GetResMsgFilter();
+#endif
   void DisableKeepAliveRefCount() override;
   bool IsKeepAliveRefCountDisabled() override;
   void PurgeAndSuspend() override;
@@ -261,10 +261,9 @@ class CONTENT_EXPORT RenderProcessHostImpl
   // Used to extend the lifetime of the sessions until the render view
   // in the renderer is fully closed. This is static because its also called
   // with mock hosts as input in test cases.
-  static void ReleaseOnCloseACK(
-      RenderProcessHost* host,
-      const SessionStorageNamespaceMap& sessions,
-      int view_route_id);
+  static void ReleaseOnCloseACK(RenderProcessHost* host,
+                                const SessionStorageNamespaceMap& sessions,
+                                int view_route_id);
 
   // Register/unregister the host identified by the host id in the global host
   // list.
@@ -859,10 +858,9 @@ class CONTENT_EXPORT RenderProcessHostImpl
 #endif
 
 #ifdef IE_REDCORE
-  bool useIE_;  //ysp+ {IE Embedded}
-  ResourceMessageFilter* resMsgFilter;	//ysp+ {IE Embedded}
+  bool use_ie_;                            // ysp+ {IE Embedded}
+  ResourceMessageFilter* res_msg_filter_;  // ysp+ {IE Embedded}
 #endif
-
   scoped_refptr<ResourceMessageFilter> resource_message_filter_;
   std::unique_ptr<FileSystemManagerImpl, BrowserThread::DeleteOnIOThread>
       file_system_manager_impl_;

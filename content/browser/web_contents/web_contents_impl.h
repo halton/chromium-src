@@ -108,7 +108,7 @@ struct FaviconURL;
 struct LoadNotificationDetails;
 struct MHTMLGenerationParams;
 #if defined(REDCORE) && defined(IE_REDCORE)
-class WebContentsIE;	//ysp+ {IE Embedded}
+class WebContentsIE;  // ysp+ {IE Embedded}
 #endif
 
 namespace mojom {
@@ -117,7 +117,7 @@ class CreateNewWindowParams;
 
 #if defined(OS_ANDROID)
 class WebContentsAndroid;
-#else  // !defined(OS_ANDROID)
+#else   // !defined(OS_ANDROID)
 class HostZoomMapObserver;
 #endif  // defined(OS_ANDROID)
 
@@ -628,7 +628,8 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   void Activate() override;
   void UpdatePreferredSize(const gfx::Size& pref_size) override;
 #if defined(REDCORE) && defined(IE_REDCORE)
-  void CreateNewIEWindow(const GURL& url, RendererMode mode); //ysp+ { Kernel switching
+  void CreateNewIEWindow(const GURL& url,
+                         RendererMode mode);  // ysp+ { Kernel switching
 #endif
   void CreateNewWidget(int32_t render_process_id,
                        int32_t route_id,
@@ -883,9 +884,7 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   bool SetDeviceEmulationSize(const gfx::Size& new_size);
   void ClearDeviceEmulationSize();
 
-  AudioStreamMonitor* audio_stream_monitor() {
-    return &audio_stream_monitor_;
-  }
+  AudioStreamMonitor* audio_stream_monitor() { return &audio_stream_monitor_; }
 
   ForwardingAudioStreamFactory* GetAudioStreamFactory();
 
@@ -998,9 +997,9 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   friend class WebContentsObserver;
   friend class WebContents;  // To implement factory methods.
 #if defined(REDCORE) && defined(IE_REDCORE)
-  friend class WebContentsIE; //ysp+ {IE Embedded}
-  RendererMode rendererMode_; //ysp+ {IE Embedded}
-  bool auto_seclect_; //YSP+ { Kernel switching }
+  friend class WebContentsIE;  // ysp+ {IE Embedded}
+  RendererMode rendererMode_;  // ysp+ {IE Embedded}
+  bool auto_seclect_;          // YSP+ { Kernel switching }
 #endif
   friend class RenderFrameHostImplBeforeUnloadBrowserTest;
   friend class WebContentsImplBrowserTest;

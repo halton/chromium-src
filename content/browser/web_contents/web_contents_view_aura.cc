@@ -102,7 +102,7 @@ WebContentsViewAura::RenderWidgetHostViewCreateFunction
 RenderWidgetHostViewAura* ToRenderWidgetHostViewAura(
     RenderWidgetHostView* view) {
   if (!view || (RenderViewHostFactory::has_factory() &&
-      !RenderViewHostFactory::is_real_render_view_host())) {
+                !RenderViewHostFactory::is_real_render_view_host())) {
     return nullptr;  // Can't cast to RenderWidgetHostViewAura in unit tests.
   }
 
@@ -119,10 +119,8 @@ RenderWidgetHostViewAura* ToRenderWidgetHostViewAura(
 class WebDragSourceAura : public NotificationObserver {
  public:
   WebDragSourceAura(aura::Window* window, WebContentsImpl* contents)
-      : window_(window),
-        contents_(contents) {
-    registrar_.Add(this,
-                   NOTIFICATION_WEB_CONTENTS_DISCONNECTED,
+      : window_(window), contents_(contents) {
+    registrar_.Add(this, NOTIFICATION_WEB_CONTENTS_DISCONNECTED,
                    Source<WebContents>(contents));
   }
 
@@ -168,10 +166,9 @@ void PrepareDragForFileContents(const DropData& drop_data,
 #endif
 
 #if defined(OS_WIN)
-void PrepareDragForDownload(
-    const DropData& drop_data,
-    ui::OSExchangeData::Provider* provider,
-    WebContentsImpl* web_contents) {
+void PrepareDragForDownload(const DropData& drop_data,
+                            ui::OSExchangeData::Provider* provider,
+                            WebContentsImpl* web_contents) {
   const GURL& page_url = web_contents->GetLastCommittedURL();
   const std::string& page_encoding = web_contents->GetEncoding();
 
@@ -179,22 +176,17 @@ void PrepareDragForDownload(
   base::string16 mime_type;
   base::FilePath file_name;
   GURL download_url;
-  if (!ParseDownloadMetadata(drop_data.download_metadata,
-                             &mime_type,
-                             &file_name,
-                             &download_url))
+  if (!ParseDownloadMetadata(drop_data.download_metadata, &mime_type,
+                             &file_name, &download_url))
     return;
 
   // Generate the file name based on both mime type and proposed file name.
   std::string default_name =
       GetContentClient()->browser()->GetDefaultDownloadName();
   base::FilePath generated_download_file_name =
-      net::GenerateFileName(download_url,
-                            std::string(),
-                            std::string(),
+      net::GenerateFileName(download_url, std::string(), std::string(),
                             base::UTF16ToUTF8(file_name.value()),
-                            base::UTF16ToUTF8(mime_type),
-                            default_name);
+                            base::UTF16ToUTF8(mime_type), default_name);
 
   // http://crbug.com/332579
   base::ThreadRestrictions::ScopedAllowIO allow_file_operations;
@@ -215,13 +207,9 @@ void PrepareDragForDownload(
   // Provide the data as file (CF_HDROP). A temporary download file with the
   // Zone.Identifier ADS (Alternate Data Stream) attached will be created.
   scoped_refptr<DragDownloadFile> download_file =
-      new DragDownloadFile(
-          download_path,
-          base::File(),
-          download_url,
-          Referrer(page_url, drop_data.referrer_policy),
-          page_encoding,
-          web_contents);
+      new DragDownloadFile(download_path, base::File(), download_url,
+                           Referrer(page_url, drop_data.referrer_policy),
+                           page_encoding, web_contents);
   ui::OSExchangeData::DownloadFileInfo file_download(base::FilePath(),
                                                      download_file.get());
   provider->SetDownloadFileInfo(file_download);
@@ -231,12 +219,10 @@ void PrepareDragForDownload(
 // Returns the FormatType to store file system files.
 const ui::Clipboard::FormatType& GetFileSystemFileFormatType() {
   static const char kFormatString[] = "chromium/x-file-system-files";
-  CR_DEFINE_STATIC_LOCAL(ui::Clipboard::FormatType,
-                         format,
+  CR_DEFINE_STATIC_LOCAL(ui::Clipboard::FormatType, format,
                          (ui::Clipboard::GetFormatType(kFormatString)));
   return format;
 }
-
 
 // Utility to fill a ui::OSExchangeDataProvider object from DropData.
 void PrepareDragData(const DropData& drop_data,
@@ -293,8 +279,8 @@ void PrepareDropData(DropData* drop_data, const ui::OSExchangeData& data) {
 
   GURL url;
   base::string16 url_title;
-  data.GetURLAndTitle(
-      ui::OSExchangeData::DO_NOT_CONVERT_FILENAMES, &url, &url_title);
+  data.GetURLAndTitle(ui::OSExchangeData::DO_NOT_CONVERT_FILENAMES, &url,
+                      &url_title);
   if (url.is_valid()) {
     drop_data->url = url;
     drop_data->url_title = url_title;
@@ -318,8 +304,8 @@ void PrepareDropData(DropData* drop_data, const ui::OSExchangeData& data) {
     drop_data->file_system_files = file_system_files;
 
   if (data.GetPickledData(ui::Clipboard::GetWebCustomDataFormatType(), &pickle))
-    ui::ReadCustomDataIntoMap(
-        pickle.data(), pickle.size(), &drop_data->custom_data);
+    ui::ReadCustomDataIntoMap(pickle.data(), pickle.size(),
+                              &drop_data->custom_data);
 }
 
 // Utilities to convert between blink::WebDragOperationsMask and
@@ -343,7 +329,7 @@ blink::WebDragOperationsMask ConvertToWeb(int drag_op) {
     web_drag_op |= blink::kWebDragOperationMove;
   if (drag_op & ui::DragDropTypes::DRAG_LINK)
     web_drag_op |= blink::kWebDragOperationLink;
-  return (blink::WebDragOperationsMask) web_drag_op;
+  return (blink::WebDragOperationsMask)web_drag_op;
 }
 
 GlobalRoutingID GetRenderViewHostID(RenderViewHost* rvh) {
@@ -373,7 +359,8 @@ bool WindowIsMirrored(aura::Window* window) {
 }  // namespace
 
 class WebContentsViewAura::WindowObserver
-    : public aura::WindowObserver, public aura::WindowTreeHostObserver {
+    : public aura::WindowObserver,
+      public aura::WindowTreeHostObserver {
  public:
   explicit WindowObserver(WebContentsViewAura* view)
       : view_(view), host_window_(nullptr) {
@@ -516,8 +503,7 @@ WebContentsViewAura::~WebContentsViewAura() {
 void WebContentsViewAura::SizeChangedCommon(const gfx::Size& size) {
   if (web_contents_->GetInterstitialPage())
     web_contents_->GetInterstitialPage()->SetSize(size);
-  RenderWidgetHostView* rwhv =
-      web_contents_->GetRenderWidgetHostView();
+  RenderWidgetHostView* rwhv = web_contents_->GetRenderWidgetHostView();
   if (rwhv)
     rwhv->SetSize(size);
 }
@@ -525,8 +511,8 @@ void WebContentsViewAura::SizeChangedCommon(const gfx::Size& size) {
 void WebContentsViewAura::EndDrag(RenderWidgetHost* source_rwh,
                                   blink::WebDragOperationsMask ops) {
   drag_start_process_id_ = ChildProcessHost::kInvalidUniqueID;
-  drag_start_view_id_ = GlobalRoutingID(ChildProcessHost::kInvalidUniqueID,
-                                        MSG_ROUTING_NONE);
+  drag_start_view_id_ =
+      GlobalRoutingID(ChildProcessHost::kInvalidUniqueID, MSG_ROUTING_NONE);
 
   if (!web_contents_)
     return;
@@ -569,8 +555,7 @@ void WebContentsViewAura::EndDrag(RenderWidgetHost* source_rwh,
 
 void WebContentsViewAura::OnWebContentDestroying() {}
 
-WebContentsImpl* WebContentsViewAura::getWebContents()
-{
+WebContentsImpl* WebContentsViewAura::getWebContents() {
   return web_contents_;
 }
 
@@ -630,8 +615,8 @@ gfx::NativeView WebContentsViewAura::GetRenderWidgetHostViewParent() const {
 bool WebContentsViewAura::IsValidDragTarget(
     RenderWidgetHostImpl* target_rwh) const {
   return target_rwh->GetProcess()->GetID() == drag_start_process_id_ ||
-      GetRenderViewHostID(web_contents_->GetRenderViewHost()) !=
-      drag_start_view_id_;
+         GetRenderViewHostID(web_contents_->GetRenderViewHost()) !=
+             drag_start_view_id_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -818,7 +803,8 @@ void WebContentsViewAura::CreateView(const gfx::Size& initial_size,
 }
 
 RenderWidgetHostViewBase* WebContentsViewAura::CreateViewForWidget(
-    RenderWidgetHost* render_widget_host, bool is_guest_view_hack) {
+    RenderWidgetHost* render_widget_host,
+    bool is_guest_view_hack) {
   if (render_widget_host->GetView()) {
     // During testing, the view will already be set up in most cases to the
     // test view, so we don't want to clobber it with a real one. To verify that
@@ -877,8 +863,7 @@ void WebContentsViewAura::SetPageTitle(const base::string16& title) {
   }
 }
 
-void WebContentsViewAura::RenderViewCreated(RenderViewHost* host) {
-}
+void WebContentsViewAura::RenderViewCreated(RenderViewHost* host) {}
 
 void WebContentsViewAura::RenderViewReady() {}
 
@@ -926,13 +911,12 @@ void WebContentsViewAura::ShowContextMenu(RenderFrameHost* render_frame_host,
   }
 }
 
-void WebContentsViewAura::StartDragging(
-    const DropData& drop_data,
-    blink::WebDragOperationsMask operations,
-    const gfx::ImageSkia& image,
-    const gfx::Vector2d& image_offset,
-    const DragEventSourceInfo& event_info,
-    RenderWidgetHostImpl* source_rwh) {
+void WebContentsViewAura::StartDragging(const DropData& drop_data,
+                                        blink::WebDragOperationsMask operations,
+                                        const gfx::ImageSkia& image,
+                                        const gfx::Vector2d& image_offset,
+                                        const DragEventSourceInfo& event_info,
+                                        RenderWidgetHostImpl* source_rwh) {
   aura::Window* root_window = GetNativeView()->GetRootWindow();
   if (!aura::client::GetDragDropClient(root_window)) {
     web_contents_->SystemDragEnded(source_rwh);
@@ -973,12 +957,10 @@ void WebContentsViewAura::StartDragging(
     gfx::NativeView content_native_view = GetContentNativeView();
     base::MessageLoopCurrent::ScopedNestableTaskAllower allow;
     result_op = aura::client::GetDragDropClient(root_window)
-        ->StartDragAndDrop(data,
-                           root_window,
-                           content_native_view,
-                           event_info.event_location,
-                           ConvertFromWeb(operations),
-                           event_info.event_source);
+                    ->StartDragAndDrop(data, root_window, content_native_view,
+                                       event_info.event_location,
+                                       ConvertFromWeb(operations),
+                                       event_info.event_source);
   }
 
   // Bail out immediately if the contents view window is gone. Note that it is
@@ -1102,19 +1084,17 @@ bool WebContentsViewAura::CanFocus() {
   // Do not take the focus if the render widget host view aura is gone or
   // is in the process of shutting down because neither the view window nor
   // this window can handle key events.
-  RenderWidgetHostViewAura* view = ToRenderWidgetHostViewAura(
-      web_contents_->GetRenderWidgetHostView());
+  RenderWidgetHostViewAura* view =
+      ToRenderWidgetHostViewAura(web_contents_->GetRenderWidgetHostView());
   if (view != nullptr && !view->IsClosing())
     return true;
 
   return false;
 }
 
-void WebContentsViewAura::OnCaptureLost() {
-}
+void WebContentsViewAura::OnCaptureLost() {}
 
-void WebContentsViewAura::OnPaint(const ui::PaintContext& context) {
-}
+void WebContentsViewAura::OnPaint(const ui::PaintContext& context) {}
 
 void WebContentsViewAura::OnDeviceScaleFactorChanged(
     float old_device_scale_factor,
@@ -1129,11 +1109,9 @@ void WebContentsViewAura::OnWindowDestroying(aura::Window* window) {
   navigation_overlay_.reset();
 }
 
-void WebContentsViewAura::OnWindowDestroyed(aura::Window* window) {
-}
+void WebContentsViewAura::OnWindowDestroyed(aura::Window* window) {}
 
-void WebContentsViewAura::OnWindowTargetVisibilityChanged(bool visible) {
-}
+void WebContentsViewAura::OnWindowTargetVisibilityChanged(bool visible) {}
 
 void WebContentsViewAura::OnWindowOcclusionChanged(
     aura::Window::OcclusionState occlusion_state) {
@@ -1144,14 +1122,12 @@ bool WebContentsViewAura::HasHitTestMask() const {
   return false;
 }
 
-void WebContentsViewAura::GetHitTestMask(gfx::Path* mask) const {
-}
+void WebContentsViewAura::GetHitTestMask(gfx::Path* mask) const {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // WebContentsViewAura, ui::EventHandler implementation:
 
-void WebContentsViewAura::OnKeyEvent(ui::KeyEvent* event) {
-}
+void WebContentsViewAura::OnKeyEvent(ui::KeyEvent* event) {}
 
 void WebContentsViewAura::OnMouseEvent(ui::MouseEvent* event) {
   if (!web_contents_->GetDelegate())
@@ -1240,8 +1216,9 @@ int WebContentsViewAura::OnDragUpdated(const ui::DropTargetEvent& event) {
       static_cast<RenderWidgetHostViewBase*>(
           web_contents_->GetRenderWidgetHostView())
           ->TransformPointToCoordSpaceForView(
-              screen_pt, static_cast<RenderWidgetHostViewBase*>(
-                             current_rwh_for_drag_->GetView()),
+              screen_pt,
+              static_cast<RenderWidgetHostViewBase*>(
+                  current_rwh_for_drag_->GetView()),
               &transformed_screen_point);
       current_rwh_for_drag_->DragTargetDragLeave(transformed_leave_point,
                                                  transformed_screen_point);
@@ -1265,7 +1242,7 @@ int WebContentsViewAura::OnDragUpdated(const ui::DropTargetEvent& event) {
 
 void WebContentsViewAura::OnDragExited() {
   if (current_rvh_for_drag_ !=
-      GetRenderViewHostID(web_contents_->GetRenderViewHost()) ||
+          GetRenderViewHostID(web_contents_->GetRenderViewHost()) ||
       !current_drop_data_) {
     return;
   }

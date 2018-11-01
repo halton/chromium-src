@@ -160,15 +160,13 @@ base::LazyInstance<RoutingIDWidgetMap>::DestructorAtExit
 // iteration (or NULL if there isn't any left).
 class RenderWidgetHostIteratorImpl : public RenderWidgetHostIterator {
  public:
-  RenderWidgetHostIteratorImpl()
-      : current_index_(0) {
-  }
+  RenderWidgetHostIteratorImpl() : current_index_(0) {}
 
   ~RenderWidgetHostIteratorImpl() override {}
 
   void Add(RenderWidgetHost* host) {
-    hosts_.push_back(RenderWidgetHostID(host->GetProcess()->GetID(),
-                                        host->GetRoutingID()));
+    hosts_.push_back(
+        RenderWidgetHostID(host->GetProcess()->GetID(), host->GetRoutingID()));
   }
 
   // RenderWidgetHostIterator:
@@ -332,10 +330,10 @@ base::LazyInstance<UnboundWidgetInputHandler>::Leaky g_unbound_input_handler =
 }  // namespace
 
 #if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
-//bool RenderWidgetHostImpl::watermark_init_ = false;
-//base::string16 watermark_string_;
-//uint32_t watermark_color_ = 0;
-//int watermark_font_size_ = 0;
+// bool RenderWidgetHostImpl::watermark_init_ = false;
+// base::string16 watermark_string_;
+// uint32_t watermark_color_ = 0;
+// int watermark_font_size_ = 0;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -453,20 +451,18 @@ RenderWidgetHostImpl::~RenderWidgetHostImpl() {
 }
 
 // static
-RenderWidgetHost* RenderWidgetHost::FromID(
-    int32_t process_id,
-    int32_t routing_id) {
+RenderWidgetHost* RenderWidgetHost::FromID(int32_t process_id,
+                                           int32_t routing_id) {
   return RenderWidgetHostImpl::FromID(process_id, routing_id);
 }
 
 // static
-RenderWidgetHostImpl* RenderWidgetHostImpl::FromID(
-    int32_t process_id,
-    int32_t routing_id) {
+RenderWidgetHostImpl* RenderWidgetHostImpl::FromID(int32_t process_id,
+                                                   int32_t routing_id) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   RoutingIDWidgetMap* widgets = g_routing_id_widget_map.Pointer();
-  RoutingIDWidgetMap::iterator it = widgets->find(
-      RenderWidgetHostID(process_id, routing_id));
+  RoutingIDWidgetMap::iterator it =
+      widgets->find(RenderWidgetHostID(process_id, routing_id));
   return it == widgets->end() ? NULL : it->second;
 }
 
@@ -568,8 +564,8 @@ void RenderWidgetHostImpl::SendScreenRects() {
   last_view_screen_rect_ = view_->GetViewBounds();
   last_window_screen_rect_ = view_->GetBoundsInRootWindow();
   view_->WillSendScreenRects();
-  Send(new ViewMsg_UpdateScreenRects(
-      GetRoutingID(), last_view_screen_rect_, last_window_screen_rect_));
+  Send(new ViewMsg_UpdateScreenRects(GetRoutingID(), last_view_screen_rect_,
+                                     last_window_screen_rect_));
   waiting_for_screen_rects_ack_ = true;
 }
 
@@ -666,7 +662,7 @@ bool RenderWidgetHostImpl::IsLoading() const {
   return is_loading_;
 }
 
-bool RenderWidgetHostImpl::OnMessageReceived(const IPC::Message &msg) {
+bool RenderWidgetHostImpl::OnMessageReceived(const IPC::Message& msg) {
   // Only process most messages if the RenderWidget is alive.
   if (!renderer_initialized())
     return false;
@@ -751,8 +747,7 @@ void RenderWidgetHostImpl::WasHidden() {
   bool is_visible = false;
   NotificationService::current()->Notify(
       NOTIFICATION_RENDER_WIDGET_VISIBILITY_CHANGED,
-      Source<RenderWidgetHost>(this),
-      Details<bool>(&is_visible));
+      Source<RenderWidgetHost>(this), Details<bool>(&is_visible));
   for (auto& observer : observers_)
     observer.RenderWidgetHostVisibilityChanged(this, false);
 }
@@ -783,8 +778,7 @@ void RenderWidgetHostImpl::WasShown(bool record_presentation_time) {
   bool is_visible = true;
   NotificationService::current()->Notify(
       NOTIFICATION_RENDER_WIDGET_VISIBILITY_CHANGED,
-      Source<RenderWidgetHost>(this),
-      Details<bool>(&is_visible));
+      Source<RenderWidgetHost>(this), Details<bool>(&is_visible));
   for (auto& observer : observers_)
     observer.RenderWidgetHostVisibilityChanged(this, true);
 
@@ -1088,7 +1082,7 @@ void RenderWidgetHostImpl::ViewDestroyed() {
 #if defined(OS_MACOSX)
 void RenderWidgetHostImpl::PauseForPendingResizeOrRepaints() {
   TRACE_EVENT0("browser",
-      "RenderWidgetHostImpl::PauseForPendingResizeOrRepaints");
+               "RenderWidgetHostImpl::PauseForPendingResizeOrRepaints");
 
   // Do not pause if the view is hidden.
   if (is_hidden())
@@ -1123,8 +1117,8 @@ void RenderWidgetHostImpl::PauseForPendingResizeOrRepaints() {
   // We should never be called recursively; this can theoretically lead to
   // infinite recursion and almost certainly leads to lower performance.
   DCHECK(!in_get_backing_store_) << "WaitForSurface called recursively!";
-  base::AutoReset<bool> auto_reset_in_get_backing_store(
-      &in_get_backing_store_, true);
+  base::AutoReset<bool> auto_reset_in_get_backing_store(&in_get_backing_store_,
+                                                        true);
 
   // We might have a surface that we can use already.
   if (!view_->ShouldContinueToPauseForFrame())
@@ -1597,8 +1591,7 @@ void RenderWidgetHostImpl::RemoveKeyPressEventCallback(
     const KeyPressEventCallback& callback) {
   for (size_t i = 0; i < key_press_event_callbacks_.size(); ++i) {
     if (key_press_event_callbacks_[i].Equals(callback)) {
-      key_press_event_callbacks_.erase(
-          key_press_event_callbacks_.begin() + i);
+      key_press_event_callbacks_.erase(key_press_event_callbacks_.begin() + i);
       return;
     }
   }
@@ -1701,10 +1694,8 @@ void RenderWidgetHostImpl::DragSourceEndedAt(
     const gfx::PointF& client_pt,
     const gfx::PointF& screen_pt,
     blink::WebDragOperation operation) {
-  Send(new DragMsg_SourceEnded(GetRoutingID(),
-                               client_pt,
-                               screen_pt,
-                               operation));
+  Send(
+      new DragMsg_SourceEnded(GetRoutingID(), client_pt, screen_pt, operation));
 }
 
 void RenderWidgetHostImpl::DragSourceSystemDragEnded() {
@@ -1824,8 +1815,8 @@ void RenderWidgetHostImpl::OnStartDragging(
     const SkBitmap& bitmap,
     const gfx::Vector2d& bitmap_offset_in_dip,
     const DragEventSourceInfo& event_info) {
-#ifdef REDCORE  //ysp+ { disable drag
-  if(disable_drag_) {
+#ifdef REDCORE  // ysp+ { disable drag
+  if (disable_drag_) {
     DragSourceSystemDragEnded();
     return;
   }
@@ -2103,10 +2094,9 @@ void RenderWidgetHostImpl::OnInputEventAckTimeout() {
 
 void RenderWidgetHostImpl::RendererIsUnresponsive(
     base::RepeatingClosure restart_hang_monitor_timeout) {
-  NotificationService::current()->Notify(
-      NOTIFICATION_RENDER_WIDGET_HOST_HANG,
-      Source<RenderWidgetHost>(this),
-      NotificationService::NoDetails());
+  NotificationService::current()->Notify(NOTIFICATION_RENDER_WIDGET_HOST_HANG,
+                                         Source<RenderWidgetHost>(this),
+                                         NotificationService::NoDetails());
   is_unresponsive_ = true;
 
   if (delegate_) {
@@ -2370,8 +2360,7 @@ void RenderWidgetHostImpl::OnProcessSwapMessage(const IPC::Message& message) {
   rph->OnMessageReceived(message);
 }
 
-void RenderWidgetHostImpl::OnLockMouse(bool user_gesture,
-                                       bool privileged) {
+void RenderWidgetHostImpl::OnLockMouse(bool user_gesture, bool privileged) {
   if (pending_mouse_lock_request_) {
     Send(new ViewMsg_LockMouse_ACK(routing_id_, false));
     return;
@@ -2470,7 +2459,8 @@ bool RenderWidgetHostImpl::KeyPressListenersHandleEvent(
 }
 
 InputEventAckState RenderWidgetHostImpl::FilterInputEvent(
-    const blink::WebInputEvent& event, const ui::LatencyInfo& latency_info) {
+    const blink::WebInputEvent& event,
+    const ui::LatencyInfo& latency_info) {
   // Don't ignore touch cancel events, since they may be sent while input
   // events are being ignored in order to keep the renderer from getting
   // confused about how many touches are active.
@@ -2590,8 +2580,8 @@ void RenderWidgetHostImpl::OnWheelEventAck(
                                          wheel_event.event);
 
   if (!is_hidden() && view_) {
-    if (ack_result != INPUT_EVENT_ACK_STATE_CONSUMED &&
-        delegate_ && delegate_->HandleWheelEvent(wheel_event.event)) {
+    if (ack_result != INPUT_EVENT_ACK_STATE_CONSUMED && delegate_ &&
+        delegate_->HandleWheelEvent(wheel_event.event)) {
       ack_result = INPUT_EVENT_ACK_STATE_CONSUMED;
     }
     view_->WheelEventAck(wheel_event.event, ack_result);
@@ -2666,7 +2656,7 @@ bool RenderWidgetHostImpl::GotResponseToLockMouseRequest(bool allowed) {
   }
 
   pending_mouse_lock_request_ = false;
-  if (!view_ || !view_->HasFocus()|| !view_->LockMouse()) {
+  if (!view_ || !view_->HasFocus() || !view_->LockMouse()) {
     Send(new ViewMsg_LockMouse_ACK(routing_id_, false));
     return false;
   }
@@ -2778,12 +2768,12 @@ void RenderWidgetHostImpl::OnSnapshotReceived(int snapshot_id,
 }
 
 BrowserAccessibilityManager*
-    RenderWidgetHostImpl::GetRootBrowserAccessibilityManager() {
+RenderWidgetHostImpl::GetRootBrowserAccessibilityManager() {
   return delegate_ ? delegate_->GetRootBrowserAccessibilityManager() : nullptr;
 }
 
 BrowserAccessibilityManager*
-    RenderWidgetHostImpl::GetOrCreateRootBrowserAccessibilityManager() {
+RenderWidgetHostImpl::GetOrCreateRootBrowserAccessibilityManager() {
   return delegate_ ? delegate_->GetOrCreateRootBrowserAccessibilityManager()
                    : nullptr;
 }
@@ -2809,27 +2799,27 @@ void RenderWidgetHostImpl::RequestCompositorFrameSink(
     viz::mojom::CompositorFrameSinkRequest compositor_frame_sink_request,
     viz::mojom::CompositorFrameSinkClientPtr compositor_frame_sink_client) {
   if (enable_viz_) {
-      // Connects the viz process end of CompositorFrameSink message pipes. The
-      // renderer compositor may request a new CompositorFrameSink on context
-      // loss, which will destroy the existing CompositorFrameSink.
-      auto callback = base::BindOnce(
-          [](viz::HostFrameSinkManager* manager,
-             viz::mojom::CompositorFrameSinkRequest request,
-             viz::mojom::CompositorFrameSinkClientPtr client,
-             const viz::FrameSinkId& frame_sink_id) {
-            manager->CreateCompositorFrameSink(
-                frame_sink_id, std::move(request), std::move(client));
-          },
-          base::Unretained(GetHostFrameSinkManager()),
-          std::move(compositor_frame_sink_request),
-          std::move(compositor_frame_sink_client));
+    // Connects the viz process end of CompositorFrameSink message pipes. The
+    // renderer compositor may request a new CompositorFrameSink on context
+    // loss, which will destroy the existing CompositorFrameSink.
+    auto callback = base::BindOnce(
+        [](viz::HostFrameSinkManager* manager,
+           viz::mojom::CompositorFrameSinkRequest request,
+           viz::mojom::CompositorFrameSinkClientPtr client,
+           const viz::FrameSinkId& frame_sink_id) {
+          manager->CreateCompositorFrameSink(frame_sink_id, std::move(request),
+                                             std::move(client));
+        },
+        base::Unretained(GetHostFrameSinkManager()),
+        std::move(compositor_frame_sink_request),
+        std::move(compositor_frame_sink_client));
 
-      if (view_)
-        std::move(callback).Run(view_->GetFrameSinkId());
-      else
-        create_frame_sink_callback_ = std::move(callback);
+    if (view_)
+      std::move(callback).Run(view_->GetFrameSinkId());
+    else
+      create_frame_sink_callback_ = std::move(callback);
 
-      return;
+    return;
   }
 
   // Consider any bitmaps registered with the old CompositorFrameSink as gone,
@@ -3136,8 +3126,11 @@ void RenderWidgetHostImpl::OnLocalSurfaceIdChanged(
 }
 
 #if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
-void RenderWidgetHostImpl::SetWatermarkString(const std::vector<base::string16>& str, const uint32_t color, const int font_size) {
-  watermark_string_ = str;
+void RenderWidgetHostImpl::SetWatermarkString(
+    const std::vector<base::string16>& watermark_string,
+    const uint32_t color,
+    const int font_size) {
+  watermark_string_ = watermark_string;
   watermark_color_ = color;
   watermark_font_size_ = font_size;
   watermark_init_ = true;
@@ -3147,7 +3140,8 @@ void RenderWidgetHostImpl::SetWatermarkString(const std::vector<base::string16>&
 void RenderWidgetHostImpl::UpdateWatermark() {
   if (!watermark_init_)
     return;
-  Send(new ViewMsg_SetWatermarkString(GetRoutingID(), watermark_string_, watermark_color_, watermark_font_size_));
+  Send(new ViewMsg_SetWatermarkString(GetRoutingID(), watermark_string_,
+                                      watermark_color_, watermark_font_size_));
 }
 #endif
 

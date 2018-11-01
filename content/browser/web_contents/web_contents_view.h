@@ -82,8 +82,8 @@ class WebContentsView {
   // Get the bounds of the View, relative to the parent.
   virtual gfx::Rect GetViewBounds() const = 0;
 
-  virtual void CreateView(
-      const gfx::Size& initial_size, gfx::NativeView context) = 0;
+  virtual void CreateView(const gfx::Size& initial_size,
+                          gfx::NativeView context) = 0;
 
   // Sets up the View that holds the rendered web page, receives messages for
   // it and contains page plugins. The host view should be sized to the current
@@ -94,7 +94,8 @@ class WebContentsView {
   // TODO(lazyboy): Remove |is_guest_view_hack| once http://crbug.com/330264 is
   // fixed.
   virtual RenderWidgetHostViewBase* CreateViewForWidget(
-      RenderWidgetHost* render_widget_host, bool is_guest_view_hack) = 0;
+      RenderWidgetHost* render_widget_host,
+      bool is_guest_view_hack) = 0;
 
   // Creates a new View that holds a popup and receives messages for it.
   virtual RenderWidgetHostViewBase* CreateViewForPopupWidget(

@@ -81,7 +81,7 @@ struct ViewHostMsg_SelectionBounds_Params;
 namespace blink {
 class WebInputEvent;
 class WebMouseEvent;
-}
+}  // namespace blink
 
 namespace cc {
 struct BeginFrameAck;
@@ -91,7 +91,7 @@ namespace gfx {
 class Image;
 class Range;
 class Vector2dF;
-}
+}  // namespace gfx
 
 namespace ui {
 enum class DomCode;
@@ -722,7 +722,9 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   void RendererIsResponsive();
 
 #ifdef REDCORE
-  static void setDisableDrag(bool DisableDrag) { disable_drag_ = DisableDrag; } //YSP+ { disable drag }
+  static void setDisableDrag(bool disable_drag) {
+    disable_drag_ = disable_drag;
+  }  // YSP+ { disable drag }
 #endif
 
  protected:
@@ -819,8 +821,7 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   void OnAutoscrollEnd();
   void OnTextInputStateChanged(const TextInputState& params);
 
-  void OnLockMouse(bool user_gesture,
-                   bool privileged);
+  void OnLockMouse(bool user_gesture, bool privileged);
   void OnUnlockMouse();
   void OnSelectionBoundsChanged(
       const ViewHostMsg_SelectionBounds_Params& params);

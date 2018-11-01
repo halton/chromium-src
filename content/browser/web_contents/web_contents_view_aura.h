@@ -26,7 +26,7 @@
 namespace ui {
 class DropTargetEvent;
 class TouchSelectionController;
-}
+}  // namespace ui
 
 namespace content {
 class GestureNavSimple;
@@ -67,10 +67,10 @@ class CONTENT_EXPORT WebContentsViewAura
   static void InstallCreateHookForTests(
       RenderWidgetHostViewCreateFunction create_render_widget_host_view);
 
-  WebContentsImpl* getWebContents();  
+  WebContentsImpl* getWebContents();
 
   void OnBoundsChanged(const gfx::Rect& old_bounds,
-                    const gfx::Rect& new_bounds) override;  
+                       const gfx::Rect& new_bounds) override;
 
   void OnWebContentDestroying() override;
 

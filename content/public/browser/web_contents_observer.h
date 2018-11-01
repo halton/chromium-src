@@ -258,10 +258,9 @@ class CONTENT_EXPORT WebContentsObserver : public IPC::Listener {
   virtual void DidChangeVisibleSecurityState() {}
 
   // This method is invoked when content was loaded from an in-memory cache.
-  virtual void DidLoadResourceFromMemoryCache(
-      const GURL& url,
-      const std::string& mime_type,
-      ResourceType resource_type) {}
+  virtual void DidLoadResourceFromMemoryCache(const GURL& url,
+                                              const std::string& mime_type,
+                                              ResourceType resource_type) {}
 
   // This method is invoked when a resource associate with the frame
   // |render_frame_host| has been loaded, successfully or not. |request_id| will
@@ -517,13 +516,15 @@ class CONTENT_EXPORT WebContentsObserver : public IPC::Listener {
   // focus.
   virtual void OnWebContentsFocused(RenderWidgetHost* render_widget_host) {}
 
-  #ifdef REDCORE
-  #ifdef IE_REDCORE
-      //ysp+{IE SWA}
-      virtual void OnGetLoginContext(RenderFrameHost* render_frame_host,
-	  const std::string& url, const std::string& userName, const std::string& userPwd) {}
-  #endif /*IE_REDCORE*/
-  #endif /*REDCORE*/
+#ifdef REDCORE
+#ifdef IE_REDCORE
+  // ysp+{IE SWA}
+  virtual void OnGetLoginContext(RenderFrameHost* render_frame_host,
+                                 const std::string& url,
+                                 const std::string& username,
+                                 const std::string& password) {}
+#endif /*IE_REDCORE*/
+#endif /*REDCORE*/
 
   // Notification that the |render_widget_host| for this WebContents has lost
   // focus.

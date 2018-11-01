@@ -13,11 +13,11 @@
 #include "content/browser/renderer_host/overscroll_controller_delegate.h"
 #include "content/browser/renderer_host/render_view_host_delegate_view.h"
 #include "content/browser/web_contents/web_contents_view.h"
+#include "content/browser/web_contents/web_contents_view_aura.h"
 #include "content/common/content_export.h"
+#include "ui/aura/client/drag_drop_delegate.h"
 #include "ui/aura/window_delegate.h"
 #include "ui/aura/window_observer.h"
-#include "ui/aura/client/drag_drop_delegate.h"
-#include "content/browser/web_contents/web_contents_view_aura.h"
 
 namespace aura {
 class Window;
@@ -26,7 +26,7 @@ class Window;
 namespace ui {
 class DropTargetEvent;
 class TouchSelectionController;
-}
+}  // namespace ui
 
 namespace content {
 class GestureNavSimple;

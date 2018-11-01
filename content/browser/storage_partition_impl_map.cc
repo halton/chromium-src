@@ -60,8 +60,8 @@
 #include "content/browser/ysp_resource_replace_interceptor.h"
 #endif
 
-using storage::FileSystemContext;
 using storage::BlobStorageContext;
+using storage::FileSystemContext;
 
 namespace content {
 
@@ -120,12 +120,10 @@ class BlobProtocolHandler : public net::URLRequestJobFactory::ProtocolHandler {
 // TODO(nasko): Move extension related path code out of content.
 const base::FilePath::CharType kStoragePartitionDirname[] =
     FILE_PATH_LITERAL("Storage");
-const base::FilePath::CharType kExtensionsDirname[] =
-    FILE_PATH_LITERAL("ext");
+const base::FilePath::CharType kExtensionsDirname[] = FILE_PATH_LITERAL("ext");
 const base::FilePath::CharType kDefaultPartitionDirname[] =
     FILE_PATH_LITERAL("def");
-const base::FilePath::CharType kTrashDirname[] =
-    FILE_PATH_LITERAL("trash");
+const base::FilePath::CharType kTrashDirname[] = FILE_PATH_LITERAL("trash");
 
 // Because partition names are user specified, they can be arbitrarily long
 // which makes them unsuitable for paths names. We use a truncation of a
@@ -163,15 +161,16 @@ const int kAllFileTypes = base::FileEnumerator::FILES |
                           base::FileEnumerator::DIRECTORIES |
                           base::FileEnumerator::SHOW_SYM_LINKS;
 #else
-const int kAllFileTypes = base::FileEnumerator::FILES |
-                          base::FileEnumerator::DIRECTORIES;
+const int kAllFileTypes =
+    base::FileEnumerator::FILES | base::FileEnumerator::DIRECTORIES;
 #endif
 
 base::FilePath GetStoragePartitionDomainPath(
     const std::string& partition_domain) {
   CHECK(base::IsStringUTF8(partition_domain));
 
-  return base::FilePath(kStoragePartitionDirname).Append(kExtensionsDirname)
+  return base::FilePath(kStoragePartitionDirname)
+      .Append(kExtensionsDirname)
       .Append(base::FilePath::FromUTF8Unsafe(partition_domain));
 }
 
@@ -193,8 +192,7 @@ void ObliterateOneDirectory(const base::FilePath& current_dir,
 
     for (std::vector<base::FilePath>::const_iterator to_keep =
              paths_to_keep.begin();
-         to_keep != paths_to_keep.end();
-         ++to_keep) {
+         to_keep != paths_to_keep.end(); ++to_keep) {
       if (to_delete == *to_keep) {
         action = kSkip;
         break;
@@ -250,8 +248,7 @@ void BlockingObliteratePath(
   // Reduce |paths_to_keep| set to those under the root and actually on disk.
   std::vector<base::FilePath> valid_paths_to_keep;
   for (std::vector<base::FilePath>::const_iterator it = paths_to_keep.begin();
-       it != paths_to_keep.end();
-       ++it) {
+       it != paths_to_keep.end(); ++it) {
     if (root.IsParent(*it) && base::PathExists(*it))
       valid_paths_to_keep.push_back(*it);
   }
@@ -269,7 +266,7 @@ void BlockingObliteratePath(
   // |valid_paths_to_keep|.
   std::vector<base::FilePath> paths_to_consider;
   paths_to_consider.push_back(root);
-  while(!paths_to_consider.empty()) {
+  while (!paths_to_consider.empty()) {
     base::FilePath path = paths_to_consider.back();
     paths_to_consider.pop_back();
     ObliterateOneDirectory(path, valid_paths_to_keep, &paths_to_consider);
@@ -363,8 +360,7 @@ base::FilePath StoragePartitionImplMap::GetStoragePartitionPath(
     // For analysis of why we can ignore collisions, see the comment above
     // kPartitionNameHashBytes.
     char buffer[kPartitionNameHashBytes];
-    crypto::SHA256HashString(partition_name, &buffer[0],
-                             sizeof(buffer));
+    crypto::SHA256HashString(partition_name, &buffer[0], sizeof(buffer));
     return path.AppendASCII(base::HexEncode(buffer, sizeof(buffer)));
   }
 
@@ -378,8 +374,7 @@ StoragePartitionImplMap::StoragePartitionImplMap(
           {base::MayBlock(), base::TaskPriority::BEST_EFFORT})),
       resource_context_initialized_(false) {}
 
-StoragePartitionImplMap::~StoragePartitionImplMap() {
-}
+StoragePartitionImplMap::~StoragePartitionImplMap() {}
 
 StoragePartitionImpl* StoragePartitionImplMap::Get(
     const std::string& partition_domain,
@@ -387,8 +382,8 @@ StoragePartitionImpl* StoragePartitionImplMap::Get(
     bool in_memory,
     bool can_create) {
   // Find the previously created partition if it's available.
-  StoragePartitionConfig partition_config(
-      partition_domain, partition_name, in_memory);
+  StoragePartitionConfig partition_config(partition_domain, partition_name,
+                                          in_memory);
 
   PartitionMap::const_iterator it = partitions_.find(partition_config);
   if (it != partitions_.end())
@@ -426,14 +421,14 @@ StoragePartitionImpl* StoragePartitionImplMap::Get(
       browser_context_->GetResourceContext()));
   request_interceptors.push_back(std::make_unique<AppCacheInterceptor>());
 #ifdef REDCORE
-  request_interceptors.push_back(std::make_unique<YSPResourceReplaceInterceptor>());
+  request_interceptors.push_back(
+      std::make_unique<YSPResourceReplaceInterceptor>());
 #endif
 
   // These calls must happen after StoragePartitionImpl::Create().
   if (partition_domain.empty()) {
-    partition->SetURLRequestContext(
-        browser_context_->CreateRequestContext(
-            &protocol_handlers, std::move(request_interceptors)));
+    partition->SetURLRequestContext(browser_context_->CreateRequestContext(
+        &protocol_handlers, std::move(request_interceptors)));
   } else {
     partition->SetURLRequestContext(
         browser_context_->CreateRequestContextForStoragePartition(
@@ -441,10 +436,10 @@ StoragePartitionImpl* StoragePartitionImplMap::Get(
             std::move(request_interceptors)));
   }
   partition->SetMediaURLRequestContext(
-      partition_domain.empty() ?
-      browser_context_->CreateMediaRequestContext() :
-      browser_context_->CreateMediaRequestContextForStoragePartition(
-          partition->GetPath(), in_memory));
+      partition_domain.empty()
+          ? browser_context_->CreateMediaRequestContext()
+          : browser_context_->CreateMediaRequestContextForStoragePartition(
+                partition->GetPath(), in_memory));
   partition->GetCookieStoreContext()->ListenToCookieChanges(
       partition->GetNetworkContext(), base::DoNothing());
 
@@ -473,8 +468,8 @@ void StoragePartitionImplMap::AsyncObliterate(
   std::string partition_name;
   bool in_memory = false;
   GetContentClient()->browser()->GetStoragePartitionConfigForSite(
-      browser_context_, site, false, &partition_domain,
-      &partition_name, &in_memory);
+      browser_context_, site, false, &partition_domain, &partition_name,
+      &in_memory);
 
   // Find the active partitions for the domain. Because these partitions are
   // active, it is not possible to just delete the directories that contain
@@ -485,8 +480,7 @@ void StoragePartitionImplMap::AsyncObliterate(
   std::vector<StoragePartitionImpl*> active_partitions;
   std::vector<base::FilePath> paths_to_keep;
   for (PartitionMap::const_iterator it = partitions_.begin();
-       it != partitions_.end();
-       ++it) {
+       it != partitions_.end(); ++it) {
     const StoragePartitionConfig& config = it->first;
     if (config.partition_domain == partition_domain) {
       it->second->ClearData(
@@ -521,8 +515,7 @@ void StoragePartitionImplMap::GarbageCollect(
   // Include all paths for current StoragePartitions in the active_paths since
   // they cannot be deleted safely.
   for (PartitionMap::const_iterator it = partitions_.begin();
-       it != partitions_.end();
-       ++it) {
+       it != partitions_.end(); ++it) {
     const StoragePartitionConfig& config = it->first;
     if (!config.in_memory)
       active_paths->insert(it->second->GetPath());
@@ -542,8 +535,7 @@ void StoragePartitionImplMap::GarbageCollect(
 void StoragePartitionImplMap::ForEach(
     const BrowserContext::StoragePartitionCallback& callback) {
   for (PartitionMap::const_iterator it = partitions_.begin();
-       it != partitions_.end();
-       ++it) {
+       it != partitions_.end(); ++it) {
     callback.Run(it->second.get());
   }
 }

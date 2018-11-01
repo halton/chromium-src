@@ -20,9 +20,9 @@
 #include "base/observer_list.h"
 #include "base/sequenced_task_runner_helpers.h"
 #include "base/synchronization/lock.h"
+#include "components/download/public/common/download_file_factory.h"
 #include "components/download/public/common/download_item_impl_delegate.h"
 #include "components/download/public/common/download_url_parameters.h"
-#include "components/download/public/common/download_file_factory.h"
 #include "components/download/public/common/in_progress_download_manager.h"
 #include "components/download/public/common/url_download_handler.h"
 #include "content/browser/loader/navigation_url_loader.h"
@@ -31,9 +31,9 @@
 #include "content/public/browser/download_manager.h"
 #include "content/public/browser/download_manager_delegate.h"
 #include "content/public/browser/ssl_status.h"
+#include "net/log/net_log_with_source.h"
 #include "services/metrics/public/cpp/ukm_source_id.h"
 #include "services/network/public/mojom/url_loader.mojom.h"
-#include "net/log/net_log_with_source.h"
 
 namespace download {
 class DownloadFileFactory;
@@ -41,9 +41,9 @@ class DownloadItemFactory;
 class DownloadItemImpl;
 class DownloadRequestHandleInterface;
 #if defined(REDCORE) && defined(IE_REDCORE)
-class IEDownloadFileFactory;  //ysp+{IE Embedded}
+class IEDownloadFileFactory;  // ysp+{IE Embedded}
 #endif
-}
+}  // namespace download
 
 namespace content {
 class ResourceContext;
@@ -106,7 +106,7 @@ class CONTENT_EXPORT DownloadManagerImpl
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& YSPUserName, //YSP+ { User information isolation }
+      const std::string& ysp_username,  // YSP+ { User information isolation }
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -182,11 +182,12 @@ class CONTENT_EXPORT DownloadManagerImpl
       int frame_tree_node_id);
 
 #ifdef REDCORE
-    void RemoveDownloadsForUserid(std::string& userid) override; //TODO (matianzhi): YSP+ { clear user data }
+  void RemoveDownloadsForUserid(const std::string& userid)
+      override;  // TODO(matianzhi): YSP+ { clear user data }
 #endif
 
 #ifdef IE_REDCORE
-    void RegisterCallbackSucceeded() override;
+  void RegisterCallbackSucceeded() override;
 #endif
 
  private:
@@ -309,7 +310,8 @@ class CONTENT_EXPORT DownloadManagerImpl
 
 #if defined(REDCORE) && defined(IE_REDCORE)
   void OnGetNextidForIE(uint32_t id);
-  void DownloadUrlForIE(std::unique_ptr<download::DownloadUrlParameters> params, uint32_t id); //chjy test
+  void DownloadUrlForIE(std::unique_ptr<download::DownloadUrlParameters> params,
+                        uint32_t id);  // chjy test
 #endif
 
   // Factory for creation of downloads items.
@@ -375,8 +377,9 @@ class CONTENT_EXPORT DownloadManagerImpl
   IdCallbackVector id_callbacks_;
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-  std::unique_ptr<download::IEDownloadFileFactory> ie_file_factory_;  //ysp+ {IE Embedded}
-  bool download_file_init_flag_;  //ysp+ {IE Embedded}
+  std::unique_ptr<download::IEDownloadFileFactory>
+      ie_file_factory_;           // ysp+ {IE Embedded}
+  bool download_file_init_flag_;  // ysp+ {IE Embedded}
 #endif
 
   base::WeakPtrFactory<DownloadManagerImpl> weak_factory_;

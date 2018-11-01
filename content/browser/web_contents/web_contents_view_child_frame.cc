@@ -22,8 +22,7 @@ WebContentsViewChildFrame::WebContentsViewChildFrame(
     WebContentsImpl* web_contents,
     WebContentsViewDelegate* delegate,
     RenderViewHostDelegateView** delegate_view)
-    : web_contents_(web_contents),
-    delegate_(delegate) {
+    : web_contents_(web_contents), delegate_(delegate) {
   *delegate_view = this;
 }
 
@@ -190,8 +189,8 @@ void WebContentsViewChildFrame::StartDragging(
     const DragEventSourceInfo& event_info,
     RenderWidgetHostImpl* source_rwh) {
   if (auto* view = GetOuterDelegateView()) {
-    view->StartDragging(
-        drop_data, ops, image, image_offset, event_info, source_rwh);
+    view->StartDragging(drop_data, ops, image, image_offset, event_info,
+                        source_rwh);
   } else {
     web_contents_->GetOuterWebContents()->SystemDragEnded(source_rwh);
   }

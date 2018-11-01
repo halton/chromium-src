@@ -197,9 +197,9 @@ void WebContentsIE::Init(const WebContents::CreateParams& params) {
   init_as_hide_ = params.initially_hidden;
   __super::Init(params);
 
-  //关闭IE 检查发行商证书是否吊销，防止IE弹出提示窗口
+  // 关闭IE 检查发行商证书是否吊销，防止IE弹出提示窗口
   base::win::RegKey key;
-  long ret = key.Open(
+  int64_t ret = key.Open(
       HKEY_CURRENT_USER,
       L"Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
       KEY_ALL_ACCESS);
@@ -427,11 +427,12 @@ void WebContentsIE::SetParentNativeViewAccessible(
   if (accessible_parent == NULL)
     return;
   IDispatch* pAccDisp = NULL;
-  accessible_parent->get_accParent((IDispatch**)&pAccDisp);
+  accessible_parent->get_accParent(reinterpret_cast<IDispatch**>(&pAccDisp));
   if (pAccDisp == NULL)
     return;
   IAccessible2* pAccParent = NULL;
-  pAccDisp->QueryInterface(IID_IAccessible2, (void**)&pAccParent);
+  pAccDisp->QueryInterface(IID_IAccessible2,
+                           reinterpret_cast<void**>(&pAccParent));
   if (pAccParent == NULL)
     return;
   HWND hWnd = 0;
@@ -542,11 +543,11 @@ bool WebContentsIE::LoadUrl(const NavigationController::LoadURLParams& params) {
   return true;
 }
 
-void WebContentsIE::OnFinishNavigate(GURL& url,
-                                     std::vector<GURL>& favicon_urls) {
+void WebContentsIE::OnFinishNavigate(const GURL& url,
+                                     const std::vector<GURL>& favicon_urls) {
   if (browser_event_handler_) {
     int mode = browser_event_handler_->GetDocMode();
-    if (mode > 0 && mode != (int)rendererMode_.ver &&
+    if (mode > 0 && mode != static_cast<int>(rendererMode_.ver) &&
         rendererMode_.ver != IE::DOCNONE && rendererMode_.ver != IE::DOCSYS) {
       IE::IEDocumentMode docMode = IE::IE8;
       switch (rendererMode_.ver) {
@@ -599,7 +600,7 @@ void WebContentsIE::OnFinishNavigate(GURL& url,
   }
 }
 
-void WebContentsIE::OnLoadUrlInNewContent(GURL& url,
+void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
                                           int flag,
                                           bool* cancel,
                                           IDispatch** dispatch) {
@@ -1007,7 +1008,7 @@ void WebContentsIE::SetBrowserEmulation(IE::IEEmulation emu) {
     default:
       break;
   }
-  long err = 0;
+  int64_t err = 0;
   HKEY key = 0;
   err = RegOpenKey(HKEY_CURRENT_USER,
                    L"Software\\Microsoft\\Internet "
@@ -1081,7 +1082,6 @@ std::wstring WebContentsIE::SerializationCookieList(
   net::CookieList::const_iterator iter = list.begin();
   for (; iter != list.end(); iter++) {
     base::DictionaryValue* cookieDict = new base::DictionaryValue;
-    ;
     GURL source = GetGurlFromCookie(*iter);
     if (source.is_empty()) {
       std::string domain = iter->Domain();
@@ -1206,7 +1206,7 @@ void WebContentsIE::NavigateUrl(
     DidFinishNavigation(navHandle.get());
     navHandle.release();
     if (is_navigate_stopped_) {
-      //让地址栏的URL恢复到之前的URL
+      // 让地址栏的URL恢复到之前的URL
       FrameHostMsg_DidFailProvisionalLoadWithError_Params errorParams;
       errorParams.url = params->url;
       errorParams.error_code = -3;

@@ -39,7 +39,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/native_widget_types.h"
 #ifdef IE_REDCORE
-#include "content/common/IE/IEVersion.h" //ysp+{IE Embedded}
+#include "content/common/IE/IEVersion.h"  // ysp+{IE Embedded}
 #endif
 #if defined(OS_ANDROID)
 #include "base/android/scoped_java_ref.h"
@@ -109,7 +109,7 @@ struct RendererPreferences;
 // be obtained from GetController(), and is used to load URLs into the
 // WebContents, navigate it backwards/forwards, etc. See navigation_controller.h
 // for more details.
-class WebContents : public PageNavigator,
+class WebContents : public PageNavigator, 
                     public base::SupportsUserData {
  public:
   struct CONTENT_EXPORT CreateParams {
@@ -173,8 +173,8 @@ class WebContents : public PageNavigator,
     // WebContents construction should take this into account.
     bool renderer_initiated_creation;
 #ifdef IE_REDCORE
-	bool auto_select_content; //YSP+ { Kernel switching }
-	RendererMode renderer_mode; //YSP+ { Kernel switching }
+    bool auto_select_content;    // YSP+ { Kernel switching }
+    RendererMode renderer_mode;  // YSP+ { Kernel switching }
 #endif
 
     // Used to specify how far WebContents::Create can initialize a renderer
@@ -687,7 +687,7 @@ class WebContents : public PageNavigator,
                         SavePageType save_type) = 0;
 
   // Saves the given frame's URL to the local filesystem.
-  virtual void SaveFrame(const GURL& url,
+  virtual void SaveFrame(const GURL& url, 
                          const Referrer& referrer) = 0;
 
   // Saves the given frame's URL to the local filesystem. The headers, if
@@ -935,8 +935,8 @@ class WebContents : public PageNavigator,
   // user activation work.
   virtual bool HasRecentInteractiveInputEvent() const = 0;
 #if defined(IE_REDCORE)
-  virtual bool IsAutoSelect() = 0; //YSP+ { Kernel switching }
-  virtual RendererMode GetRendererMode() = 0; //ysp+ {IE Embedded}
+  virtual bool IsAutoSelect() = 0;             // YSP+ { Kernel switching }
+  virtual RendererMode GetRendererMode() = 0;  // ysp+ {IE Embedded}
 #endif
   // Sets a flag that causes the WebContents to ignore input events.
   virtual void SetIgnoreInputEvents(bool ignore_input_events) = 0;

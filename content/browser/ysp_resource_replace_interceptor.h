@@ -1,4 +1,8 @@
-//YSP+ { Resource Replace }
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// YSP+ { Resource Replace }
 
 #ifndef CONTENT_BROWSER_YSP_RESOURCE_REPLACE_INTERCEPTOR_H_
 #define CONTENT_BROWSER_YSP_RESOURCE_REPLACE_INTERCEPTOR_H_
@@ -9,9 +13,9 @@
 #include "base/macros.h"
 #include "base/values.h"
 #include "content/common/content_export.h"
-#include "content/public/common/resource_type.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_delegate.h"
+#include "content/public/common/resource_type.h"
 #include "net/url_request/url_request_interceptor.h"
 
 class GURL;
@@ -19,7 +23,7 @@ class GURL;
 namespace net {
 class URLRequest;
 class URLRequestFileJob;
-}
+}  // namespace net
 
 namespace content {
 class AppCacheRequestHandler;
@@ -28,12 +32,13 @@ class webcontents;
 
 // An interceptor to hijack requests and potentially service them out of
 // the appcache.
-class CONTENT_EXPORT YSPResourceReplaceInterceptor : public net::URLRequestInterceptor {
+class CONTENT_EXPORT YSPResourceReplaceInterceptor
+    : public net::URLRequestInterceptor {
  public:
   YSPResourceReplaceInterceptor();
   ~YSPResourceReplaceInterceptor() override;
-  static void SetResourceReplaceValue(const std::string& resourceReplace);
-  static void SetValueFormPostTask(const std::string& resourceReplace);
+  static void SetResourceReplaceValue(const std::string& resource_replace);
+  static void SetValueFormPostTask(const std::string& resource_replace);
 
  protected:
   // Override from net::URLRequestInterceptor:
@@ -42,9 +47,9 @@ class CONTENT_EXPORT YSPResourceReplaceInterceptor : public net::URLRequestInter
       net::NetworkDelegate* network_delegate) const override;
 
  private:
-   //static scoped_ptr<base::DictionaryValue> resourceReplace_;
-   static YSPResourceReplaceInterceptor* GetHandler(net::URLRequest* request);
-   std::string ResourceReplaceCompared(const std::string url) const;
+  // static scoped_ptr<base::DictionaryValue> resource_replace_;
+  static YSPResourceReplaceInterceptor* GetHandler(net::URLRequest* request);
+  std::string ResourceReplaceCompared(const std::string& url) const;
 
   DISALLOW_COPY_AND_ASSIGN(YSPResourceReplaceInterceptor);
 };

@@ -105,7 +105,7 @@ class CONTENT_EXPORT WebContentsDelegate {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
   virtual bool UrlCompared(const GURL& host, RendererMode& mode); //YSP+ { Kernel switching
-  virtual void DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* userPwd);
+  virtual void DidGetWindowsDomainUserInfo(base::string16* username, base::string16* password);
 #endif
 
   // Allows the delegate to optionally cancel navigations that attempt to

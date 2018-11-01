@@ -41,7 +41,7 @@ class WebContentsViewGuest : public WebContentsView,
 
   void OnGuestDetached(WebContentsView* old_parent_view);
 
-   void OnWebContentDestroying() override;
+  void OnWebContentDestroying() override;
 
   // WebContentsView implementation --------------------------------------------
   gfx::NativeView GetNativeView() const override;
