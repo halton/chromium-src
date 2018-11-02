@@ -35,10 +35,10 @@ DownloadFile* IEDownloadFileFactory::CreateFile(
     const GURL& url,
     const GURL& referrer_url,
     bool calculate_hash,
-    base::WeakPtr<IE::IEDownloader> pDownloader,
+    base::WeakPtr<ie::IEDownloader> pDownloader,
     const net::NetLogWithSource& bound_net_log,
     base::WeakPtr<DownloadDestinationObserver> observer) {
-  return new IE::DownloadFileIE(
+  return new ie::DownloadFileIE(
       std::move(save_info), default_downloads_directory, url, referrer_url,
       calculate_hash, bound_net_log, observer, std::move(pDownloader));
 }

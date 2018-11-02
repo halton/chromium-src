@@ -35,8 +35,9 @@
 #include "ui/views/controls/button/button.h"
 #include "ui/views/controls/focus_ring.h"
 #include "ui/views/drag_controller.h"
-#ifdef IE_REDCORE
-#include "content/common/IE/IEVersion.h"
+
+#if defined(IE_REDCORE)
+#include "content/common/IE/version_ie.h"
 #endif
 
 class CommandUpdater;

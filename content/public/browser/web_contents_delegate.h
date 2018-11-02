@@ -37,7 +37,7 @@
 #endif
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-#include "content\common\IE\IEVersion.h"
+#include "content\common\IE\version_ie.h"
 #endif
 class GURL;
 

@@ -38,11 +38,13 @@
 #include "ui/base/window_open_disposition.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/native_widget_types.h"
-#ifdef IE_REDCORE
-#include "content/common/IE/IEVersion.h"  // ysp+{IE Embedded}
-#endif
+
 #if defined(OS_ANDROID)
 #include "base/android/scoped_java_ref.h"
+#endif
+
+#ifdef IE_REDCORE
+#include "content/common/IE/version_ie.h"
 #endif
 
 namespace blink {
@@ -109,8 +111,7 @@ struct RendererPreferences;
 // be obtained from GetController(), and is used to load URLs into the
 // WebContents, navigate it backwards/forwards, etc. See navigation_controller.h
 // for more details.
-class WebContents : public PageNavigator, 
-                    public base::SupportsUserData {
+class WebContents : public PageNavigator, public base::SupportsUserData {
  public:
   struct CONTENT_EXPORT CreateParams {
     explicit CreateParams(BrowserContext* context);
@@ -687,8 +688,7 @@ class WebContents : public PageNavigator,
                         SavePageType save_type) = 0;
 
   // Saves the given frame's URL to the local filesystem.
-  virtual void SaveFrame(const GURL& url, 
-                         const Referrer& referrer) = 0;
+  virtual void SaveFrame(const GURL& url, const Referrer& referrer) = 0;
 
   // Saves the given frame's URL to the local filesystem. The headers, if
   // provided, is used to make a request to the URL rather than using cache.
@@ -934,10 +934,7 @@ class WebContents : public PageNavigator,
   // renderer. This should be eventually merged into and accounted for in the
   // user activation work.
   virtual bool HasRecentInteractiveInputEvent() const = 0;
-#if defined(IE_REDCORE)
-  virtual bool IsAutoSelect() = 0;             // YSP+ { Kernel switching }
-  virtual RendererMode GetRendererMode() = 0;  // ysp+ {IE Embedded}
-#endif
+
   // Sets a flag that causes the WebContents to ignore input events.
   virtual void SetIgnoreInputEvents(bool ignore_input_events) = 0;
 
@@ -945,12 +942,19 @@ class WebContents : public PageNavigator,
   // guest.
   virtual BrowserPluginGuest* GetBrowserPluginGuest() const = 0;
 
+#if defined(IE_REDCORE)
+  virtual bool IsAutoSelect() = 0;
+  virtual RendererMode GetRendererMode() = 0;
+#endif
+
  private:
   // This interface should only be implemented inside content.
   friend class WebContentsImpl;
+
 #if defined(IE_REDCORE)
   friend class WebContentsIE;
 #endif
+
   WebContents() {}
 };
 

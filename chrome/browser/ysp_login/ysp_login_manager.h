@@ -344,7 +344,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPReplaceFetcher* replace_fetcher_;
   YSPSingleSignOnFetcher* single_signon_fetcher_;
   YSPUSReportFetcher* report_fetcher_;
-  // YSP+ { Fetcher resource
+
+  // Fetcher resource
   YSPFetcherResource* get_user_fetcher_;
   YSPFetcherResource* get_application_fetcher_;
   YSPFetcherResource* get_configuration_strategy_fetcher_;
@@ -357,14 +358,13 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPFetcherResource* put_appliction_status_fetcher_;
   YSPFetcherResource* get_gateway_appliction_fetcher_;
   YSPFetcherResource* put_modify_password_fetcher_;
-  // YSP+ } /*Fetcher resource*/
+
   YSPAutoConfigFetcher* autoConfig_fetcher_;
   bool auto_login_;
   std::string account_;
   std::string password_;
   std::string cid_;
   std::unique_ptr<base::DictionaryValue> login_info_;
-  // YSP+ { Fetcher resource
   std::unique_ptr<base::DictionaryValue> application_info_;
   std::unique_ptr<base::DictionaryValue> strategy_info_;
   std::unique_ptr<base::DictionaryValue> token_info_;
@@ -377,16 +377,15 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   bool token_status_code_;
   bool swa_status_code_;
   bool pc_status_code_;
-  // YSP+ } /*Fetcher resource*/
   std::vector<std::string> send_request_list_;
   std::unique_ptr<base::DictionaryValue> single_signon_info_;
   int window_frame_color_;
   int window_inactive_color_;
   bool should_parse_response_;
-  bool download_ = false;
-  int login_status_ = SATUS_LOGOUT;    // ysp+ { auto get config }
-  bool ntp_login_status_ = false;      // false is logout
-  bool single_signon_status_ = false;  // YSP+ { SingleSignOn config }
+  bool download_;
+  int login_status_;
+  bool ntp_login_status_;
+  bool single_signon_status_;
   bool web_initialized_;
   bool offline_status_;
 

@@ -14,7 +14,7 @@
 #include "base/win/win_util.h"
 #include "base/win/windows_version.h"
 #include "content/child/dwrite_font_proxy/dwrite_font_proxy_init_win.h"
-#include "content/common/IE/BrowserProcess.h"
+#include "content/common/IE/browser_process_ie.h"
 #include "content/common/font_warmup_win.h"
 #include "content/public/common/content_switches.h"
 
@@ -26,11 +26,11 @@ TridentMainPlatformDelegate::TridentMainPlatformDelegate(
 TridentMainPlatformDelegate::~TridentMainPlatformDelegate() {}
 
 void TridentMainPlatformDelegate::PlatformInitialize() {
-  IE::BrowserProcess::RegisterClassObject();
+  ie::BrowserProcess::RegisterClassObject();
 }
 
 void TridentMainPlatformDelegate::PlatformUninitialize() {
-  IE::BrowserProcess::UnregisterClassObject();
+  ie::BrowserProcess::UnregisterClassObject();
 }
 
 }  // namespace content

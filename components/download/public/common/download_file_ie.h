@@ -26,7 +26,7 @@
 #include "net/log/net_log.h"
 #include "net/log/net_log_with_source.h"
 
-namespace IE {
+namespace ie {
 
 class IEDownloader;
 
@@ -125,6 +125,6 @@ class IEDownloader {
   virtual bool IsDownloading() = 0;
 };
 
-}  // namespace IE
+}  // namespace ie
 
 #endif  // COMPONENTS_DOWNLOAD_PUBLIC_COMMON_DOWNLOAD_FILE_IE_H_

@@ -30,7 +30,7 @@
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 // ysp+{IE Embedded}
-namespace IE {
+namespace ie {
 class IEDownloader;
 }
 #endif
@@ -318,8 +318,8 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
 
 #if defined(REDCORE) && defined(IE_REDCORE)
   // ysp+ {IE Embedded}
-  void SetIEDownloader(IE::IEDownloader* downloader);
-  IE::IEDownloader* IEDownloader();
+  void SetIEDownloader(ie::IEDownloader* downloader);
+  ie::IEDownloader* IEDownloader();
   bool IsUseIEDownloader();
   void SetIEDownloadResponseheader(const std::wstring header);
   std::wstring IEDownloadResponseheader();
@@ -358,7 +358,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
 #if defined(REDCORE) && defined(IE_REDCORE)
   // ysp+ {IE Embedded}
   bool useIeDownload;
-  IE::IEDownloader* pIEDownloader;
+  ie::IEDownloader* pIEDownloader;
   std::wstring ieResponseHeader;
 #endif
   DISALLOW_COPY_AND_ASSIGN(DownloadUrlParameters);

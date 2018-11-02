@@ -73,9 +73,9 @@
 #include "content/browser/webui/web_ui_controller_factory_registry.h"
 #include "content/browser/webui/web_ui_impl.h"
 #include "content/child/image_decoder.h"
-#include "content/common/IE/BrowserHostEventDelegant.h"
-#include "content/common/IE/BrowserProcess.h"
-#include "content/common/IE/IEVersion.h"
+#include "content/common/IE/browser_host_event_delegant_ie.h"
+#include "content/common/IE/browser_process_ie.h"
+#include "content/common/IE/version_ie.h"
 #include "content/common/browser_plugin/browser_plugin_constants.h"
 #include "content/common/browser_plugin/browser_plugin_messages.h"
 #include "content/common/frame_messages.h"
@@ -213,7 +213,7 @@ void WebContentsIE::Init(const WebContents::CreateParams& params) {
   if (pHost && rendererMode_.core == IE_CORE)
     pHost->SetTridentCore(true);
 
-  CComObject<IE::BrowserHostEventDelegant>::CreateInstance(
+  CComObject<ie::BrowserHostEventDelegant>::CreateInstance(
       &browser_event_handler_);
   if (browser_event_handler_) {
     browser_event_handler_->AddRef();
@@ -547,33 +547,34 @@ void WebContentsIE::OnFinishNavigate(const GURL& url,
                                      const std::vector<GURL>& favicon_urls) {
   if (browser_event_handler_) {
     int mode = browser_event_handler_->GetDocMode();
-    if (mode > 0 && mode != static_cast<int>(rendererMode_.ver) &&
-        rendererMode_.ver != IE::DOCNONE && rendererMode_.ver != IE::DOCSYS) {
-      IE::IEDocumentMode docMode = IE::IE8;
-      switch (rendererMode_.ver) {
-        case IE::DOC6:
-          docMode = IE::IE5;
+    if (mode > 0 && mode != static_cast<int>(rendererMode_.version) &&
+        rendererMode_.version != ie::DOCNONE &&
+        rendererMode_.version != ie::DOCSYS) {
+      ie::DocumentMode doc_mode = ie::IE8;
+      switch (rendererMode_.version) {
+        case ie::DOC6:
+          doc_mode = ie::IE5;
           break;
-        case IE::DOC7:
-          docMode = IE::IE7;
+        case ie::DOC7:
+          doc_mode = ie::IE7;
           break;
-        case IE::DOC8:
-          docMode = IE::IE8;
+        case ie::DOC8:
+          doc_mode = ie::IE8;
           break;
-        case IE::DOC9:
-          docMode = IE::IE9;
+        case ie::DOC9:
+          doc_mode = ie::IE9;
           break;
-        case IE::DOC10:
-          docMode = IE::IE10;
+        case ie::DOC10:
+          doc_mode = ie::IE10;
           break;
-        case IE::DOC11:
-          docMode = IE::IE11;
+        case ie::DOC11:
+          doc_mode = ie::IE11;
           break;
-        case IE::DOCSYS:
-        case IE::DOCNONE:
+        case ie::DOCSYS:
+        case ie::DOCNONE:
           break;
       }
-      browser_event_handler_->SetDocMode(docMode);
+      browser_event_handler_->SetDocMode(doc_mode);
       return;
     }
   }
@@ -635,7 +636,7 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   if (delegate) {
     WindowOpenDisposition disposition =
         WindowOpenDisposition::NEW_FOREGROUND_TAB;
-    if ((flag & IE::POPUP) == IE::POPUP)
+    if ((flag & ie::POPUP) == ie::POPUP)
       disposition = WindowOpenDisposition::NEW_POPUP;  // NEW_FOREGROUND_TAB;
     gfx::Rect initial_rect;
     initial_rect.set_size(create_params.initial_size);
@@ -646,7 +647,7 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
 
   ui::PageTransition transition = ui::PAGE_TRANSITION_LINK;
-  if (mode.core == IE_CORE && (flag & IE::FROMDIALOG) == 0)
+  if (mode.core == IE_CORE && (flag & ie::FROMDIALOG) == 0)
     transition = ui::PAGE_TRANSITION_IE_NEWWINDOW;
   OpenURLParams open_params(url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
                             transition, true /* is_renderer_initiated */);
@@ -659,7 +660,7 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
     if (ie_contents == NULL)
       return;
     *cancel = false;
-    if ((flag & IE::FROMDIALOG) == IE::FROMDIALOG)
+    if ((flag & ie::FROMDIALOG) == ie::FROMDIALOG)
       *cancel = true;
     IDispatch* idisp = ie_contents->GetWebBrowserIDispatch();
     *dispatch = idisp;
@@ -885,13 +886,13 @@ bool WebContentsIE::CreateTridentWebView(
     // std::wstring ua = L"";
     // switch (ieVer_)
     //{
-    // case IE::DOC6:
+    // case ie::DOC6:
     //  ua = defaultIE6UA;
     //  break;
-    // case IE::DOC7:
+    // case ie::DOC7:
     //  ua = defaultIE7UA;
     //  break;
-    // case IE::DOC8:
+    // case ie::DOC8:
     //  ua = defaultIE8UA;
     //  break;
     //}
@@ -987,22 +988,22 @@ void WebContentsIE::LoadFinishedAndUpdateEntry(GURL gurl) {
   DidStopLoading();
 }
 
-void WebContentsIE::SetBrowserEmulation(IE::IEEmulation emu) {
+void WebContentsIE::SetBrowserEmulation(ie::Emulation emulation) {
   DWORD value = 7000;
-  switch (emu) {
-    case IE::EMULATION7:
+  switch (emulation) {
+    case ie::EMULATION7:
       value = 7000;
       break;
-    case IE::EMULATION8:
+    case ie::EMULATION8:
       value = 8888;
       break;
-    case IE::EMULATION9:
+    case ie::EMULATION9:
       value = 9999;
       break;
-    case IE::EMULATION10:
+    case ie::EMULATION10:
       value = 10001;
       break;
-    case IE::EMULATION11:
+    case ie::EMULATION11:
       value = 11001;
       break;
     default:

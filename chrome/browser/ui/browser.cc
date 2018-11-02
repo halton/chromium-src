@@ -6,7 +6,6 @@
 #include "chrome/browser/ui/browser.h"
 
 #include <stddef.h>
-
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -188,14 +187,6 @@
 #include "content/public/browser/keyboard_event_processing_result.h"
 #include "content/public/browser/navigation_controller.h"
 #include "content/public/browser/navigation_entry.h"
-
-#ifdef REDCORE
-#include "chrome/browser/ui/simple_message_box.h"
-#include "content/browser/frame_host/navigation_handle_impl.h"
-#include "content/public/browser/navigation_throttle.h"
-#include "net/socket/transport_client_socket_pool.h"
-#endif
-
 #include "content/public/browser/notification_details.h"
 #include "content/public/browser/notification_service.h"
 #include "content/public/browser/overscroll_configuration.h"
@@ -234,23 +225,45 @@
 #include "extensions/browser/process_manager.h"
 #endif
 
+#if defined(OS_WIN)
+#include <shellapi.h>
+#include <windows.h>
+#include "chrome/browser/ui/view_ids.h"
+#include "components/autofill/core/browser/autofill_ie_toolbar_import_win.h"
+#include "ui/base/touch/touch_device.h"
+#include "ui/base/win/shell.h"
+
+#ifdef REDCORE
+#include "base/win/registry.h"  //ysp+{window popup}
+#endif
+
+#endif  // OS_WIN
+
+#if defined(OS_CHROMEOS)
+#include "chrome/browser/chromeos/fileapi/external_file_url_util.h"
+#include "chrome/browser/ui/settings_window_manager_chromeos.h"
+#endif
+
+#if BUILDFLAG(ENABLE_PRINTING)
+#include "components/printing/browser/print_composite_client.h"
+#endif
+
 #if defined(REDCORE)
 #include "base/timer/timer.h"
 #include "chrome/browser/extensions/api/web_navigation/web_navigation_api.h"  //ysp+{push server api}
+#include "chrome/browser/ui/simple_message_box.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ui/webui/settings/settings_startup_pages_handler.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"    //ysp+ {}
 #include "chrome/browser/ysp_update/ysp_update_manager.h"  //ysp+
+#include "content/browser/frame_host/navigation_handle_impl.h"
+#include "content/browser/renderer_host/render_widget_host_impl.h"  //YSP+ { disable drag }
+#include "content/public/browser/navigation_throttle.h"
 #include "crypto/ysp_crypto_header.h"
 #include "net/dns/host_resolver_impl.h"  //ysp+ { private DNS }
-
-#ifdef SANGFOR_GM_SSL
-#include "net/http/http_stream_parser.h"  //YSP+ { sangfor GM ssl }
-#endif
-#include "content/browser/renderer_host/render_widget_host_impl.h"  //YSP+ { disable drag }
+#include "net/socket/transport_client_socket_pool.h"
 #include "net/url_request/url_request_http_job.h"  //YSP+ { SingleSignOn config }
-
 // YSP+ { passwords AD manager
 #include "base/json/json_reader.h"
 #include "chrome/browser/password_manager/password_store_factory.h"
@@ -278,40 +291,22 @@
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/download_manager.h"
 // YSP+ }
+
+#ifdef SANGFOR_GM_SSL
+#include "net/http/http_stream_parser.h"  //YSP+ { sangfor GM ssl }
 #endif
+
+#endif  // REDCORE
 
 #if defined(IE_REDCORE)
 #include "base/win/win_util.h"  //ysp+ {Kernel switching}
 #include "content/browser/web_contents/web_contents_ie.h"  //ysp+{IE Function Control}
-
 #include "chrome/browser/password_manager/password_store_factory.h"
 #include "chrome/browser/ui/views/ysp_ie_login_view.h"
 #include "components/autofill/core/common/password_form.h"
 #include "components/password_manager/core/browser/password_store.h"
 #include "components/password_manager/core/browser/password_store_consumer.h"
-
-#endif
-
-#if defined(OS_WIN)
-#include <shellapi.h>
-#include <windows.h>
-#include "chrome/browser/ui/view_ids.h"
-#include "components/autofill/core/browser/autofill_ie_toolbar_import_win.h"
-#include "ui/base/touch/touch_device.h"
-#include "ui/base/win/shell.h"
-#ifdef REDCORE
-#include "base/win/registry.h"  //ysp+{window popup}
-#endif
-#endif  // OS_WIN
-
-#if defined(OS_CHROMEOS)
-#include "chrome/browser/chromeos/fileapi/external_file_url_util.h"
-#include "chrome/browser/ui/settings_window_manager_chromeos.h"
-#endif
-
-#if BUILDFLAG(ENABLE_PRINTING)
-#include "components/printing/browser/print_composite_client.h"
-#endif
+#endif  // IE_REDCORE
 
 using base::TimeDelta;
 using base::UserMetricsAction;
@@ -3430,14 +3425,14 @@ void Browser::MatchSystemIEVersion(RendererMode& mode) {
     return;
   int system_ie_version = base::win::GetSystemIEVersion();
   if (system_ie_version < 8) {
-    mode.ver = IE::DOCNONE;
-    mode.emulation = IE::EMULATION7;
+    mode.version = ie::DOCNONE;
+    mode.emulation = ie::EMULATION7;
     return;
   }
   if ((int)mode.emulation > system_ie_version)
-    mode.emulation = (IE::IEEmulation)system_ie_version;
-  if ((int)mode.ver > system_ie_version)
-    mode.ver = (IE::IEVersion)system_ie_version;
+    mode.emulation = (ie::Emulation)system_ie_version;
+  if ((int)mode.version > system_ie_version)
+    mode.version = (ie::Version)system_ie_version;
 }
 
 bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
@@ -3449,33 +3444,33 @@ bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
   if (core_emulation.empty() == false) {
     mode.core = IE_CORE;
     if (core_emulation == "emulation7")
-      mode.emulation = IE::EMULATION7;
+      mode.emulation = ie::EMULATION7;
     else if (core_emulation == "emulation8")
-      mode.emulation = IE::EMULATION8;
+      mode.emulation = ie::EMULATION8;
     else if (core_emulation == "emulation9")
-      mode.emulation = IE::EMULATION9;
+      mode.emulation = ie::EMULATION9;
     else if (core_emulation == "emulation10")
-      mode.emulation = IE::EMULATION10;
+      mode.emulation = ie::EMULATION10;
     else if (core_emulation == "emulation11")
-      mode.emulation = IE::EMULATION11;
+      mode.emulation = ie::EMULATION11;
     else if (core_emulation == "chrome")
       mode.core = BLINK_CORE;
 
     if (mode.core == IE_CORE && core_version.empty() == false) {
       if (core_version == "IE6")
-        mode.ver = IE::DOC6;
+        mode.version = ie::DOC6;
       else if (core_version == "IE7")
-        mode.ver = IE::DOC7;
+        mode.version = ie::DOC7;
       else if (core_version == "IE8")
-        mode.ver = IE::DOC8;
+        mode.version = ie::DOC8;
       else if (core_version == "IE9")
-        mode.ver = IE::DOC9;
+        mode.version = ie::DOC9;
       else if (core_version == "IE10")
-        mode.ver = IE::DOC10;
+        mode.version = ie::DOC10;
       else if (core_version == "IE11")
-        mode.ver = IE::DOC11;
+        mode.version = ie::DOC11;
       else if (core_version == "Auto")
-        mode.ver = IE::DOCSYS;
+        mode.version = ie::DOCSYS;
 
       MatchSystemIEVersion(mode);
     }

@@ -48,12 +48,12 @@ DownloadUrlParameters::~DownloadUrlParameters() = default;
 
 #if defined(REDCORE) && defined(IE_REDCORE)
 // ysp+ {IE Embedded}
-void DownloadUrlParameters::SetIEDownloader(IE::IEDownloader* downloader) {
+void DownloadUrlParameters::SetIEDownloader(ie::IEDownloader* downloader) {
   pIEDownloader = downloader;
   useIeDownload = true;
 }
 
-IE::IEDownloader* DownloadUrlParameters::IEDownloader() {
+ie::IEDownloader* DownloadUrlParameters::IEDownloader() {
   return pIEDownloader;
 }
 

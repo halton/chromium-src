@@ -31,7 +31,7 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
   static void Hide();
 
   static RendererModeBubbleView* GetBubbleView() {
-    return pRendererModeBubbleView;
+    return renderer_mode_bubble_view_;
   }
 
   ~RendererModeBubbleView() override;
@@ -50,7 +50,7 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
   // Overridden from views::ButtonListener:
   void ButtonPressed(views::Button* sender, const ui::Event& event) override;
 
-  void SetButtonSelected(views::LabelButton* pSelectButton);
+  void SetButtonSelected(views::LabelButton* select_button);
 
   RendererModeBubbleView(views::View* anchor_view,
                          Browser* browser,
@@ -58,10 +58,10 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
                          RendererMode mode);
 
  private:
-  static RendererModeBubbleView* pRendererModeBubbleView;
-  views::LabelButton* p_blink_button_;
-  views::LabelButton* p_sys_ie_button_;
-  Browser* p_browser_;
+  static RendererModeBubbleView* renderer_mode_bubble_view_;
+  views::LabelButton* blink_button_;
+  views::LabelButton* ie_button_;
+  Browser* browser_;
   RendererMode renderer_mode_;
 };
 

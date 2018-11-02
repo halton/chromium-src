@@ -39,18 +39,21 @@
 #include "ui/base/ui_base_switches.h"
 
 namespace content {
+
 namespace {
+
 static void HandleTridentErrorTestParameters(
     const base::CommandLine& command_line) {
   if (command_line.HasSwitch(switches::kTridentStartupDialog))
     ChildProcess::WaitForDebugger("Trident");
 }
+
 }  // namespace
 
 int TridentMain(const MainFunctionParams& parameters) {
   TRACE_EVENT_ASYNC_BEGIN0("startup", "TridentMain", 0);
 
-  IE::IEDLLModule _AtlModule;
+  ie::IEDLLModule _AtlModule;
   if (FAILED(OleInitialize(NULL)))
     return -1;
 
@@ -73,4 +76,5 @@ int TridentMain(const MainFunctionParams& parameters) {
   TRACE_EVENT_ASYNC_END0("startup", "TridentMain", 0);
   return 0;
 }
+
 }  // namespace content

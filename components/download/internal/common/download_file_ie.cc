@@ -16,10 +16,11 @@
 #include "components/download/public/common/download_destination_observer.h"
 #include "components/download/public/common/download_interrupt_reasons_utils.h"
 #include "components/download/public/common/download_stats.h"
-#include "content/common/IE/IEVersion.h"
+#include "content/common/IE/version_ie.h"
 #include "content/public/browser/browser_thread.h"
 
-namespace IE {
+namespace ie {
+
 const int kMaxRenameRetries = 3;
 const int kInitialRenameRetryDelayMs = 200;
 const int kUpdatePeriodMs = 500;
@@ -268,4 +269,4 @@ void DownloadFileIE::SendUpdate() {
   //                     CurrentSpeed(), GetHashState()));
 }
 
-}  // namespace IE
+}  // namespace ie

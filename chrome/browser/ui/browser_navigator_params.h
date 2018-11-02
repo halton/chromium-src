@@ -22,8 +22,9 @@
 #include "ui/base/window_open_disposition.h"
 #include "ui/gfx/geometry/rect.h"
 #include "url/gurl.h"
-#if defined(REDCORE) && defined(IE_REDCORE)
-#include "content/common/IE/IEVersion.h"  // ysp+{IE Embedded}
+
+#if defined(IE_REDCORE)
+#include "content/common/IE/version_ie.h"
 #endif
 
 class Browser;
@@ -257,13 +258,10 @@ struct NavigateParams {
   // possible, i.e. if the is a PWA installed for the target URL.
   bool open_pwa_window_if_possible = false;
 
-  #if defined(REDCORE) && defined(IE_REDCORE)
-  // ysp+ {IE Embedded}
+#if defined(IE_REDCORE)
   RendererMode renderer_mode;
-  // ysp+
-  bool auto_select;  // ysp+ { Kernel switching }
-  #endif
-
+  bool auto_select;
+#endif
 
  private:
   NavigateParams();

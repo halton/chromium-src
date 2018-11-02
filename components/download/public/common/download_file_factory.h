@@ -18,7 +18,7 @@
 #include "url/gurl.h"
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-namespace IE {
+namespace ie {
 class IEDownloader;
 }
 #endif
@@ -51,7 +51,7 @@ class COMPONENTS_DOWNLOAD_EXPORT IEDownloadFileFactory {
       const GURL& url,
       const GURL& referrer_url,
       bool calculate_hash,
-      base::WeakPtr<IE::IEDownloader> pDownloader,
+      base::WeakPtr<ie::IEDownloader> pDownloader,
       const net::NetLogWithSource& bound_net_log,
       base::WeakPtr<DownloadDestinationObserver> observer);
 };

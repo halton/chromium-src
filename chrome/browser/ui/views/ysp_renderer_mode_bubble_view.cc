@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "base/macros.h"
-#include "base/metrics/user_metrics.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
@@ -35,7 +34,6 @@
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/layout/grid_layout.h"
 #include "ui/views/widget/widget.h"
-
 #include "base/win/win_util.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPaint.h"
@@ -62,7 +60,24 @@ class RendererModeButtonBackGround : public views::Background {
   }
 };
 
-RendererModeBubbleView* RendererModeBubbleView::pRendererModeBubbleView = NULL;
+RendererModeBubbleView* RendererModeBubbleView::renderer_mode_bubble_view_ =
+    NULL;
+
+RendererModeBubbleView::RendererModeBubbleView(views::View* anchor_view,
+                                               Browser* browser,
+                                               const GURL& url,
+                                               RendererMode mode)
+    :  // BubbleDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
+      blink_button_(NULL),
+      ie_button_(NULL),
+      browser_(browser),
+      renderer_mode_(mode) {
+  gfx::Insets inset;
+  inset.Set(0, 0, 0, 0);
+  set_margins(inset);
+  // Compensate for built-in vertical padding in the anchor view's image.
+  set_anchor_view_insets(gfx::Insets(2, 0, 2, 0));
+}
 
 void RendererModeBubbleView::ShowBubble(views::View* anchor_view,
                                         const gfx::Rect& anchor_rect,
@@ -70,77 +85,77 @@ void RendererModeBubbleView::ShowBubble(views::View* anchor_view,
                                         Browser* browser,
                                         const GURL& url,
                                         RendererMode renderer_mode) {
-  if (pRendererModeBubbleView)
+  if (renderer_mode_bubble_view_)
     return;
 
-  pRendererModeBubbleView =
+  renderer_mode_bubble_view_ =
       new RendererModeBubbleView(anchor_view, browser, url, renderer_mode);
   if (!anchor_view) {
-    pRendererModeBubbleView->SetAnchorRect(anchor_rect);
-    pRendererModeBubbleView->set_parent_window(parent_window);
+    renderer_mode_bubble_view_->SetAnchorRect(anchor_rect);
+    renderer_mode_bubble_view_->set_parent_window(parent_window);
   }
-  // views::BubbleDelegateView::CreateBubble(pRendererModeBubbleView)->Show();
+  // views::BubbleDelegateView::CreateBubble(renderer_mode_bubble_view_)->Show();
 }
 
 void RendererModeBubbleView::Hide() {
-  if (pRendererModeBubbleView)
-    pRendererModeBubbleView->GetWidget()->Hide();
+  if (renderer_mode_bubble_view_)
+    renderer_mode_bubble_view_->GetWidget()->Hide();
 }
 
 RendererModeBubbleView::~RendererModeBubbleView() {}
 
 void RendererModeBubbleView::WindowClosing() {
-  pRendererModeBubbleView = NULL;
+  renderer_mode_bubble_view_ = NULL;
 }
 
 void RendererModeBubbleView::Init() {
-  p_blink_button_ =
+  blink_button_ =
       new views::LabelButton(this, l10n_util::GetStringUTF16(IDS_CHROME_CORE));
-  gfx::ImageSkia* blinkImg =
+  gfx::ImageSkia* blink_image =
       ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
           IDR_YSP_BLINK_CORE);
-  p_blink_button_->SetImageLabelSpacing(10);
-  p_blink_button_->SetImage(views::Button::STATE_NORMAL, *blinkImg);
+  blink_button_->SetImageLabelSpacing(10);
+  blink_button_->SetImage(views::Button::STATE_NORMAL, *blink_image);
   // comment for compiling
   // views::Background* blinkBackGround = new RendererModeButtonBackGround;
-  // p_blink_button_->set_background(blinkBackGround);
-  // p_blink_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,15));
-  // p_blink_button_->SetFontList(views::MenuConfig::instance().font_list);
+  // blink_button_->set_background(blinkBackGround);
+  // blink_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,15));
+  // blink_button_->SetFontList(views::MenuConfig::instance().font_list);
 
-  p_sys_ie_button_ =
+  ie_button_ =
       new views::LabelButton(this, l10n_util::GetStringUTF16(IDS_IE_CORE));
-  gfx::ImageSkia* sysIeImg =
+  gfx::ImageSkia* ie_image =
       ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
           IDR_YSP_IE_CORE);
-  p_sys_ie_button_->SetImageLabelSpacing(10);
-  p_sys_ie_button_->SetImage(views::Button::STATE_NORMAL, *sysIeImg);
+  ie_button_->SetImageLabelSpacing(10);
+  ie_button_->SetImage(views::Button::STATE_NORMAL, *ie_image);
   // comment for compiling
   // views::Background* sysIeBackGround = new RendererModeButtonBackGround;
-  // p_sys_ie_button_->set_background(sysIeBackGround);
-  // p_sys_ie_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,
+  // ie_button_->set_background(sysIeBackGround);
+  // ie_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,
   // 15));
-  // p_sys_ie_button_->SetFontList(views::MenuConfig::instance().font_list);
+  // ie_button_->SetFontList(views::MenuConfig::instance().font_list);
 
   views::GridLayout* layout = new views::GridLayout(this);
   // SetLayoutManager(layout);
 
-  views::ColumnSet* cs = layout->AddColumnSet(0);
-  cs->AddPaddingColumn(0, 0);
-  cs->AddColumn(views::GridLayout::FILL, views::GridLayout::FILL, 0,
-                views::GridLayout::USE_PREF, 0, 0);
+  views::ColumnSet* column_set = layout->AddColumnSet(0);
+  column_set->AddPaddingColumn(0, 0);
+  column_set->AddColumn(views::GridLayout::FILL, views::GridLayout::FILL, 0,
+                        views::GridLayout::USE_PREF, 0, 0);
 
   layout->StartRow(0, 0);
-  layout->AddView(p_blink_button_);
+  layout->AddView(blink_button_);
 
   layout->StartRow(1, 0);
-  layout->AddView(p_sys_ie_button_);
+  layout->AddView(ie_button_);
 
   switch (renderer_mode_.core) {
     case BLINK_CORE:
-      SetButtonSelected(p_blink_button_);
+      SetButtonSelected(blink_button_);
       break;
     case IE_CORE:
-      SetButtonSelected(p_sys_ie_button_);
+      SetButtonSelected(ie_button_);
       break;
     default:
       break;
@@ -157,52 +172,36 @@ views::View* RendererModeBubbleView::GetInitiallyFocusedView() {
 
 void RendererModeBubbleView::ButtonPressed(views::Button* sender,
                                            const ui::Event& event) {
-  if (p_browser_ == NULL)
+  if (browser_ == NULL)
     return;
-  GURL ysp_url;
+  GURL url;
   RendererMode mode;
-  if (sender == p_blink_button_ && renderer_mode_.core != BLINK_CORE) {
+  if (sender == blink_button_ && renderer_mode_.core != BLINK_CORE) {
     mode.core = BLINK_CORE;
-    chrome::SwitchRendererMode(p_browser_, ysp_url, mode, false);
-  } else if (sender == p_sys_ie_button_ && renderer_mode_.core != IE_CORE) {
-    int sysIEVer = base::win::GetSystemIEVersion();
+    chrome::SwitchRendererMode(browser_, url, mode, false);
+  } else if (sender == ie_button_ && renderer_mode_.core != IE_CORE) {
     mode.core = IE_CORE;
-    mode.ver = IE::DOCSYS;
-    mode.emulation = (IE::IEEmulation)sysIEVer;
-    chrome::SwitchRendererMode(p_browser_, ysp_url, mode, false);
+    mode.version = ie::DOCSYS;
+    mode.emulation = (ie::Emulation)base::win::GetSystemIEVersion();
+    chrome::SwitchRendererMode(browser_, url, mode, false);
   }
   GetWidget()->Close();
 }
 
 void RendererModeBubbleView::SetButtonSelected(
-    views::LabelButton* pSelectButton) {
-  if (pSelectButton == NULL)
+    views::LabelButton* select_button) {
+  if (select_button == NULL)
     return;
+
   gfx::ImageSkia* img = NULL;
-  if (pSelectButton == p_blink_button_)
+  if (select_button == blink_button_)
     img = ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
         IDR_YSP_BLINK_CORE_WHITE);
   else
     img = ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
         IDR_YSP_IE_CORE_WHITE);
-  pSelectButton->SetImage(views::Button::STATE_NORMAL, *img);
+  select_button->SetImage(views::Button::STATE_NORMAL, *img);
   // views::Background* backGround =
   // views::Background::CreateSolidBackground(55, 159, 255, 255);
-  // pSelectButton->set_background(backGround);
-}
-
-RendererModeBubbleView::RendererModeBubbleView(views::View* anchor_view,
-                                               Browser* browser,
-                                               const GURL& url,
-                                               RendererMode mode)
-    :  // BubbleDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
-      p_blink_button_(NULL),
-      p_sys_ie_button_(NULL),
-      p_browser_(browser),
-      renderer_mode_(mode) {
-  gfx::Insets inset;
-  inset.Set(0, 0, 0, 0);
-  set_margins(inset);
-  // Compensate for built-in vertical padding in the anchor view's image.
-  set_anchor_view_insets(gfx::Insets(2, 0, 2, 0));
+  // select_button->set_background(backGround);
 }

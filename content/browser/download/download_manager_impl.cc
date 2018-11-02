@@ -85,14 +85,16 @@
 #endif
 
 #ifdef REDCORE
+
 #ifdef IE_REDCORE
-#include "components/download/public/common/download_file_ie.h"  // ysp+{IE Embedded}
-#include "net/http/http_response_headers.h"  // ysp+{IE Embedded}
+#include "components/download/public/common/download_file_ie.h"
+#include "net/http/http_response_headers.h"
 #endif
-#include "base/strings/utf_string_conversions.h"  // ysp+
-#include "crypto/ysp_crypto_encryption.h"  // YSP+ { User information isolation }
-#include "url/url_util.h"                  // ysp+
-#endif
+
+#include "base/strings/utf_string_conversions.h"
+#include "crypto/ysp_crypto_encryption.h"
+#include "url/url_util.h"
+#endif  // REDCORE
 
 namespace content {
 namespace {
@@ -219,7 +221,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& ysp_username,  // YSP+ { User information isolation }
+      const std::string& ysp_username,
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -246,7 +248,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
     return new download::DownloadItemImpl(
         delegate, guid, download_id, current_path, target_path,
 #ifdef REDCORE
-        ysp_username,  // YSP+ { User information isolation }
+        ysp_username,
 #endif
         url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
         original_mime_type, start_time, end_time, etag, last_modified,
@@ -259,9 +261,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       uint32_t download_id,
       const download::DownloadCreateInfo& info) override {
 #ifdef REDCORE
-    std::string ysp_username =
-        YspCryptoSingleton::GetInstance()
-            ->GetUserId();  // YSP+ { User information isolation }
+    std::string ysp_username = YspCryptoSingleton::GetInstance()->GetUserId();
     return new download::DownloadItemImpl(delegate, download_id, ysp_username,
                                           info);
 #else
@@ -278,14 +278,13 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       std::unique_ptr<download::DownloadRequestHandleInterface> request_handle)
       override {
 #ifdef REDCORE
-    std::string ysp_username =
-        YspCryptoSingleton::GetInstance()
-            ->GetUserId();  // YSP+ { User information isolation }
+    std::string ysp_username = YspCryptoSingleton::GetInstance()->GetUserId();
     return new download::DownloadItemImpl(delegate, download_id, ysp_username,
                                           path, url, mime_type,
                                           std::move(request_handle));
-#else return new download::DownloadItemImpl(
-        delegate, download_id, path, url, mime_type, std::move(request_handle));
+#else
+    return new download::DownloadItemImpl(delegate, download_id, path, url,
+                                          mime_type, std::move(request_handle));
 #endif
   }
 };
@@ -334,7 +333,7 @@ DownloadManagerImpl::DownloadManagerImpl(BrowserContext* browser_context)
       next_download_id_(download::DownloadItem::kInvalidId),
       is_history_download_id_retrieved_(false),
 #if defined(REDCORE) && defined(IE_REDCORE)
-      download_file_init_flag_(false),  // ysp+{IE Embedded}
+      download_file_init_flag_(false),
 #endif
       weak_factory_(this) {
   DCHECK(browser_context);
@@ -360,9 +359,9 @@ DownloadManagerImpl::DownloadManagerImpl(BrowserContext* browser_context)
       weak_factory_.GetWeakPtr()));
 
 #if defined(REDCORE) && defined(IE_REDCORE)
-  std::unique_ptr<download::IEDownloadFileFactory> ief(
+  std::unique_ptr<download::IEDownloadFileFactory> tmp_factory(
       new download::IEDownloadFileFactory());
-  ie_file_factory_ = std::move(ief);
+  ie_file_factory_ = std::move(tmp_factory);
 #endif
 }
 
@@ -986,7 +985,7 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
     const base::FilePath& current_path,
     const base::FilePath& target_path,
 #ifdef REDCORE
-    const std::string& ysp_username,  // YSP+ { User information isolation }
+    const std::string& ysp_username,
 #endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
@@ -1022,7 +1021,7 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
   download::DownloadItemImpl* item = item_factory_->CreatePersistedItem(
       this, guid, id, current_path, target_path,
 #ifdef REDCORE
-      ysp_username,  // YSP+ { User information isolation }
+      ysp_username,
 #endif
       url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
       original_mime_type, start_time, end_time, etag, last_modified,
@@ -1092,7 +1091,7 @@ int DownloadManagerImpl::NonMaliciousInProgressCount() const {
         it.second->GetDangerType() !=
             download::DOWNLOAD_DANGER_TYPE_DANGEROUS_HOST &&
 #ifdef REDCORE
-        !(it.second->is_update()) &&  // ysp+
+        !(it.second->is_update()) &&
 #endif
         it.second->GetDangerType() !=
             download::DOWNLOAD_DANGER_TYPE_POTENTIALLY_UNWANTED) {
@@ -1348,7 +1347,7 @@ bool DownloadManagerImpl::IsNextIdInitialized() const {
 }
 
 #if defined(REDCORE)
-// TODO(matianzhi): YSP+ { clear user data
+// TODO(matianzhi): clear user data
 void DownloadManagerImpl::RemoveDownloadsForUserid(const std::string& userid) {
   for (const auto& it : downloads_) {
     download::DownloadItemImpl* download = it.second.get();
@@ -1359,8 +1358,7 @@ void DownloadManagerImpl::RemoveDownloadsForUserid(const std::string& userid) {
     DownloadRemoved(download);
   }
 }
-// ysp+ }
-#endif
+#endif  // REDCORE
 
 #if defined(IE_REDCORE)
 void DownloadManagerImpl::DownloadUrlForIE(
@@ -1444,6 +1442,6 @@ void DownloadManagerImpl::DownloadUrlForIE(
   // id);
 }
 
-#endif
+#endif  // IE_REDCORE
 
 }  // namespace content

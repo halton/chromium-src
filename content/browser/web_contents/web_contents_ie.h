@@ -29,8 +29,8 @@
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/renderer_host/render_widget_host_delegate.h"
 #include "content/browser/web_contents/web_contents_impl.h"
-#include "content/common/IE/ATLInclude.h"
-#include "content/common/IE/IEVersion.h"
+#include "content/common/IE/atl_include.h"
+#include "content/common/IE/version_ie.h"
 #include "content/common/content_export.h"
 #include "content/public/browser/color_chooser.h"
 #include "content/public/browser/notification_observer.h"
@@ -52,7 +52,7 @@
 
 struct RendererMode;
 
-namespace IE {
+namespace ie {
 class BrowserHostEventDelegant;
 }
 
@@ -194,7 +194,7 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   bool IsTridentCreated();
   void CommitToEntry(GURL gurl, bool is_set_history);
   void LoadFinishedAndUpdateEntry(GURL gurl);
-  void SetBrowserEmulation(IE::IEEmulation emu);
+  void SetBrowserEmulation(ie::Emulation emulation);
   net::CookieList LoadCookie(const GURL& url);
   void OnBeginLoadCookie(
       const GURL& url,
@@ -222,7 +222,7 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
 
   mutable base::string16 title_;
 
-  CComObject<IE::BrowserHostEventDelegant>* browser_event_handler_;
+  CComObject<ie::BrowserHostEventDelegant>* browser_event_handler_;
   gfx::AcceleratedWidget render_host_hwnd_;
   bool trident_created_;
   std::unique_ptr<net::URLFetcher> image_fetcher_;

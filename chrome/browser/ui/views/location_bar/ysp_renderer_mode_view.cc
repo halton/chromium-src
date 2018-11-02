@@ -53,30 +53,30 @@ void YspRendererModeView::SetToggled(RendererMode mode) {
     if (base::win::GetSystemIEVersion() < 8)
       tip_str = l10n_util::GetStringUTF16(IDS_IE_CORE);
     else {
-      if (renderer_mode_.emulation == IE::EMULATION7)
+      if (renderer_mode_.emulation == ie::EMULATION7)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_7) + L" + ";
-      else if (renderer_mode_.emulation == IE::EMULATION8)
+      else if (renderer_mode_.emulation == ie::EMULATION8)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_8) + L" + ";
-      else if (renderer_mode_.emulation == IE::EMULATION9)
+      else if (renderer_mode_.emulation == ie::EMULATION9)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_9) + L" + ";
-      else if (renderer_mode_.emulation == IE::EMULATION10)
+      else if (renderer_mode_.emulation == ie::EMULATION10)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_10) + L" + ";
-      else if (renderer_mode_.emulation == IE::EMULATION11)
+      else if (renderer_mode_.emulation == ie::EMULATION11)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_11) + L" + ";
 
-      if (renderer_mode_.ver == IE::DOC6)
+      if (renderer_mode_.version == ie::DOC6)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_6);
-      else if (renderer_mode_.ver == IE::DOC7)
+      else if (renderer_mode_.version == ie::DOC7)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_7);
-      else if (renderer_mode_.ver == IE::DOC8)
+      else if (renderer_mode_.version == ie::DOC8)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_8);
-      else if (renderer_mode_.ver == IE::DOC9)
+      else if (renderer_mode_.version == ie::DOC9)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_9);
-      else if (renderer_mode_.ver == IE::DOC10)
+      else if (renderer_mode_.version == ie::DOC10)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_10);
-      else if (renderer_mode_.ver == IE::DOC11)
+      else if (renderer_mode_.version == ie::DOC11)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_11);
-      else if (renderer_mode_.ver == IE::DOCSYS)
+      else if (renderer_mode_.version == ie::DOCSYS)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_SYS);
     }
   }

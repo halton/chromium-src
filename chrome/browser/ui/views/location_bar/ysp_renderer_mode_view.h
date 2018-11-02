@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "chrome/browser/ui/views/page_action/page_action_icon_view.h"
-#include "content/common/IE/IEVersion.h"
+#include "content/common/IE/version_ie.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
 
 class Browser;

@@ -16,8 +16,9 @@
 #include "content/public/common/page_zoom.h"
 #include "printing/buildflags/buildflags.h"
 #include "ui/base/window_open_disposition.h"
+
 #if defined(IE_REDCORE)
-#include "content/common/IE/IEVersion.h"  // ysp+{IE Embedded}
+#include "content/common/IE/version_ie.h"
 #endif
 
 class Browser;
@@ -167,11 +168,18 @@ void CreateBookmarkAppFromCurrentWebContents(Browser* browser,
 bool CanCreateBookmarkApp(const Browser* browser);
 
 #if defined(IE_REDCORE)
-// ysp+{IE Embedded}
-void OpenCurrentURLUseIE(Browser* browser, const GURL& ysp_url, IE::IEVersion ver, IE::IEEmulation emu, bool auto_select);
-void OpenCurrentURLUseChrome(Browser* browser, const GURL& ysp_url, bool auto_select);
-void SwitchRendererMode(Browser * browser, const GURL& url, const RendererMode& mode, bool auto_select);
-// ysp+
+void OpenCurrentUrlUseIe(Browser* browser,
+                         const GURL& url,
+                         ie::Version version,
+                         ie::Emulation emulation,
+                         bool auto_select);
+void OpenCurrentUrlUseChrome(Browser* browser,
+                             const GURL& url,
+                             bool auto_select);
+void SwitchRendererMode(Browser* browser,
+                        const GURL& url,
+                        const RendererMode& mode,
+                        bool auto_select);
 void ShowRendererModeSwitchBubble(Browser* browser, RendererMode mode);
 #endif
 

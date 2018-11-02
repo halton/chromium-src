@@ -715,9 +715,9 @@ YSPLoginManager::YSPLoginManager()
       get_auth_token_fetcher_(nullptr),
       get_sdp_device_fetcher_(nullptr),
       put_sdp_device_fetcher_(nullptr),
-      put_modify_password_fetcher_(nullptr),
       put_appliction_status_fetcher_(nullptr),
       get_gateway_appliction_fetcher_(nullptr),
+      put_modify_password_fetcher_(nullptr),
       autoConfig_fetcher_(nullptr),
       login_info_(nullptr),
       application_info_(nullptr),
@@ -736,6 +736,10 @@ YSPLoginManager::YSPLoginManager()
       window_frame_color_(-1),
       window_inactive_color_(0),
       should_parse_response_(false),
+      download_(false),
+      login_status_(SATUS_LOGOUT),
+      ntp_login_status_(false),
+      single_signon_status_(false),
       web_initialized_(false),
       offline_status_(true) {}
 
