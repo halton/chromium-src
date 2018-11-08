@@ -8,9 +8,9 @@
 #include <sys/timeb.h>
 #endif
 
-#include <string>
 #include <openssl/aes.h>
 #include <openssl/md5.h>
+#include <string>
 #include "base/base64.h"
 #include "base/files/file_util.h"
 #include "base/md5.h"
@@ -22,6 +22,7 @@
 #include "net/base/io_buffer.h"
 #include "net/base/rand_callback.h"
 #include "net/socket/udp_socket.h"
+#include "net/traffic_annotation/network_traffic_annotation.h"
 
 #define RAND_VALUE_SIZE 16
 #define SHA256_DIGEST_LENGTH 32
@@ -84,7 +85,7 @@ size_t strlcpy(char* dst, const char* src, size_t siz) {
   return (s - src - 1);
 }
 #else
-#define strnlen(s,l) (strlen(s)<l ? strlen(s):l)
+#define strnlen(s, l) (strlen(s) < l ? strlen(s) : l)
 #endif
 
 void get_random_data(unsigned char* data, const size_t len) {
@@ -133,7 +134,7 @@ std::string set_key_and_iv(const std::string key, const unsigned char* value) {
   char pw_buf[AES_MAX_SIZE] = {0};
   unsigned char tmp_buf[MD5_DIGEST_LEN + AES_MAX_SIZE + AES_BLOCK_SIZE] = {0};
   unsigned char kiv_buf[AES_MAX_SIZE + AES_BLOCK_SIZE] = {
-      0};                                       //Key and IV buffer
+      0};                                       // Key and IV buffer
   unsigned char salt_buf[AES_SALT_LEN] = {0};   // salt buffer
   unsigned char md5_buf[MD5_DIGEST_LEN] = {0};  // md5 buffer
   char key_iv_buf[AES_MAX_SIZE + AES_BLOCK_SIZE] = {0};
@@ -199,7 +200,7 @@ void InitHmacKey(unsigned char* inner_key,
   return;
 }
 
-} //namespace
+}  // namespace
 
 YSPRedcoreSpaPacket* g_instance = nullptr;
 
@@ -220,7 +221,7 @@ YSPRedcoreSpaPacket::YSPRedcoreSpaPacket()
 
 YSPRedcoreSpaPacket::~YSPRedcoreSpaPacket() {}
 
-//static
+// static
 YSPRedcoreSpaPacket* YSPRedcoreSpaPacket::GetInstance() {
   if (!g_instance) {
     g_instance = new YSPRedcoreSpaPacket;
@@ -267,7 +268,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
     sprintf(Hex_block_key + (i * 3), "%02x ", (uint8_t)(block_key_.c_str()[i]));
   }
   DLOG(INFO) << "HEX block_key: " << Hex_block_key;
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
   if (!base::Base64Decode(hmac_key, &hmac_key_)) {
     DLOG(INFO) << "hmac key base64 decode failure !";
     return -1;
@@ -284,7 +285,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
   }
   DLOG(INFO) << "inner key: " << inner_tmp;
   DLOG(INFO) << "outer key: " << outer_tmp;
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
   if ((ret = CreateRandAndTimeStamp(time_diff)) < 0) {
     DLOG(INFO) << "create rand and timestamp failure !";
     return ret;
@@ -296,7 +297,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
     strlcpy(const_cast<char*>(enc_msg), rand_value_.c_str(), 1024);
 #ifdef TEST_REDCORE
     strlcpy(enc_msg, "8205236612517342", 1024);
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
     strlcat(const_cast<char*>(enc_msg), ":", 1024);
     strlcat(const_cast<char*>(enc_msg), b64_device_id_.c_str(), 1024);
     strlcat(const_cast<char*>(enc_msg), ":", 1024);
@@ -315,7 +316,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
     strlcat(enc_msg, ":", 1024);
     strlcat(enc_msg, "1535273604", 1024);
     strlcat(enc_msg, ":", 1024);
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
     strlcat(enc_msg, version_.c_str(), 1024);
     offset = strlen(enc_msg);
     snprintf(enc_msg + offset, 1024 - offset,
@@ -331,7 +332,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
       sprintf(enc_str + (i * 3), "%02x ", (uint8_t)(cip_test.c_str()[i]));
     }
     DLOG(INFO) << "encrypt string: " << enc_str;
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
   }
   {  //计算验证字符串SHA256的值
     std::string sha256_tmp = "";
@@ -374,7 +375,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
       sprintf(Hex_hash_str + (i * 3), "%02x ", (uint8_t)(hash_str.c_str()[i]));
     }
     DLOG(INFO) << "HEX hash_str: " << Hex_hash_str;
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
     char hash_tmp[1024] = {0};
     memcpy(hash_tmp, outer_key, 64);
     memcpy(hash_tmp + 64, hash_str.c_str(), 32);
@@ -389,7 +390,7 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
       sprintf(Hex_hmac_tmp + (i * 3), "%02x ", (uint8_t)(hmac_tmp.c_str()[i]));
     }
     DLOG(INFO) << "HEX hmac_tmp: " << Hex_hmac_tmp;
-#endif //TEST_REDCORE
+#endif  // TEST_REDCORE
     std::string b64_hmac_tmp = "";
     base::Base64Encode(hmac_tmp, &b64_hmac_tmp);
     hmac_sha256_encrypted_string_.assign(b64_hmac_tmp, 0,
@@ -404,25 +405,25 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
 // net::IPAddressNumber -> net::IPAddress
 // https://codereview.chromium.org/1932363003
 int YSPRedcoreSpaPacket::SendUdpPacket(net::CompletionCallback callback) {
-  // net::UDPSocket socket(net::DatagramSocket::DEFAULT_BIND,
-  //            net::RandIntCallback(),
-  //            NULL, net::NetLogSource());
-  // socket.Open(net::AddressFamily::ADDRESS_FAMILY_IPV4);
-  // const std::vector<uint8_t>& address
-  // net::IPAddressNumber ip_number;
-  // net::ParseURLHostnameToNumber(server_ip_, &ip_number);
-  // socket.Connect(net::IPEndPoint(ip_number, 62201));
-  // net::IPEndPoint endpoint;
-  // socket.GetLocalAddress(&endpoint);
-  // std::string request_data = "";
-  // request_data.assign(encrypted_string_, 10, encrypted_string_.length() -
-  // 10); request_data += hmac_sha256_encrypted_string_;
-  // scoped_refptr<net::StringIOBuffer> io_buffer(new
-  // net::StringIOBuffer(request_data)); scoped_refptr<net::DrainableIOBuffer>
-  // buffer(
-  //  new net::DrainableIOBuffer(io_buffer.get(), request_data.length()));
-  // socket.Write(buffer.get(), buffer->BytesRemaining(), callback);
-  // socket.Close();
+  net::UDPSocket socket(net::DatagramSocket::DEFAULT_BIND, NULL,
+                        net::NetLogSource());
+  socket.Open(net::AddressFamily::ADDRESS_FAMILY_IPV4);
+  net::IPAddress ip_number;
+  net::ParseURLHostnameToAddress(server_ip_, &ip_number);
+  socket.Connect(net::IPEndPoint(ip_number, 62201));
+  net::IPEndPoint endpoint;
+  socket.GetLocalAddress(&endpoint);
+  std::string request_data = "";
+  request_data.assign(encrypted_string_, 10, encrypted_string_.length() - 10);
+  request_data += hmac_sha256_encrypted_string_;
+  scoped_refptr<net::StringIOBuffer> io_buffer(
+      new net::StringIOBuffer(request_data));
+  scoped_refptr<net::DrainableIOBuffer> buffer(
+      new net::DrainableIOBuffer(io_buffer.get(), request_data.length()));
+  auto tag = net::DefineNetworkTrafficAnnotation("YSPRedcoreSpa",
+                                                 "completion_YSPRedcoreSpa");
+  socket.Write(buffer.get(), buffer->BytesRemaining(), callback, tag);
+  socket.Close();
   return 0;
 }
 
