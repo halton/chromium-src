@@ -1134,6 +1134,7 @@ class Browser : public TabStripModelObserver,
   std::vector<base::string16> watermark_str_;
   uint32_t watermark_color_;
   int watermark_font_size_;
+  void UpdateWatermark();
 #endif
 
 #if defined(IE_REDCORE)

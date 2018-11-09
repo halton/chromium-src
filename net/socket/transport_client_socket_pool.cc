@@ -110,7 +110,8 @@ TransportConnectJob::TransportConnectJob(
       client_socket_factory_(client_socket_factory),
       next_state_(STATE_NONE),
       socket_performance_watcher_factory_(socket_performance_watcher_factory),
-      resolve_result_(OK) {}
+      resolve_result_(OK),
+      group_name_(group_name) {}
 
 TransportConnectJob::~TransportConnectJob() {
   // We don't worry about cancelling the host resolution and TCP connect, since
@@ -323,11 +324,23 @@ int TransportConnectJob::DoTransportConnect() {
   std::string port = std::string(host_and_port, host_and_port.find(':') + 1,
                                  host_and_port.length());
   std::string host = params_->destination().hostname();
-  std::string comparedHost = "";
+  if (!group_name_.empty()) {
+    std::string domain_and_port = "";
+    if (group_name_.find("ssl/") == std::string::npos)
+      domain_and_port = group_name_;
+    else
+      domain_and_port = std::string(group_name_, group_name_.find("ssl/") + 4,
+                                    group_name_.length());
+    port = std::string(domain_and_port, domain_and_port.find(':') + 1,
+                       domain_and_port.length());
+    host = std::string(domain_and_port, 0, domain_and_port.find(':'));
+  }
+
+  std::string compared_host = "";
   if (port == "80" || port == "443")
-    comparedHost = host;
+    compared_host = host;
   else
-    comparedHost = host + ":" + port;
+    compared_host = host + ":" + port;
 
   std::string device_id = "";
   std::string username = "";
@@ -340,7 +353,7 @@ int TransportConnectJob::DoTransportConnect() {
       "02LbTG8yoariufYrbigLgvax4lYhWtND5AFLDcf2EGeu4/"
       "bd3VxovZwFNAkdC4PowALnosuDhZKkUKm/41Rx8g==";
 
-  if (DomainCompared(comparedHost, &device_id, &username, &server_ip,
+  if (DomainCompared(compared_host, &device_id, &username, &server_ip,
                      time_diff)) {
     if (!device_id.empty() && !username.empty() && !ip.empty() &&
         !port.empty() && !server_ip.empty()) {
@@ -358,7 +371,7 @@ int TransportConnectJob::DoTransportConnect() {
       rv = transport_socket_->Connect(base::Bind(
           &TransportConnectJob::OnIOComplete, base::Unretained(this)));
     }
-  } else if (comparedHost == host_) {
+  } else if (compared_host == host_) {
     device_id.assign("dJjCl43TR4TkcEO2");
     server_ip = ip;
     YSPRedcoreSpaPacket udp_packet;

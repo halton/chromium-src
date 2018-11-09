@@ -179,41 +179,45 @@ std::string YspCryptoHeader::GetEncString()
   return " (" + base64_enc_timeStamp + ")";
 }
 
-std::string YspCryptoHeader::GetHMACEncString(const std::string& message_type, const std::string& uri)
-{
-	int type = 1; //1:sha1, 2:sha256, 3:sm3
-	//std::string method = "HTTP" + message_type;
+std::string YspCryptoHeader::GetHmacEncString(const std::string& message_type,
+                                              const std::string& uri,
+                                              const std::string& version) {
+  int type = 1;  // 1:sha1, 2:sha256, 3:sm3
+  // std::string method = "HTTP" + message_type;
 
-	int clientID = 352234625;
-	char client_id[64] = {0};
-	std::string clientIDHex = "";
-	sprintf(client_id, "%x", clientID);clientIDHex.assign(client_id);
-	char time_stamp[64] = {0};
+  int clientID = 352234625;
+  char client_id[64] = {0};
+  std::string client_id_hex = "";
+  sprintf(client_id, "%x", clientID);
+  client_id_hex.assign(client_id);
+  char time_stamp[64] = {0};
 #ifdef WIN32
 	sprintf(time_stamp, "%I64x", (base::Time::Now().ToTimeT() + time_diff_));
 #else
 	sprintf(time_stamp, "%lx", (base::Time::Now().ToTimeT() + time_diff_));
 #endif
-	std::string timeStampHex; timeStampHex.assign(time_stamp);
-	//std::string key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
-	std::string key = "";
-	key.assign(cryptoHeaderkey::pwd);
-	key.append(cryptoHeaderkey::sal);
+        std::string time_stamp_hex;
+        time_stamp_hex.assign(time_stamp);
+        // std::string key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
+        std::string key = "";
+        key.assign(cryptoHeaderkey::pwd);
+        key.append(cryptoHeaderkey::sal);
 	key.append(cryptoHeaderkey::iv);
 	//memcpy(key, cryptoHeaderkey::pwd, 8);
 	//memcpy(key, cryptoHeaderkey::sal, 8);
 	//memcpy(key, cryptoHeaderkey::iv, 16);
 	key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
-        std::string value = "1#" + base::IntToString(type) + "#" + clientIDHex +
-                            "#" + timeStampHex + "#" + message_type + "#" + uri;
-	std::string cipher_text = "1" + base::IntToString(type) + clientIDHex + timeStampHex;
-	if (type == 1) {
-		unsigned char digestSha1[SHA1_DIGEST_LENGTH] = { '\0' };
+        std::string value = version + "#" + base::IntToString(type) + "#" +
+                            client_id_hex + "#" + time_stamp_hex + "#" +
+                            message_type + "#" + uri;
+        std::string cipher_text =
+            version + base::IntToString(type) + client_id_hex + time_stamp_hex;
+        if (type == 1) {
+          unsigned char digestSha1[SHA1_DIGEST_LENGTH] = {'\0'};
 
-		crypto::HMAC hmacSha1(crypto::HMAC::SHA1);
-		
-        if(hmacSha1.Init(key))
-        {
+          crypto::HMAC hmacSha1(crypto::HMAC::SHA1);
+
+          if (hmacSha1.Init(key)) {
             if(hmacSha1.Sign(value, digestSha1, SHA1_DIGEST_LENGTH))
             {
                 std::string digest = "", digest_base64 = "";

@@ -277,6 +277,7 @@ void LocationBarView::Init() {
   if (browser_) {
     page_action_icons_.push_back(
         star_view_ = new StarView(command_updater(), browser_, this));
+    star_view_->SetVisible(true);
   }
 
   for (PageActionIconView* icon_view : page_action_icons_) {

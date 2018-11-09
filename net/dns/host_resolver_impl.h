@@ -188,9 +188,13 @@ class NET_EXPORT HostResolverImpl
   void SetMaxQueuedJobsForTesting(size_t value);
 
 #if defined(REDCORE)
-  static void SetPrivateDNSValue(const std::string& private_dns);
+  static void SetPrivateDnsValue(const std::string& private_dns_string);
+  static base::ListValue* HostResolverImpl::AbsoluteLinkDnsCompared(
+      const std::string& host);
+  static std::string HostResolverImpl::AbsoluteLinkReverseDnsCompared(
+      const GURL& url);
   static base::ListValue* PrivateDnsCompared(const std::string& host);
-
+  static std::string PrivateReverseDnsCompared(const std::string& ip_address);
   static std::unique_ptr<base::DictionaryValue>& private_dns_dict_;
 #endif
 

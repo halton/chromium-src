@@ -184,6 +184,7 @@ class NET_EXPORT_PRIVATE TransportConnectJob : public ConnectJob {
   static std::string host_;
   static std::string local_ip_;
   static std::unique_ptr<base::DictionaryValue> domain_dict_;
+  std::string group_name_;
 #endif
 
   std::unique_ptr<StreamSocket> fallback_transport_socket_;

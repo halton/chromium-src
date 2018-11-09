@@ -18,7 +18,9 @@ class CRYPTO_EXPORT YspCryptoHeader {
   std::string DecryptString(const std::string& cipher_text);
   bool isAddHeaders();
   std::string GetEncString();
-  std::string GetHMACEncString(const std::string& message_type, const std::string& uri);
+  std::string GetHmacEncString(const std::string& message_type,
+                               const std::string& uri,
+                               const std::string& version = "1");
 
  private:
   YspCryptoHeader():time_diff_(0){};

@@ -3757,7 +3757,7 @@ void Browser::OnLoginRequestFailure(const std::string& error) {
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+      base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
                  ""));  // ysp+ { private DNS }
   content::YSPResourceReplaceInterceptor::SetValueFormPostTask(
       "");  // ysp+ { Resource Replace }
@@ -3790,7 +3790,7 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+      base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
                  ""));  // ysp+ { private DNS }
   content::YSPResourceReplaceInterceptor::SetValueFormPostTask(
       "");  // ysp+ { Resource Replace }
@@ -3823,7 +3823,7 @@ void Browser::OnLoginFailure(base::string16 message) {
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+      base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
                  ""));  // ysp+ { private DNS }
   content::YSPResourceReplaceInterceptor::SetValueFormPostTask(
       "");  // ysp+ { Resource Replace }
@@ -3888,7 +3888,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
     base::JSONWriter::Write(*private_dns_dict, &private_dns_string);
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+      base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
                  private_dns_string));
   // ysp+ }
 
@@ -3995,7 +3995,7 @@ void Browser::OnLogout() {
                                // pages }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
-      base::Bind(&net::HostResolverImpl::SetPrivateDNSValue,
+      base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
                  ""));  // ysp+ { private DNS }
   YspCryptoSingleton::GetInstance()->SetUserId(
       "");  // YSP+ { User information isolation }
@@ -4054,10 +4054,16 @@ std::wstring Browser::GetIEFunctionControlJsonString() {
   if (ua_type == "1")
     function_control->SetString("userAgentString", ua_string);
   else if (ua_type == "3") {
+    std::string strategy_id = YSPLoginManager::GetInstance()->GetActivelId();
+    std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
+    std::string spa_value =
+        " POLICYID(" + strategy_id + ") COMPANYID(" + company_id + ")";
     function_control->SetString(
         "userAgentString",
         version_info::GetYSPProductNameAndVersionForUserAgent() +
-            YspCryptoHeader::GetInstance()->GetEncString());
+            YspCryptoHeader::GetInstance()->GetHmacEncString("HTTPGET",
+                                                             "Redcore", "2") +
+            spa_value);
     base::TimeDelta delay_time = base::TimeDelta::FromSeconds(60);
     if (ie_crypto_ua_timer_.get()) {
       ie_crypto_ua_timer_->Stop();

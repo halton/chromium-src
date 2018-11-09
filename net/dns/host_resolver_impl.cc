@@ -2106,10 +2106,134 @@ HostResolverImpl::~HostResolverImpl() {
 
 // ysp+ { private DNS
 #ifdef REDCORE
+
+static int stringmatchlen(const char* pattern,
+                          int pattern_len,
+                          const char* string,
+                          int string_len,
+                          int nocase) {
+  while (pattern_len) {
+    switch (pattern[0]) {
+      case '*':
+        while (pattern[1] == '*') {
+          pattern++;
+          pattern_len--;
+        }
+        if (pattern_len == 1)
+          return 1; /** match */
+        while (string_len) {
+          if (stringmatchlen(pattern + 1, pattern_len - 1, string, string_len,
+                             nocase))
+            return 1; /** match */
+          string++;
+          string_len--;
+        }
+        return 0; /** no match */
+        break;
+      case '[': {
+        int inot, match;
+
+        pattern++;
+        pattern_len--;
+        inot = pattern[0] == '^';
+        if (inot) {
+          pattern++;
+          pattern_len--;
+        }
+        match = 0;
+        while (1) {
+          if (pattern[0] == '\\') {
+            pattern++;
+            pattern_len--;
+            if (pattern[0] == string[0])
+              match = 1;
+          } else if (pattern[0] == ']') {
+            break;
+          } else if (pattern_len == 0) {
+            pattern--;
+            pattern_len++;
+            break;
+          } else if (pattern[1] == '-' && pattern_len >= 3) {
+            int start = pattern[0];
+            int end = pattern[2];
+            int c = string[0];
+            if (start > end) {
+              int t = start;
+              start = end;
+              end = t;
+            }
+            if (nocase) {
+              start = tolower(start);
+              end = tolower(end);
+              c = tolower(c);
+            }
+            pattern += 2;
+            pattern_len -= 2;
+            if (c >= start && c <= end)
+              match = 1;
+          } else {
+            if (!nocase) {
+              if (pattern[0] == string[0])
+                match = 1;
+            } else {
+              if (tolower((int)pattern[0]) == tolower((int)string[0]))
+                match = 1;
+            }
+          }
+          pattern++;
+          pattern_len--;
+        }
+        if (inot)
+          match = !match;
+        if (!match)
+          return 0; /** no match */
+        string++;
+        string_len--;
+        break;
+      }
+      case '\\':
+        if (pattern_len >= 2) {
+          pattern++;
+          pattern_len--;
+        }
+        break;
+      /** fall through */
+      default:
+        if (!nocase) {
+          if (pattern[0] != string[0])
+            return 0; /** no match */
+        } else {
+          if (tolower((int)pattern[0]) != tolower((int)string[0]))
+            return 0; /** no match */
+        }
+        string++;
+        string_len--;
+        break;
+    }
+    pattern++;
+    pattern_len--;
+    if (string_len == 0) {
+      while (*pattern == '*') {
+        pattern++;
+        pattern_len--;
+      }
+      break;
+    }
+  }
+  if (pattern_len == 0 && string_len == 0)
+    return 1;
+  return 0;
+}
+
+static int stringmatch(const char* pattern, const char* string, int nocase) {
+  return stringmatchlen(pattern, strlen(pattern), string, strlen(string),
+                        nocase);
+}
+
 std::unique_ptr<base::DictionaryValue>& HostResolverImpl::private_dns_dict_ =
     *(new std::unique_ptr<base::DictionaryValue>);
 
-void HostResolverImpl::SetPrivateDNSValue(const std::string& private_dns) {
+void HostResolverImpl::SetPrivateDnsValue(const std::string& private_dns) {
   if (private_dns.empty()) {
     private_dns_dict_.reset();
     return;
@@ -2119,28 +2243,160 @@ void HostResolverImpl::SetPrivateDNSValue(const std::string& private_dns) {
       static_cast<base::DictionaryValue*>(dns_value.release()));
 }
 
-base::ListValue* HostResolverImpl::PrivateDnsCompared(const std::string& host) {
-  base::ListValue* dns_list = nullptr;
+base::ListValue* HostResolverImpl::PrivateDnsCompared(
+    const std::string& SetPrivateDnsValue) {
+  base::ListValue* private_dns_list = nullptr;
   if (private_dns_dict_.get() &&
-      private_dns_dict_->GetList("list", &dns_list) && dns_list &&
-      !dns_list->empty()) {
-    for (size_t i = 0; i < dns_list->GetSize(); ++i) {
-      base::DictionaryValue* dns_dict = nullptr;
-      if (dns_list->GetDictionary(i, &dns_dict)) {
-        std::string domain;
-        dns_dict->GetString("domain", &domain);
-        if (host == domain) {
-          base::ListValue* ip_address = nullptr;
-          if (dns_dict->GetList("ip", &ip_address)) {
-            return ip_address;
+      private_dns_dict_->GetList("list", &private_dns_list)) {
+    if (private_dns_list && !private_dns_list->empty()) {
+      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+        base::DictionaryValue* bm_dict = nullptr;
+        if (private_dns_list->GetDictionary(i, &bm_dict)) {
+          std::string domain;
+          bm_dict->GetString("domain", &domain);
+          if (stringmatch(domain.c_str(), SetPrivateDnsValue.c_str(), true)) {
+            base::ListValue* address_list = nullptr;
+            if (bm_dict->GetList("ip", &address_list)) {
+              return address_list;
+            }
           }
         }
       }
     }
   }
-
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("reverseDNSList", &private_dns_list)) {
+    if (private_dns_list && !private_dns_list->empty()) {
+      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+        base::DictionaryValue* bm_dict = nullptr;
+        if (private_dns_list->GetDictionary(i, &bm_dict)) {
+          std::string domain;
+          bm_dict->GetString("domain", &domain);
+          if (stringmatch(domain.c_str(), SetPrivateDnsValue.c_str(), true)) {
+            base::ListValue* address_list = nullptr;
+            if (bm_dict->GetList("gatewayIP", &address_list)) {
+              return address_list;
+            }
+          }
+        }
+      }
+    }
+  }
   return nullptr;
 }
+std::string HostResolverImpl::PrivateReverseDnsCompared(
+    const std::string& ip_address) {
+  base::ListValue* private_dns_list = nullptr;
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("list", &private_dns_list)) {
+  }
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("list", &private_dns_list)) {
+    if (private_dns_list && !private_dns_list->empty()) {
+      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+        base::DictionaryValue* bm_dict = nullptr;
+        if (private_dns_list->GetDictionary(i, &bm_dict)) {
+          base::ListValue* address_list = nullptr;
+          if (bm_dict->GetList("ip", &address_list)) {
+            if (address_list && !address_list->empty()) {
+              for (size_t i = 0; i < address_list->GetSize(); ++i) {
+                std::string addr = "";
+                address_list->GetString(i, &addr);
+                if (ip_address == addr) {
+                  std::string domain = "";
+                  bm_dict->GetString("domain", &domain);
+                  return domain;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return std::string();
+}
+
+base::ListValue* HostResolverImpl::AbsoluteLinkDnsCompared(
+    const std::string& SetPrivateDnsValue) {
+  // base::ListValue listDNS;
+  base::ListValue* private_dns_list = nullptr;
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("list", &private_dns_list))
+    if (private_dns_list && !private_dns_list->empty()) {
+      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+        base::DictionaryValue* bm_dict = nullptr;
+        if (private_dns_list->GetDictionary(i, &bm_dict)) {
+          std::string domain;
+          bm_dict->GetString("domain", &domain);
+          if (SetPrivateDnsValue == domain) {
+            base::ListValue* address_list = nullptr;
+            if (bm_dict->GetList("ip", &address_list)) {
+              return address_list;
+            }
+          }
+        }
+      }
+    }
+  return nullptr;
+}
+
+// ysp+ { private Reverse DNS
+std::string DomainSplice(const std::string& domain, const GURL& url) {
+  std::string ip = url.host();
+  if (!domain.empty() && !ip.empty()) {
+    if (domain.find('*') != std::string::npos) {
+      std::string domain_str = domain;
+      std::string ip_str = ip;
+      while (ip_str.find('.') != std::string::npos) {
+        size_t offset = ip_str.find('.');
+        ip_str.replace(offset, 1, 1, '_');
+      }
+      int offset = domain_str.find('*');
+      std::string post_domain = "";
+      post_domain.assign(domain_str, offset + 1,
+                         domain_str.length() - offset - 1);
+      return "redcore_gw_" + url.scheme() + "_" + ip_str + "_" + url.port() +
+             post_domain;
+    }
+  }
+  return std::string();
+}
+
+std::string HostResolverImpl::AbsoluteLinkReverseDnsCompared(const GURL& url) {
+  std::string ip_address = url.host();
+  base::ListValue* private_dns_list = nullptr;
+  if (private_dns_dict_.get() &&
+      private_dns_dict_->GetList("reverseDNSList", &private_dns_list)) {
+    if (private_dns_list && !private_dns_list->empty()) {
+      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+        base::DictionaryValue* bm_dict = nullptr;
+        if (private_dns_list->GetDictionary(i, &bm_dict)) {
+          std::string addr = "";
+          if (bm_dict->GetString("appIP", &addr)) {
+            std::string domain = "";
+            bm_dict->GetString("domain", &domain);
+            if (ip_address == addr) {
+              return domain;
+            } else if (addr.find('/') != std::string::npos) {
+              IPAddress ip_number, ip_prefix;
+              size_t prefix_length_in_bits;
+              if (ParseCIDRBlock(addr, &ip_prefix, &prefix_length_in_bits)) {
+                if (ParseURLHostnameToAddress(ip_address, &ip_number)) {
+                  if (IPAddressMatchesPrefix(ip_number, ip_prefix,
+                                             prefix_length_in_bits))
+                    return DomainSplice(domain, url);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return std::string();
+}
+
 #endif  // REDCORE
 
 void HostResolverImpl::SetDnsClient(std::unique_ptr<DnsClient> dns_client) {

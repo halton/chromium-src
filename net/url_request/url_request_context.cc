@@ -26,6 +26,10 @@
 #include "net/url_request/http_user_agent_settings.h"
 #include "net/url_request/url_request.h"
 
+#ifdef REDCORE  // ysp+ { private Reverse DNS
+#include "net/dns/host_resolver_impl.h"
+#endif  // ysp+ }
+
 namespace net {
 
 URLRequestContext::URLRequestContext()
@@ -120,6 +124,24 @@ std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
     const GURL& url,
     RequestPriority priority,
     URLRequest::Delegate* delegate) const {
+#ifdef REDCORE  // ysp+ { private Reverse DNS
+  GURL redcore_url(url);
+  std::string domain =
+      net::HostResolverImpl::AbsoluteLinkReverseDnsCompared(url);
+  if (!domain.empty()) {
+    std::string port = "";
+    if (url.port() != "") {
+      port = ":" + url.port();
+    }
+    std::string dest_url = "https://" + domain + port + url.PathForRequest();
+    redcore_url = GURL(dest_url);
+    DLOG(INFO) << "dest_url: " << dest_url;
+  }
+  return base::WrapUnique(new URLRequest(redcore_url, priority, delegate, this,
+                                         network_delegate_,
+                                         MISSING_TRAFFIC_ANNOTATION));
+#endif  // ysp+ }
+
   return CreateRequest(url, priority, delegate, MISSING_TRAFFIC_ANNOTATION);
 }
 

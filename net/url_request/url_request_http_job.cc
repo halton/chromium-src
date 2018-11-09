@@ -724,7 +724,7 @@ void URLRequestHttpJob::Start() {
               std::string uri = request_info_.url.PathForRequest();
               std::string scheme = "HTTP";  // request_info_.url.scheme();
               std::string spa_value = http_user_agent_settings_->GetUserAgent();
-              spa_value += YspCryptoHeader::GetInstance()->GetHMACEncString(
+              spa_value += YspCryptoHeader::GetInstance()->GetHmacEncString(
                   scheme + method, uri);
               spa_value += " POLICYID(" + strategy_id + ") COMPANYID(" +
                            company_id + ")";
