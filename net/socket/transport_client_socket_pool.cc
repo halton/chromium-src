@@ -435,7 +435,7 @@ void TransportConnectJob::SetLoginSpaValue(const std::string& device_id,
 //static
 void TransportConnectJob::SetDomainDictValue(
     const std::string& domain_dict_string) {
-  if (!domain_dict_string.empty()) {
+  if (domain_dict_string.empty()) {
     domain_dict_.reset();
     return;
   }
@@ -483,6 +483,8 @@ bool TransportConnectJob::DomainCompared(const std::string& host,
       }
     }
   }
+
+  return false;
 }
 #endif  // REDCORE
 

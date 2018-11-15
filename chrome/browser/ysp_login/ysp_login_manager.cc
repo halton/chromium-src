@@ -37,6 +37,7 @@
 #include "net/base/mime_util.h"
 #include "net/url_request/url_request_http_job.h"
 #include "ui/base/l10n/l10n_util.h"
+#include "net/socket/transport_client_socket_pool.h"
 
 #if defined(OS_MACOSX)
 #include "base/sys_info.h"
@@ -1471,6 +1472,22 @@ void YSPLoginManager::OnSdpDeviceFetcherResponseParse(
   }
 }
 
+void YSPLoginManager::OnGatewayApplictionResponseParse(
+    std::unique_ptr<base::DictionaryValue>& response_data) {
+  LOG(INFO) << "YSPLoginManager::OnGatewayApplictionResponseParse";
+  std::string responseStatus = GetResponseStatusCode(response_data);
+  if (responseStatus == "0") {
+    base::ListValue* gatewayDomainList = nullptr;
+    if (response_data->GetList("data", &gatewayDomainList)) {
+      if (gatewayDomainList && !gatewayDomainList->empty()) {
+        std::string gatewayDomainListString = "";
+        base::JSONWriter::Write(*gatewayDomainList, &gatewayDomainListString);
+        NotifyConfigureUpdate("gatewayDomain", gatewayDomainListString);
+      }
+    }
+  }
+}
+
 void YSPLoginManager::OnModifyPasswordResponseParse(std::string response) {
   LOG(INFO) << "YSPLoginManager::OnModifyPasswordResponseParse";
   NotifyConfigureUpdate("modifyPassword", response);
@@ -2133,6 +2150,18 @@ bool YSPLoginManager::Restore() {
   }
   if (login_fetcher_) {
     std::string device_info = GetDeviceInfo();
+    PrefService* prefs = g_browser_process->local_state();
+    std::string device_id = GetRegMachineId();
+    if (device_id.empty())
+      device_id = prefs->GetString(prefs::kYSPDeviceID);
+    if (device_id.empty()) {
+      device_id = base::GenerateGUID();
+      prefs->SetString(prefs::kYSPDeviceID, device_id);
+    }
+    content::BrowserThread::PostTask(
+        content::BrowserThread::IO, FROM_HERE,
+        base::Bind(&net::TransportConnectJob::SetLoginSpaValue, device_id,
+                   account_, domain_name));
     login_fetcher_->StartLogin(GetManageServer(), domain_name, account_,
                                password_, header_list, device_info);
   }
@@ -2185,6 +2214,17 @@ void YSPLoginManager::StartLogin(const std::string& cid,
   }
   if (login_fetcher_) {
     std::string device_info = GetDeviceInfo();
+    std::string device_id = GetRegMachineId();
+    if (device_id.empty())
+      device_id = prefs->GetString(prefs::kYSPDeviceID);
+    if (device_id.empty()) {
+      device_id = base::GenerateGUID();
+      prefs->SetString(prefs::kYSPDeviceID, device_id);
+    }
+    content::BrowserThread::PostTask(
+        content::BrowserThread::IO, FROM_HERE,
+        base::Bind(&net::TransportConnectJob::SetLoginSpaValue, device_id,
+                   account_, domain_name));
     login_fetcher_->StartLogin(GetManageServer(), domain_name, account_,
                                password, header_list, device_info);
   }
@@ -2493,6 +2533,7 @@ void YSPLoginManager::OnLoginResponseParseSuccessInternal(
     GetTokenfetcher(false);
     GetSwafetcher(false);
     GetPcfetcher(false);
+    GetGatewayApplictionFetch();
     // YSP+ } /*Fetcher resource*/
   } else {
     if (status == "E1002")
@@ -2616,6 +2657,8 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(
       OnAutoTokenFetcherResponseParse(response_data, from_local, auto_fetch);
     } else if (url.spec().find(kSdpDevicePath) != std::string::npos) {
       OnSdpDeviceFetcherResponseParse(response_data, from_local, auto_fetch);
+    } else if (url.spec().find(kGatewayApplictionPath) != std::string::npos) {
+      OnGatewayApplictionResponseParse(response_data);
     }
     if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
       OnModifyPasswordResponseParse(response_status);

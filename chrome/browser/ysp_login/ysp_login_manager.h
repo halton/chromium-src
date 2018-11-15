@@ -269,6 +269,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
       std::unique_ptr<base::DictionaryValue>& response_data,
       bool from_local,
       bool auto_fetch);
+  void OnGatewayApplictionResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data);
   void OnModifyPasswordResponseParse(std::string response);
   // YSP+ } /*Fetcher resource*/
  private:

@@ -148,12 +148,9 @@ YSPAutoUpdateShowMessageBoxViews::RunDialogAndGetResult() {
   result_ = &result;
   // TODO(pkotwicz): Exit message loop when the dialog is closed by some other
   // means than |Cancel| or |Accept|. crbug.com/404385
-  // FIXME(halton): Use new way to run
-  // base::MessageLoopForUI* loop = base::MessageLoopCurrent::Get();
-  // base::MessageLoopForUI::ScopedNestableTaskAllower allow_nested(loop);
-  // base::RunLoop run_loop;
-  // quit_runloop_ = run_loop.QuitClosure();
-  // run_loop.Run();
+  base::RunLoop run_loop(base::RunLoop::Type::kNestableTasksAllowed);
+  quit_runloop_ = run_loop.QuitClosure();
+  run_loop.Run();
   return result;
 }
 

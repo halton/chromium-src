@@ -862,7 +862,8 @@ LogMessage::~LogMessage() {
 #if defined(OFFICIAL_BUILD) && defined(NDEBUG)
       IMMEDIATE_CRASH();
 #else
-      base::debug::BreakDebugger();
+// TODO(wangping):for debug
+// base::debug::BreakDebugger();
 #endif
     }
   }
