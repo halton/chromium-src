@@ -24,6 +24,13 @@ class CookieOSCryptoDelegate : public net::CookieCryptoDelegate {
                      std::string* ciphertext) override;
   bool DecryptString(const std::string& ciphertext,
                      std::string* plaintext) override;
+#ifdef REDCORE
+  bool IsSupportHardwareCrypto() override;
+  bool HardwareEncryptString(const std::string& plaintext,
+                             std::string* ciphertext) override;
+  bool HardwareDecryptString(const std::string& ciphertext,
+                             std::string* plaintext) override;
+#endif
 };
 
 bool CookieOSCryptoDelegate::ShouldEncrypt() {
@@ -52,6 +59,23 @@ bool CookieOSCryptoDelegate::DecryptString(const std::string& ciphertext,
                                            std::string* plaintext) {
   return OSCrypt::DecryptString(ciphertext, plaintext);
 }
+
+#ifdef REDCORE
+bool CookieOSCryptoDelegate::IsSupportHardwareCrypto() {
+  return OSCrypt::IsSupportHardwareCrypto();
+}
+
+bool CookieOSCryptoDelegate::HardwareEncryptString(const std::string& plaintext,
+                                                   std::string* ciphertext) {
+  return OSCrypt::HardwareEncryptString(plaintext, ciphertext);
+}
+
+bool CookieOSCryptoDelegate::HardwareDecryptString(
+    const std::string& ciphertext,
+    std::string* plaintext) {
+  return OSCrypt::HardwareDecryptString(ciphertext, plaintext);
+}
+#endif  // REDCORE
 
 // Using a LazyInstance is safe here because this class is stateless and
 // requires 0 initialization.

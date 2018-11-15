@@ -196,6 +196,9 @@ class LoginDatabase {
   enum EncryptionResult {
     // Success.
     ENCRYPTION_RESULT_SUCCESS,
+#ifdef REDCORE
+    ENCRYPTION_RESULT_HARDWARE_SUCCESS,
+#endif  // REDCORE
     // Failure for a specific item (e.g., the encrypted value was manually
     // moved from another machine, and can't be decrypted on this machine).
     // This is presumed to be a permanent failure.
@@ -205,7 +208,16 @@ class LoginDatabase {
     // This is presumed to be a temporary failure.
     ENCRYPTION_RESULT_SERVICE_FAILURE,
   };
+#ifdef REDCORE
+  EncryptionResult YspEncryptedString(const base::string16& plain_text,
+                                      std::string* cipher_text) const
+      WARN_UNUSED_RESULT;
 
+  EncryptionResult YspDecryptedString(const std::string& cipher_text,
+                                      base::string16* plain_text,
+                                      bool hardware_crypto = false) const
+      WARN_UNUSED_RESULT;
+#endif
   // Encrypts plain_text, setting the value of cipher_text and returning true if
   // successful, or returning false and leaving cipher_text unchanged if
   // encryption fails (e.g., if the underlying OS encryption system is
@@ -221,7 +233,6 @@ class LoginDatabase {
   EncryptionResult DecryptedString(const std::string& cipher_text,
                                    base::string16* plain_text) const
       WARN_UNUSED_RESULT;
-
   // Fills |form| from the values in the given statement (which is assumed to
   // be of the form used by the Get*Logins methods).
   // Returns the EncryptionResult from decrypting the password in |s|; if not

@@ -72,7 +72,6 @@ component("os_crypt") {
     ]
     set_sources_assignment_filter(sources_assignment_filter)
   }
-
   if (is_win) {
     libs = [ "crypt32.lib" ]
   }

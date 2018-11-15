@@ -70,17 +70,27 @@ component("crypto") {
     "wincrypt_shim.h",
 
     # YSP
+    "ysp_enclave.cc",
+    "ysp_enclave.h",
     "ysp_crypto_encryption.cc",
     "ysp_crypto_encryption.h",
     "ysp_crypto_header.cc",
     "ysp_crypto_header.h",
+    "ysp_sgx_crypto.cc",
+    "ysp_sgx_crypto.h",
+    "ysp_sgx_support.cc",
+    "ysp_sgx_support.h",
   ]
 
   # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
-  configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+  configs += [
+    "//build/config/compiler:no_size_t_to_int_warning",
+    ":sgx_config",
+  ]
 
   deps = [
     ":platform",
+    ":sgx_crt",
     "//base",
     "//base/third_party/dynamic_annotations",
   ]
@@ -112,7 +122,15 @@ component("crypto") {
     sources -= [
       "capi_util.cc",
       "capi_util.h",
+      "ysp_enclave.cc",
+      "ysp_enclave.h",
+      "ysp_sgx_crypto.cc",
+      "ysp_sgx_crypto.h",
+      "ysp_sgx_support.cc",
+      "ysp_sgx_support.h",
     ]
+    configs -= [ ":sgx_config" ]
+    deps -= [ ":sgx_crt" ]
   }
 
   # Some files are built when NSS is used for the platform certificate library.
@@ -225,4 +243,27 @@ group("platform") {
     public_configs = [ ":platform_config" ]
     public_configs += [ "//build/config/linux/nss:system_nss_no_ssl_config" ]
   }
+}
+
+config("sgx_config") {
+  include_dirs = [ "//third_party/sgxsdk/include" ]
+  lib_dirs = [ "//third_party/sgxsdk/bin/$target_cpu/Debug" ]
+  libs = [ "sgx_urts.lib" ]
+}
+
+copy("sgx_crt") {
+  sources = [
+    "//third_party/sgxsdk/bin/$target_cpu/Release/sgx_uae_service.dll",
+    "//third_party/sgxsdk/bin/$target_cpu/Release/sgx_urtsd.dll",
+  ]
+  if (is_debug) {
+    sources +=
+        [ "//third_party/sgxsdk/crt/$target_cpu/debug/Enclave.signed.dll" ]
+  } else {
+    sources +=
+        [ "//third_party/sgxsdk/crt/$target_cpu/release/Enclave.signed.dll" ]
+  }
+  outputs = [
+    "$root_out_dir/{{source_file_part}}",
+  ]
 }

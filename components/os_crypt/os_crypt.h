@@ -67,7 +67,25 @@ class OSCrypt {
   static COMPONENT_EXPORT(OS_CRYPT) bool DecryptString(
       const std::string& ciphertext,
       std::string* plaintext);
+#ifdef REDCORE
+  static COMPONENT_EXPORT(OS_CRYPT) bool IsSupportHardwareCrypto();
 
+  static COMPONENT_EXPORT(OS_CRYPT) bool HardwareEncryptString16(
+      const base::string16& plaintext,
+      std::string* ciphertext);
+
+  static COMPONENT_EXPORT(OS_CRYPT) bool HardwareDecryptString16(
+      const std::string& ciphertext,
+      base::string16* plaintext);
+
+  static COMPONENT_EXPORT(OS_CRYPT) bool HardwareEncryptString(
+      const std::string& plaintext,
+      std::string* ciphertext);
+
+  static COMPONENT_EXPORT(OS_CRYPT) bool HardwareDecryptString(
+      const std::string& ciphertext,
+      std::string* plaintext);
+#endif
 #if defined(OS_MACOSX)
   // For unit testing purposes we instruct the Encryptor to use a mock Keychain
   // on the Mac. The default is to use the real Keychain. Use OSCryptMocker,

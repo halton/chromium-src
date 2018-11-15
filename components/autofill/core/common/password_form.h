@@ -367,6 +367,7 @@ struct PasswordForm {
   base::string16 ysp_app_name_value;
   base::string16 ysp_username_value;
   std::string ysp_login_type_value;
+  enum EncryptedType { ENCRYPTED_TYPE_OS, ENCRYPTED_TYPE_HARDWARE };
 #endif
 };
 

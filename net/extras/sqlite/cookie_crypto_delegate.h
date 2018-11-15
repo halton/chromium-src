@@ -25,6 +25,13 @@ class CookieCryptoDelegate {
   // method is always functional even if ShouldEncrypt() is false.
   virtual bool DecryptString(const std::string& ciphertext,
                              std::string* plaintext) = 0;
+#ifdef REDCORE
+  virtual bool IsSupportHardwareCrypto() = 0;
+  virtual bool HardwareEncryptString(const std::string& plaintext,
+                                     std::string* ciphertext) = 0;
+  virtual bool HardwareDecryptString(const std::string& ciphertext,
+                                     std::string* plaintext) = 0;
+#endif
 };
 
 }  // namespace net
