@@ -254,6 +254,7 @@ vs-chromium-project.txt
 /sync/sync.xml
 /sync_testserver.log
 /testserver.log
+third_party/sgxsdk/
 # See third_party/.gitignore for entries covering src/third_party.
 /tools/.bisect-builds-cache.json
 /tools/cygprofile/*.wprgo
