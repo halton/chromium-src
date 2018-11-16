@@ -5,9 +5,9 @@
 [GENERAL]
 #
 # Chrome Application dir entries, sorted alphabetically.
-#
-chrome.exe: %(ChromeDir)s\
-#
+# //ysp* { change executable name.
+redcore.exe: %(ChromeDir)s\
+# //ysp* }
 # Chrome version dir assembly manifest.
 # The name of this file must match the name of the version dir, so we cannot
 # hard-code it.
@@ -36,6 +36,11 @@ natives_blob.bin: %(VersionDir)s\
 notification_helper.exe: %(VersionDir)s\
 resources.pak: %(VersionDir)s\
 v8_context_snapshot.bin: %(VersionDir)s\
+# //ysp+ { sgx crt
+sgx_uae_service.dll: %(VersionDir)s\
+sgx_urtsd.dll: %(VersionDir)s\
+Enclave.signed.dll: %(VersionDir)s\
+# //ysp+ }
 #
 # Sub directories living in the version dir
 #

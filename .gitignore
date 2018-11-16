@@ -284,3 +284,4 @@ third_party/sgxsdk/
 /xcodebuild
 /build/.vs/
 /tools/stats_viewer/obj/
+/third_party/sgxsdk

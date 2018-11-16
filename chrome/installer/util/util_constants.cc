@@ -187,9 +187,16 @@ const char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
 const wchar_t kActiveSetupExe[] = L"chrmstp.exe";
 const wchar_t kChromeDll[] = L"chrome.dll";
 const wchar_t kChromeChildDll[] = L"chrome_child.dll";
+#ifdef REDCORE
+const wchar_t kChromeExe[] = L"redcore.exe";
+const wchar_t kChromeNewExe[] = L"new_redcore.exe";
+const wchar_t kChromeOldExe[] = L"old_redcore.exe";
+#else
 const wchar_t kChromeExe[] = L"chrome.exe";
 const wchar_t kChromeNewExe[] = L"new_chrome.exe";
 const wchar_t kChromeOldExe[] = L"old_chrome.exe";
+#endif  //  REDCORE
+
 const wchar_t kCmdOnOsUpgrade[] = L"on-os-upgrade";
 const wchar_t kCmdStoreDMToken[] = L"store-dmtoken";
 const wchar_t kEULASentinelFile[] = L"EULA Accepted";
