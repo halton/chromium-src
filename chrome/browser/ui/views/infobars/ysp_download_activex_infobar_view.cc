@@ -94,9 +94,9 @@ void DownloadActivexInfobarView::ViewHierarchyChanged(
         elevation_icon_setter_.reset(new ElevationIconSetter(
             ok_button_,
             base::Bind(&DownloadActivexInfobarView::Layout, base::Unretained(this))));
-      }
-      AddChildView(ok_button_);
-      ok_button_->SizeToPreferredSize();
+        AddChildView(ok_button_);
+        ok_button_->SizeToPreferredSize();
+      } 
     }
 
     if (delegate->GetButtons() & DownloadActivexInfobarDelegate::BUTTON_CANCEL) {
