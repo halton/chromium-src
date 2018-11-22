@@ -68,7 +68,6 @@ constexpr SkColor kTitleBarFeatureColor = SK_ColorWHITE;
 
 #ifdef REDCORE
 const int kWindowTitleFontSize = 14; // ysp size in pixel
-
 const SkColor kLockScreenBackgroundColor = SkColorSetRGB(160, 160, 160);
 #endif
 
@@ -92,6 +91,7 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
       window_icon_(nullptr),
       window_title_(nullptr),
 #ifdef REDCORE
+      lock_button_(nullptr),
       locked_view_(nullptr),
 #endif
       frame_background_(new views::FrameBackground()) {
@@ -158,26 +158,6 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
   AddChildView(window_title_);
 
 #ifdef REDCORE  // TODO: (Liu Wei) Add login info label
-  login_info_ = new views::Label(base::string16());
-  login_info_->SetFontList(small_font.DeriveWithSizeDelta(
-      kWindowTitleFontSize - small_font.GetFontSize()));
-  login_info_->SetBounds(80, 10, 42, 14);
-  login_info_->SetVisible(false);
-  login_info_->SetEnabledColor(0xFF333333);
-  login_info_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  login_info_->set_id(VIEW_ID_LOGIN_LABLE);
-  AddChildView(login_info_);
-
-  hello_ = new views::Label(l10n_util::GetStringUTF16(IDS_YSP_LOGIN_HELLO));
-  hello_->SetFontList(small_font.DeriveWithSizeDelta(
-      kWindowTitleFontSize - small_font.GetFontSize()));
-  hello_->SetBounds(80, 10, 42, 14);
-  hello_->SetVisible(false);
-  hello_->SetEnabledColor(0xFF333333);
-  hello_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  hello_->set_id(VIEW_ID_WELCOME_LABLE);
-  AddChildView(hello_);
-
   lock_button_ = InitWindowCaptionButton(IDR_YSP_LOCK_SCREEN,
                                          IDR_YSP_LOCK_SCREEN_H,
                                          IDR_YSP_LOCK_SCREEN_P,
@@ -236,6 +216,17 @@ gfx::Rect OpaqueBrowserFrameView::GetBoundsForTabStrip(
 
   return layout_->GetBoundsForTabStrip(tabstrip->GetPreferredSize(), width());
 }
+
+#ifdef REDCORE
+//(TODO) fix LockScreenView not respond to mouse click events;
+bool OpaqueBrowserFrameView::DoesIntersectRect(const views::View* target,
+                                               const gfx::Rect& rect) const {
+  if (locked_view_ && locked_view_->visible()) {
+    return true;
+  }
+  return BrowserNonClientFrameView::DoesIntersectRect(target, rect);
+}
+#endif
 
 int OpaqueBrowserFrameView::GetTopInset(bool restored) const {
 #ifdef REDCORE // we have moved tabstrip to the bottom of toolbar, so we don't have to consider tabstrip
@@ -468,8 +459,7 @@ void OpaqueBrowserFrameView::ButtonPressed(views::Button* sender,
   else if (sender == lock_button_) {
     // TODO: (LIUWEI)
     if (locked_view_ && !locked_view_->IsLocked()) {
-      locked_view_->Lock(Browser::SCREEN_LOCKED);
-      Layout();
+      LockScreen();
     }
   }
 #endif
@@ -887,7 +877,7 @@ base::string16 OpaqueBrowserFrameView::GetLoginInfo() const {
   return browser_view()->GetUserNameString();
 }
 
-void OpaqueBrowserFrameView::LockScreen(Browser::YSPLockStatus status) {
+void OpaqueBrowserFrameView::LockScreen() {
 	if (locked_view_ && !locked_view_->IsLocked()) {
 		locked_view_->Lock(Browser::SCREEN_LOCKED);
 		Layout();

@@ -3639,7 +3639,7 @@ void Browser::OnAutoLockScreenTimer(int64_t time_out_sec) {
       OpaqueBrowserFrameView* opaque_view =
           static_cast<OpaqueBrowserFrameView*>(view);
       if (opaque_view)
-        opaque_view->LockScreen(SCREEN_LOCKED);
+        opaque_view->LockScreen();
     }
   }
 #endif  // OS_WIN

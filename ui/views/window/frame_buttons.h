@@ -9,6 +9,9 @@ namespace views {
 
 // Identifies what a button in a window frame is.
 enum FrameButton {
+#ifdef REDCORE
+  FRAME_BUTTON_LOCK_SCREEN,
+#endif
   FRAME_BUTTON_MINIMIZE,
   FRAME_BUTTON_MAXIMIZE,
   FRAME_BUTTON_CLOSE

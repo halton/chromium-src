@@ -68,7 +68,6 @@ YSPLockScreenView::YSPLockScreenView(views::ButtonListener* listener,
   password_text_->SetBorder(NULL);
   password_text_->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
   password_text_->set_placeholder_text(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK));
-  password_text_->set_controller(this);
   AddChildView(password_text_);
 
   login_button_ = new views::ImageButton(this);
@@ -189,6 +188,7 @@ void YSPLockScreenView::Layout() {
   gfx::Rect bound = bounds();
   bound.Inset(1, 1);
   SetImageSize(bound.size());
+  SetDrawCircle(false);
 
   const int window_width = width();
   int top = (double)height() * (0.85/1.85);

@@ -243,8 +243,6 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
   views::View* incognito_icon_;
 
 #ifdef REDCORE
-  views::Label* hello_;
-  views::Label* login_info_;
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
 #endif

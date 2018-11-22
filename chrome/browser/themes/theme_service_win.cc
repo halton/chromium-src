@@ -43,6 +43,9 @@ ThemeServiceWin::~ThemeServiceWin() {
 }
 
 bool ThemeServiceWin::ShouldUseNativeFrame() const {
+#ifdef REDCORE
+  return false;
+#endif
   const bool use_native_frame_if_enabled =
       ShouldCustomDrawSystemTitlebar() || !HasCustomImage(IDR_THEME_FRAME);
   return use_native_frame_if_enabled && ui::win::IsAeroGlassEnabled();

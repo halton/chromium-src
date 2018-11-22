@@ -5487,4 +5487,18 @@
 <translation id="994289308992179865">循环(&amp;L)</translation>
 <translation id="996250603853062861">正在建立安全连接...</translation>
 <translation id="998747458861718449">检查(&amp;N)</translation>
+<!-- //ysp+ { -->
+<translation id="4852111869507463990">红芯企业浏览器</translation>
+<translation id="632770826694814868">您的办公浏览器当前处于锁屏模式</translation>
+<translation id="6964321312176942428">请输入浏览器登录密码解锁</translation>
+<translation id="4116513560936149887">密码输入错误，请重新输入</translation>
+<translation id="273844075565984758">您的身份认证已过期，请输入密码进行身份认证</translation>
+<translation id="7973262765199496975">登录系统</translation>
+<translation id="6301691710768061600">请选择您要访问的系统账号</translation>
+<translation id="8053289196402956586">此设备被禁用，已退出登录。</translation>
+<translation id="5112585569654745466">请输入密码</translation>
+<translation id="6867970763795157612">您的账号被管理员删除，已退出登录。</translation>
+<translation id="3174843802464425189">您的账号被管理员禁用，已退出登录。</translation>
+<translation id="7596913374482479303">设置在通过多功能框搜索时所用的搜索引擎。</translation>
+<!-- //ysp+ } -->
 </translationbundle>

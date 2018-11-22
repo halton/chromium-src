@@ -68,6 +68,10 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   void UpdateThrobber(bool running) override;
   gfx::Size GetMinimumSize() const override;
   int GetTabStripLeftInset() const override;
+#ifdef REDCORE
+  bool DoesIntersectRect(const views::View* target,
+                         const gfx::Rect& rect) const override;
+#endif
 
   // views::NonClientFrameView:
   gfx::Rect GetBoundsForClientView() const override;
@@ -121,7 +125,7 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   #ifdef REDCORE
   bool OnMousePressed(const ui::MouseEvent& event) override;
   base::string16 GetLoginInfo() const override;
-  void LockScreen(Browser::YSPLockStatus status);
+  void LockScreen();
   #endif
 
   bool IsFrameCondensed() const override;
@@ -222,8 +226,6 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   TabIconView* window_icon_;
   views::Label* window_title_;
 #ifdef REDCORE
-  views::Label* hello_;
-  views::Label* login_info_;
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
 #endif

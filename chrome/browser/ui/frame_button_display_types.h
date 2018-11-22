@@ -17,6 +17,9 @@ enum class FrameButtonDisplayType {
   kMaximize,
   kRestore,
   kClose,
+#ifdef REDCORE
+  kLockScreen
+#endif
 };
 
 }  // namespace chrome
