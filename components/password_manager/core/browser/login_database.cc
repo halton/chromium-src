@@ -109,6 +109,7 @@ enum LoginDatabaseTableColumns {
   COLUMN_YSP_USERNAME_VALUE,   // YSP+ { passwords AD manager }
   COLUMN_YSP_LOGINTYPE_VALUE,  // YSP+ { passwords AD manager }
   COLUMN_YSP_ENCRYPED_TYPE,
+  COLUMN_YSP_ENCRYPED_VALUE,
 #endif
   COLUMN_NUM  // Keep this last.
 };
@@ -374,11 +375,6 @@ void InitializeBuilder(SQLTableBuilder* builder) {
   builder->AddColumn("blacklisted_by_user", "INTEGER NOT NULL");
   builder->AddColumn("scheme", "INTEGER NOT NULL");
   builder->AddIndex("logins_signon", {"signon_realm"});
-#ifdef REDCORE
-  builder->AddColumn("YSPAppName_value", "VARCHAR");
-  builder->AddColumn("YSPUserName_value", "VARCHAR");
-  builder->AddColumn("YSPLoginType_value", "VARCHAR");
-#endif
   builder->SealVersion();
   unsigned version = builder->SealVersion();
   DCHECK_EQ(1u, version);
@@ -460,7 +456,11 @@ void InitializeBuilder(SQLTableBuilder* builder) {
   builder->DropColumn("possible_usernames");
   builder->AddColumn("possible_username_pairs", "BLOB");
 #ifdef REDCORE
+  builder->AddColumn("YSPAppName_value", "VARCHAR");
+  builder->AddColumn("YSPUserName_value", "VARCHAR");
+  builder->AddColumn("YSPLoginType_value", "VARCHAR");
   builder->AddColumn("YSPEncrypted_type", "INTEGER NOT NULL DEFAULT 0");
+  builder->AddColumn("YSPEncrypted_value", "INTEGER NOT NULL DEFAULT -1");
 #endif
   version = builder->SealVersion();
   DCHECK_EQ(19u, version);
@@ -817,7 +817,7 @@ void LoginDatabase::ReportMetrics(const std::string& sync_username,
   LogNumberOfAccountsForScheme("Other", other_logins);
 #ifdef REDCORE
   sql::Statement saved_passwords_statement(db_.GetUniqueStatement(
-      "SELECT signon_realm, password_value, scheme, YSPEncrypted_type "
+      "SELECT signon_realm, password_value, scheme, YSPEncrypted_type, YSPEncrypted_value "
       "FROM logins WHERE blacklisted_by_user = 0"));
 #else
   sql::Statement saved_passwords_statement(
@@ -832,13 +832,15 @@ void LoginDatabase::ReportMetrics(const std::string& sync_username,
 
 #ifdef REDCORE
     int encryp_type = saved_passwords_statement.ColumnInt(3);
+    int encryp_value = saved_passwords_statement.ColumnInt(4);
     DCHECK(encryp_type >= 0 &&
            encryp_type <= PasswordForm::ENCRYPTED_TYPE_HARDWARE)
         << encryp_type;
     PasswordForm::EncryptedType ysp_encrypted_type =
         static_cast<PasswordForm::EncryptedType>(encryp_type);
     EncryptionResult encryption_result = YspDecryptedString(
-        saved_passwords_statement.ColumnString(1), &decrypted_password,
+        saved_passwords_statement.ColumnString(1), encryp_value,
+        &decrypted_password,
         ysp_encrypted_type == PasswordForm::ENCRYPTED_TYPE_HARDWARE ? true
                                                                     : false);
     if (encryption_result == ENCRYPTION_RESULT_SUCCESS) {
@@ -903,8 +905,9 @@ PasswordStoreChangeList LoginDatabase::AddLogin(const PasswordForm& form) {
   std::string encrypted_password;
 #ifdef REDCORE
   PasswordForm::EncryptedType encrypted_type = PasswordForm::ENCRYPTED_TYPE_OS;
+  int key_index = -1;
   EncryptionResult enc_result =
-      YspEncryptedString(form.password_value, &encrypted_password);
+      YspEncryptedString(form.password_value, key_index, &encrypted_password);
   if (enc_result != ENCRYPTION_RESULT_SUCCESS &&
       enc_result != ENCRYPTION_RESULT_HARDWARE_SUCCESS)
     return list;
@@ -921,6 +924,7 @@ PasswordStoreChangeList LoginDatabase::AddLogin(const PasswordForm& form) {
       db_.GetCachedStatement(SQL_FROM_HERE, add_statement_.c_str()));
 #ifdef REDCORE
   s.BindInt(COLUMN_YSP_ENCRYPED_TYPE, encrypted_type);
+  s.BindInt(COLUMN_YSP_ENCRYPED_VALUE, key_index);
 #endif
   BindAddStatement(form, encrypted_password.data(), encrypted_password.length(),
                    &s);
@@ -937,6 +941,7 @@ PasswordStoreChangeList LoginDatabase::AddLogin(const PasswordForm& form) {
       db_.GetCachedStatement(SQL_FROM_HERE, add_replace_statement_.c_str()));
 #ifdef REDCORE
   s.BindInt(COLUMN_YSP_ENCRYPED_TYPE, encrypted_type);
+  s.BindInt(COLUMN_YSP_ENCRYPED_VALUE, key_index);
 #endif
   BindAddStatement(form, encrypted_password.data(), encrypted_password.length(),
                    &s);
@@ -954,8 +959,9 @@ PasswordStoreChangeList LoginDatabase::AddBlacklistedLoginForTesting(
   std::string encrypted_password;
 #ifdef REDCORE
   PasswordForm::EncryptedType encrypted_type = PasswordForm::ENCRYPTED_TYPE_OS;
+  int key_index = -1;
   EncryptionResult enc_result =
-      YspEncryptedString(form.password_value, &encrypted_password);
+      YspEncryptedString(form.password_value, key_index, &encrypted_password);
   if (enc_result != ENCRYPTION_RESULT_SUCCESS &&
       enc_result != ENCRYPTION_RESULT_HARDWARE_SUCCESS)
     return PasswordStoreChangeList();
@@ -972,6 +978,7 @@ PasswordStoreChangeList LoginDatabase::AddBlacklistedLoginForTesting(
       db_.GetCachedStatement(SQL_FROM_HERE, add_statement_.c_str()));
 #ifdef REDCORE
   s.BindInt(COLUMN_YSP_ENCRYPED_TYPE, encrypted_type);
+  s.BindInt(COLUMN_YSP_ENCRYPED_VALUE, key_index);
 #endif
   BindAddStatement(form, encrypted_password.data(), encrypted_password.length(),
                    &s);
@@ -983,10 +990,10 @@ PasswordStoreChangeList LoginDatabase::AddBlacklistedLoginForTesting(
 PasswordStoreChangeList LoginDatabase::UpdateLogin(const PasswordForm& form) {
   std::string encrypted_password;
 #ifdef REDCORE
-  std::string myenc_value;
   PasswordForm::EncryptedType encrypted_type = PasswordForm::ENCRYPTED_TYPE_OS;
+  int key_index = -1;
   EncryptionResult enc_result =
-      YspEncryptedString(form.password_value, &encrypted_password);
+      YspEncryptedString(form.password_value, key_index, &encrypted_password);
   if (enc_result != ENCRYPTION_RESULT_SUCCESS &&
       enc_result != ENCRYPTION_RESULT_HARDWARE_SUCCESS)
     return PasswordStoreChangeList();
@@ -1010,6 +1017,7 @@ PasswordStoreChangeList LoginDatabase::UpdateLogin(const PasswordForm& form) {
   s.BindString(next_param++, form.action.spec());
 #ifdef REDCORE
   s.BindInt(COLUMN_YSP_ENCRYPED_TYPE, encrypted_type);
+  s.BindInt(COLUMN_YSP_ENCRYPED_VALUE, key_index);
 #endif  // REDCORE
   s.BindBlob(next_param++, encrypted_password.data(),
              static_cast<int>(encrypted_password.length()));
@@ -1140,13 +1148,14 @@ LoginDatabase::EncryptionResult LoginDatabase::InitPasswordFormFromStatement(
   base::string16 decrypted_password;
 #ifdef REDCORE
   int encryp_type = s.ColumnInt(COLUMN_YSP_ENCRYPED_TYPE);
+  int encryp_value = s.ColumnInt(COLUMN_YSP_ENCRYPED_VALUE);
   DCHECK(encryp_type >= 0 &&
          encryp_type <= PasswordForm::ENCRYPTED_TYPE_HARDWARE)
       << encryp_type;
   PasswordForm::EncryptedType ysp_encrypted_type =
       static_cast<PasswordForm::EncryptedType>(encryp_type);
   EncryptionResult encryption_result = YspDecryptedString(
-      encrypted_password, &decrypted_password,
+      encrypted_password, encryp_value, &decrypted_password,
       ysp_encrypted_type == PasswordForm::ENCRYPTED_TYPE_HARDWARE ? true
                                                                   : false);
   if (encryption_result != ENCRYPTION_RESULT_SUCCESS) {
@@ -1622,8 +1631,9 @@ PasswordStoreChangeList LoginDatabase::SelectLogins(const PasswordForm& form) {
   std::string encrypted_password;
 #ifdef REDCORE
   PasswordForm::EncryptedType encrypted_type = PasswordForm::ENCRYPTED_TYPE_OS;
+  int key_index = -1;
   EncryptionResult enc_result =
-      YspEncryptedString(form.password_value, &encrypted_password);
+      YspEncryptedString(form.password_value, key_index, &encrypted_password);
   if (enc_result != ENCRYPTION_RESULT_SUCCESS &&
       enc_result != ENCRYPTION_RESULT_HARDWARE_SUCCESS)
     return list;

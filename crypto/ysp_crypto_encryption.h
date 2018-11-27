@@ -7,6 +7,7 @@
 #define CRYPTO_YSP_CRYPTO_ENCRYPTION_H_
 
 #include <string>
+#include <vector>
 #include "crypto/crypto_export.h"
 
 class CRYPTO_EXPORT YspCryptoSingleton {
@@ -24,6 +25,16 @@ class CRYPTO_EXPORT YspCryptoSingleton {
   std::string DecryptString(const std::string& cipher_text);
   void SetUserId(const std::string& id);
   std::string GetUserId();
+
+  void SetPinKeys(const std::vector<std::string>& pin_keys);
+  const std::vector<std::string>& GetPinKeys();
+  std::string GetPinKey(int index);
+  std::string GetCurrentPinKey();
+  void UpdateCurrentPinKey(const std::string& pin_key);
+  int GetCurrentPinKeyIndex();
+
+ private:
+  std::vector<std::string> pin_keys_;
 };
 
 #endif  // CRYPTO_YSP_CRYPTO_ENCRYPTION_H_

@@ -51,6 +51,7 @@ void RegisterBrowserPrefs(PrefRegistrySimple* registry) {
   registry->RegisterBooleanPref(prefs::kYSPFirstLogin, true);
   registry->RegisterDoublePref(prefs::kYSPTimeDifference, 0);
   registry->RegisterIntegerPref(prefs::kYSPLockScreen, false);
+  registry->RegisterListPref(prefs::kYSPPinKeys);
 #ifdef IE_REDCORE
   registry->RegisterDictionaryPref(prefs::kYSPActivexNoPromptInfo);
 #endif

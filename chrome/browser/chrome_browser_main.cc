@@ -193,6 +193,10 @@
 #include "ui/base/layout.h"
 #include "ui/base/resource/resource_bundle.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif  // REDCORE
+
 #if defined(OS_ANDROID)
 #include "chrome/browser/metrics/thread_watcher_android.h"
 #include "ui/base/resource/resource_bundle_android.h"
@@ -354,6 +358,10 @@ void InitializeLocalState() {
   // locale dll to load.  This also causes local state prefs to be registered.
   PrefService* local_state = g_browser_process->local_state();
   DCHECK(local_state);
+#ifdef REDCORE
+  YSPLoginManager::GetInstance()->InitPinKeys();
+#endif  // REDCORE
+
 #if defined(OS_WIN)
   if (first_run::IsChromeFirstRun()) {
     // During first run we read the google_update registry key to find what

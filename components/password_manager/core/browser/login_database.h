@@ -210,10 +210,12 @@ class LoginDatabase {
   };
 #ifdef REDCORE
   EncryptionResult YspEncryptedString(const base::string16& plain_text,
+                                      int& key_index,
                                       std::string* cipher_text) const
       WARN_UNUSED_RESULT;
 
   EncryptionResult YspDecryptedString(const std::string& cipher_text,
+                                      int key_index,
                                       base::string16* plain_text,
                                       bool hardware_crypto = false) const
       WARN_UNUSED_RESULT;

@@ -33,11 +33,12 @@
 #include "components/prefs/pref_service.h"
 #include "components/version_info/version_info.h"
 #include "content/public/browser/browser_thread.h"
+#include "crypto/ysp_crypto_encryption.h"
 #include "crypto/ysp_crypto_header.h"
 #include "net/base/mime_util.h"
+#include "net/socket/transport_client_socket_pool.h"
 #include "net/url_request/url_request_http_job.h"
 #include "ui/base/l10n/l10n_util.h"
-#include "net/socket/transport_client_socket_pool.h"
 
 #if defined(OS_MACOSX)
 #include "base/sys_info.h"
@@ -3688,6 +3689,31 @@ std::string YSPLoginManager::GetLastId(const std::string& key) {
   std::string decoded_string;
   base::Base64Decode(base64_string, &decoded_string);
   return decoded_string;
+}
+
+void YSPLoginManager::InitPinKeys() {
+  PrefService* prefs = g_browser_process->local_state();
+  const base::ListValue* pin_list = prefs->GetList(prefs::kYSPPinKeys);
+  std::vector<std::string> pin_keys;
+  for (int index = 0; index < pin_list->GetSize(); index++) {
+    const base::Value* key_value = NULL;
+    if (pin_list->Get(index, &key_value)) {
+      pin_keys.push_back(key_value->GetString());
+    }
+  }
+  YspCryptoSingleton::GetInstance()->SetPinKeys(pin_keys);
+}
+
+void YSPLoginManager::UpdatePinKey(const std::string& value) {
+  YspCryptoSingleton::GetInstance()->UpdateCurrentPinKey(value);
+  base::ListValue list_value;
+  list_value.AppendStrings(YspCryptoSingleton::GetInstance()->GetPinKeys());
+  PrefService* prefs = g_browser_process->local_state();
+  prefs->Set(prefs::kYSPPinKeys, list_value);
+}
+
+std::string YSPLoginManager::GetUserPinKey() {
+  YspCryptoSingleton::GetInstance()->GetCurrentPinKey();
 }
 
 std::string YSPLoginManager::GetLastCID() {

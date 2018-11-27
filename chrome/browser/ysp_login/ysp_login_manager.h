@@ -87,6 +87,10 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   std::string GetLastCID();
   std::string GetLastUID();
 
+  void InitPinKeys();
+  void UpdatePinKey(const std::string& value);
+  std::string GetUserPinKey();
+
   void Init();
   void SetPushData(const std::string& user_info);
   bool Restore();

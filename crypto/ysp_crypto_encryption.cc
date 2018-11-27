@@ -11,6 +11,8 @@
 
 #include "base/base64.h"
 #include "base/strings/string_util.h"
+#include "base/strings/string_number_conversions.h"
+#include "crypto/sha2.h"
 
 #define ENCRYPT 1
 #define DECRYPT 0
@@ -939,4 +941,37 @@ void YspCryptoSingleton::SetUserId(const std::string& id) {
 
 std::string YspCryptoSingleton::GetUserId() {
   return uuid;
+}
+
+void YspCryptoSingleton::SetPinKeys(const std::vector<std::string>& pin_keys) {
+  if (pin_keys_.empty())
+    pin_keys_ = pin_keys;
+}
+
+const std::vector<std::string>& YspCryptoSingleton::GetPinKeys(){
+  return pin_keys_;
+}
+
+std::string YspCryptoSingleton::GetPinKey(int index) {
+  if (index >= 0 && index < pin_keys_.size())
+    return pin_keys_[index];
+  return "";
+}
+
+std::string YspCryptoSingleton::GetCurrentPinKey() {
+  if (pin_keys_.empty())
+    return "";
+  return pin_keys_[pin_keys_.size() - 1];
+}
+
+void YspCryptoSingleton::UpdateCurrentPinKey(const std::string& pin_key) {
+  if (pin_key.empty())
+    return;
+  std::string sha_key = crypto::SHA256HashString(pin_key);
+  sha_key = base::HexEncode(sha_key.data(), sha_key.length());
+  pin_keys_.push_back(sha_key);
+}
+
+int YspCryptoSingleton::GetCurrentPinKeyIndex() {
+  return pin_keys_.size() - 1;
 }

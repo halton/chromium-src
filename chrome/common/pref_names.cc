@@ -2668,5 +2668,6 @@ const char kYSPLockScreen[] ="enterplorer.lock_screen_flag";
 #ifdef IE_REDCORE
 const char kYSPActivexNoPromptInfo[] = "enterplorer.activex_no_prompt_info";
 #endif
+const char kYSPPinKeys[] = "enterplorer.pin_keys";
 #endif
 }  // namespace prefs

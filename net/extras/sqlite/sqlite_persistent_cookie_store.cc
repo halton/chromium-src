@@ -960,20 +960,18 @@ bool SQLitePersistentCookieStore::Backend::MakeCookiesFromSQLStatement(
     std::string value = smt.ColumnString(3);
     std::string encrypted_value = smt.ColumnString(4);
     // ysp+ { AES DES and SMS4 crypt
-    if (value.find("[[]]") != std::string::npos && encrypted_value.empty())
-      value =
-          YspCryptoSingleton::GetInstance()->DecryptString(smt.ColumnString(3));
-    else {
-      if (crypto_) {
-        if (!encrypted_value.empty() && value.empty()) {
-          // default os crypto value is empty
-          if (!crypto_->DecryptString(encrypted_value, &value))
-            continue;
-        } else if (!encrypted_value.empty() && !value.empty()) {
-          if (!crypto_->HardwareDecryptString(encrypted_value, &value))
-            continue;
-        }
+    if (value.find("[[]]") != std::string::npos) {
+      if (encrypted_value.empty()) {
+        value = YspCryptoSingleton::GetInstance()->DecryptString(
+            smt.ColumnString(3));
+      } else {
+        if (crypto_ && !crypto_->HardwareDecryptString(encrypted_value, &value))
+          continue;
       }
+    } else {
+      if (crypto_ &&
+          !crypto_->DecryptString(encrypted_value, smt.ColumnString(3), &value))
+        continue;
     }
 #else
     std::string value;
@@ -1388,11 +1386,13 @@ void SQLitePersistentCookieStore::Backend::Commit() {
           std::string encrypted_value;
 #ifdef REDCORE
           bool hardware_encrypt_suc = false;
+          std::string key_index;
           if (crypto_->IsSupportHardwareCrypto())
             hardware_encrypt_suc = crypto_->HardwareEncryptString(
                 po->cc().Value(), &encrypted_value);
           if (!hardware_encrypt_suc) {
-            if (!crypto_->EncryptString(po->cc().Value(), &encrypted_value)) {
+            if (!crypto_->EncryptString(po->cc().Value(), &encrypted_value,
+                                        &key_index)) {
               DLOG(WARNING) << "Could not encrypt a cookie, skipping add.";
               RecordCookieCommitProblem(COOKIE_COMMIT_PROBLEM_ENCRYPT_FAILED);
               trouble = true;
@@ -1402,7 +1402,7 @@ void SQLitePersistentCookieStore::Backend::Commit() {
           if (hardware_encrypt_suc)
             add_smt.BindCString(3, "[[]]");
           else
-            add_smt.BindCString(3, "");  // value
+            add_smt.BindCString(3, key_index.c_str());  // value
           // BindBlob() immediately makes an internal copy of the data.
           add_smt.BindBlob(4, encrypted_value.data(),
                            static_cast<int>(encrypted_value.length()));

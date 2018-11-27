@@ -5,9 +5,14 @@
 #include "components/cookie_config/cookie_store_util.h"
 
 #include "base/lazy_instance.h"
+#include "base/strings/string_number_conversions.h"
 #include "build/build_config.h"
 #include "components/os_crypt/os_crypt.h"
 #include "net/extras/sqlite/cookie_crypto_delegate.h"
+#ifdef REDCORE
+#include "crypto/ysp_crypto_encryption.h"
+#endif  // REDCORE
+
 
 namespace cookie_config {
 
@@ -25,6 +30,13 @@ class CookieOSCryptoDelegate : public net::CookieCryptoDelegate {
   bool DecryptString(const std::string& ciphertext,
                      std::string* plaintext) override;
 #ifdef REDCORE
+  bool EncryptString(const std::string& plaintext,
+                     std::string* ciphertext,
+                     std::string* key_index) override;
+  bool DecryptString(const std::string& ciphertext,
+                     const std::string& key_index,
+                     std::string* plaintext) override;
+
   bool IsSupportHardwareCrypto() override;
   bool HardwareEncryptString(const std::string& plaintext,
                              std::string* ciphertext) override;
@@ -61,6 +73,32 @@ bool CookieOSCryptoDelegate::DecryptString(const std::string& ciphertext,
 }
 
 #ifdef REDCORE
+bool CookieOSCryptoDelegate::EncryptString(const std::string& plaintext,
+                                           std::string* ciphertext,
+                                           std::string* key_index) {
+  int index = YspCryptoSingleton::GetInstance()->GetCurrentPinKeyIndex();
+  key_index->assign(base::NumberToString(index));
+  return OSCrypt::EncryptString(
+      plaintext, YspCryptoSingleton::GetInstance()->GetCurrentPinKey(),
+      ciphertext);
+}
+
+bool CookieOSCryptoDelegate::DecryptString(const std::string& ciphertext,
+                                           const std::string& key_index,
+                                           std::string* plaintext) {
+ 
+  if (key_index.empty())
+    return OSCrypt::DecryptString(ciphertext, plaintext);
+
+  int index;
+  if (!base::StringToInt(key_index, &index))
+    return false;
+
+  return OSCrypt::DecryptString(
+      ciphertext, YspCryptoSingleton::GetInstance()->GetPinKey(index),
+      plaintext);
+}
+
 bool CookieOSCryptoDelegate::IsSupportHardwareCrypto() {
   return OSCrypt::IsSupportHardwareCrypto();
 }

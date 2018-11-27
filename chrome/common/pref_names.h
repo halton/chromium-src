@@ -947,6 +947,7 @@ extern const char kYSPTimeDifference[];
 extern const char kYSPExtensionInstallVersion[];
 extern const char kYSPActivexNoPromptInfo[];
 extern const char kYSPLockScreen[];
+extern const char kYSPPinKeys[];
 #endif
 }  // namespace prefs
 

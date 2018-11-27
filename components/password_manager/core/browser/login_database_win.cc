@@ -6,18 +6,25 @@
 
 #include "base/strings/string_util.h"
 #include "components/os_crypt/os_crypt.h"
+#ifdef REDCORE
+#include "crypto/ysp_crypto_encryption.h"
+#endif  // REDCORE
 
 namespace password_manager {
 #ifdef REDCORE
 LoginDatabase::EncryptionResult LoginDatabase::YspEncryptedString(
     const base::string16& plain_text,
+    int& key_index,
     std::string* cipher_text) const {
   if (OSCrypt::IsSupportHardwareCrypto()) {
     if (OSCrypt::HardwareEncryptString16(plain_text, cipher_text))
       return ENCRYPTION_RESULT_HARDWARE_SUCCESS;
   }
 
-  if (OSCrypt::EncryptString16(plain_text, cipher_text))
+  key_index = YspCryptoSingleton::GetInstance()->GetCurrentPinKeyIndex();
+  if (OSCrypt::EncryptString16(
+          plain_text, YspCryptoSingleton::GetInstance()->GetCurrentPinKey(),
+          cipher_text))
     return ENCRYPTION_RESULT_SUCCESS;
 
   return ENCRYPTION_RESULT_ITEM_FAILURE;
@@ -25,6 +32,7 @@ LoginDatabase::EncryptionResult LoginDatabase::YspEncryptedString(
 
 LoginDatabase::EncryptionResult LoginDatabase::YspDecryptedString(
     const std::string& cipher_text,
+    int key_index,
     base::string16* plain_text,
     bool hardware_crypto) const {
   // Unittests need to read sample database entries. If these entries had real
@@ -45,7 +53,15 @@ LoginDatabase::EncryptionResult LoginDatabase::YspDecryptedString(
     if (OSCrypt::HardwareDecryptString16(cipher_text, plain_text))
       return ENCRYPTION_RESULT_SUCCESS;
   } else {
-    if (OSCrypt::DecryptString16(cipher_text, plain_text))
+    if (key_index == -1) {
+      if (OSCrypt::DecryptString16(cipher_text, plain_text))
+        return ENCRYPTION_RESULT_SUCCESS;
+    }
+
+    if (OSCrypt::DecryptString16(
+            cipher_text,
+            YspCryptoSingleton::GetInstance()->GetPinKey(key_index),
+            plain_text))
       return ENCRYPTION_RESULT_SUCCESS;
   }
 
