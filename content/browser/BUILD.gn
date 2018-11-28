@@ -15,6 +15,7 @@ import("//ppapi/buildflags/buildflags.gni")
 import("//printing/buildflags/buildflags.gni")
 import("//third_party/blink/public/public_features.gni")
 import("//tools/ipc_fuzzer/ipc_fuzzer.gni")
+import("//build/config/redcore.gni") 
 
 jumbo_source_set("browser") {
   # Only the public target should depend on this. All other targets (even
@@ -223,6 +224,12 @@ jumbo_source_set("browser") {
     "//third_party/blink/public:media_devices_mojo_bindings",
     "//third_party/leveldatabase",
   ]
+
+  
+  if (is_ie_redcore) {
+    defines += ["_WINDLL"]
+    libs += [ "ole32.lib" ]  
+  }
 
   sources = [
     "$target_gen_dir/devtools/protocol/browser.cc",

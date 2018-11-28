@@ -733,6 +733,13 @@ const char kRendererProcessLimit[]          = "renderer-process-limit";
 // that's needed to show a dialog.
 const char kRendererStartupDialog[]         = "renderer-startup-dialog";
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+// ysp+ {IE Embedded}
+const char kTridentStartupDialog[] = "trident-startup-dialog";
+const char kTridentProcess[] = "trident";
+#endif
+
+
 // Reduce the default `referer` header's granularity.
 const char kReducedReferrerGranularity[] =
   "reduced-referrer-granularity";

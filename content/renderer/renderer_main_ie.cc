@@ -23,11 +23,10 @@
 #include "base/timer/hi_res_timer_manager.h"
 #include "base/trace_event/trace_event.h"
 #include "build/build_config.h"
-#include "components/scheduler/renderer/renderer_scheduler.h"
-#include "components/startup_metric_utils/common/startup_metric_messages.h"
 #include "content/child/child_process.h"
-#include "content/common/IE/IEProcessModule.h"
+#include "content/common/IE/dll_module_ie.h"
 #include "content/common/content_constants_internal.h"
+#include "content/common/content_switches_internal.h"
 #include "content/public/common/content_switches.h"
 #include "content/public/common/main_function_params.h"
 #include "content/public/renderer/content_renderer_client.h"
@@ -38,6 +37,10 @@
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "ui/base/ui_base_switches.h"
 
+#include "base/logging.h"
+#include "content/common/IE/atl_include.h"
+#include "content/common/IE/dll_module_ie.h"
+
 namespace content {
 
 namespace {
@@ -45,7 +48,7 @@ namespace {
 static void HandleTridentErrorTestParameters(
     const base::CommandLine& command_line) {
   if (command_line.HasSwitch(switches::kTridentStartupDialog))
-    ChildProcess::WaitForDebugger("Trident");
+    WaitForDebugger("Trident");
 }
 
 }  // namespace
@@ -53,11 +56,18 @@ static void HandleTridentErrorTestParameters(
 int TridentMain(const MainFunctionParams& parameters) {
   TRACE_EVENT_ASYNC_BEGIN0("startup", "TridentMain", 0);
 
-  ie::IEDLLModule _AtlModule;
-  if (FAILED(OleInitialize(NULL)))
-    return -1;
+  WaitForDebugger("Trident");
 
-  base::trace_event::TraceLog::GetInstance()->SetProcessName("Trident");
+  ie::DllModule _AtlModule;
+  HRESULT hr = OleInitialize(NULL);
+  DCHECK(SUCCEEDED(hr)) << "Com initialize failed !";
+  
+ if (!SUCCEEDED(hr)) {
+    return 0;  
+  }
+  //// base::win::ScopedCOMInitializer scoped_com_initializer;
+
+  base::trace_event::TraceLog::GetInstance()->set_process_name("Trident");
   base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
       kTraceEventRendererProcessSortIndex);
 
@@ -65,11 +75,14 @@ int TridentMain(const MainFunctionParams& parameters) {
   HandleTridentErrorTestParameters(parsed_command_line);
 
   TridentMainPlatformDelegate platform(parameters);
-  scoped_ptr<base::MessageLoop> main_message_loop(new base::MessageLoopForUI());
+//////////////fatal
+  std::unique_ptr<base::MessageLoop> main_message_loop(new base::MessageLoopForUI());
   base::PlatformThread::SetName("CrTridentMain");
   platform.PlatformInitialize();
   TRACE_EVENT_ASYNC_BEGIN0("toplevel", "TridentMain.START_MSG_LOOP", 0);
-  base::MessageLoop::current()->Run();
+
+  base::RunLoop().Run();
+
   TRACE_EVENT_ASYNC_END0("toplevel", "TridentMain.START_MSG_LOOP", 0);
   platform.PlatformUninitialize();
   OleUninitialize();

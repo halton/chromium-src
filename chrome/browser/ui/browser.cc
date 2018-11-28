@@ -298,14 +298,18 @@
 
 #endif  // REDCORE
 
-#if defined(IE_REDCORE)
-#include "base/win/win_util.h"  //ysp+ {Kernel switching}
-#include "content/browser/web_contents/web_contents_ie.h"  //ysp+{IE Function Control}
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+#include "base/win/win_util.h"               //ysp+ {Kernel switching}
 #include "chrome/browser/password_manager/password_store_factory.h"
 #include "chrome/browser/ui/views/ysp_ie_login_view.h"
 #include "components/autofill/core/common/password_form.h"
 #include "components/password_manager/core/browser/password_store.h"
 #include "components/password_manager/core/browser/password_store_consumer.h"
+#include "content/browser/web_contents/web_contents_ie.h"  //ysp+{IE Function Control}
+#endif                                                     // ysp {+
+
+#if defined(IE_REDCORE)
+
 #endif  // IE_REDCORE
 
 using base::TimeDelta;
@@ -327,7 +331,7 @@ using web_modal::WebContentsModalDialogManager;
 
 namespace {
 
-#if defined(IE_REDCORE)
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
 class PwdConsumer : public password_manager::PasswordStoreConsumer {
  public:
   PwdConsumer(Browser* browser) : p_brower(browser) {}
@@ -342,7 +346,7 @@ class PwdConsumer : public password_manager::PasswordStoreConsumer {
  private:
   Browser* p_brower;
 };
-#endif
+#endif  // ysp }+
 
 // How long we wait before updating the browser chrome while loading a page.
 const int kUIUpdateCoalescingTimeMS = 200;
@@ -620,6 +624,16 @@ Browser::Browser(const CreateParams& params)
       bookmark_bar_state_(BookmarkBar::HIDDEN),
       command_controller_(new chrome::BrowserCommandController(this)),
       window_has_shown_(false),
+#if defined(REDCORE)
+#if defined(WATERMARK) && !defined(IE_REDCORE)
+      watermark_init_(false),
+      watermark_color_(kDefaultColor),
+      watermark_font_size_(kDefaultFontSize),
+#endif
+      lock_status_(UNLOCKED),
+// AutoLockTimer(new base::Timer(false, false)),
+#endif
+
 #if defined(IE_REDCORE)
       ie_crypto_ua_timer_(new base::RepeatingTimer()),
 #endif
@@ -808,6 +822,14 @@ Browser::~Browser() {
   // away so they don't try and call back to us.
   if (select_file_dialog_.get())
     select_file_dialog_->ListenerDestroyed();
+
+#if defined(REDCORE)
+  YSPLoginManager::GetInstance()->RemoveObserver(
+      this);  // ysp+{IE Function Control}
+#if defined(IE_REDCORE)
+  ie_crypto_ua_timer_.reset();
+#endif
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1240,7 +1262,7 @@ void Browser::TabInsertedAt(TabStripModel* tab_strip_model,
   // ysp+{IE Function Control}
   if (contents->GetRendererMode().core == IE_CORE) {
     content::WebContentsIE* p_ie_content =
-        dynamic_cast<content::WebContentsIE*>(contents);
+        (content::WebContentsIE*)(contents);
     std::wstring json_str = GetIEFunctionControlJsonString();
     p_ie_content->SendFunctionControl(json_str);
   }
@@ -1379,6 +1401,14 @@ void Browser::ActiveTabChanged(WebContents* old_contents,
   }
 
   SearchTabHelper::FromWebContents(new_contents)->OnTabActivated();
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  TrySetIEConetentZoom(new_contents);
+#endif  // ysp {+
+
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+  UpdateWatermark();  // ysp+ { watermark }
+#endif
 }
 
 void Browser::TabMoved(WebContents* contents, int from_index, int to_index) {
@@ -1714,6 +1744,21 @@ WebContents* Browser::OpenURLFromTab(WebContents* source,
     nav_params.window_action = NavigateParams::SHOW_WINDOW;
   nav_params.user_gesture = params.user_gesture;
   nav_params.blob_url_loader_factory = params.blob_url_loader_factory;
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  // ysp+ {IE Embedded}
+  if (!ui::PageTransitionCoreTypeIs(params.transition,
+                                    ui::PAGE_TRANSITION_AUTO_BOOKMARK)) {
+    if (source)
+      nav_params.renderer_mode = source->GetRendererMode();
+  }
+  // ysp+
+  // ysp+ { Kernel switching
+  RendererMode mode;
+  if (UrlCompared(params.url, mode))
+    nav_params.renderer_mode = mode;
+#endif  // ysp+ }
+
   bool is_popup = source && PopupBlockerTabHelper::ConsiderForPopupBlocking(
                                 params.disposition);
   if (is_popup && PopupBlockerTabHelper::MaybeBlockPopup(
@@ -1797,6 +1842,10 @@ void Browser::LoadingStateChanged(WebContents* source,
                                   bool to_different_document) {
   ScheduleUIUpdate(source, content::INVALIDATE_TYPE_LOAD);
   UpdateWindowForLoadingStateChanged(source, to_different_document);
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  TrySetIEConetentZoom(source);
+#endif  // ysp {+
 }
 
 void Browser::CloseContents(WebContents* source) {
@@ -1968,6 +2017,11 @@ void Browser::RendererResponsive(
 void Browser::DidNavigateMainFramePostCommit(WebContents* web_contents) {
   if (web_contents == tab_strip_model_->GetActiveWebContents())
     UpdateBookmarkBarState(BOOKMARK_BAR_STATE_CHANGE_TAB_STATE);
+
+#if defined(REDCORE) && defined(WATERMARK) && !defined(IE_REDCORE)
+  if (web_contents == tab_strip_model_->GetActiveWebContents())
+    UpdateWatermark();
+#endif
 }
 
 content::JavaScriptDialogManager* Browser::GetJavaScriptDialogManager(
@@ -3118,8 +3172,7 @@ void Browser::ConfigIEPopupManager(
 
 // ysp+{IE CryptoUA}
 void Browser::OnTimerSetIEEncUA(base::Time post_task_time) {}
-#endif
-// YSP+ } /*window popup*/
+#endif  // YSP+ } /*window popup*/
 
 void Browser::SetExceptionForPopup(int type,
                                    std::string host,
@@ -3287,49 +3340,49 @@ static int StringMatch(const char* pattern, const char* string, int no_case) {
 #ifdef IE_REDCORE
 // comment unused code by webb
 
-// static void GetHostToString(std::string url_string, std::string* url_host,
-// std::string* url_port)
-// {
-//   if (url_string.empty())
-//     return;
-//   std::string url_string_noscheme, url_string_host;
-//   if (url_string.find("://") != std::string::npos) {
-//     int schemeOffset = url_string.find("://");
-//     url_string_noscheme.assign(url_string, schemeOffset + 3,
-//     url_string.length() - schemeOffset - 3);
-//   }
-//   if (url_string_noscheme.find_first_of("/") != std::string::npos) {
-//     int hostOffset = url_string_noscheme.find_first_of("/");
-//     url_string_host.assign(url_string_noscheme, 0, hostOffset);
-//   } else {
-//     url_string_host.assign(url_string_noscheme);
-//   }
-//   if (url_string_host.find(":") != std::string::npos) {
-//     int portOffset = url_string_host.find(":");
-//     url_port->assign(url_string_host, portOffset + 1, url_host->length() -
-//     portOffset - 1); url_host->assign(url_string_host, 0, portOffset);
-//   } else {
-//     url_host->assign(url_string_host);
-//     url_port->assign("");
-//   }
-// }
+static void GetHostToString(std::string url_string,
+                            std::string* url_host,
+                            std::string* url_port) {
+  if (url_string.empty())
+    return;
+  std::string url_string_noscheme, url_string_host;
+  if (url_string.find("://") != std::string::npos) {
+    int schemeOffset = url_string.find("://");
+    url_string_noscheme.assign(url_string, schemeOffset + 3,
+                               url_string.length() - schemeOffset - 3);
+  }
+  if (url_string_noscheme.find_first_of("/") != std::string::npos) {
+    int hostOffset = url_string_noscheme.find_first_of("/");
+    url_string_host.assign(url_string_noscheme, 0, hostOffset);
+  } else {
+    url_string_host.assign(url_string_noscheme);
+  }
+  if (url_string_host.find(":") != std::string::npos) {
+    int portOffset = url_string_host.find(":");
+    url_port->assign(url_string_host, portOffset + 1,
+                     url_host->length() - portOffset - 1);
+    url_host->assign(url_string_host, 0, portOffset);
+  } else {
+    url_host->assign(url_string_host);
+    url_port->assign("");
+  }
+}
 
-// static void GetPathToString(std::string url_string, std::string* url_path)
-// {
-//   if (url_string.empty())
-//     return;
-//   std::string url_string_noscheme;
-//   if (url_string.find("://") != std::string::npos) {
-//     int schemeOffset = url_string.find("://");
-//     url_string_noscheme.assign(url_string, schemeOffset + 3,
-//     url_string.length() - schemeOffset - 3);
-//   }
-//   if (url_string_noscheme.find_first_of("/") != std::string::npos) {
-//     int hostOffset = url_string_noscheme.find_first_of("/");
-//     url_path->assign(url_string_noscheme, hostOffset,
-//     url_string_noscheme.length() - hostOffset);
-//   }
-// }
+static void GetPathToString(std::string url_string, std::string* url_path) {
+  if (url_string.empty())
+    return;
+  std::string url_string_noscheme;
+  if (url_string.find("://") != std::string::npos) {
+    int schemeOffset = url_string.find("://");
+    url_string_noscheme.assign(url_string, schemeOffset + 3,
+                               url_string.length() - schemeOffset - 3);
+  }
+  if (url_string_noscheme.find_first_of("/") != std::string::npos) {
+    int hostOffset = url_string_noscheme.find_first_of("/");
+    url_path->assign(url_string_noscheme, hostOffset,
+                     url_string_noscheme.length() - hostOffset);
+  }
+}
 
 static void ParseStringToUrl(std::string string_str, std::string* url_string) {
   if (string_str.empty())

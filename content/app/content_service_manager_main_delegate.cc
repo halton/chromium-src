@@ -46,7 +46,11 @@ bool ContentServiceManagerMainDelegate::IsEmbedderSubprocess() {
          type == switches::kPpapiPluginProcess ||
          type == switches::kRendererProcess ||
          type == switches::kUtilityProcess ||
-         type == service_manager::switches::kZygoteProcess;
+         type == service_manager::switches::kZygoteProcess
+#ifdef REDCORE  // ysp {+
+         || type == switches::kTridentProcess
+#endif  // ysp {+
+      ;
 }
 
 int ContentServiceManagerMainDelegate::RunEmbedderProcess() {

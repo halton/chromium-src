@@ -942,7 +942,7 @@ class WebContents : public PageNavigator, public base::SupportsUserData {
   // guest.
   virtual BrowserPluginGuest* GetBrowserPluginGuest() const = 0;
 
-#if defined(IE_REDCORE)
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
   virtual bool IsAutoSelect() = 0;
   virtual RendererMode GetRendererMode() = 0;
 #endif
@@ -951,7 +951,7 @@ class WebContents : public PageNavigator, public base::SupportsUserData {
   // This interface should only be implemented inside content.
   friend class WebContentsImpl;
 
-#if defined(IE_REDCORE)
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
   friend class WebContentsIE;
 #endif
 

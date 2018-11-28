@@ -393,6 +393,7 @@ if (is_win) {
       "app/chrome_main.cc",
       "app/chrome_main_delegate.cc",
       "app/chrome_main_delegate.h",
+      "app/chrome_dll.rc"
     ]
 
     output_name = "chrome"
@@ -500,6 +501,7 @@ if (is_win) {
         "app/chrome_main.cc",
         "app/chrome_main_delegate.cc",
         "app/chrome_main_delegate.h",
+        "app/chrome_child.rc"
       ]
 
       configs += [ "//build/config/compiler:wexit_time_destructors" ]

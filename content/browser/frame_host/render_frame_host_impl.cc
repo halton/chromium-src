@@ -182,6 +182,12 @@
 #include "url/origin.h"
 #include "url/url_constants.h"
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "content/browser/web_contents/web_contents_ie.h"
+#include "content/browser/web_contents/web_contents_impl.h"
+#include "content/public/browser/navigation_controller.h"
+#endif
+
 #if defined(OS_ANDROID)
 #include "content/browser/android/java_interfaces_impl.h"
 #include "content/browser/frame_host/render_frame_host_android.h"

@@ -83,13 +83,24 @@
 #include "ui/gfx/image/image_skia.h"
 #include "ui/touch_selection/touch_selection_controller.h"
 
-namespace content {
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "content/browser/web_contents/web_contents_IE.h"
+#include "content/browser/web_contents/web_contents_ie_view_aura.h"
+#include "content/browser/web_contents/web_contents_impl.h"
+#endif
 
+namespace content {
 WebContentsView* CreateWebContentsView(
     WebContentsImpl* web_contents,
     WebContentsViewDelegate* delegate,
     RenderViewHostDelegateView** render_view_host_delegate_view) {
-  WebContentsViewAura* rv = new WebContentsViewAura(web_contents, delegate);
+  WebContentsViewAura* rv = NULL;
+#if defined(REDCORE) && defined(IE_REDCORE)
+  if (web_contents->GetRendererMode().core == IE_CORE)
+    rv = new WebContentsViewIEAura(web_contents, delegate);
+  else
+#endif
+    rv = new WebContentsViewAura(web_contents, delegate);
   *render_view_host_delegate_view = rv;
   return rv;
 }
@@ -394,6 +405,11 @@ class WebContentsViewAura::WindowObserver
                              const gfx::Rect& old_bounds,
                              const gfx::Rect& new_bounds,
                              ui::PropertyChangeReason reason) override {
+    //#if defined(REDCORE) && defined(IE_REDCORE)
+    //    if (view_ == NULL || view_->web_contents_ == NULL)
+    //      return;
+    //#endif
+
     if (window == host_window_ || window == view_->window_.get()) {
       SendScreenRects();
       if (old_bounds.origin() != new_bounds.origin()) {
@@ -442,7 +458,16 @@ class WebContentsViewAura::WindowObserver
   }
 
  private:
-  void SendScreenRects() { view_->web_contents_->SendScreenRects(); }
+  void SendScreenRects() {
+    //#if defined(REDCORE) && defined(IE_REDCORE)
+    //    if (view_ == NULL || view_->web_contents_ == NULL) {  // ysp+ {IE
+    //    Embedded}
+    //      return;
+    //    }
+    //#endif
+
+    view_->web_contents_->SendScreenRects();
+  }
 
   WebContentsViewAura* view_;
 
@@ -501,6 +526,11 @@ WebContentsViewAura::~WebContentsViewAura() {
 }
 
 void WebContentsViewAura::SizeChangedCommon(const gfx::Size& size) {
+  //#if defined(REDCORE) && defined(IE_REDCORE)
+  //  if (!web_contents_)  // ysp+ {IE Embedded}
+  //    return;
+  //#endif
+
   if (web_contents_->GetInterstitialPage())
     web_contents_->GetInterstitialPage()->SetSize(size);
   RenderWidgetHostView* rwhv = web_contents_->GetRenderWidgetHostView();

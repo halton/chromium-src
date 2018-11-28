@@ -49,6 +49,10 @@ struct RendererMode {
     emulation = ie::EMULATION_NONE;
   }
 
+  RendererMode(const RendererMode& mode) {
+    memcpy(this, &mode, sizeof(RendererMode));
+  }
+
   bool operator==(const RendererMode& mode) const {
     if (this->core == BLINK_CORE && this->core == mode.core)
       return true;

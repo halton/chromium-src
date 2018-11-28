@@ -506,7 +506,9 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
       GetSiteInstanceForNavigationRequest(request);
 
   // The SiteInstance determines whether to switch RenderFrameHost or not.
-  bool use_current_rfh = current_site_instance == dest_site_instance;
+  bool use_current_rfh = 
+	  (current_site_instance == dest_site_instance
+		  || current_site_instance->GetRenderMode().core == IE_CORE);
 
   bool notify_webui_of_rf_creation = false;
   if (use_current_rfh) {

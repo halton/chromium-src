@@ -45,6 +45,15 @@
 #include "extensions/buildflags/buildflags.h"
 #include "url/url_constants.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/simple_message_box.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "chrome/grit/generated_resources.h"
+#include "content/common/IE/version_ie.h"
+#include "ui/base/l10n/l10n_util.h"
+#endif
+
+
 #if defined(OS_CHROMEOS)
 #include "chrome/browser/ui/ash/multi_user/multi_user_window_manager.h"
 #include "components/account_id/account_id.h"
@@ -412,6 +421,12 @@ std::unique_ptr<content::WebContents> CreateTargetContents(
         params.browser->window()->GetNativeWindow();
   }
 #endif
+#ifdef IE_REDCORE  // ysp+{IE Embedded}
+  create_params.renderer_mode = params.renderer_mode;
+  // ysp+
+  if (!params.auto_select)
+    create_params.auto_select_content = params.auto_select;
+#endif
 
   std::unique_ptr<WebContents> target_contents =
       WebContents::Create(create_params);
@@ -477,10 +492,15 @@ void Navigate(NavigateParams* params) {
   // the target browser. This must happen first, before
   // GetBrowserForDisposition() has a chance to replace |params->browser| with
   // another one.
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  params->source_contents = nullptr;
+#else
   if (!params->source_contents && params->browser) {
     params->source_contents =
         params->browser->tab_strip_model()->GetActiveWebContents();
   }
+#endif  // ysp {+
 
   WebContents* contents_to_navigate_or_insert =
       params->contents_to_insert.get();
@@ -576,6 +596,34 @@ void Navigate(NavigateParams* params) {
   // Did we use a prerender?
   bool swapped_in_prerender = false;
 
+#ifdef IE_REDCORE  // ysp+ {IE Embedded}
+  if (params->source_contents &&
+      params->source_contents->GetRendererMode().core == IE_CORE &&
+      params->url.SchemeIs("redcore") == true) {  //在IE页面开首页等自有页面，转为使用Chrome打开
+    params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
+  }
+
+  if (params->source_contents &&
+      ui::PageTransitionCoreTypeIs(params->transition,
+                                   ui::PAGE_TRANSITION_AUTO_BOOKMARK) &&
+      (params->renderer_mode.core !=
+       params->source_contents->GetRendererMode().core)) {
+    params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
+    user_initiated = false;
+    params->tabstrip_add_types = TabStripModel::ADD_ACTIVE |
+                                 TabStripModel::ADD_FORCE_INDEX |
+                                 TabStripModel::ADD_INHERIT_OPENER;
+  }
+
+  RendererMode mode;
+  mode.core = IE_CORE;
+  mode.version = ie::DOC10;
+  mode.emulation = ie::EMULATION10;
+  params->renderer_mode = mode;
+
+  // params->renderer_mode = params->renderer_mode;
+#endif
+
   // If no target WebContents was specified (and we didn't seek and find a
   // singleton), we need to construct one if we are supposed to target a new
   // tab.
@@ -590,6 +638,7 @@ void Navigate(NavigateParams* params) {
       DCHECK(params->source_contents);
       contents_to_navigate_or_insert = params->source_contents;
 
+#if !defined(IE_REDCORE)  // ysp {+
       prerender::PrerenderManager::Params prerender_params(
           params, params->source_contents);
 
@@ -598,6 +647,7 @@ void Navigate(NavigateParams* params) {
       swapped_in_prerender = SwapInPrerender(params->url, &prerender_params);
       if (swapped_in_prerender)
         contents_to_navigate_or_insert = prerender_params.replaced_contents;
+#endif  // ysp {+
     }
 
     if (user_initiated)
@@ -706,7 +756,7 @@ bool IsURLAllowedInIncognito(const GURL& url,
     stripped_spec.erase(0, strlen(content::kViewSourceScheme) + 1);
     GURL stripped_url(stripped_spec);
     return stripped_url.is_valid() &&
-        IsURLAllowedInIncognito(stripped_url, browser_context);
+           IsURLAllowedInIncognito(stripped_url, browser_context);
   }
   // Most URLs are allowed in incognito; the following are exceptions.
   // chrome://extensions is on the list because it redirects to

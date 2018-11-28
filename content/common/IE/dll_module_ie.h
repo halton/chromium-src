@@ -5,7 +5,7 @@
 #ifndef CONTENT_COMMON_IE_DLL_MODULE_IE_H_
 #define CONTENT_COMMON_IE_DLL_MODULE_IE_H_
 
-#include "content/common/IE/IEInterface_h.h"
+#include "content/common/IE/IEInterface.h"
 #include "content/common/IE/atl_include.h"
 
 namespace ie {

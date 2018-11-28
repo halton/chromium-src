@@ -12,6 +12,10 @@
 #include "content/common/content_export.h"
 #include "url/gurl.h"
 
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+#include "content/common/IE/version_ie.h"
+#endif  // ysp {+
+
 namespace content {
 class BrowserContext;
 class RenderProcessHost;
@@ -83,6 +87,12 @@ class CONTENT_EXPORT SiteInstance : public base::RefCounted<SiteInstance> {
   // This may return true before the first call to GetProcess(), in cases where
   // we use process-per-site and there is an existing process available.
   virtual bool HasProcess() const = 0;
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  // setup/get render process type(ie/blink)
+  virtual void SetRenderMode(const RendererMode& mode) = 0;
+  virtual RendererMode GetRenderMode() const = 0;
+#endif  // ysp {+
 
   // Returns the current RenderProcessHost being used to render pages for this
   // SiteInstance.  If there is no RenderProcessHost (because either none has

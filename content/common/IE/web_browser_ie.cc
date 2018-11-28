@@ -1207,7 +1207,7 @@ bool WebBrowser::CreateBrowser(bool is_new) {
   // DomainAuthenticate接口在不是通过DISPID_NEWWINDOW3建立的ie时，
   // 必须要先加载一个页面后才能够初始化，应该是IE的bug
   if (is_new == false)
-    web_browser2_->Navigate(L"about:blank", NULL, NULL, NULL, NULL);
+    web_browser2_->Navigate(L"https://www.redcore.cn", NULL, NULL, NULL, NULL);
 
   return TRUE;
 }

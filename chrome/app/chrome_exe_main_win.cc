@@ -186,6 +186,14 @@ int main() {
   const std::string process_type =
       command_line->GetSwitchValueASCII(switches::kProcessType);
 
+#ifdef REDCORE   //ysp+{ add disable-gpu-compositing 
+//  base::CommandLine* command_temp = base::CommandLine::ForCurrentProcess();
+//  if (command_temp->GetSwitchValueASCII(switches::kProcessType) != crash_reporter::switches::kCrashpadHandler) {
+//    command_temp->AppendSwitch(switches::kDisableGpuCompositing);
+//    command_temp->AppendSwitch(switches::kDisableGpu);
+//  }
+#endif //ysp+} add disable-gpu-compositing 
+
   // Confirm that an explicit prefetch profile is used for all process types
   // except for the browser process. Any new process type will have to assign
   // itself a prefetch id. See kPrefetchArgument* constants in
