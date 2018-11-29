@@ -2408,12 +2408,6 @@ void BrowserView::InitViews() {
   infobar_container_ = new InfoBarContainerView(this);
   AddChildView(infobar_container_);
 
-#if defined(REDCORE) // custom ui
-  account_view_ = new YSPAccountView(this);
-  top_container_->AddChildView(account_view_);
-  account_view_->Init();
-#endif // defined(REDCORE)
-
   InitStatusBubble();
 
   // Create do-nothing view for the sake of controlling the z-order of the find
@@ -2431,9 +2425,6 @@ void BrowserView::InitViews() {
                             top_container_,
                             tabstrip_,
                             toolbar_,
-#if defined(REDCORE)
-                    //        account_view_,    //ysp+ { custom ui }
-#endif // defined(REDCORE)
                             infobar_container_,
                             contents_container_,
                             GetContentsLayoutManager(),

@@ -1032,6 +1032,10 @@ jumbo_split_static_library("ui") {
       "views/ysp_lock_screen_view.h",
       "views/ysp_login_view.cc",
       "views/ysp_login_view.h",
+      "views/ysp_set_pin_view.cc",
+      "views/ysp_set_pin_view.h",
+      "views/ysp_set_pin_view_holder.cc",
+      "views/ysp_set_pin_view_holder.h",
 
       # FIXME(halton):
       # "webui/options/ysp_password_manager_handler.cc",

@@ -3713,7 +3713,7 @@ void YSPLoginManager::UpdatePinKey(const std::string& value) {
 }
 
 std::string YSPLoginManager::GetUserPinKey() {
-  YspCryptoSingleton::GetInstance()->GetCurrentPinKey();
+  return YspCryptoSingleton::GetInstance()->GetCurrentPinKey();
 }
 
 std::string YSPLoginManager::GetLastCID() {

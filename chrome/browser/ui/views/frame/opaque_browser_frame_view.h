@@ -22,6 +22,7 @@
 
 #ifdef REDCORE
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
 #endif
 
 class BrowserView;
@@ -32,6 +33,7 @@ class TabIconView;
 #ifdef REDCORE
 class YSPLockScreenView;
 class YSPLoginManagerObserver;
+class YSPSetPINViewHolder;
 #endif
 
 namespace chrome {
@@ -69,8 +71,10 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   gfx::Size GetMinimumSize() const override;
   int GetTabStripLeftInset() const override;
 #ifdef REDCORE
+  enum YSPScreenStatus { SET_PIN_SCREEN, LOCK_SCREEN, BROWSER_SCREEN };
   bool DoesIntersectRect(const views::View* target,
                          const gfx::Rect& rect) const override;
+  void ChangeScreenStatus(YSPScreenStatus ysp_screen_status);
 #endif
 
   // views::NonClientFrameView:
@@ -228,6 +232,8 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
 #ifdef REDCORE
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
+  YSPSetPINViewHolder* ysp_set_pin_view_holder_;
+  BrowserView* browser_view_;
 #endif
 
   HostedAppButtonContainer* hosted_app_button_container_ = nullptr;

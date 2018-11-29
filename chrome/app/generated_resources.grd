@@ -9519,6 +9519,15 @@ Please help our engineers fix this problem. Tell us what happened right before y
       <message name="IDS_WEBAUTHN_CABLE_ACTIVATE_DESCRIPTION" desc="Contents of the dialog shown when the user tries to sign-in using a phone as a security key.">
         A notification was sent to your phone. Follow the prompts to confirm it's you.
       </message>
+      <message name="IDS_SET_PIN_TITLE" desc="set pin page title.">Set PIN Code</message>
+      <message name="IDS_SET_PIN_DESC" desc="pin code setting page desc.">PIN is used to open screen</message>
+      <message name="IDS_SET_SIX_PIN_CODE" desc="pin code setting textfield.">Enter 6-digit PIN</message>
+      <message name="IDS_CONFIRM_PIN_CODE" desc="pin code setting textfield confirm.">Confirm 6-digit PIN</message>
+      <message name="IDS_SET_PIN_ERROR_PROMOT" desc="pin code setting error promot message.">PIN code must be 6 digit</message>
+      <message name="IDS_SET_PIN_PASSWORD_NOT_SAME" desc="pin code setting error promot message.">Two PIN code are inconsistent</message>
+      <message name="IDS_UNLOCK_SCREEN_TITLE" desc="unclock page title.">Use PIN code to unlock</message>
+      <message name="IDS_FORGET_PIN_CODE" desc="unclock page forget pin.">forget pin code?</message>
+      <message name="IDS_FORGET_PIN_CODE_MESSAGE" desc="unclock page forget pin message.">Sorry, the PIN does not support the retrieval function. You can uninstall your browser and reinstall it to reset your PIN in your profile</message>
    </if>
    <if expr="is_macosx">
      <message name="IDS_WEBAUTHN_TOUCH_ID_TITLE" desc="Title of the dialog shown when the user tries to sign in with Touch ID." meaning="'Touch ID' is the fingerprint recognition feature in macOS. Try to refer Apple support documentation in the target language for the appropriate product name translation.">

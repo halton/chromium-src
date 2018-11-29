@@ -5490,7 +5490,7 @@
 <!-- //ysp+ { -->
 <translation id="4852111869507463990">红芯企业浏览器</translation>
 <translation id="632770826694814868">您的办公浏览器当前处于锁屏模式</translation>
-<translation id="6964321312176942428">请输入浏览器登录密码解锁</translation>
+<translation id="6964321312176942428">请输入6位PIN码解锁</translation>
 <translation id="4116513560936149887">密码输入错误，请重新输入</translation>
 <translation id="273844075565984758">您的身份认证已过期，请输入密码进行身份认证</translation>
 <translation id="7973262765199496975">登录系统</translation>
@@ -5500,5 +5500,14 @@
 <translation id="6867970763795157612">您的账号被管理员删除，已退出登录。</translation>
 <translation id="3174843802464425189">您的账号被管理员禁用，已退出登录。</translation>
 <translation id="7596913374482479303">设置在通过多功能框搜索时所用的搜索引擎。</translation>
+<translation id="2065749275561741829">PIN码将保护您的隐私，用于打开自动锁屏</translation>
+<translation id="3972708394175159725">设置6位PIN码</translation>
+<translation id="7492885667290119555">确认6位PIN码</translation>
+<translation id="8946472665790859936">设置PIN码</translation>
+<translation id="9222447453844795985">PIN码必须是6位数字</translation>
+<translation id="1443145956076335366">PIN码不一致，请重新输入</translation>
+<translation id="355226436098205131">请使用6位PIN码解锁屏幕</translation>
+<translation id="4425739312452866274">忘记PIN码？</translation>
+<translation id="1988735210256571067">很抱歉，PIN码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置PIN码。</translation>
 <!-- //ysp+ } -->
 </translationbundle>

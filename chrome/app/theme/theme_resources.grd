@@ -598,6 +598,13 @@
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN_ENTER_P" file="ysp/login_icon_lock_screen_pressed.png" />
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN_ENTER_MASK" file="ysp/login_icon_lock_screen_default.png" />
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN_BACKGROUND" file="ysp/lock_screen_background.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_SET_PIN_BACKGROUND" file="ysp/bg_set_pin.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_SET_PIN_DIALOG_BACKGROUND" file="ysp/bg_dialog_set_pin.png" />
+      
+        <structure type="chrome_scaled_image" name="IDR_YSP_SET_PIN_DETERMINE_H" file="ysp/determine hover_icon.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_SET_PIN_DETERMINE_P" file="ysp/determine activel_icon.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_SET_PIN_DETERMINE_N" file="ysp/determine normal_icon.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_FORGET_PIN_BG" file="ysp/forget_password_bg.png" />
         <!-- Title bar background for MAC -->
       <if expr="is_macosx">
         <structure type="chrome_scaled_image" name="IDR_YSP_TITLE_ACTIVE" file="mac/ysp/title_background.png" />

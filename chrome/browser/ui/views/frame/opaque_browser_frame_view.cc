@@ -1,4 +1,4 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+﻿// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,9 +54,10 @@
 #endif
 
 #ifdef REDCORE
-#include "chrome/browser/ysp_login/ysp_login_manager.h"
-#include "chrome/browser/ui/views/ysp_login_view.h"
 #include "chrome/browser/ui/views/ysp_lock_screen_view.h"
+#include "chrome/browser/ui/views/ysp_login_view.h"
+#include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "ui/base/resource/resource_bundle.h"
 #endif
 
@@ -93,6 +94,7 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
 #ifdef REDCORE
       lock_button_(nullptr),
       locked_view_(nullptr),
+      ysp_set_pin_view_holder_(nullptr),
 #endif
       frame_background_(new views::FrameBackground()) {
   layout_->set_delegate(this);
@@ -129,6 +131,7 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
                                           VIEW_ID_CLOSE_BUTTON);
 
   // Initializing the TabIconView is expensive, so only do it if we need to.
+  browser_view_ = browser_view;
   if (browser_view->ShouldShowWindowIcon()) {
     window_icon_ = new TabIconView(this, this);
     window_icon_->set_is_light(true);
@@ -165,11 +168,18 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
                                          IDS_ACCNAME_YSP_LOCK_SCREEN,
                                          VIEW_ID_LOCK_SCREEN_BUTTON);
 
+  ysp_set_pin_view_holder_ = new YSPSetPINViewHolder(this, browser_view);
+  ysp_set_pin_view_holder_->set_id(VIEW_ID_YSP_SET_PIN_VIEW_HOLDER);
+  AddChildViewAt(ysp_set_pin_view_holder_, 0);
+
   locked_view_ = new YSPLockScreenView(this, browser_view);
   locked_view_->SetBackground(views::CreateSolidBackground(kLockScreenBackgroundColor));
-  locked_view_->SetVisible(false);
   locked_view_->set_id(VIEW_ID_LOCK_SCREEN_VIEW);
   AddChildViewAt(locked_view_, 0);
+
+  std::string pin_key = YSPLoginManager::GetInstance()->GetUserPinKey();
+  ChangeScreenStatus(pin_key.empty() ? OpaqueBrowserFrameView::SET_PIN_SCREEN
+                                     : OpaqueBrowserFrameView::LOCK_SCREEN);
 #endif
 
   if (extensions::HostedAppBrowserController::IsForExperimentalHostedAppBrowser(
@@ -218,10 +228,41 @@ gfx::Rect OpaqueBrowserFrameView::GetBoundsForTabStrip(
 }
 
 #ifdef REDCORE
+void OpaqueBrowserFrameView::LockScreen() {
+  if (!ysp_set_pin_view_holder_->visible()) {
+    ChangeScreenStatus(OpaqueBrowserFrameView::LOCK_SCREEN);
+  }
+}
+
+void OpaqueBrowserFrameView::ChangeScreenStatus(
+    OpaqueBrowserFrameView::YSPScreenStatus ysp_screen_status) {
+  switch (ysp_screen_status) {
+    case OpaqueBrowserFrameView::SET_PIN_SCREEN:
+      locked_view_->SetVisible(false);
+      ysp_set_pin_view_holder_->SetVisible(true);
+      browser_view_->SetVisible(false);
+      lock_button_->SetVisible(false);
+      break;
+    case OpaqueBrowserFrameView::LOCK_SCREEN:
+      locked_view_->SetVisible(true);
+      ysp_set_pin_view_holder_->SetVisible(false);
+      browser_view_->SetVisible(false);
+      lock_button_->SetVisible(false);
+      break;
+    case OpaqueBrowserFrameView::BROWSER_SCREEN:
+      locked_view_->SetVisible(false);
+      ysp_set_pin_view_holder_->SetVisible(false);
+      browser_view_->SetVisible(true);
+      lock_button_->SetVisible(true);
+      break;
+  }
+}
+
 //(TODO) fix LockScreenView not respond to mouse click events;
 bool OpaqueBrowserFrameView::DoesIntersectRect(const views::View* target,
                                                const gfx::Rect& rect) const {
-  if (locked_view_ && locked_view_->visible()) {
+  if ((locked_view_ && locked_view_->visible()) ||
+      (ysp_set_pin_view_holder_ && ysp_set_pin_view_holder_->visible())) {
     return true;
   }
   return BrowserNonClientFrameView::DoesIntersectRect(target, rect);
@@ -457,10 +498,7 @@ void OpaqueBrowserFrameView::ButtonPressed(views::Button* sender,
   }
 #ifdef REDCORE
   else if (sender == lock_button_) {
-    // TODO: (LIUWEI)
-    if (locked_view_ && !locked_view_->IsLocked()) {
-      LockScreen();
-    }
+    locked_view_->Lock();
   }
 #endif
 }
@@ -618,10 +656,9 @@ void OpaqueBrowserFrameView::OnPaint(gfx::Canvas* canvas) {
   SkColor frame_color = GetFrameColor();
   window_title_->SetEnabledColor(GetReadableFrameForegroundColor(kUseCurrent));
 #ifdef REDCORE
-  if (locked_view_ && locked_view_->IsLocked()) {
+  if (locked_view_ && locked_view_->visible()) {
     frame_background_->set_frame_color(kLockScreenBackgroundColor);
-  }
-  else {
+  } else {
     frame_background_->set_frame_color(frame_color);
   }
 #else
@@ -641,7 +678,8 @@ void OpaqueBrowserFrameView::OnPaint(gfx::Canvas* canvas) {
   frame_background_->set_top_area_height(GetTopAreaHeight());
 
 #ifdef REDCORE
-  if (locked_view_ && locked_view_->IsLocked()) {
+  if ((locked_view_ && locked_view_->visible()) ||
+      (ysp_set_pin_view_holder_ && ysp_set_pin_view_holder_->visible())) {
     SetControlButtonImage(minimize_button_, IDR_LOCK_SCREEN_MINIMIZE, IDR_LOCK_SCREEN_MINIMIZE_H, IDR_LOCK_SCREEN_MINIMIZE_P);
     SetControlButtonImage(maximize_button_, IDR_LOCK_SCREEN_MAXIMIZE, IDR_LOCK_SCREEN_MAXIMIZE_H, IDR_LOCK_SCREEN_MAXIMIZE_P);
     SetControlButtonImage(close_button_, IDR_LOCK_SCREEN_CLOSE, IDR_LOCK_SCREEN_CLOSE_H, IDR_LOCK_SCREEN_CLOSE_P);
@@ -877,13 +915,6 @@ base::string16 OpaqueBrowserFrameView::GetLoginInfo() const {
   return browser_view()->GetUserNameString();
 }
 
-void OpaqueBrowserFrameView::LockScreen() {
-	if (locked_view_ && !locked_view_->IsLocked()) {
-		locked_view_->Lock(Browser::SCREEN_LOCKED);
-		Layout();
-	}
-}
-
 void OpaqueBrowserFrameView::SetControlButtonImage(
     views::ImageButton* button, int normal_image_id,
     int hover_image_id, int pressed_image_id) {
@@ -898,8 +929,11 @@ void OpaqueBrowserFrameView::SetControlButtonImage(
 
 bool OpaqueBrowserFrameView::OnMousePressed(const ui::MouseEvent& event)
 {
-  if (locked_view_ && locked_view_->IsLocked() && event.IsRightMouseButton())
+  if ((locked_view_ && locked_view_->visible() && event.IsRightMouseButton()) ||
+      (ysp_set_pin_view_holder_ && ysp_set_pin_view_holder_->visible() &&
+       event.IsRightMouseButton())) {
     return true;
+  }
   return parent()->OnMousePressed(event);
 }
 #endif

@@ -19,6 +19,7 @@
 
 #ifdef REDCORE
 #include "chrome/browser/ui/views/ysp_lock_screen_view.h"
+#include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
 #include "chrome/grit/generated_resources.h"
 #include "ui/base/l10n/l10n_util.h"
 #endif
@@ -93,12 +94,12 @@ OpaqueBrowserFrameViewLayout::OpaqueBrowserFrameViewLayout()
       window_title_(nullptr),
       incognito_icon_(nullptr),
       trailing_buttons_{
-                    #ifdef REDCORE
-                        views::FRAME_BUTTON_LOCK_SCREEN,
-                    #endif
-                        views::FRAME_BUTTON_MINIMIZE,
-                        views::FRAME_BUTTON_MAXIMIZE,
-                        views::FRAME_BUTTON_CLOSE} {}
+#ifdef REDCORE
+          views::FRAME_BUTTON_LOCK_SCREEN,
+#endif
+          views::FRAME_BUTTON_MINIMIZE, views::FRAME_BUTTON_MAXIMIZE,
+          views::FRAME_BUTTON_CLOSE} {
+}
 
 OpaqueBrowserFrameViewLayout::~OpaqueBrowserFrameViewLayout() {}
 
@@ -543,8 +544,7 @@ void OpaqueBrowserFrameViewLayout::ConfigureButton(views::View* host,
     }
 #ifdef REDCORE
     case views::FRAME_BUTTON_LOCK_SCREEN: {
-      lock_button_->SetVisible(
-          YSPLoginManager::GetInstance()->GetLoginStatus());
+      lock_button_->SetVisible(true);
       SetBoundsForButton(button_id, host, lock_button_, alignment);
       break;
     }
@@ -717,6 +717,9 @@ void OpaqueBrowserFrameViewLayout::SetView(int id, views::View* view) {
     case VIEW_ID_LOCK_SCREEN_VIEW:
       locked_view_ = static_cast<YSPLockScreenView *>(view);
       break;
+    case VIEW_ID_YSP_SET_PIN_VIEW_HOLDER:
+      ysp_set_pin_view_holder_ = static_cast<YSPSetPINViewHolder*>(view);
+      break;
 #endif
     default:
       NOTREACHED() << "Unknown view id " << id;
@@ -741,12 +744,15 @@ void OpaqueBrowserFrameViewLayout::Layout(views::View* host) {
   LayoutWindowControls(host);
 #ifdef REDCORE
   window_title_->SetVisible(false);
-  if (locked_view_->IsLocked()) {
+
+  if (ysp_set_pin_view_holder_->visible() || locked_view_->visible()) {
     lock_button_->SetVisible(false);
-    // TODO: (LIUWEI) remove hard code
-    locked_view_->SetBounds(host->x(), host->y(), host->width(), host->height());
-    return;
+  } else {
+    lock_button_->SetVisible(true);
   }
+  ysp_set_pin_view_holder_->SetBounds(host->x(), host->y(), host->width(),
+                                      host->height());
+  locked_view_->SetBounds(host->x(), host->y(), host->width(), host->height());
 #endif
 
   if (delegate_->IsRegularOrGuestSession())

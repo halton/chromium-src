@@ -12,6 +12,10 @@
 #include "ui/views/layout/layout_manager.h"
 #include "ui/views/window/frame_buttons.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
+#endif
+
 class HostedAppButtonContainer;
 class OpaqueBrowserFrameViewLayoutDelegate;
 
@@ -245,6 +249,7 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
 #ifdef REDCORE
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
+  YSPSetPINViewHolder* ysp_set_pin_view_holder_;
 #endif
 
   std::vector<views::FrameButton> leading_buttons_;

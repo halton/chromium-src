@@ -29,35 +29,51 @@
 #include "ui/aura/window_tree_host.h"
 #endif
 
+#ifdef REDCORE
+#include "crypto/sha2.cc"
+#include "ui/gfx/color_utils.h"
+#endif
+
 void YSPLockScreenView::ShowLockedScreen(BrowserView* browser_view) {
   //static YSPLockScreenView * locked_view = new YSPLockScreenView(browser_view);
 }
 
-YSPLockScreenView::YSPLockScreenView(views::ButtonListener* listener,
-                                     BrowserView* browser_view)
-    : browser_view_(browser_view), is_locked_(false) {
-  if (!browser_view)
-    return;
-
+YSPLockScreenView::YSPLockScreenView(
+    OpaqueBrowserFrameView* opaque_browser_frame_view,
+    BrowserView* browser_view)
+    : browser_view_(browser_view),
+      opaque_browser_frame_view_(opaque_browser_frame_view) {
   browser_ = browser_view->browser();
+
+  const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
+  SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_BACKGROUND));
+
   const gfx::FontList& small_font =
       ui::ResourceBundle::GetSharedInstance().GetFontList(
           ui::ResourceBundle::SmallFont);
 
-  info_label_ = new views::Label(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE));
-  info_label_->SetFontList(small_font.DeriveWithSizeDelta(14 - small_font.GetFontSize()));
+  const gfx::FontList& bold_font =
+      ui::ResourceBundle::GetSharedInstance().GetFontList(
+          ui::ResourceBundle::BoldFont);
+
+  info_label_ =
+      new views::Label(l10n_util::GetStringUTF16(IDS_UNLOCK_SCREEN_TITLE));
+  info_label_->SetFontList(
+      bold_font.DeriveWithSizeDelta(15 - bold_font.GetFontSize()));
   info_label_->SetAutoColorReadabilityEnabled(false);
   info_label_->SetEnabledColor(SK_ColorWHITE);
   AddChildView(info_label_);
 
   avatar_image_ = new views::ImageView();
   avatar_image_->SetDrawCircle(true);
-
-  //avatar_image_->set_background(views::Background::CreateSolidBackground(255, 0, 255));
+  avatar_image_->SetImageSize(gfx::Size(80, 80));
   AddChildView(avatar_image_);
 
-  name_label_ = new views::Label(base::string16());
-  name_label_->SetFontList(small_font.DeriveWithSizeDelta(14 - small_font.GetFontSize()));
+  YSPLoginManager* manager = YSPLoginManager::GetInstance();
+  const base::string16& name = manager->GetYSPUserName();
+  name_label_ = new views::Label(name);
+  name_label_->SetFontList(
+      small_font.DeriveWithSizeDelta(15 - small_font.GetFontSize()));
   name_label_->SetAutoColorReadabilityEnabled(false);
   name_label_->SetEnabledColor(SK_ColorWHITE);
   AddChildView(name_label_);
@@ -71,183 +87,270 @@ YSPLockScreenView::YSPLockScreenView(views::ButtonListener* listener,
   AddChildView(password_text_);
 
   login_button_ = new views::ImageButton(this);
-  const ui::ThemeProvider* tp = browser_view->frame()->GetThemeProvider();
   login_button_->SetImage(views::Button::ButtonState::STATE_NORMAL, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER));
   login_button_->SetImage(views::Button::ButtonState::STATE_HOVERED, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER_H));
   login_button_->SetImage(views::Button::ButtonState::STATE_PRESSED, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER_P));
   login_button_->SetImageAlignment(views::ImageButton::ALIGN_CENTER, views::ImageButton::ALIGN_MIDDLE);
   login_button_->SetBackground(views::CreateSolidBackground(SK_ColorWHITE));
+  login_button_->SetEnabled(false);
   AddChildView(login_button_);
 
   error_prompt_ = new views::Label(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_REENTER_PASSWORD));
-  error_prompt_->SetFontList(small_font.DeriveWithSizeDelta(14 - small_font.GetFontSize()));
+  error_prompt_->SetFontList(
+      small_font.DeriveWithSizeDelta(15 - small_font.GetFontSize()));
+  error_prompt_->SetAutoColorReadabilityEnabled(false);
   error_prompt_->SetEnabledColor(SK_ColorWHITE);
   error_prompt_->SetVisible(false);
   AddChildView(error_prompt_);
 
-  YSPLoginManager::GetInstance()->AddObserver(this);
-  profile_pref_registrar_.Init(g_browser_process->local_state());
-  profile_pref_registrar_.Add(
-    prefs::kYSPLockScreen,
-    base::Bind(&YSPLockScreenView::OnLockStatusChanged, base::Unretained(this)));
+  error_confirm_button_ =
+      views::MdTextButton::Create(this, l10n_util::GetStringUTF16(IDS_CONFIRM));
+  error_confirm_button_->SetVisible(false);
+  error_confirm_button_->SetEnabledTextColors(SK_ColorWHITE);
+  const SkColor c_color = SkColorSetRGB(151, 151, 151);
+  error_confirm_button_->SetBgColorOverride(c_color);
+  AddChildView(error_confirm_button_);
 
+  forget_pin_ink_label_ =
+      new views::Link(l10n_util::GetStringUTF16(IDS_FORGET_PIN_CODE));
+  forget_pin_ink_label_->SetVisible(true);
+  forget_pin_ink_label_->SetAutoColorReadabilityEnabled(false);
+  forget_pin_ink_label_->SetEnabledColor(SK_ColorWHITE);
+  forget_pin_ink_label_->set_listener(this);
+  AddChildView(forget_pin_ink_label_);
+
+  forget_password_message_bg_image_ = new views::ImageView();
+  forget_password_message_bg_image_->SetDrawCircle(false);
+  forget_password_message_bg_image_->SetImage(
+      tp->GetImageSkiaNamed(IDR_YSP_FORGET_PIN_BG));
+  forget_password_message_bg_image_->SetImageSize(gfx::Size(500, 232));
+  AddChildView(forget_password_message_bg_image_);
+
+  forget_password_message_title_label_ =
+      new views::Label(l10n_util::GetStringUTF16(IDS_FORGET_PIN_CODE));
+  forget_password_message_title_label_->SetFontList(
+      bold_font.DeriveWithSizeDelta(16 - bold_font.GetFontSize()));
+  forget_password_message_title_label_->SetAutoColorReadabilityEnabled(false);
+  forget_password_message_title_label_->SetEnabledColor(SK_ColorBLACK);
+  AddChildView(forget_password_message_title_label_);
+
+  forget_password_message_label_ =
+      new views::Label(l10n_util::GetStringUTF16(IDS_FORGET_PIN_CODE_MESSAGE));
+  forget_password_message_label_->SetFontList(
+      small_font.DeriveWithSizeDelta(15 - small_font.GetFontSize()));
+  forget_password_message_label_->SetAutoColorReadabilityEnabled(false);
+  forget_password_message_label_->SetEnabledColor(SK_ColorBLACK);
+  forget_password_message_label_->SetMultiLine(true);
+  forget_password_message_label_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+  AddChildView(forget_password_message_label_);
+
+  forget_password_message_confirm_button_ =
+      views::MdTextButton::CreateSecondaryUiBlueButton(
+          this, l10n_util::GetStringUTF16(IDS_CONFIRM));
+  AddChildView(forget_password_message_confirm_button_);
+
+  ShowForgetPasswordDialog(false);
+
+  SetAvatar();
 }
 
 YSPLockScreenView::~YSPLockScreenView() {
-  YSPLoginManager::GetInstance()->RemoveObserver(this);
+  
 }
 
-static int GetLeftTop(int window_width, int view_width) {
-  return (window_width > view_width) ? (window_width - view_width) / 2 : 0;
-}
-
-void YSPLockScreenView::Lock(Browser::YSPLockStatus status) {
-  PrefService *pref = g_browser_process->local_state();
-  if (status != pref->GetInteger(prefs::kYSPLockScreen))
-    pref->SetInteger(prefs::kYSPLockScreen, status);
-}
-
-void YSPLockScreenView::LockInternal(Browser::YSPLockStatus status) {
-  if (!is_locked_) {
-    is_locked_ = true;
-    if (status == Browser::SCREEN_LOCKED)
-      info_label_->SetText(
-          l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE));
-    else if (status == Browser::TOKEN_EXPIRED_LOCKED)
-      info_label_->SetText(
-          l10n_util::GetStringUTF16(IDS_YSP_FLOAT_LOGIN_WINDOW_VIEW_TITLE));
-    else
-      NOTREACHED();
-    const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
-    SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_BACKGROUND));
-    avatar_image_->SetImage(browser_view_->account_view()->GetHeadImage());
-    avatar_image_->SetImageSize(gfx::Size(80, 80));
-    error_prompt_->SetVisible(false);
-    browser_view_->SetVisible(false);
-    //browser_->SetLockStatus(status);
-    SetVisible(true);
-    password_text_->RequestFocus();
-    login_button_->SetEnabled(false);
-#if defined(WATERMARK) && defined(IE_REDCORE)
-    aura::WindowTreeHost* pHost = NULL;
-    pHost = browser_view_->GetNativeWindow()->GetToplevelWindow()->GetHost();
-    if (pHost) {
-      pHost->OnLockScreenChanged(true);
+void YSPLockScreenView::Submit() {
+  if (password_text_->text().length() == 6) {
+    std::string text = base::UTF16ToUTF8(password_text_->text());
+    std::string pin_key = YSPLoginManager::GetInstance()->GetUserPinKey();
+    std::string text_sha_key = crypto::SHA256HashString(text);
+    text_sha_key = base::HexEncode(text_sha_key.data(), text_sha_key.length());
+    if (text_sha_key == pin_key) {
+      Unlock();
+      return;
     }
-#endif
-    parent()->Layout();
   }
+  ShowError(true);
+}
+
+void YSPLockScreenView::SetAvatar() {
+  const std::string& head_image_url =
+      YSPLoginManager::GetInstance()->GetHeadImageUrl();
+  if (!head_image_url.empty()) {
+    DownloadImage(head_image_url);
+  } else {
+    const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
+    avatar_image_->SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
+  }
+}
+
+void YSPLockScreenView::DownloadImage(const std::string& url) {
+  content::WebContents* webContents = browser_view_->GetActiveWebContents();
+  if (!webContents)
+    return;
+
+  webContents->DownloadImage(GURL(url), true, 0, true,
+                             base::Bind(&YSPLockScreenView::DidDownloadFavicon,
+                                        base::Unretained(this)));
+}
+
+void YSPLockScreenView::DidDownloadFavicon(
+    int id,
+    int http_status_code,
+    const GURL& image_url,
+    const std::vector<SkBitmap>& bitmaps,
+    const std::vector<gfx::Size>& original_bitmap_sizes) {
+  DLOG(INFO) << "YSPAccountView::DidDownloadFavicon";
+  if (bitmaps.size() > 0) {
+    avatar_image_->SetImage(
+        new gfx::ImageSkia(gfx::ImageSkiaRep(bitmaps[0], 1)));
+  }
+}
+
+void YSPLockScreenView::ShowForgetPasswordDialog(bool show) {
+  forget_pin_ink_label_->SetEnabled(!show);
+  if (show) {
+    forget_password_message_bg_image_->SetVisible(true);
+    forget_password_message_title_label_->SetVisible(true);
+    forget_password_message_label_->SetVisible(true);
+    forget_password_message_confirm_button_->SetVisible(true);
+    error_confirm_button_->SetVisible(false);
+    error_prompt_->SetVisible(false);
+    login_button_->SetVisible(false);
+    password_text_->SetVisible(false);
+    name_label_->SetVisible(false);
+    avatar_image_->SetVisible(false);
+    info_label_->SetVisible(false);
+  } else {
+    forget_password_message_bg_image_->SetVisible(false);
+    forget_password_message_title_label_->SetVisible(false);
+    forget_password_message_label_->SetVisible(false);
+    forget_password_message_confirm_button_->SetVisible(false);
+    error_confirm_button_->SetVisible(false);
+    error_prompt_->SetVisible(false);
+    login_button_->SetVisible(true);
+    password_text_->SetVisible(true);
+    name_label_->SetVisible(true);
+    avatar_image_->SetVisible(true);
+    info_label_->SetVisible(true);
+  }
+}
+
+void YSPLockScreenView::ShowError(bool show) {
+  if (show) {
+    error_prompt_->SetVisible(true);
+    error_confirm_button_->SetVisible(true);
+    password_text_->SetVisible(false);
+    login_button_->SetVisible(false);
+  } else {
+    error_prompt_->SetVisible(false);
+    error_confirm_button_->SetVisible(false);
+    password_text_->SetVisible(true);
+    password_text_->RequestFocus();
+    login_button_->SetVisible(true);
+  }
+}
+
+void YSPLockScreenView::Lock() {
+  SetAvatar();
+  YSPLoginManager* manager = YSPLoginManager::GetInstance();
+  base::string16 name = manager->GetYSPUserName();
+  name_label_->SetText(name);
+  avatar_image_->SetImage(browser_view_->account_view()->GetHeadImage());
+  avatar_image_->SetImageSize(gfx::Size(80, 80));
+  error_prompt_->SetVisible(false);
+  password_text_->RequestFocus();
+  login_button_->SetEnabled(false);
+  opaque_browser_frame_view_->ChangeScreenStatus(
+      OpaqueBrowserFrameView::LOCK_SCREEN);
 }
 
 void YSPLockScreenView::Unlock() {
-  PrefService *pref = g_browser_process->local_state();
-  if (pref->GetInteger(prefs::kYSPLockScreen) != Browser::UNLOCKED)
-    pref->SetInteger(prefs::kYSPLockScreen, Browser::UNLOCKED);
+  password_text_->SetText(base::string16());
+  opaque_browser_frame_view_->ChangeScreenStatus(
+      OpaqueBrowserFrameView::BROWSER_SCREEN);
 }
 
-void YSPLockScreenView::UnlockInternal() {
-  if (is_locked_) {
-    is_locked_ = false;
-    browser_view_->SetVisible(true);
-    //browser_->SetLockStatus(Browser::UNLOCKED);
-    SetVisible(false);
-    password_text_->SetText(base::string16());
-    browser_view_->frame()->GetFrameView()->Layout();
-#if defined(WATERMARK) && defined(IE_REDCORE)
-    aura::WindowTreeHost* pHost = NULL;
-    pHost = browser_view_->GetNativeWindow()->GetToplevelWindow()->GetHost();
-    if (pHost)
-      pHost->OnLockScreenChanged(false);
-#endif
-  }
-}
-
-
-void YSPLockScreenView::Submit()
-{
-  std::string text = base::UTF16ToUTF8(password_text_->text());
-  if (g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen) ==
-      Browser::TOKEN_EXPIRED_LOCKED) {
-    YSPLoginManager::GetInstance()->StartLogin(
-        YSPLoginManager::GetInstance()->GetLastCID(),
-        YSPLoginManager::GetInstance()->GetLastUID(), text);
-    return;
-  }
-
-  if (YSPLoginManager::GetInstance()->isValidPassword(text)) {
-    Unlock();
-  } else {
-    error_prompt_->SetVisible(true);
-    InvalidateLayout();
-  }
+int YSPLockScreenView::GetLeftTop(int window_width, int view_width) {
+  return (window_width > view_width) ? (window_width - view_width) / 2 : 0;
 }
 
 void YSPLockScreenView::Layout() {
   // TODO (LIUWEI) hard code for now
-  SetBorder(views::CreateSolidBorder(1, SK_ColorBLACK));
+  // SetBorder(views::CreateSolidBorder(1, SK_ColorBLACK));
   gfx::Rect bound = bounds();
   bound.Inset(1, 1);
   SetImageSize(bound.size());
   SetDrawCircle(false);
 
   const int window_width = width();
-  int top = (double)height() * (0.85/1.85);
+  const int window_height = height();
+  int top = (double)window_height * 0.374;
   gfx::Size info_size = info_label_->GetPreferredSize();
   int x = GetLeftTop(window_width, info_size.width());
 
   //gfx::Rect bounds(width() / 2, height() / 2, 80, 80);
-  info_label_->SetBounds(x, top, info_size.width(), 14);
-  top += 14 + 40;
+  info_label_->SetBounds(x, top, info_size.width(), info_size.height());
+  top += info_size.height() + 40;
 
   x = GetLeftTop(window_width, 80);
   avatar_image_->SetBounds(x, top, 80, 80);
   top += 80 + 20;
 
-
-  name_label_->SetText(browser_view_->GetUserNameString());
+  YSPLoginManager* manager = YSPLoginManager::GetInstance();
+  base::string16 name = manager->GetYSPUserName();
+  name_label_->SetText(name);
   gfx::Size name_size = name_label_->GetPreferredSize();
   x = GetLeftTop(window_width, name_size.width());
-  name_label_->SetBounds(x, top, name_size.width(), 14);
-  top += 14 + 20;
+  name_label_->SetBounds(x, top, name_size.width(), 15);
+  top += 15 + 30;
 
   x = GetLeftTop(window_width, 320);
   password_text_->SetBounds(x, top, 280, 40);
   login_button_->SetBounds(x + 280, top, 40, 40);
-  top += 40 + 10;
 
   gfx::Size error_size = error_prompt_->GetPreferredSize();
+  x = GetLeftTop(window_width, error_size.width());
   error_prompt_->SetBounds(x, top, error_size.width(), error_size.height());
 
-  // ysp: frame view is destroyed in case of Windows user switch but browser view will not,
-  // check/restore the lock state in this case
+  top += 30 + error_size.height();
+  x = GetLeftTop(window_width, 68);
+  error_confirm_button_->SetBounds(x, top, 68, 32);
 
-  Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
-      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
-  if (lock != Browser::UNLOCKED)
-    LockInternal(lock);
-}
+  gfx::Size forget_button_size = forget_pin_ink_label_->GetPreferredSize();
+  int f_top = height() - 30 - forget_button_size.height();
+  x = GetLeftTop(window_width, forget_button_size.width());
+  forget_pin_ink_label_->SetBounds(x, f_top, forget_button_size.width(),
+                                   forget_button_size.height());
 
-void YSPLockScreenView::OnLoginRequestFailure(const std::string& error) {}
+  gfx::Size forget_bg_image_size =
+      forget_password_message_bg_image_->GetPreferredSize();
+  int bg_image_x = GetLeftTop(window_width, forget_bg_image_size.width());
+  int bg_image_y = GetLeftTop(window_height, forget_bg_image_size.height());
+  forget_password_message_bg_image_->SetBounds(bg_image_x, bg_image_y,
+                                               forget_bg_image_size.width(),
+                                               forget_bg_image_size.height());
 
-void YSPLockScreenView::OnLoginResponseParseFailure(const std::string& error) {}
+  gfx::Size forget_password_title_size =
+      forget_password_message_title_label_->GetPreferredSize();
+  bg_image_x += 60;
+  bg_image_y += 40;
+  forget_password_message_title_label_->SetBounds(
+      bg_image_x, bg_image_y, forget_password_title_size.width(),
+      forget_password_title_size.height());
 
-void YSPLockScreenView::OnLoginFailure(base::string16 message) {}
+  gfx::Size forget_password_message_size =
+      forget_password_message_label_->GetPreferredSize();
+  bg_image_y += (23 + forget_password_title_size.height());
+  forget_password_message_label_->SetBounds(
+      bg_image_x, bg_image_y, 370, forget_password_message_size.height());
 
-void YSPLockScreenView::OnLoginSuccess(const base::string16& name,
-                                       const std::string& head_image_url) {}
-
-void YSPLockScreenView::OnLogout() {}
-
-void YSPLockScreenView::OnTokenStatusChanged(const std::string& type) {
-  if (type == "TokenExpired") {
-    Lock(Browser::TOKEN_EXPIRED_LOCKED);
-  } else if (type == "TokenAvailable") {
-    if (is_locked_)
-      Unlock();
-  } else if (type == "failure") {
-    error_prompt_->SetVisible(true);
-    InvalidateLayout();
-  }
+  gfx::Size forget_password_button_size =
+      forget_password_message_confirm_button_->GetPreferredSize();
+  bg_image_y += (20 + forget_password_message_size.height());
+  bg_image_x += 337;
+  forget_password_message_confirm_button_->SetBounds(
+      bg_image_x, bg_image_y, forget_password_button_size.width(),
+      forget_password_button_size.height());
 }
 
 bool YSPLockScreenView::HandleContextMenu(
@@ -258,8 +361,18 @@ bool YSPLockScreenView::HandleContextMenu(
 void YSPLockScreenView::ButtonPressed(views::Button* sender,
                                       const ui::Event& event) {
   if (sender == login_button_) {
-    // TODO: (LIUWEI) Implement it
     Submit();
+  } else if (sender == error_confirm_button_) {
+    password_text_->SetText(base::string16());
+    ShowError(false);
+  } else if (sender == forget_password_message_confirm_button_) {
+    ShowForgetPasswordDialog(false);
+  }
+}
+
+void YSPLockScreenView::LinkClicked(views::Link* source, int event_flags) {
+  if (source == forget_pin_ink_label_) {
+    ShowForgetPasswordDialog(true);
   }
 }
 
@@ -267,27 +380,15 @@ void YSPLockScreenView::ContentsChanged(views::Textfield* sender,
                                         const base::string16& new_contents) {
   bool enable = password_text_->text().length() > 0;
   login_button_->SetEnabled(enable);
+  error_prompt_->SetVisible(false);
 }
 
 bool YSPLockScreenView::HandleKeyEvent(views::Textfield* sender,
                                        const ui::KeyEvent& key_event) {
   // TODO: (LIUWEI)
   if (key_event.key_code() == ui::VKEY_RETURN) {
-    if (password_text_->text().length() > 0)
-      Submit();
+    Submit();
     return true;
   }
-
   return false;
-}
-
-void YSPLockScreenView::OnLockStatusChanged() {
-  Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
-      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
-
-  if (lock) {
-    LockInternal(lock);
-  } else {
-    UnlockInternal();
-  }
 }
