@@ -70,8 +70,6 @@ component("crypto") {
     "wincrypt_shim.h",
 
     # YSP
-    "ysp_enclave.cc",
-    "ysp_enclave.h",
     "ysp_crypto_encryption.cc",
     "ysp_crypto_encryption.h",
     "ysp_crypto_header.cc",
@@ -80,6 +78,8 @@ component("crypto") {
     "ysp_sgx_crypto.h",
     "ysp_sgx_support.cc",
     "ysp_sgx_support.h",
+    "$target_gen_dir/intel_sgx/Enclave_u.h",
+    "$target_gen_dir/intel_sgx/Enclave_u.c",
   ]
 
   # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
@@ -89,6 +89,7 @@ component("crypto") {
   ]
 
   deps = [
+    ":sgx_edl2c",
     ":platform",
     ":sgx_crt",
     "//base",
@@ -128,9 +129,12 @@ component("crypto") {
       "ysp_sgx_crypto.h",
       "ysp_sgx_support.cc",
       "ysp_sgx_support.h",
+      "$target_gen_dir/intel_sgx/Enclave_u.h",
+      "$target_gen_dir/intel_sgx/Enclave_u.c",
     ]
     configs -= [ ":sgx_config" ]
     deps -= [ ":sgx_crt" ]
+    deps -= [ ":sgx_edl2c" ]
   }
 
   # Some files are built when NSS is used for the platform certificate library.
@@ -247,6 +251,7 @@ group("platform") {
 
 config("sgx_config") {
   include_dirs = [ "//third_party/sgxsdk/include" ]
+  include_dirs += [ "$target_gen_dir/intel_sgx" ] 
   lib_dirs = [ "//third_party/sgxsdk/bin/$target_cpu/Debug" ]
   libs = [ "sgx_urts.lib" ]
 }
@@ -265,5 +270,20 @@ copy("sgx_crt") {
   }
   outputs = [
     "$root_out_dir/{{source_file_part}}",
+  ]
+}
+
+action("sgx_edl2c") {
+  script = "tools/sgx2c.py"
+  sources = ["Enclave.edl"]
+  outputs = [
+    "$target_gen_dir/intel_sgx/Enclave_u.h",
+    "$target_gen_dir/intel_sgx/Enclave_u.c",
+  ]
+  
+  args = [
+    rebase_path("//third_party/sgxsdk/bin/x86/release"),
+    rebase_path("Enclave.edl"),
+    rebase_path("$target_gen_dir/intel_sgx", root_build_dir),
   ]
 }

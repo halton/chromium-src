@@ -5,8 +5,8 @@
 #include "ysp_sgx_crypto.h"
 
 #include "base/logging.h"
-#include "crypto/ysp_enclave.h"
 #include "crypto/ysp_sgx_support.h"
+#include "enclave_u.h"
 #include "third_party/sgxsdk/include/sgx_urts.h"
 
 #define ENCLAVE_PATH L"Enclave.signed.dll"
