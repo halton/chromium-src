@@ -77,7 +77,8 @@ YSPLockScreenView::YSPLockScreenView(
   password_text_ = new views::Textfield();
   password_text_->set_controller(this);
   password_text_->SetFocusBehavior(FocusBehavior::ALWAYS);
-  password_text_->SetBorder(NULL);
+  password_text_->SetGlyphSpacing(6);
+  password_text_->SetBorder(views::CreateEmptyBorder(0, 10, 0, 10));
   password_text_->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
   password_text_->set_placeholder_text(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK));
   AddChildView(password_text_);
@@ -105,6 +106,9 @@ YSPLockScreenView::YSPLockScreenView(
   error_confirm_button_->SetEnabledTextColors(SK_ColorWHITE);
   const SkColor c_color = SkColorSetRGB(151, 151, 151);
   error_confirm_button_->SetBgColorOverride(c_color);
+  error_confirm_button_->SetFocusBehavior(FocusBehavior::NEVER);
+  error_confirm_button_->SetBackground(
+      views::CreateSolidBackground(SK_ColorWHITE));
   AddChildView(error_confirm_button_);
 
   forget_pin_ink_label_ =
@@ -113,6 +117,7 @@ YSPLockScreenView::YSPLockScreenView(
   forget_pin_ink_label_->SetAutoColorReadabilityEnabled(false);
   forget_pin_ink_label_->SetEnabledColor(SK_ColorWHITE);
   forget_pin_ink_label_->set_listener(this);
+  forget_pin_ink_label_->SetFocusBehavior(FocusBehavior::NEVER);
   AddChildView(forget_pin_ink_label_);
 
   forget_password_message_bg_image_ = new views::ImageView();
@@ -143,6 +148,8 @@ YSPLockScreenView::YSPLockScreenView(
   forget_password_message_confirm_button_ =
       views::MdTextButton::CreateSecondaryUiBlueButton(
           this, l10n_util::GetStringUTF16(IDS_CONFIRM));
+  forget_password_message_confirm_button_->SetFocusBehavior(
+      FocusBehavior::NEVER);
   AddChildView(forget_password_message_confirm_button_);
 
   ShowForgetPasswordDialog(false);

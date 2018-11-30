@@ -11,6 +11,7 @@
 #include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "content/public/browser/web_contents_delegate.h"
+#include "ui/views/border.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
 #include "ui/views/controls/button/button.h"
 #include "ui/views/controls/button/md_text_button.h"
@@ -30,6 +31,7 @@ class MdTextButton;
 class Link;
 class LinkListener;
 class Button;
+class Border;
 }  // namespace views
 
 class Browser;

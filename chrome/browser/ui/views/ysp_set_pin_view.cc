@@ -70,7 +70,8 @@ YSPSetPINView::YSPSetPINView(OpaqueBrowserFrameView* opaque_browser_frame_view,
   AddChildView(set_pin_label_);
 
   pin_textfield_ = new views::Textfield();
-  pin_textfield_->SetBorder(NULL);
+  pin_textfield_->SetGlyphSpacing(6);
+  pin_textfield_->SetBorder(views::CreateEmptyBorder(0, 10, 0, 10));
   pin_textfield_->SetFocusBehavior(FocusBehavior::ALWAYS);
   pin_textfield_->SetBackgroundColor(kTextfieldBackgroundColor);
   pin_textfield_->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
@@ -85,7 +86,8 @@ YSPSetPINView::YSPSetPINView(OpaqueBrowserFrameView* opaque_browser_frame_view,
   AddChildView(confirm_set_pin_label_);
 
   confirm_pin_textfield_ = new views::Textfield();
-  confirm_pin_textfield_->SetBorder(NULL);
+  confirm_pin_textfield_->SetGlyphSpacing(6);
+  confirm_pin_textfield_->SetBorder(views::CreateEmptyBorder(0, 10, 0, 10));
   confirm_pin_textfield_->SetFocusBehavior(FocusBehavior::ALWAYS);
   confirm_pin_textfield_->SetBackgroundColor(kTextfieldBackgroundColor);
   confirm_pin_textfield_->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
