@@ -123,8 +123,6 @@ component("crypto") {
     sources -= [
       "capi_util.cc",
       "capi_util.h",
-      "ysp_enclave.cc",
-      "ysp_enclave.h",
       "ysp_sgx_crypto.cc",
       "ysp_sgx_crypto.h",
       "ysp_sgx_support.cc",
