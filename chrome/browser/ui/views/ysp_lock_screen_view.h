@@ -29,6 +29,7 @@ class Textfield;
 class MdTextButton;
 class Link;
 class LinkListener;
+class Button;
 }  // namespace views
 
 class Browser;
@@ -39,7 +40,8 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                           public views::ImageView,
                           public views::ButtonListener,
                           public views::TextfieldController,
-                          public views::LinkListener {
+                          public views::LinkListener,
+                          public YSPLoginManagerObserver {
  public:
   static void ShowLockedScreen(BrowserView* browser_view);
   YSPLockScreenView(OpaqueBrowserFrameView* opaque_browser_frame_view,
@@ -54,7 +56,6 @@ class YSPLockScreenView : public content::WebContentsDelegate,
   int GetLeftTop(int window_width, int view_width);
   void ShowError(bool show);
   void ShowForgetPasswordDialog(bool show);
-  void SetAvatar();
   void DownloadImage(const std::string& url);
   void DidDownloadFavicon(int id,
                           int http_status_code,
@@ -79,6 +80,15 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                        const base::string16& new_contents) override;
   bool HandleKeyEvent(views::Textfield* sender,
                       const ui::KeyEvent& key_event) override;
+
+  // YSPLoginManagerObserver implementation
+  void OnLoginRequestFailure(const std::string& error) override;
+  void OnLoginResponseParseFailure(const std::string& error) override;
+  void OnLoginFailure(base::string16 message) override;
+  void OnLoginSuccess(const base::string16& name,
+                      const std::string& head_image_url) override;
+  void OnLogout() override;
+  void OnTokenStatusChanged(const std::string& type) override;
 
   Browser* browser_;
   BrowserView* browser_view_;

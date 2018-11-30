@@ -13,9 +13,11 @@
 #include "chrome/grit/generated_resources.h"
 #include "chrome/grit/theme_resources.h"
 #include "components/prefs/pref_service.h"
+#include "crypto/sha2.cc"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/theme_provider.h"
+#include "ui/gfx/color_utils.h"
 #include "ui/native_theme/native_theme.h"
 #include "ui/views/controls/button/checkbox.h"
 #include "ui/views/controls/button/image_button.h"
@@ -27,11 +29,6 @@
 #if defined(WATERMARK) && defined(IE_REDCORE)
 #include "ui/aura/window.h"
 #include "ui/aura/window_tree_host.h"
-#endif
-
-#ifdef REDCORE
-#include "crypto/sha2.cc"
-#include "ui/gfx/color_utils.h"
 #endif
 
 void YSPLockScreenView::ShowLockedScreen(BrowserView* browser_view) {
@@ -67,11 +64,10 @@ YSPLockScreenView::YSPLockScreenView(
   avatar_image_ = new views::ImageView();
   avatar_image_->SetDrawCircle(true);
   avatar_image_->SetImageSize(gfx::Size(80, 80));
+  avatar_image_->SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
   AddChildView(avatar_image_);
 
-  YSPLoginManager* manager = YSPLoginManager::GetInstance();
-  const base::string16& name = manager->GetYSPUserName();
-  name_label_ = new views::Label(name);
+  name_label_ = new views::Label();
   name_label_->SetFontList(
       small_font.DeriveWithSizeDelta(15 - small_font.GetFontSize()));
   name_label_->SetAutoColorReadabilityEnabled(false);
@@ -151,7 +147,7 @@ YSPLockScreenView::YSPLockScreenView(
 
   ShowForgetPasswordDialog(false);
 
-  SetAvatar();
+  YSPLoginManager::GetInstance()->AddObserver(this);
 }
 
 YSPLockScreenView::~YSPLockScreenView() {
@@ -170,17 +166,6 @@ void YSPLockScreenView::Submit() {
     }
   }
   ShowError(true);
-}
-
-void YSPLockScreenView::SetAvatar() {
-  const std::string& head_image_url =
-      YSPLoginManager::GetInstance()->GetHeadImageUrl();
-  if (!head_image_url.empty()) {
-    DownloadImage(head_image_url);
-  } else {
-    const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
-    avatar_image_->SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
-  }
 }
 
 void YSPLockScreenView::DownloadImage(const std::string& url) {
@@ -251,15 +236,9 @@ void YSPLockScreenView::ShowError(bool show) {
 }
 
 void YSPLockScreenView::Lock() {
-  SetAvatar();
-  YSPLoginManager* manager = YSPLoginManager::GetInstance();
-  base::string16 name = manager->GetYSPUserName();
-  name_label_->SetText(name);
-  avatar_image_->SetImage(browser_view_->account_view()->GetHeadImage());
-  avatar_image_->SetImageSize(gfx::Size(80, 80));
   error_prompt_->SetVisible(false);
   password_text_->RequestFocus();
-  login_button_->SetEnabled(false);
+  login_button_->SetEnabled(!password_text_->text().empty());
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
 }
@@ -296,9 +275,6 @@ void YSPLockScreenView::Layout() {
   avatar_image_->SetBounds(x, top, 80, 80);
   top += 80 + 20;
 
-  YSPLoginManager* manager = YSPLoginManager::GetInstance();
-  base::string16 name = manager->GetYSPUserName();
-  name_label_->SetText(name);
   gfx::Size name_size = name_label_->GetPreferredSize();
   x = GetLeftTop(window_width, name_size.width());
   name_label_->SetBounds(x, top, name_size.width(), 15);
@@ -392,3 +368,24 @@ bool YSPLockScreenView::HandleKeyEvent(views::Textfield* sender,
   }
   return false;
 }
+
+void YSPLockScreenView::OnLoginRequestFailure(const std::string& error) {}
+
+void YSPLockScreenView::OnLoginResponseParseFailure(const std::string& error) {}
+
+void YSPLockScreenView::OnLoginFailure(base::string16 message) {}
+
+void YSPLockScreenView::OnLoginSuccess(const base::string16& name,
+                                       const std::string& head_image_url) {
+  name_label_->SetText(name);
+  if (!head_image_url.empty()) {
+    DownloadImage(head_image_url);
+  } else {
+    const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
+    avatar_image_->SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
+  }
+}
+
+void YSPLockScreenView::OnLogout() {}
+
+void YSPLockScreenView::OnTokenStatusChanged(const std::string& type) {}
