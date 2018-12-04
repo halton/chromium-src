@@ -1153,8 +1153,7 @@ int EntryImpl::InternalReadData(int index,
   }
 
   SyncCallback* io_callback = NULL;
-  bool null_callback = callback.is_null();
-  if (!null_callback) {
+  if (!callback.is_null()) {
     io_callback =
         new SyncCallback(base::WrapRefCounted(this), buf, std::move(callback),
                          net::NetLogEventType::ENTRY_READ_DATA);
@@ -1209,7 +1208,7 @@ int EntryImpl::InternalReadData(int index,
     ReportIOTime(kReadAsync1, start_async);
 
   ReportIOTime(kRead, start);
-  return (completed || null_callback) ? buf_len : net::ERR_IO_PENDING;
+  return (completed || callback.is_null()) ? buf_len : net::ERR_IO_PENDING;
 }
 
 int EntryImpl::InternalWriteData(int index,
@@ -1293,8 +1292,7 @@ int EntryImpl::InternalWriteData(int index,
     return 0;
 
   SyncCallback* io_callback = NULL;
-  bool null_callback = callback.is_null();
-  if (!null_callback) {
+  if (!callback.is_null()) {
     io_callback = new SyncCallback(this, buf, std::move(callback),
                                    net::NetLogEventType::ENTRY_WRITE_DATA);
   }
@@ -1316,7 +1314,7 @@ int EntryImpl::InternalWriteData(int index,
     ReportIOTime(kWriteAsync1, start_async);
 
   ReportIOTime(kWrite, start);
-  return (completed || null_callback) ? buf_len : net::ERR_IO_PENDING;
+  return (completed || callback.is_null()) ? buf_len : net::ERR_IO_PENDING;
 }
 
 // ------------------------------------------------------------------------
