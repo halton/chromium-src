@@ -37,7 +37,7 @@ const int kKeyFileIndex = 3;
 
 // This class implements FileIOCallback to buffer the callback from a file IO
 // operation from the actual net class.
-class SyncCallback: public disk_cache::FileIOCallback {
+class SyncCallback : public disk_cache::FileIOCallback {
  public:
   // |end_event_type| is the event type to log on completion.  Logs nothing on
   // discard, or when the NetLog is not set to log all events.
@@ -95,60 +95,52 @@ const int kMaxBufferSize = 1024 * 1024;  // 1 MB.
 namespace disk_cache {
 
 #ifdef REDCORE
-  //YSP+ { cache encryption
-  bool EntryImpl::cache_crypt_status_ = false;
-  const char key[] = "WFMxTBb4EODsRgyMibiERdMnT6qpyGDZ";
+// YSP+ { cache encryption
+bool EntryImpl::cache_crypt_status_ = false;
+const char kDefaultKey[] = "WFMxTBb4EODsRgyMibiERdMnT6qpyGDZ";
 
-  static void EncryptValueFormFile(int64_t offset,
-                                   const char* data,
-                                   int size,
-                                   char* enc_data) {
-    int i = 0;
-    int key_len = strlen(key);
-    char ckey;
-    for (i = 0; i < size; i++) {
-      ckey = key[(offset + i) % key_len];
-      enc_data[i] = data[i] ^ ckey;
-    }
-  }
+static void EncryptValueFormFile(int64_t offset,
+                                 const char* data,
+                                 int size,
+                                 char* enc_data) {
+  size_t key_len = strlen(kDefaultKey);
+  for (size_t i = 0; i < size; i++)
+    enc_data[i] = data[i] ^ kDefaultKey[(offset + i) % key_len];
+}
 
-  void DecryptValueFormFile(int64_t offset,
-                            char* data,
-                            int size,
-                            const char* dec_data) {
-    int i = 0;
-    int key_len = strlen(key);
-    char ckey;
-    for (i = 0; i < size; i++) {
-      ckey = key[(offset + i) % key_len];
-      data[i] = dec_data[i] ^ ckey;
-    }
-  }
-  //YSP+ }
+void DecryptValueFormFile(int64_t offset,
+                          char* data,
+                          int size,
+                          const char* dec_data) {
+  size_t key_len = strlen(kDefaultKey);
+  for (size_t i = 0; i < size; i++)
+    data[i] = dec_data[i] ^ kDefaultKey[(offset + i) % key_len];
+}
+// YSP+ }
 
-class YspEncryptCallback : public base::RefCountedThreadSafe<YspEncryptCallback> {
-public:
- YspEncryptCallback(int offset,
-                    char* out,
-                    int out_len,
-                    char* in,
-                    net::CompletionOnceCallback callback);
- void OnCompleted(int arg);
+class YspEncryptCallback
+    : public base::RefCountedThreadSafe<YspEncryptCallback> {
+ public:
+  YspEncryptCallback(int offset,
+                     char* out,
+                     int out_len,
+                     char* in,
+                     net::CompletionOnceCallback callback);
+  void OnCompleted(int arg);
 
-protected:
+ protected:
   virtual ~YspEncryptCallback();
 
-private:
+ private:
   friend class base::RefCountedThreadSafe<YspEncryptCallback>;
   int offset_;
-  char *out_;
-  char *in_buf_;
+  char* out_;
+  char* in_buf_;
   int len_;
   net::CompletionOnceCallback callback_;
 };
 
-YspEncryptCallback::~YspEncryptCallback() {
-}
+YspEncryptCallback::~YspEncryptCallback() {}
 
 YspEncryptCallback::YspEncryptCallback(int offset,
                                        char* out,
@@ -384,8 +376,11 @@ bool EntryImpl::UserBuffer::GrowBuffer(int required, int limit) {
 // ------------------------------------------------------------------------
 
 EntryImpl::EntryImpl(BackendImpl* backend, Addr address, bool read_only)
-    : entry_(NULL, Addr(0)), node_(NULL, Addr(0)),
-      backend_(backend->GetWeakPtr()), doomed_(false), read_only_(read_only),
+    : entry_(NULL, Addr(0)),
+      node_(NULL, Addr(0)),
+      backend_(backend->GetWeakPtr()),
+      doomed_(false),
+      read_only_(read_only),
       dirty_(false) {
   entry_.LazyInit(backend->File(address), address);
   for (int i = 0; i < kNumStreams; i++) {
@@ -581,8 +576,8 @@ void EntryImpl::DeleteEntryData(bool everything) {
   for (int index = 0; index < kNumStreams; index++) {
     Addr address(entry_.Data()->data_addr[index]);
     if (address.is_initialized()) {
-      backend_->ModifyStorageSize(entry_.Data()->data_size[index] -
-                                      unreported_size_[index], 0);
+      backend_->ModifyStorageSize(
+          entry_.Data()->data_size[index] - unreported_size_[index], 0);
       entry_.Data()->data_addr[index] = 0;
       entry_.Data()->data_size[index] = 0;
       entry_.Store();
@@ -875,8 +870,8 @@ std::string EntryImpl::GetKey() const {
     offset = address.start_block() * address.BlockSize() + kBlockHeaderSize;
 
   static_assert(kNumStreams == kKeyFileIndex, "invalid key index");
-  File* key_file = const_cast<EntryImpl*>(this)->GetBackingFile(address,
-                                                                kKeyFileIndex);
+  File* key_file =
+      const_cast<EntryImpl*>(this)->GetBackingFile(address, kKeyFileIndex);
   if (!key_file)
     return std::string();
 
@@ -1148,31 +1143,28 @@ int EntryImpl::InternalReadData(int index,
   size_t file_offset = offset;
   if (address.is_block_file()) {
     DCHECK_LE(offset + buf_len, kMaxBlockSize);
-    file_offset += address.start_block() * address.BlockSize() +
-                   kBlockHeaderSize;
+    file_offset +=
+        address.start_block() * address.BlockSize() + kBlockHeaderSize;
   }
 
   SyncCallback* io_callback = NULL;
-  if (!callback.is_null()) {
-    io_callback =
-        new SyncCallback(base::WrapRefCounted(this), buf, std::move(callback),
-                         net::NetLogEventType::ENTRY_READ_DATA);
-  }
+  bool null_callback = callback.is_null();
 
   TimeTicks start_async = TimeTicks::Now();
   bool completed;
 #ifdef REDCORE
-  //YSP+ { cache encryption
+  // YSP+ { cache encryption
   if (cache_crypt_status_ && address.is_separate_file() &&
       !backend_->GetFileName(address).empty()) {
     char* enc_data = new char[buf_len];
     memset(enc_data, 0, buf_len);
-    if (io_callback) {
-      delete io_callback;
-      YspEncryptCallback* obj = new YspEncryptCallback(
-          offset, buf->data(), buf_len, enc_data, std::move(callback));
+    if (!null_callback) {
+      scoped_refptr<YspEncryptCallback> encrypt_callback =
+          new YspEncryptCallback(offset, buf->data(), buf_len, enc_data,
+                                 std::move(callback));
       io_callback = new SyncCallback(
-          this, buf, base::Bind(&YspEncryptCallback::OnCompleted, obj),
+          this, buf,
+          base::Bind(&YspEncryptCallback::OnCompleted, encrypt_callback),
           net::NetLogEventType::ENTRY_READ_DATA);
     }
 
@@ -1186,10 +1178,14 @@ int EntryImpl::InternalReadData(int index,
       DecryptValueFormFile(offset, buf->data(), buf_len, enc_data);
       delete[] enc_data;
     }
-  }
-  else {
-  //YSP+ }
+  } else {
+    // YSP+ }
 #endif  // REDCORE
+    if (!null_callback) {
+      io_callback =
+          new SyncCallback(base::WrapRefCounted(this), buf, std::move(callback),
+                           net::NetLogEventType::ENTRY_READ_DATA);
+    }
     if (!file->Read(buf->data(), buf_len, file_offset, io_callback,
                     &completed)) {
       if (io_callback)
@@ -1198,7 +1194,7 @@ int EntryImpl::InternalReadData(int index,
       return net::ERR_CACHE_READ_FAILURE;
     }
 #ifdef REDCORE
-  } //YSP+ { cache encryption }
+  }  // YSP+ { cache encryption }
 #endif
 
   if (io_callback && completed)
@@ -1208,7 +1204,7 @@ int EntryImpl::InternalReadData(int index,
     ReportIOTime(kReadAsync1, start_async);
 
   ReportIOTime(kRead, start);
-  return (completed || callback.is_null()) ? buf_len : net::ERR_IO_PENDING;
+  return (completed || null_callback) ? buf_len : net::ERR_IO_PENDING;
 }
 
 int EntryImpl::InternalWriteData(int index,
@@ -1281,8 +1277,8 @@ int EntryImpl::InternalWriteData(int index,
   size_t file_offset = offset;
   if (address.is_block_file()) {
     DCHECK_LE(offset + buf_len, kMaxBlockSize);
-    file_offset += address.start_block() * address.BlockSize() +
-                   kBlockHeaderSize;
+    file_offset +=
+        address.start_block() * address.BlockSize() + kBlockHeaderSize;
   } else if (truncate || (extending && !buf_len)) {
     if (!file->SetLength(offset + buf_len))
       return net::ERR_FAILED;
@@ -1292,7 +1288,8 @@ int EntryImpl::InternalWriteData(int index,
     return 0;
 
   SyncCallback* io_callback = NULL;
-  if (!callback.is_null()) {
+  bool null_callback = callback.is_null();
+  if (!null_callback) {
     io_callback = new SyncCallback(this, buf, std::move(callback),
                                    net::NetLogEventType::ENTRY_WRITE_DATA);
   }
@@ -1314,7 +1311,7 @@ int EntryImpl::InternalWriteData(int index,
     ReportIOTime(kWriteAsync1, start_async);
 
   ReportIOTime(kWrite, start);
-  return (completed || callback.is_null()) ? buf_len : net::ERR_IO_PENDING;
+  return (completed || null_callback) ? buf_len : net::ERR_IO_PENDING;
 }
 
 // ------------------------------------------------------------------------
@@ -1365,8 +1362,9 @@ void EntryImpl::DeleteData(Addr address, int index) {
     int failure = !DeleteCacheFile(backend_->GetFileName(address));
     CACHE_UMA(COUNTS, "DeleteFailed", 0, failure);
     if (failure) {
-      LOG(ERROR) << "Failed to delete " <<
-          backend_->GetFileName(address).value() << " from the cache.";
+      LOG(ERROR) << "Failed to delete "
+                 << backend_->GetFileName(address).value()
+                 << " from the cache.";
     }
     if (files_[index].get())
       files_[index] = NULL;  // Releases the object.
@@ -1428,7 +1426,9 @@ File* EntryImpl::GetExternalFile(Addr address, int index) {
 // reuse it for the new data. Keep in mind that the normal use pattern is quite
 // simple (write sequentially from the beginning), so we optimize for handling
 // that case.
-bool EntryImpl::PrepareTarget(int index, int offset, int buf_len,
+bool EntryImpl::PrepareTarget(int index,
+                              int offset,
+                              int buf_len,
                               bool truncate) {
   if (truncate)
     return HandleTruncation(index, offset, buf_len);
@@ -1628,7 +1628,7 @@ bool EntryImpl::Flush(int index, int min_len) {
   if (!file)
     return false;
 #ifdef REDCORE
-  //YSP+ { cache encryption
+  // YSP+ { cache encryption
   if (cache_crypt_status_ && address.is_separate_file() &&
       !backend_->GetFileName(address).empty()) {
     char* enc_data = new char[len];
@@ -1639,14 +1639,13 @@ bool EntryImpl::Flush(int index, int min_len) {
       return false;
     }
     delete[] enc_data;
-  }
-  else {
-  //YSP+ }
+  } else {
+    // YSP+ }
 #endif  // REDCORE
     if (!file->Write(user_buffers_[index]->Data(), len, offset, NULL, NULL))
       return false;
 #ifdef REDCORE
-  } //YSP+ { cache encryption }
+  }  // YSP+ { cache encryption }
 #endif
   user_buffers_[index]->Reset();
 
@@ -1704,8 +1703,8 @@ void EntryImpl::GetData(int index, char** buffer, Addr* address) {
   address->set_value(entry_.Data()->data_addr[index]);
   if (address->is_initialized()) {
     // Prevent us from deleting the block from the backing store.
-    backend_->ModifyStorageSize(entry_.Data()->data_size[index] -
-                                    unreported_size_[index], 0);
+    backend_->ModifyStorageSize(
+        entry_.Data()->data_size[index] - unreported_size_[index], 0);
     entry_.Data()->data_addr[index] = 0;
     entry_.Data()->data_size[index] = 0;
   }
