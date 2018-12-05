@@ -5,13 +5,13 @@
 // When an extension is added or removed here, the two lists 'default_apps_list'
 // and 'default_apps_list_linux_dest' in build/common.gypi must also be updated.
 {
-	"ahejmjlfdnkngmajdfanadcgmdmgahda" : {
-        "external_crx": "ysp_sso.crx",
-        "external_version": "2.1.7"
-	},
-	"pgigkojhmdneillbbpcajchbggkphhjp" : {
-        "external_crx": "push_server.crx",
-        "external_version": "2.5"
-	}
+  "ahejmjlfdnkngmajdfanadcgmdmgahda": {
+    "external_crx": "ysp_sso.crx",
+    "external_version": "2.1.8"
+  },
+  "pgigkojhmdneillbbpcajchbggkphhjp": {
+    "external_crx": "push_server.crx",
+    "external_version": "2.5"
+  }
 }
 

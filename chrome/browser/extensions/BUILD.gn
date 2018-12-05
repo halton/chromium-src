@@ -1057,8 +1057,8 @@ jumbo_static_library("extensions") {
 
   if (is_redcore) {
     sources += [
-      "api/yspmanager/ysp_manager_api.cc",
-      "api/yspmanager/ysp_manager_api.h",
+      "api/yspmanager/yspmanager_api.cc",
+      "api/yspmanager/yspmanager_api.h",
     ]
     deps += [
       "//chrome/browser/ysp_login",

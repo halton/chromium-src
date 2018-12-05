@@ -81,6 +81,10 @@ schema_sources_ = [
   "windows.json",
 ]
 
+if (is_redcore) {
+  schema_sources_ += [ "yspmanager.json" ]
+}
+
 if (!is_android) {
   schema_sources_ += [ "processes.idl" ]
 }

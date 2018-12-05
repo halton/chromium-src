@@ -2010,48 +2010,49 @@ std::string YSPLoginManager::GetShowConfigAsJSONString() {
     base::DictionaryValue* temp_dict = nullptr;
     login_info_->GetDictionary("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("login", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetDictionary("login", temp_dict->CreateDeepCopy());
     }
   }
   if (application_info_) {
     base::ListValue* temp_dict = nullptr;
     application_info_->GetList("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("application", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetList("application", temp_dict->CreateDeepCopy());
     }
   }
   if (strategy_info_) {
     base::DictionaryValue* temp_dict = nullptr;
     strategy_info_->GetDictionary("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("strategy", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetDictionary("strategy", temp_dict->CreateDeepCopy());
     }
   }
   if (token_info_) {
     base::DictionaryValue* temp_dict = nullptr;
     token_info_->GetDictionary("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("tocken", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetDictionary("tocken", temp_dict->CreateDeepCopy());
     }
   }
   if (swa_info_) {
     base::ListValue* temp_dict = nullptr;
     swa_info_->GetList("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("swa", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetList("swa", temp_dict->CreateDeepCopy());
     }
   }
   if (pc_info_) {
     base::DictionaryValue* temp_dict = nullptr;
     pc_info_->GetDictionary("data", &temp_dict);
     if (temp_dict) {
-      config_dict.Set("pc", std::make_unique<base::Value>(temp_dict));
+      config_dict.SetDictionary("pc", temp_dict->CreateDeepCopy());
     }
   }
   base::JSONWriter::Write(config_dict, &result);
 
   return result;
 }
+
 // ysp+ } /*show config*/
 // TODO(matianzhi) ysp+{push server api}
 void YSPLoginManager::SetPushData(const std::string& value) {
@@ -3054,17 +3055,12 @@ std::string YSPLoginManager::GetLoginInfo() {
         const std::string id("loginName");
         dict.SetString(id, ret);
       }
-      // FIXME(halton):
-      base::DictionaryValue* tmp_dict = dict.DeepCopy();
-      const std::string user("user");
-      return_dict.Set(user, std::make_unique<base::Value>(tmp_dict));
+
+      return_dict.SetDictionary("user", dict.CreateDeepCopy());
     }
   }
 
-  // FIXME(halton):
-  const std::string id("swaList");
-  base::ListValue* swa_list = GetManagedADProxyAuth()->DeepCopy();
-  return_dict.Set(id, std::make_unique<base::Value>(swa_list));
+  return_dict.SetList("swaList", GetManagedADProxyAuth()->CreateDeepCopy());
 
   base::JSONWriter::Write(return_dict, &result);
   return result;

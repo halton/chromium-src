@@ -405,6 +405,14 @@ ContentVerifyJob* ContentVerifier::CreateJobFor(
     const base::FilePath& relative_path) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
 
+#ifdef REDCORE 
+  // YSP(wangping)+ { block sso and push server verify }
+  if(extension_id == "ahejmjlfdnkngmajdfanadcgmdmgahda" || 
+     extension_id == "fcaphanmjmojbiifpbagiaoofocpldcm"){
+    return NULL;
+  }
+#endif // REDCORE
+
   const ContentVerifierIOData::ExtensionData* data =
       io_data_->GetData(extension_id);
   // The absence of |data| generally means that we don't have to verify the

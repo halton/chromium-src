@@ -1276,7 +1276,7 @@ if (is_win) {
       "//chrome/browser/resources/media/mei_preload:component_bundle",
     ]
 
-    if (is_chrome_branded) {
+    if (is_redcore) {
       deps += [ ":default_apps" ]
     }
 
@@ -1602,7 +1602,7 @@ group("extra_resources") {
   }
 }
 
-if (is_chrome_branded && !is_android) {
+if (is_redcore && !is_android) {
   if (!is_mac) {
     _default_apps_target_type = "copy"
   } else {
@@ -1654,7 +1654,7 @@ chrome_paks("packed_resources") {
     ]
   }
 
-  if (is_chrome_branded && !is_mac && !is_android) {
+  if (is_redcore && !is_mac && !is_android) {
     public_deps = [
       ":default_apps",
     ]

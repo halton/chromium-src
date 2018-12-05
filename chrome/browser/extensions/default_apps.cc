@@ -25,6 +25,11 @@
 #include "extensions/common/constants.h"
 #include "extensions/common/extension.h"
 
+#ifdef REDCORE
+#include "base/version.h"                       
+#include "components/version_info/version_info.h"
+#endif // REDCORE
+
 namespace {
 
 // Returns true if the app was a default app in Chrome 22
@@ -39,7 +44,11 @@ bool IsLocaleSupported() {
   // TODO(rogerta): Do this check dynamically once the webstore can expose
   // an API. See http://crbug.com/101357
   const std::string& locale = g_browser_process->GetApplicationLocale();
+#ifdef REDCORE
+  static const char* const unsupported_locales[] = {/*"CN", */ "TR", "IR"};
+#else
   static const char* const unsupported_locales[] = {"CN", "TR", "IR"};
+#endif // REDCORE
   for (size_t i = 0; i < arraysize(unsupported_locales); ++i) {
     if (base::EndsWith(locale, unsupported_locales[i],
                        base::CompareCase::INSENSITIVE_ASCII)) {
@@ -55,6 +64,10 @@ namespace default_apps {
 
 void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
   registry->RegisterIntegerPref(prefs::kDefaultAppsInstallState, kUnknown);
+#ifdef REDCORE
+  registry->RegisterStringPref(prefs::kYSPExtensionInstallVersion,
+                               "0.0.0.0");
+#endif // REDCORE
 }
 
 bool Provider::ShouldInstallInProfile() {
@@ -109,6 +122,23 @@ bool Provider::ShouldInstallInProfile() {
 
   if (install_apps && !IsLocaleSupported())
     install_apps = false;
+
+  #ifdef REDCORE
+  // ysp+ install extension on new version
+  std::string local_version_string = version_info::GetVersionNumber();
+  std::string install_version_string =
+      profile_->GetPrefs()->GetString(prefs::kYSPExtensionInstallVersion);
+  DLOG(INFO) << "local version: " << local_version_string
+             << ", install version: " << install_version_string;
+  base::Version install_version(install_version_string);
+  base::Version local_version(local_version_string);
+  if (install_version.CompareTo(local_version) < 0) {
+    DLOG(INFO) << "Should install builtin extensions.";
+    install_apps = true;
+    profile_->GetPrefs()->SetString(prefs::kYSPExtensionInstallVersion,
+                                    local_version_string);
+  }
+#endif // REDCORE
 
   // Default apps are only installed on profile creation or a new chrome
   // download.

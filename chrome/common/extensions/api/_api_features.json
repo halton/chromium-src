@@ -849,5 +849,10 @@
     "matches": [
       "chrome://bookmarks/*"
     ]
-  }]
+  }],
+  "yspmanager": {
+    "channel": "stable",
+    "extension_types": ["extension", "legacy_packaged_app"],
+    "contexts": ["blessed_extension"]
+  }
 }
