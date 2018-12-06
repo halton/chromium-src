@@ -22,7 +22,8 @@ namespace {
   content::WebUIDataSource* CreateWebUIDataSource() {
     content::WebUIDataSource* html_source =
         content::WebUIDataSource::Create(chrome::kChromeUINewTabHost);
-
+    
+    // redcore_start_tag
     html_source->AddResourcePath("Home.html", IDR_REDCORE_NEWTAB_HOME_HTML);
     html_source->AddResourcePath("Home.js", IDR_REDCORE_NEWTAB_HOME_JS);
     html_source->AddResourcePath("HomeBrowser.js", IDR_REDCORE_NEWTAB_HOMEBROWSER_JS);
@@ -127,6 +128,7 @@ namespace {
     html_source->AddResourcePath("hello/img/swiper4/15.png", IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_15_PNG);
     html_source->AddResourcePath("hello/img/swiper4/16.png", IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_16_PNG);
     html_source->AddResourcePath("hello/img/swiper4/17.png", IDR_REDCORE_NEWTAB_HELLO_IMG_SWIPER4_17_PNG);
+    // redcore_stop_tag
     html_source->SetDefaultResource(IDR_REDCORE_NEWTAB_HOME_HTML);
     html_source->SetJsonPath("strings.js");
     return html_source;

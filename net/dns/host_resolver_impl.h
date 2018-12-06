@@ -189,9 +189,9 @@ class NET_EXPORT HostResolverImpl
 
 #if defined(REDCORE)
   static void SetPrivateDnsValue(const std::string& private_dns_string);
-  static base::ListValue* HostResolverImpl::AbsoluteLinkDnsCompared(
+  static base::ListValue* AbsoluteLinkDnsCompared(
       const std::string& host);
-  static std::string HostResolverImpl::AbsoluteLinkReverseDnsCompared(
+  static std::string AbsoluteLinkReverseDnsCompared(
       const GURL& url);
   static base::ListValue* PrivateDnsCompared(const std::string& host);
   static std::string PrivateReverseDnsCompared(const std::string& ip_address);

@@ -465,7 +465,8 @@
             <include name="IDR_BLUETOOTH_PAIRING_DIALOG_HTML" file="resources\chromeos\bluetooth_pairing_dialog\bluetooth_pairing_dialog.html" flattenhtml="true" allowexternalscript="true" type="chrome_html" />
             <include name="IDR_BLUETOOTH_PAIRING_DIALOG_JS" file="resources\chromeos\bluetooth_pairing_dialog\bluetooth_pairing_dialog.js" type="chrome_html" />
           </else>
-        </if>
+  	</if>
+  	<!-- redcore_start_tag -->
         <include name="IDR_CROSH_BUILTIN_MANIFEST" file="resources\chromeos\crosh_builtin\manifest.json" type="BINDATA" />
         <include name="IDR_CRYPTOHOME_HTML" file="resources\chromeos\cryptohome.html" flattenhtml="true" type="BINDATA" />
         <include name="IDR_CRYPTOHOME_JS" file="resources\chromeos\cryptohome.js" type="BINDATA" />
@@ -567,7 +568,8 @@
           <else>
             <include name="IDR_SOUND_STARTUP_WAV" file="resources\chromeos\sounds\startup.wav" type="BINDATA" />
           </else>
-        </if>
+  	</if>
+	 <!-- redcore_stop_tag -->
         <include name="IDR_SOUND_LOCK_WAV" file="resources\chromeos\sounds\lock.wav" type="BINDATA" />
         <include name="IDR_SOUND_UNLOCK_WAV" file="resources\chromeos\sounds\unlock.wav" type="BINDATA" />
         <include name="IDR_SOUND_SHUTDOWN_WAV" file="resources\chromeos\sounds\shutdown.wav" type="BINDATA" />

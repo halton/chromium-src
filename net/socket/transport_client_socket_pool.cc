@@ -109,9 +109,9 @@ TransportConnectJob::TransportConnectJob(
       resolver_(host_resolver),
       client_socket_factory_(client_socket_factory),
       next_state_(STATE_NONE),
+      group_name_(group_name),
       socket_performance_watcher_factory_(socket_performance_watcher_factory),
-      resolve_result_(OK),
-      group_name_(group_name) {}
+      resolve_result_(OK) {}
 
 TransportConnectJob::~TransportConnectJob() {
   // We don't worry about cancelling the host resolution and TCP connect, since
