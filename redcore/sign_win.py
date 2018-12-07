@@ -4,8 +4,9 @@ import argparse
 import codecs
 import os
 import shutil
-import subprocess
-# from auto_build_win import _MASTER_BRANCH_LIST
+import platform
+from build_utils import execCmd
+from build_utils import getBuildType
 
 parser = argparse.ArgumentParser(description='manual to this script')
 parser.add_argument('--working-dir', type=str, default = "")
@@ -16,6 +17,9 @@ args = parser.parse_args()
 _WORKING_DIR = args.working_dir
 _PRODUCT_NAME = args.product_name
 
+if platform.system() != "Windows":
+  raise Exception("\nThis python script is only support windows platform!")
+
 # 不在这个列表中的product_name，最终生成的安装包会将redcore替换为对应的product-name
 _MASTER_BRANCH_LIST = [
     "49_dev",
@@ -24,46 +28,55 @@ _MASTER_BRANCH_LIST = [
 
 _IS_MASTER_BRANCH = _PRODUCT_NAME in _MASTER_BRANCH_LIST
 
-_FIRST_SIGN_FILES = [
-    "chrome.dll",
-    "chrome_child.dll",
-    "chrome_elf.dll",
-    "chrome_watcher.dll",
-    "delegate_execute.exe",
-    "libEGL.dll",
-    "libexif.dll",
-    "libGLESv2.dll",
-    "metro_driver.dll",
-    "mini_installer.exe",
-    "nacl64.exe",
-    "setup.exe",
-    "initialexe/redcore.exe"
-]
+if getBuildType(_WORKING_DIR) == "build_type_win_49":
+  _FIRST_SIGN_FILES = [
+      "chrome.dll",
+      "chrome_child.dll",
+      "chrome_elf.dll",
+      "chrome_watcher.dll",
+      "delegate_execute.exe",
+      "libEGL.dll",
+      "libexif.dll",
+      "libGLESv2.dll",
+      "metro_driver.dll",
+      "mini_installer.exe",
+      "nacl64.exe",
+      "setup.exe",
+      "initialexe/redcore.exe"
+  ]
+elif getBuildType(_WORKING_DIR) == "build_type_win_70":
+  _FIRST_SIGN_FILES = [
+      "chrome.dll",
+      "chrome_watcher.dll",
+      "libegl.dll",
+      "sgx_urtsd.dll",
+      "chrome_child.dll",
+      "d3dcompiler_47.dll",
+      "libglesv2.dll",
+      "chrome_elf.dll",
+      "enclave.signed.dll",
+      "sgx_uae_service.dll",
+      "libegl.dll",
+      "libglesv2.dll",
+      "ucrtbase.dll",
+      "notification_helper.exe",
+      "setup.exe",
+      "mini_installer.exe",
+      "redcore.exe",
+      "initialexe/redcore.exe"
+  ]
 
 _PDB_FILES = [
     "chrome.dll.pdb",
     "chrome_child.dll.pdb",
     "chrome_elf.dll.pdb",
-    "chrome_watcher.dll.pdb",
+    "chrome_watcher.dll.pdb", 
     "initialexe/redcore.exe.pdb"
 ]
 
 
-def execCmd(cmd):
-  print cmd
-  #universal_newlines=True, it means by text way to open stdout and stderr
-  p = subprocess.Popen(cmd, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  curline = p.stdout.readline()
-  while(curline != ""):
-    print(curline),
-    curline = p.stdout.readline()
-    # 这里无法用returncode来判断bat脚本执行错误，所以bat语句连接符需要设置成 &&
-  p.wait()
-  if p.returncode != 0:
-    raise Exception("\nExit with code %s" %p.returncode)
-
-
 def firstSignWithNewKey():
+  print _FIRST_SIGN_FILES
   globalSignDir = os.path.join(os.path.expanduser("~"), "Desktop", "GlobalSign")
   signToolPath = os.path.join(globalSignDir, "signtool.exe").replace("\\", "/")
   # TODO:签名证书路径处理

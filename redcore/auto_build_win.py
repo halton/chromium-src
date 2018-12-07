@@ -2,8 +2,10 @@
 
 import argparse
 import os
-import subprocess
 import codecs
+from build_utils import execCmd
+from build_utils import getBuildType
+
 
 parser = argparse.ArgumentParser(description = 'manual to this script')
 parser.add_argument("--product-name", type = str, default = "")
@@ -28,6 +30,7 @@ if len(_PRODUCT_NAME) == 0:
 if len(_WORKING_DIR) == 0:
   raise Exception("--working-dir could not be nil")
 
+# 不在这个列表中的product_name，最终生成的安装包会将redcore替换为对应的product-name
 _MASTER_BRANCH_LIST = [
     "49_dev",
     "70_dev"
@@ -37,21 +40,6 @@ _IS_MASTER_BRANCH = _PRODUCT_NAME in _MASTER_BRANCH_LIST
 
 _INTERNAL_VERSION = ""
 _WINDOW_VERSION = ""
-_MAC_VERSION = ""
-
-
-def execCmd(cmd):
-  print cmd
-  #universal_newlines=True, it means by text way to open stdout and stderr
-  p = subprocess.Popen(cmd, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  curline = p.stdout.readline()
-  while(curline != ""):
-    print(curline),
-    curline = p.stdout.readline()
-    # 这里无法用returncode来判断bat脚本执行错误，所以bat语句连接符需要设置成 &&
-  p.wait()
-  if p.returncode != 0:
-    raise Exception("\nExit with code %s" %p.returncode)
 
 
 def modifyBuildVersion():
@@ -62,9 +50,6 @@ def modifyBuildVersion():
   yspMajor = 0
   yspMinor = 0
   yspBuild = 0
-  yspMacMajor = 0
-  yspMacMinor = 0
-  yspMacBuild = 0
   versionPath = ""
   # 判断定制资源中如果没有VERSION文件，或者VERSION文件为空，则定制版的版本号跟随主版本号递增
   if _IS_MASTER_BRANCH or not needIncreaseCustomVersion():
@@ -81,7 +66,6 @@ def modifyBuildVersion():
         build = int(line[6:])
       elif line.startswith("PATCH="):
         patch = int(line[6:])
-        patch += 1
       elif line.startswith("YSPMAJOR="):
         yspMajor = int(line[9:])
       elif line.startswith("YSPMINOR="):
@@ -89,14 +73,7 @@ def modifyBuildVersion():
       elif line.startswith("YSPBUILD="):
         yspBuild = int(line[9:])
         yspBuild += 1
-      elif line.startswith("YSP_MAC_MAJOR"):
-        yspMacMajor = int(line[14:])
-      elif line.startswith("YSP_MAC_MINOR"):
-        yspMacMinor = int(line[14:])
-      elif line.startswith("YSP_MAC_BUILD"):
-        yspMacBuild = int(line[14:])
-        yspMacBuild += 1
-  versionFileContent = "MAJOR=%s\nMINOR=%s\nBUILD=%s\nPATCH=%s\nYSPMAJOR=%s\nYSPMINOR=%s\nYSPBUILD=%s\nYSP_MAC_MAJOR=%s\nYSP_MAC_MINOR=%s\nYSP_MAC_BUILD=%s\n" % (major, minor, build, patch, yspMajor, yspMinor, yspBuild, yspMacMajor, yspMacMinor, yspMacBuild)
+  versionFileContent = "MAJOR=%s\nMINOR=%s\nBUILD=%s\nPATCH=%s\nYSPMAJOR=%s\nYSPMINOR=%s\nYSPBUILD=%s\n" % (major, minor, build, patch, yspMajor, yspMinor, yspBuild)
   # 这里chrome下的VERSION每次都要更改，因为编译需要
   with codecs.open(os.path.join(_WORKING_DIR, "chrome", "VERSION"), "w", encoding="utf-8") as tempFile:
     tempFile.write(versionFileContent)
@@ -105,10 +82,9 @@ def modifyBuildVersion():
     with codecs.open(versionPath, "w", encoding='utf-8') as tempFile:
       tempFile.write(versionFileContent)
   # 记录版本号，在编译成功以后，push代码
-  global _INTERNAL_VERSION, _WINDOW_VERSION, _MAC_VERSION
+  global _INTERNAL_VERSION, _WINDOW_VERSION
   _INTERNAL_VERSION = "%s.%s.%s.%s" % (major, minor, build, patch)
   _WINDOW_VERSION = "%s.%s.%s" % (yspMajor, yspMinor, yspBuild)
-  _MAC_VERSION = "%s.%s.%s" % (yspMacMajor, yspMacMinor, yspMacBuild)
 
 
 def needIncreaseCustomVersion():
@@ -130,8 +106,8 @@ def gitPull():
   execCmd(pullCmdLine)
 
 
-def gitPushVersionChangeTo1redcore(chromeVersion, redcoreVersion, macVersion):
-  commitMessage = "%s modify the internal version to %s ; modify windows version to %s ; modify Mac version to %s" % (_PRODUCT_NAME, chromeVersion, redcoreVersion, macVersion)
+def gitPushVersionChangeTo1redcore(chromeVersion, redcoreVersion):
+  commitMessage = "%s the internal version is %s ; modify windows version to %s ;" % (_PRODUCT_NAME, chromeVersion, redcoreVersion)
   pushCmdLine = "%s &&;\
     cd %s &&;\
     git add chrome/VERSION &&;\
@@ -141,8 +117,8 @@ def gitPushVersionChangeTo1redcore(chromeVersion, redcoreVersion, macVersion):
   execCmd(pushCmdLine)
 
 
-def gitPushVersionChangeToCustomize(chromeVersion, redcoreVersion, macVersion):
-  commitMessage = "%s modify the internal version to %s ; modify windows version to %s ; modify Mac version to:%s" % (_PRODUCT_NAME, chromeVersion, redcoreVersion, macVersion)
+def gitPushVersionChangeToCustomize(chromeVersion, redcoreVersion):
+  commitMessage = "%s the internal version is %s ; modify windows version to %s ;" % (_PRODUCT_NAME, chromeVersion, redcoreVersion)
   pushCmdLine = "%s &&;\
     cd %s &&;\
     git add . &&;\
@@ -155,9 +131,9 @@ def gitPushVersionChangeToCustomize(chromeVersion, redcoreVersion, macVersion):
 def gitPushVersionChange():
   if _PUSH_VERSION:
     if _IS_MASTER_BRANCH or not needIncreaseCustomVersion():
-      gitPushVersionChangeTo1redcore(_INTERNAL_VERSION, _WINDOW_VERSION, _MAC_VERSION)
+      gitPushVersionChangeTo1redcore(_INTERNAL_VERSION, _WINDOW_VERSION)
     else:
-      gitPushVersionChangeToCustomize(_INTERNAL_VERSION, _WINDOW_VERSION, _MAC_VERSION)
+      gitPushVersionChangeToCustomize(_INTERNAL_VERSION, _WINDOW_VERSION)
   
 
 def gitResetWorkSpace():
@@ -188,13 +164,30 @@ def resourceReplace():
     execCmd(replacePythonCmdLine)
 
 
-def buildRelease():
+def buildRelease49Win():
   autoBuild = "%s &&;\
     cd %s &&;\
     python build\\gyp_chromium.py -Dbranding=Chromium -Dbuildtype=Official -Dproprietary_codecs=1 -Dffmpeg_branding=Chrome &&;\
     ninja -C out/Release mini_installer \
     " % (_WORKING_DIR[0:2], _WORKING_DIR)
   execCmd(autoBuild)
+
+
+def buildRelease70Win():
+  autoBuild = "%s &&;\
+    cd %s &&;\
+    gn gen --ide=\"vs2017\" --winsdk=10.0.17134.1  --filters=//chrome out/release_win --args=\"is_component_build=false is_official_build=false enable_nacl=false enable_precompiled_headers=false treat_warnings_as_errors=false\" &&;\
+    ninja -C out/Release mini_installer \
+    " % (_WORKING_DIR[0:2], _WORKING_DIR)
+  execCmd(autoBuild)
+
+
+def buildRelease():
+  buildType = getBuildType(_WORKING_DIR)
+  if buildType == "build_type_win_49":
+    buildRelease49Win()
+  elif buildType == "build_type_win_70":
+    buildRelease70Win()
 
 
 def sign():

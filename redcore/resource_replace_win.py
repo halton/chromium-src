@@ -5,8 +5,8 @@ import codecs
 import json
 import os
 import shutil
-import subprocess
 import re
+from build_utils import execCmd
 
 parser = argparse.ArgumentParser(description='manual to this script')
 parser.add_argument('--product-name', type=str, default = "")
@@ -31,20 +31,6 @@ _PRODUCT_NAME_NEEDED_REPLACE_FILES = [
 ]
 
 
-def execCmd(cmd):
-  print cmd
-  #universal_newlines=True, it means by text way to open stdout and stderr
-  p = subprocess.Popen(cmd, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  curline = p.stdout.readline()
-  while(curline != ""):
-    print(curline),
-    curline = p.stdout.readline()
-    # 这里无法用returncode来判断bat脚本执行错误，所以bat语句连接符需要设置成 &&
-  p.wait()
-  if p.returncode != 0:
-    raise Exception("\nExit with code %s" %p.returncode)
-
-
 # apply git patch
 def applyGitPatch():
   applyCmdLine = "%s &&;\
@@ -61,6 +47,7 @@ def applyGitPatch():
     applyCmdLine += "git apply %s &&;" % (os.path.join(patchDir, filename))
   applyCmdLine = applyCmdLine[:-4]
   execCmd(applyCmdLine)
+
 
 # replace grd and cpp file content
 def replaceNewtab():
@@ -157,6 +144,7 @@ def updateProductInfo():
       for key in productJson["replace"].keys():
         replaceFileContent(os.path.join(_WORKING_DIR, os.path.normcase(filepath)), key, productJson["replace"][key])
   print "update product info success"
+
 
 applyGitPatch()
 replaceNewtab()
