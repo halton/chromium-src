@@ -12,9 +12,9 @@ SetCompressor /FINAL /SOLID zlib
 !include "str_contains.nsh"
 !include "is_flash_ax_Inst.nsh"
 !include "text_log.nsh"
-!include "nsProcess.nsh"
 !include "LogicLib.nsh"
 !include "x64.nsh"
+!include "EnvVarUpdate.nsh"
 !include "version.nsh"
 
 !define MUI_ABORTWARNING
@@ -175,8 +175,15 @@ InstallYSPGm:
   SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert"
   SetOverwrite try
   File nsis_src\gm\gmcert\*.*
+  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
+  SetOverwrite try
+  File nsis_src\gm\gmcert-hd\*.*
+  ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
+  SetOutPath "$SYSDIR"
+  SetOverwrite try
+  File nsis_src\gm\KeyGDBApi.dll
   IfErrors 0 +3
-  ${LogText} "Copy sangfor files faild"
+  ${LogText} "Copy GM files faild"
 CheckFlashAx:
   Call IsFlashInstalled
   Pop $R0

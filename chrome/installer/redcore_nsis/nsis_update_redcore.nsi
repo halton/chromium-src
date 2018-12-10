@@ -12,6 +12,7 @@ SetCompressor /FINAL /SOLID zlib
 !include "str_contains.nsh"
 !include "is_flash_ax_inst.nsh"
 !include "text_log.nsh"
+!include "version.nsh"
 
 !define MUI_ABORTWARNING
 
