@@ -54,10 +54,12 @@
 #endif
 
 #ifdef REDCORE
+#include "chrome/browser/browser_process.h"
 #include "chrome/browser/ui/views/ysp_lock_screen_view.h"
 #include "chrome/browser/ui/views/ysp_login_view.h"
 #include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "chrome/common/pref_names.h"
 #include "ui/base/resource/resource_bundle.h"
 #endif
 
@@ -181,7 +183,17 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
   if (pin_key.empty()) {
     ChangeScreenStatus(OpaqueBrowserFrameView::SET_PIN_SCREEN);
   } else {
-    locked_view_->Lock();
+    bool first_create = browser_view->browser()->FirstCreate();
+    if (first_create) {
+      locked_view_->Lock();
+    } else {
+      PrefService* pref = g_browser_process->local_state();
+      if (pref->GetInteger(prefs::kYSPLockScreen) == Browser::UNLOCKED) {
+        locked_view_->Unlock();
+      } else {
+        locked_view_->Lock();
+      }
+    }
   }
 #endif
 
@@ -233,7 +245,7 @@ gfx::Rect OpaqueBrowserFrameView::GetBoundsForTabStrip(
 #ifdef REDCORE
 void OpaqueBrowserFrameView::LockScreen() {
   if (!ysp_set_pin_view_holder_->visible()) {
-    ChangeScreenStatus(OpaqueBrowserFrameView::LOCK_SCREEN);
+    locked_view_->Lock();
   }
 }
 

@@ -427,7 +427,8 @@ Browser* StartupBrowserCreatorImpl::OpenTabsInBrowser(Browser* browser,
     // created in response to the user clicking on chrome. There was an
     // incomplete check on whether a user gesture created a window which looked
     // at the state of the MessageLoop.
-    Browser::CreateParams params = Browser::CreateParams(profile_, false);
+    Browser::CreateParams params =
+        Browser::CreateParams(profile_, false, process_startup);
     browser = new Browser(params);
   }
 

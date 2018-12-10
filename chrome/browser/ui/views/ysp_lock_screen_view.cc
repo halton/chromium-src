@@ -151,6 +151,10 @@ YSPLockScreenView::YSPLockScreenView(
   ShowForgetPasswordDialog(false);
 
   YSPLoginManager::GetInstance()->AddObserver(this);
+  profile_pref_registrar_.Init(g_browser_process->local_state());
+  profile_pref_registrar_.Add(
+      prefs::kYSPLockScreen, base::Bind(&YSPLockScreenView::OnLockStatusChanged,
+                                        base::Unretained(this)));
 }
 
 YSPLockScreenView::~YSPLockScreenView() {
@@ -240,13 +244,35 @@ void YSPLockScreenView::ShowError(bool show) {
   }
 }
 
+void YSPLockScreenView::OnLockStatusChanged() {
+  Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
+      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
+  if (lock) {
+    LockInternal();
+  } else {
+    UnlockInternal();
+  }
+}
+
 void YSPLockScreenView::Lock() {
+  PrefService* pref = g_browser_process->local_state();
+  if (Browser::SCREEN_LOCKED != pref->GetInteger(prefs::kYSPLockScreen))
+    pref->SetInteger(prefs::kYSPLockScreen, Browser::SCREEN_LOCKED);
+}
+
+void YSPLockScreenView::Unlock() {
+  PrefService* pref = g_browser_process->local_state();
+  if (pref->GetInteger(prefs::kYSPLockScreen) != Browser::UNLOCKED)
+    pref->SetInteger(prefs::kYSPLockScreen, Browser::UNLOCKED);
+}
+
+void YSPLockScreenView::LockInternal() {
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
   password_text_.at(0)->RequestFocus();
 }
 
-void YSPLockScreenView::Unlock() {
+void YSPLockScreenView::UnlockInternal() {
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::BROWSER_SCREEN);
 }
@@ -332,6 +358,14 @@ void YSPLockScreenView::Layout() {
   forget_password_message_confirm_button_->SetBounds(
       bg_image_x, bg_image_y, forget_password_button_size.width(),
       forget_password_button_size.height());
+
+  Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
+      g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
+  if (lock == Browser::UNLOCKED) {
+    UnlockInternal();
+  } else {
+    LockInternal();
+  }
 }
 
 bool YSPLockScreenView::HandleContextMenu(

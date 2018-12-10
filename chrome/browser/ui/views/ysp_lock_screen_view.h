@@ -67,6 +67,9 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                           const GURL& image_url,
                           const std::vector<SkBitmap>& bitmaps,
                           const std::vector<gfx::Size>& original_bitmap_sizes);
+  void OnLockStatusChanged();
+  void LockInternal();
+  void UnlockInternal();
 
   // views::View implementation.
   void Layout() override;

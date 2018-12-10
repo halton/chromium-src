@@ -529,6 +529,21 @@ Browser::CreateParams::CreateParams(Type type,
                                     bool user_gesture)
     : type(type), profile(profile), user_gesture(user_gesture) {}
 
+#ifdef REDCORE
+Browser::CreateParams::CreateParams(Profile* profile,
+                                    bool user_gesture,
+                                    bool first_create)
+    : CreateParams(TYPE_TABBED, profile, user_gesture, first_create) {}
+Browser::CreateParams::CreateParams(Type type,
+                                    Profile* profile,
+                                    bool user_gesture,
+                                    bool first_create)
+    : type(type),
+      profile(profile),
+      user_gesture(user_gesture),
+      first_create(first_create) {}
+#endif
+
 Browser::CreateParams::CreateParams(const CreateParams& other) = default;
 
 // static
@@ -625,6 +640,7 @@ Browser::Browser(const CreateParams& params)
 #endif
       chrome_updater_factory_(this),
 #if defined(REDCORE)
+      first_create_(params.first_create),
       crypto_ua_factory_(this),
 #endif
       weak_factory_(this) {
@@ -4096,6 +4112,9 @@ void Browser::NotifyIEFunctionControl() {
   }
 }
 
+bool Browser::FirstCreate() {
+  return first_create_;
+}
 #endif
 
 // YSP+ { passwords AD manager

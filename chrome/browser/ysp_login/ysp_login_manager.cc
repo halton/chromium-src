@@ -986,11 +986,6 @@ void YSPLoginManager::Init() {
   password_ = GetLastId(prefs::kYSPLoginLastPWD);
   PrefService* prefs = g_browser_process->local_state();
   auto_login_ = prefs->GetBoolean(prefs::kYSPAutoLogin);
-
-  if (g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen)) {
-    g_browser_process->local_state()->SetInteger(prefs::kYSPLockScreen, 0);
-    Logout();
-  }
 }
 
 std::string YSPLoginManager::GetCompanyId() {
