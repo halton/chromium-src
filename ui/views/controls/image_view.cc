@@ -219,7 +219,7 @@ void ImageView::OnPaintImage(gfx::Canvas* canvas) {
 
 #ifdef REDCORE
   if (draw_circle_) {
-    int corner_radius = image_bounds.width()/2;
+    int corner_radius = image_bounds.width() / 10;
     SkPath clipPath;
     SkRect clipRect = SkRect::MakeXYWH(
       image_bounds.x(), image_bounds.y(),

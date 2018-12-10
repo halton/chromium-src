@@ -27,6 +27,10 @@
 #include "ui/views/layout/grid_layout.h"
 
 #if defined(WATERMARK) && defined(IE_REDCORE)
+#include "base/bind.h"
+#include "base/bind_helpers.h"
+#include "base/containers/queue.h"
+#include "base/location.h"
 #include "ui/aura/window.h"
 #include "ui/aura/window_tree_host.h"
 #endif
@@ -63,7 +67,7 @@ YSPLockScreenView::YSPLockScreenView(
 
   avatar_image_ = new views::ImageView();
   avatar_image_->SetDrawCircle(true);
-  avatar_image_->SetImageSize(gfx::Size(80, 80));
+  avatar_image_->SetImageSize(gfx::Size(62, 62));
   avatar_image_->SetImage(tp->GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
   AddChildView(avatar_image_);
 
@@ -74,23 +78,15 @@ YSPLockScreenView::YSPLockScreenView(
   name_label_->SetEnabledColor(SK_ColorWHITE);
   AddChildView(name_label_);
 
-  password_text_ = new views::Textfield();
-  password_text_->set_controller(this);
-  password_text_->SetFocusBehavior(FocusBehavior::ALWAYS);
-  password_text_->SetGlyphSpacing(6);
-  password_text_->SetBorder(views::CreateEmptyBorder(0, 10, 0, 10));
-  password_text_->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
-  password_text_->set_placeholder_text(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK));
-  AddChildView(password_text_);
-
-  login_button_ = new views::ImageButton(this);
-  login_button_->SetImage(views::Button::ButtonState::STATE_NORMAL, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER));
-  login_button_->SetImage(views::Button::ButtonState::STATE_HOVERED, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER_H));
-  login_button_->SetImage(views::Button::ButtonState::STATE_PRESSED, tp->GetImageSkiaNamed(IDR_YSP_LOCK_SCREEN_ENTER_P));
-  login_button_->SetImageAlignment(views::ImageButton::ALIGN_CENTER, views::ImageButton::ALIGN_MIDDLE);
-  login_button_->SetBackground(views::CreateSolidBackground(SK_ColorWHITE));
-  login_button_->SetEnabled(false);
-  AddChildView(login_button_);
+  for (int i = 0; i < 6; i++) {
+    views::Textfield* password_textfield = new views::Textfield();
+    password_textfield->set_controller(this);
+    password_textfield->SetFocusBehavior(FocusBehavior::ALWAYS);
+    password_textfield->SetHorizontalAlignment(gfx::ALIGN_CENTER);
+    password_textfield->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
+    AddChildView(password_textfield);
+    password_text_.push_back(password_textfield);
+  }
 
   error_prompt_ = new views::Label(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_REENTER_PASSWORD));
   error_prompt_->SetFontList(
@@ -162,10 +158,15 @@ YSPLockScreenView::~YSPLockScreenView() {
 }
 
 void YSPLockScreenView::Submit() {
-  if (password_text_->text().length() == 6) {
-    std::string text = base::UTF16ToUTF8(password_text_->text());
+  std::string pin = std::string();
+  for (size_t i = 0; i < password_text_.size(); i++) {
+    pin += base::UTF16ToUTF8(password_text_.at(i)->text());
+    password_text_.at(i)->SetText(base::EmptyString16());
+  }
+  password_text_.at(0)->RequestFocus();
+  if (pin.length() == 6) {
     std::string pin_key = YSPLoginManager::GetInstance()->GetUserPinKey();
-    std::string text_sha_key = crypto::SHA256HashString(text);
+    std::string text_sha_key = crypto::SHA256HashString(pin);
     text_sha_key = base::HexEncode(text_sha_key.data(), text_sha_key.length());
     if (text_sha_key == pin_key) {
       Unlock();
@@ -200,6 +201,11 @@ void YSPLockScreenView::DidDownloadFavicon(
 
 void YSPLockScreenView::ShowForgetPasswordDialog(bool show) {
   forget_pin_ink_label_->SetEnabled(!show);
+  for (size_t i = 0; i < password_text_.size(); i++) {
+    password_text_.at(i)->SetVisible(!show);
+    password_text_.at(i)->SetText(base::EmptyString16());
+  }
+  password_text_.at(0)->RequestFocus();
   if (show) {
     forget_password_message_bg_image_->SetVisible(true);
     forget_password_message_title_label_->SetVisible(true);
@@ -207,8 +213,6 @@ void YSPLockScreenView::ShowForgetPasswordDialog(bool show) {
     forget_password_message_confirm_button_->SetVisible(true);
     error_confirm_button_->SetVisible(false);
     error_prompt_->SetVisible(false);
-    login_button_->SetVisible(false);
-    password_text_->SetVisible(false);
     name_label_->SetVisible(false);
     avatar_image_->SetVisible(false);
     info_label_->SetVisible(false);
@@ -219,8 +223,6 @@ void YSPLockScreenView::ShowForgetPasswordDialog(bool show) {
     forget_password_message_confirm_button_->SetVisible(false);
     error_confirm_button_->SetVisible(false);
     error_prompt_->SetVisible(false);
-    login_button_->SetVisible(true);
-    password_text_->SetVisible(true);
     name_label_->SetVisible(true);
     avatar_image_->SetVisible(true);
     info_label_->SetVisible(true);
@@ -228,30 +230,23 @@ void YSPLockScreenView::ShowForgetPasswordDialog(bool show) {
 }
 
 void YSPLockScreenView::ShowError(bool show) {
-  if (show) {
-    error_prompt_->SetVisible(true);
-    error_confirm_button_->SetVisible(true);
-    password_text_->SetVisible(false);
-    login_button_->SetVisible(false);
-  } else {
-    error_prompt_->SetVisible(false);
-    error_confirm_button_->SetVisible(false);
-    password_text_->SetVisible(true);
-    password_text_->RequestFocus();
-    login_button_->SetVisible(true);
+  for (size_t i = 0; i < password_text_.size(); i++) {
+    password_text_.at(i)->SetVisible(!show);
+  }
+  error_prompt_->SetVisible(show);
+  error_confirm_button_->SetVisible(show);
+  if (!show) {
+    password_text_.at(0)->RequestFocus();
   }
 }
 
 void YSPLockScreenView::Lock() {
-  error_prompt_->SetVisible(false);
-  password_text_->RequestFocus();
-  login_button_->SetEnabled(!password_text_->text().empty());
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
+  password_text_.at(0)->RequestFocus();
 }
 
 void YSPLockScreenView::Unlock() {
-  password_text_->SetText(base::string16());
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::BROWSER_SCREEN);
 }
@@ -278,18 +273,21 @@ void YSPLockScreenView::Layout() {
   info_label_->SetBounds(x, top, info_size.width(), info_size.height());
   top += info_size.height() + 40;
 
-  x = GetLeftTop(window_width, 80);
-  avatar_image_->SetBounds(x, top, 80, 80);
-  top += 80 + 20;
+  x = GetLeftTop(window_width, 62);
+  avatar_image_->SetBounds(x, top, 62, 62);
+  top += 62 + 20;
 
   gfx::Size name_size = name_label_->GetPreferredSize();
   x = GetLeftTop(window_width, name_size.width());
   name_label_->SetBounds(x, top, name_size.width(), 15);
   top += 15 + 30;
 
-  x = GetLeftTop(window_width, 320);
-  password_text_->SetBounds(x, top, 280, 40);
-  login_button_->SetBounds(x + 280, top, 40, 40);
+  int total_length = 36 * 6 + 5 * 10;
+  x = GetLeftTop(window_width, total_length);
+  for (size_t i = 0; i < password_text_.size(); i++) {
+    int start_x = x + 46 * i;
+    password_text_.at(i)->SetBounds(start_x, top, 36, 36);
+  }
 
   gfx::Size error_size = error_prompt_->GetPreferredSize();
   x = GetLeftTop(window_width, error_size.width());
@@ -343,10 +341,7 @@ bool YSPLockScreenView::HandleContextMenu(
 
 void YSPLockScreenView::ButtonPressed(views::Button* sender,
                                       const ui::Event& event) {
-  if (sender == login_button_) {
-    Submit();
-  } else if (sender == error_confirm_button_) {
-    password_text_->SetText(base::string16());
+  if (sender == error_confirm_button_) {
     ShowError(false);
   } else if (sender == forget_password_message_confirm_button_) {
     ShowForgetPasswordDialog(false);
@@ -361,18 +356,40 @@ void YSPLockScreenView::LinkClicked(views::Link* source, int event_flags) {
 
 void YSPLockScreenView::ContentsChanged(views::Textfield* sender,
                                         const base::string16& new_contents) {
-  bool enable = password_text_->text().length() > 0;
-  login_button_->SetEnabled(enable);
-  error_prompt_->SetVisible(false);
+  size_t current = 0;
+  for (size_t i = 0; i < password_text_.size(); i++) {
+    if (password_text_.at(i) == sender) {
+      current = i;
+      break;
+    }
+  }
+  if (!new_contents.empty()) {
+    const base::string16& single =
+        (base::string16)new_contents.substr(new_contents.length() - 1, 1);
+    if (single[0] >= '0' && single[0] <= '9') {
+      sender->SetText(single);
+    } else {
+      sender->SetText(base::EmptyString16());
+      return;
+    }
+    if (current + 1 < password_text_.size()) {
+      password_text_.at(current + 1)->RequestFocus();
+    } else {
+      password_text_.at(current)->RequestFocus();
+    }
+    if (current == 5) {
+      Submit();
+    }
+  }
 }
 
 bool YSPLockScreenView::HandleKeyEvent(views::Textfield* sender,
                                        const ui::KeyEvent& key_event) {
-  // TODO: (LIUWEI)
-  if (key_event.key_code() == ui::VKEY_RETURN) {
-    Submit();
-    return true;
-  }
+  return false;
+}
+
+bool YSPLockScreenView::HandleMouseEvent(views::Textfield* sender,
+                                         const ui::MouseEvent& mouse_event) {
   return false;
 }
 

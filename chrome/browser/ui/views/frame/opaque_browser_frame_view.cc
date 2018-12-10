@@ -178,8 +178,11 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
   AddChildViewAt(locked_view_, 0);
 
   std::string pin_key = YSPLoginManager::GetInstance()->GetUserPinKey();
-  ChangeScreenStatus(pin_key.empty() ? OpaqueBrowserFrameView::SET_PIN_SCREEN
-                                     : OpaqueBrowserFrameView::LOCK_SCREEN);
+  if (pin_key.empty()) {
+    ChangeScreenStatus(OpaqueBrowserFrameView::SET_PIN_SCREEN);
+  } else {
+    locked_view_->Lock();
+  }
 #endif
 
   if (extensions::HostedAppBrowserController::IsForExperimentalHostedAppBrowser(

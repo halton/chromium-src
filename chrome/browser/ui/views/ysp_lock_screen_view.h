@@ -7,6 +7,8 @@
 
 #include <stddef.h>
 
+#include "base/memory/weak_ptr.h"
+#include "base/threading/thread_task_runner_handle.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
@@ -37,6 +39,7 @@ class Border;
 class Browser;
 class BrowserView;
 class OpaqueBrowserFrameView;
+class ThreadTaskRunnerHandle;
 
 class YSPLockScreenView : public content::WebContentsDelegate,
                           public views::ImageView,
@@ -82,6 +85,8 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                        const base::string16& new_contents) override;
   bool HandleKeyEvent(views::Textfield* sender,
                       const ui::KeyEvent& key_event) override;
+  bool HandleMouseEvent(views::Textfield* sender,
+                        const ui::MouseEvent& mouse_event) override;
 
   // YSPLoginManagerObserver implementation
   void OnLoginRequestFailure(const std::string& error) override;
@@ -99,8 +104,7 @@ class YSPLockScreenView : public content::WebContentsDelegate,
   views::Label* info_label_;
   views::ImageView* avatar_image_;
   views::Label* name_label_;
-  views::Textfield* password_text_;
-  views::ImageButton* login_button_;
+  std::vector<views::Textfield*> password_text_;
   views::Label* error_prompt_;
   views::MdTextButton* error_confirm_button_;
   views::Link* forget_pin_ink_label_;
