@@ -22,6 +22,7 @@
 
 #ifdef REDCORE
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/views/ysp_account_view.h"
 #include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
 #endif
 
@@ -34,6 +35,7 @@ class TabIconView;
 class YSPLockScreenView;
 class YSPLoginManagerObserver;
 class YSPSetPINViewHolder;
+class YSPAccountView;
 #endif
 
 namespace chrome {
@@ -230,6 +232,7 @@ class OpaqueBrowserFrameView : public BrowserNonClientFrameView,
   TabIconView* window_icon_;
   views::Label* window_title_;
 #ifdef REDCORE
+  YSPAccountView* account_view_;
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
   YSPSetPINViewHolder* ysp_set_pin_view_holder_;

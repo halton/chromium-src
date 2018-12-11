@@ -28,6 +28,7 @@ namespace {
 
 #ifdef REDCORE
 constexpr int kCaptionButtonHeight = 34;
+constexpr int kTabStripLeftSpacing = 56;
 #else
 constexpr int kCaptionButtonHeight = 18;
 #endif
@@ -93,6 +94,7 @@ OpaqueBrowserFrameViewLayout::OpaqueBrowserFrameViewLayout()
       window_icon_(nullptr),
       window_title_(nullptr),
       incognito_icon_(nullptr),
+      account_view_(nullptr),
       trailing_buttons_{
 #ifdef REDCORE
           views::FRAME_BUTTON_LOCK_SCREEN,
@@ -514,6 +516,36 @@ void OpaqueBrowserFrameViewLayout::LayoutIncognitoIcon(views::View* host) {
                                 available_space_trailing_x_ - old_button_size);
 }
 
+void OpaqueBrowserFrameViewLayout::LayoutYSPAccountView(views::View* host) {
+  if (!account_view_)
+    return;
+
+  const int button_width = 32;
+  const int button_height = 32;
+  int button_width_with_offset = button_width;
+  if (!trailing_buttons_.empty())
+    button_width_with_offset += kCaptionSpacing;
+
+  const int bottom =
+      GetTabStripInsetsTop(false) + delegate_->GetTabStripHeight();
+  const int button_x = (kTabStripLeftSpacing - button_width_with_offset) / 2 +
+                       available_space_leading_x_;
+  const int button_y = (bottom - button_height) / 2 +
+                       DefaultCaptionButtonY(!delegate_->IsFrameCondensed());
+
+  minimum_size_for_buttons_ += button_width_with_offset;
+  available_space_trailing_x_ -= button_width_with_offset;
+
+  // In non-maximized mode, allow the new tab button to completely slide under
+  // the avatar button.
+  if (!delegate_->IsFrameCondensed()) {
+    available_space_trailing_x_ +=
+        delegate_->GetNewTabButtonPreferredSize().width() + kCaptionSpacing;
+  }
+
+  account_view_->SetBounds(button_x, button_y, button_width, button_height);
+}
+
 void OpaqueBrowserFrameViewLayout::ConfigureButton(views::View* host,
                                                    views::FrameButton button_id,
                                                    ButtonAlignment alignment) {
@@ -720,6 +752,9 @@ void OpaqueBrowserFrameViewLayout::SetView(int id, views::View* view) {
     case VIEW_ID_YSP_SET_PIN_VIEW_HOLDER:
       ysp_set_pin_view_holder_ = static_cast<YSPSetPINViewHolder*>(view);
       break;
+    case VIEW_ID_YSP_ACCOUNT_VIEW:
+      account_view_ = static_cast<YSPAccountView*>(view);
+      break;
 #endif
     default:
       NOTREACHED() << "Unknown view id " << id;
@@ -755,6 +790,7 @@ void OpaqueBrowserFrameViewLayout::Layout(views::View* host) {
   locked_view_->SetBounds(host->x(), host->y(), host->width(), host->height());
 #endif
 
+  LayoutYSPAccountView(host);
   if (delegate_->IsRegularOrGuestSession())
     LayoutNewStyleAvatar(host);
   LayoutIncognitoIcon(host);

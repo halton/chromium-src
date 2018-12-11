@@ -35,6 +35,7 @@
 #if defined(IE_REDCORE)
 #include "ui/views/win/hwnd_util.h"
 #include "chrome/browser/browser_process.h"
+#include "chrome/browser/ui/view_ids.h"
 #include "chrome/browser/ui/ysp_download_activex_infobar_delegate.h"
 #endif
 #include "base/json/json_writer.h"
@@ -50,7 +51,7 @@
 
 namespace {
 
-  const int AvatarImageSize = 52;
+  const int AvatarImageSize = 32;
 #if defined(IE_REDCORE)
 // comment unused code by webb.
   // const int AvatarFrameSize = 52;
@@ -116,6 +117,7 @@ YSPAccountView::YSPAccountView(BrowserView* browser_view)
      head_image_(nullptr),
      weakFactoryForFile(this),
      weakFactoryForUI(this) {
+     set_id(VIEW_ID_YSP_ACCOUNT_VIEW);
      YSPLoginManager::GetInstance()->AddObserver(this);
      set_notify_enter_exit_on_child(true);
    SetEventTargeter(
@@ -166,7 +168,7 @@ void YSPAccountView::Layout() {
   int x = (width() - AvatarImageSize) / 2;
   int y = (height() - AvatarImageSize) / 2;
   head_view_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
-  head_view_->SetDrawCircle(true);
+  head_view_->SetDrawCircle(false);
   if (name_label_->visible()) {
     name_label_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
   }
@@ -205,7 +207,7 @@ bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
                                ui::PAGE_TRANSITION_AUTO_TOPLEVEL,
                                false);
   // FIXME(mtz): Disable click on login icon.
-  //browser_view_->browser()->OpenURL(param);
+  browser_view_->browser()->OpenURL(param);
 
   return false;
 }
@@ -253,7 +255,7 @@ void YSPAccountView::OnConfigDataUpdated(const std::string& type,
     YSPLoginManager* manager = YSPLoginManager::GetInstance();
     if (manager->GetYSPUserName() != user_name_ || manager->GetHeadImageUrl() != head_image_url_)
     {
-      OnLoginSuccess(manager->GetYSPUserName(), manager->GetHeadImageUrl());
+      //OnLoginSuccess(manager->GetYSPUserName(), manager->GetHeadImageUrl());
     }
   }
   else if (type == "pc")
@@ -373,6 +375,7 @@ void YSPAccountView::DidDownloadFavicon(
   const std::vector<gfx::Size>& original_bitmap_sizes) {
   DLOG(INFO) << "YSPAccountView::DidDownloadFavicon";
   if (head_view_ && bitmaps.size() > 0) {
+    name_label_->SetVisible(false);
     head_image_.reset(new gfx::ImageSkia(gfx::ImageSkiaRep(bitmaps[0], 1)));
     head_view_->SetImage(*head_image_);
     if (YSPLoginView::IsShowing())
@@ -466,6 +469,11 @@ void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) 
 
 void YSPAccountView::ShowDefaultAvatar()
 {
+    name_label_->SetText(user_name_);
+    name_label_->SetVisible(true);
+    ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
+    head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
+	return;
     base::char16 name = 0;
     if (user_name_.empty())
         name_label_->SetText(base::string16());

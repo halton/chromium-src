@@ -215,7 +215,11 @@ void ToolbarView::Init() {
       cast_ = media_router::CastToolbarButton::Create(browser_).release();
     }
 
+#ifdef REDCORE
+    bool show_avatar_toolbar_button = false;
+#else
     bool show_avatar_toolbar_button = true;
+#endif
 #if defined(OS_CHROMEOS)
     // ChromeOS only badges Incognito and Guest icons in the browser window.
     show_avatar_toolbar_button = browser_->profile()->IsOffTheRecord() ||

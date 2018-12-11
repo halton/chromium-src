@@ -54,6 +54,7 @@
 #endif
 
 #ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_account_view.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/ui/views/ysp_lock_screen_view.h"
 #include "chrome/browser/ui/views/ysp_login_view.h"
@@ -94,6 +95,7 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
       window_icon_(nullptr),
       window_title_(nullptr),
 #ifdef REDCORE
+      account_view_(nullptr),
       lock_button_(nullptr),
       locked_view_(nullptr),
       ysp_set_pin_view_holder_(nullptr),
@@ -163,6 +165,11 @@ OpaqueBrowserFrameView::OpaqueBrowserFrameView(
   AddChildView(window_title_);
 
 #ifdef REDCORE  // TODO: (Liu Wei) Add login info label
+  account_view_ = new YSPAccountView(browser_view);
+  if (account_view_) {
+    AddChildView(account_view_);
+    account_view_->Init();
+  }
   lock_button_ = InitWindowCaptionButton(IDR_YSP_LOCK_SCREEN,
                                          IDR_YSP_LOCK_SCREEN_H,
                                          IDR_YSP_LOCK_SCREEN_P,
@@ -256,18 +263,21 @@ void OpaqueBrowserFrameView::ChangeScreenStatus(
       locked_view_->SetVisible(false);
       ysp_set_pin_view_holder_->SetVisible(true);
       browser_view_->SetVisible(false);
+      account_view_->SetVisible(false);
       lock_button_->SetVisible(false);
       break;
     case OpaqueBrowserFrameView::LOCK_SCREEN:
       locked_view_->SetVisible(true);
       ysp_set_pin_view_holder_->SetVisible(false);
       browser_view_->SetVisible(false);
+      account_view_->SetVisible(false);
       lock_button_->SetVisible(false);
       break;
     case OpaqueBrowserFrameView::BROWSER_SCREEN:
       locked_view_->SetVisible(false);
       ysp_set_pin_view_holder_->SetVisible(false);
       browser_view_->SetVisible(true);
+      account_view_->SetVisible(true);
       lock_button_->SetVisible(true);
       break;
   }

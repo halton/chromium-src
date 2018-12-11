@@ -212,6 +212,7 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
 
 #ifdef REDCORE
   void LayoutLoginMessage(views::View* host);
+  void LayoutYSPAccountView(views::View* host);
 #endif
 
   // The bounds of the ClientView.
@@ -250,6 +251,7 @@ class OpaqueBrowserFrameViewLayout : public views::LayoutManager {
   views::ImageButton* lock_button_;
   YSPLockScreenView* locked_view_;
   YSPSetPINViewHolder* ysp_set_pin_view_holder_;
+  YSPAccountView* account_view_;
 #endif
 
   std::vector<views::FrameButton> leading_buttons_;
