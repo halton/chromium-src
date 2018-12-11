@@ -28,6 +28,14 @@
 #include "net/ssl/token_binding.h"
 #include "url/url_canon.h"
 
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+#include "net/http/gm_sangfor_interface.h" // YSP+ { sangfor GM ssl }
+#include "net/socket/tcp_socket.h" // YSP+ { sangfor GM ssl }
+#include "base/json/json_reader.h" // YSP+ { sangfor GM ssl }
+#endif // SANGFOR_GM_SSL
+#endif // EDCORE
+
 namespace net {
 
 namespace {
@@ -465,6 +473,47 @@ int HttpStreamParser::DoSendHeaders() {
     response_->request_time = base::Time::Now();
 
   io_state_ = STATE_SEND_HEADERS_COMPLETE;
+
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+	if (request_->url.is_valid() && !request_->url.is_empty()) {
+   SOCKET gm_socket;
+	  bool is_https = connection_->socket()->HttpsOrhttp();
+	  std::string gm_port;
+	  if (!request_->url.port().empty()) {
+		  gm_port = request_->url.port();
+	  }
+	  else {
+		  if (is_https)
+			  gm_port = "443";
+		  else
+			  gm_port = "80";
+	  }
+	  if (GMStreamCompared(request_->url.host(), gm_port)) {
+		  connection_->SetGmStatus(true);
+		  if (is_https)
+			  gm_socket = connection_->socket()->GetTransport()->GetSocket();
+		  else
+			  gm_socket = connection_->socket()->GetTcpSocket()->GetSocket();
+		  if (GMStream_.GMCreateDataStream((int)gm_socket) == 0) {
+			  if (!GMSSLishandshake) {
+				  GMStream_.GMHandShake();
+				  GMSSLishandshake = true;
+			  }
+			  GMStream_.GMWriteRequestData(request_headers_->data(), 
+				  bytes_remaining, io_callback_);
+			  return bytes_remaining;
+		  }
+		  else {
+			  LOG(ERROR) << "GMStream init failure !";
+			  return -114;
+		  }
+	  }
+  }
+ 
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
+
   return connection_->socket()->Write(
       request_headers_.get(), bytes_remaining, io_callback_,
       NetworkTrafficAnnotationTag(traffic_annotation_));
@@ -514,6 +563,18 @@ int HttpStreamParser::DoSendHeadersComplete(int result) {
 int HttpStreamParser::DoSendBody() {
   if (request_body_send_buf_->BytesRemaining() > 0) {
     io_state_ = STATE_SEND_BODY_COMPLETE;
+
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+  if (connection_->GetGmStatus()) {
+    if (NULL != GMStream_.module) {
+      GMStream_.GMWriteRequestData(request_body_send_buf_->data(), request_body_send_buf_->BytesRemaining(), io_callback_);
+    }
+    return request_body_send_buf_->BytesRemaining();
+   }
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
+
     return connection_->socket()->Write(
         request_body_send_buf_.get(), request_body_send_buf_->BytesRemaining(),
         io_callback_, NetworkTrafficAnnotationTag(traffic_annotation_));
@@ -609,6 +670,19 @@ int HttpStreamParser::DoReadHeaders() {
   // See if the user is passing in an IOBuffer with a NULL |data_|.
   CHECK(read_buf_->data());
 
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+  // YSP+ { sangfor GM ssl
+  if (connection_->GetGmStatus()) {
+    if (NULL != GMStream_.GetGMStream()) {
+      int read_buf_len = GMStream_.GMReadResponseData(read_buf_.get(), read_buf_->RemainingCapacity());
+      DLOG(INFO) << "http read_buf_:" << read_buf_->data();
+      return read_buf_len;
+    }
+  }
+  // YSP+ } // sangfor GM ssl
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
   return connection_->socket()
       ->Read(read_buf_.get(), read_buf_->RemainingCapacity(), io_callback_);
 }
@@ -695,6 +769,19 @@ int HttpStreamParser::DoReadBody() {
     return 0;
 
   DCHECK_EQ(0, read_buf_->offset());
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+  // YSP+ { sangfor GM ssl
+  if (connection_->GetGmStatus()) {
+    if (NULL != GMStream_.GetGMStream()) {
+      int user_readbuf_len = GMStream_.GMReadResponseData(user_read_buf_.get(), user_read_buf_len_);
+      DLOG(INFO) << "http user read buf:" << user_read_buf_->data();
+      return user_readbuf_len;
+    }
+  }
+  // YSP+ } // sangfor GM ssl
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
   return connection_->socket()
       ->Read(user_read_buf_.get(), user_read_buf_len_, io_callback_);
 }
@@ -1191,5 +1278,217 @@ bool HttpStreamParser::SendRequestBuffersEmpty() {
   return request_headers_ == nullptr && request_body_send_buf_ == nullptr &&
          request_body_read_buf_ == nullptr;
 }
-
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+// YSP+ { sangfor GM ssl
+static int stringmatchlen(const char *pattern, int pattern_len,
+	const char *string, int string_len, int nocase) {
+	while (pattern_len) {
+		switch (pattern[0]) {
+		case '*':
+			while (pattern[1] == '*') {
+				pattern++;
+				pattern_len--;
+			}
+			if (pattern_len == 1)
+				return 1; // match
+			while (string_len) {
+				if (stringmatchlen(pattern + 1, pattern_len - 1,
+					string, string_len, nocase))
+					return 1; // match 
+				string++;
+				string_len--;
+			}
+			return 0; // no match 
+			break;
+		case '?':
+			if (string_len == 0)
+				return 0; // no match
+			string++;
+			string_len--;
+			break;
+		case '[':
+		{
+			int inot, match;
+			pattern++;
+			pattern_len--;
+			inot = pattern[0] == '^';
+			if (inot) {
+				pattern++;
+				pattern_len--;
+			}
+			match = 0;
+			while (1) {
+				if (pattern[0] == '\\') {
+					pattern++;
+					pattern_len--;
+					if (pattern[0] == string[0])
+						match = 1;
+				}
+				else if (pattern[0] == ']') {
+					break;
+				}
+				else if (pattern_len == 0) {
+					pattern--;
+					pattern_len++;
+					break;
+				}
+				else if (pattern[1] == '-' && pattern_len >= 3) {
+					int start = pattern[0];
+					int end = pattern[2];
+					int c = string[0];
+					if (start > end) {
+						int t = start;
+						start = end;
+						end = t;
+					}
+					if (nocase) {
+						start = tolower(start);
+						end = tolower(end);
+						c = tolower(c);
+					}
+					pattern += 2;
+					pattern_len -= 2;
+					if (c >= start && c <= end)
+						match = 1;
+				}
+				else {
+					if (!nocase) {
+						if (pattern[0] == string[0])
+							match = 1;
+					}
+					else {
+						if (tolower((int)pattern[0]) == tolower((int)string[0]))
+							match = 1;
+					}
+				}
+				pattern++;
+				pattern_len--;
+			}
+			if (inot)
+				match = !match;
+			if (!match)
+				return 0; // no match
+			string++;
+			string_len--;
+			break;
+		}
+		case '\\':
+			if (pattern_len >= 2) {
+				pattern++;
+				pattern_len--;
+			}
+			// fall through
+		default:
+			if (!nocase) {
+				if (pattern[0] != string[0])
+					return 0; // no match 
+			}
+			else {
+				if (tolower((int)pattern[0]) != tolower((int)string[0]))
+					return 0; // no match 
+			}
+			string++;
+			string_len--;
+			break;
+		}
+		pattern++;
+		pattern_len--;
+		if (string_len == 0) {
+			while (*pattern == '*') {
+				pattern++;
+				pattern_len--;
+			}
+			break;
+		}
+	}
+	if (pattern_len == 0 && string_len == 0)
+		return 1;
+	return 0;
+}
+static int stringmatch(const char *pattern, const char *string, int nocase) {
+	return stringmatchlen(pattern, strlen(pattern), 
+    string, strlen(string), nocase);
+}
+static bool HostAndPortParse(const std::string& gm_stream_url,
+  std::string* host_name, std::string* port)
+{
+	std::string hostand_port = "";
+	std::string gm_scheme = "";
+	if (gm_stream_url.empty())
+		return false;
+	if (gm_stream_url.find("://") != std::string::npos) {
+		int urloffset = gm_stream_url.find("://");
+		gm_scheme.assign(gm_stream_url, 0, urloffset + 3);
+		hostand_port.assign(gm_stream_url, urloffset + 3, 
+      gm_stream_url.length() - urloffset - 3);
+	} else
+		hostand_port.assign(gm_stream_url);
+	if (hostand_port.empty())
+		return false;
+	if (hostand_port.find(":") != std::string::npos) {
+		int offset = hostand_port.find(":");
+		host_name->assign(hostand_port, 0, offset);
+		port->assign(hostand_port, offset + 1, hostand_port.length() - offset - 1);
+	} else {
+		host_name->assign(hostand_port);
+		if (gm_scheme == "http://") {
+			port->assign("80");
+		}
+		else if (gm_scheme == "https://") {
+			port->assign("443");
+		}
+	}
+	return true;
+}
+scoped_ptr<base::DictionaryValue> HttpStreamParser::dict_gm_stream_ = NULL;
+void HttpStreamParser::SetGMStreamValue(const std::string & dict_gm_stream)
+{
+	if (!dict_gm_stream.empty()) {
+		scoped_ptr<base::Value> dict_gm_value = 
+      base::JSONReader::Read(dict_gm_stream);
+		dict_gm_stream_.reset(static_cast<base::DictionaryValue*>
+      (dict_gm_value.release()));
+	} else
+		dict_gm_stream_.reset();
+}
+bool HttpStreamParser::GMStreamCompared(const std::string& host,
+  const std::string& port)
+{
+	base::ListValue* gm_stream_list = nullptr;
+	if (dict_gm_stream_ && dict_gm_stream_->
+    GetList("stateSecretSite", &gm_stream_list))
+		if (gm_stream_list && !gm_stream_list->empty()) {
+			for (size_t i = 0; i < gm_stream_list->GetSize(); ++i) {
+				base::DictionaryValue* bmDict = nullptr;
+				if (gm_stream_list->GetDictionary(i, &bmDict)) {
+					std::string gm_stream_host_port, gm_stream_host_name, gm_stream_port;
+					bmDict->GetString("url", &gm_stream_host_port);
+					GURL gmUrl(gm_stream_host_port);
+					gm_stream_port = gmUrl.port();
+					if (gm_stream_port.empty())
+					{
+						if (gmUrl.scheme() == "http") {
+							gm_stream_port = "80";
+						}
+						else if (gmUrl.scheme() == "https") {
+							gm_stream_port = "443";
+						}
+					}
+			
+					std::string hostWithOutPath = gmUrl.host();
+					DLOG(INFO) << "host: " << host << " port: " 
+            << port << " GMURL: " << hostWithOutPath;
+					if (stringmatch(hostWithOutPath.c_str(), host.c_str(), true)) {
+						if (gm_stream_port == port)
+							return true;
+					}
+				}
+			}
+		}
+	return false;
+}
+// YSP+ } // sangfor GM ssl
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
 }  // namespace net

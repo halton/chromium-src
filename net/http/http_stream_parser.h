@@ -24,6 +24,12 @@
 #include "net/ssl/token_binding.h"
 #include "net/traffic_annotation/network_traffic_annotation.h"
 
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+#include "net/http/gm_sangfor_interface.h"
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
+
 namespace net {
 
 class ClientSocketHandle;
@@ -129,6 +135,16 @@ class NET_EXPORT_PRIVATE HttpStreamParser {
   // The number of extra bytes required to encode a chunk.
   static const size_t kChunkHeaderFooterSize;
 
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+  static void SetGMStreamValue(const std::string& dict_gm_stream);
+
+  static bool GMStreamCompared(const std::string& host,
+    const std::string& port);
+  static scoped_ptr<base::DictionaryValue> dict_gm_stream_;
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
+ 
  private:
   class SeekableIOBuffer;
 
@@ -240,7 +256,15 @@ class NET_EXPORT_PRIVATE HttpStreamParser {
   // The amount of sent data.
   int64_t sent_bytes_;
 
-  // The parsed response headers.  Owned by the caller of SendRequest.   This
+#ifdef REDCORE
+#ifdef SANGFOR_GM_SSL
+  bool GMSSLishandshake = false;
+  SanforGMStream GMStream_;
+  bool firstread = true;
+#endif // SANGFOR_GM_SSL
+#endif // REDCORE
+
+  // The parsed response headers.  Owned by the caller of SendRequest.  This
   // cannot be safely accessed after reading the final set of headers, as the
   // caller of SendRequest may have been destroyed - this happens in the case an
   // HttpResponseBodyDrainer is used.
