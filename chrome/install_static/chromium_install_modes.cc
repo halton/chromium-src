@@ -12,9 +12,15 @@
 
 namespace install_static {
 
+#ifdef REDCORE
+const wchar_t kCompanyPathName[] = L"AllMobilize";
+
+const wchar_t kProductPathName[] = L"Redcore";
+#else
 const wchar_t kCompanyPathName[] = L"";
 
 const wchar_t kProductPathName[] = L"Chromium";
+#endif // REDCORE
 
 const size_t kProductPathNameLength = _countof(kProductPathName) - 1;
 
