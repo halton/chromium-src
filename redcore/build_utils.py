@@ -6,6 +6,9 @@ import platform
 
 
 def execCmd(cmd):
+  if platform.system() == "Darwin":
+    cmd = "source ~/.bashrc &&" + cmd.replace("&&;", "&&")
+
   print cmd
   #universal_newlines=True, it means by text way to open stdout and stderr
   p = subprocess.Popen(cmd, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -20,7 +23,6 @@ def execCmd(cmd):
 
 
 def getBuildType(workingDir):
-  global _BUILD_TYPE
   osName = platform.system()
   if (osName == "Windows"):
     if (getMajorVersion(workingDir) == 49):
@@ -41,3 +43,11 @@ def getMajorVersion(workingDir):
       if line.startswith("MAJOR="):
         return int(line[6:])
   raise Exception("\nCan not find the version file, please check the working-dir")
+
+
+def getDiskString(workingDir):
+  osName = platform.system()
+  if (osName == "Windows"):
+    return workingDir[0:2] + " &&;"
+  elif (osName == "Darwin"):
+    return ""

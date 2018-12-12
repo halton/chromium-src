@@ -7,6 +7,7 @@ import os
 import shutil
 import re
 from build_utils import execCmd
+from build_utils import getDiskString
 
 parser = argparse.ArgumentParser(description='manual to this script')
 parser.add_argument('--product-name', type=str, default = "")
@@ -33,9 +34,9 @@ _PRODUCT_NAME_NEEDED_REPLACE_FILES = [
 
 # apply git patch
 def applyGitPatch():
-  applyCmdLine = "%s &&;\
+  applyCmdLine = "%s \
     cd %s &&;\
-    " % (_WORKING_DIR[0:2], _WORKING_DIR)
+    " % (getDiskString(_WORKING_DIR), _WORKING_DIR)
   patchDir = os.path.join(_PRODUCT_DIR, "patches")
   if not os.path.exists(patchDir):
     return

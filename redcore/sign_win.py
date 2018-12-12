@@ -119,9 +119,7 @@ def nsisPackage():
   print "copying mini_installer.exe"
   shutil.copy(os.path.join(releaseDir, "mini_installer.exe"), os.path.join(nsisSrcDir, "install_redcore.exe"))
   print "copying gm folder"
-  gmPath = os.path.join(releaseDir, "gm")
-  if os.path.exists(gmPath):
-    shutil.copytree(gmPath, os.path.join(nsisSrcDir, "gm"))
+  shutil.copytree(os.path.join(releaseDir, "gm"), os.path.join(nsisSrcDir, "gm"))
   # 更改版本号
   buffstr = "!define CHROME_VERSION \"" + getBuildVersion() + "\"\n"
   fileObject = open(os.path.join(nsisDir, "version.nsh"), "wb")
