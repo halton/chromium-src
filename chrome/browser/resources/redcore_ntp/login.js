@@ -5,7 +5,7 @@ function switchPage(isLogin) {
   if (isLogin) {
     // 已经登录
     $('#content').empty();
-    $('#content').append('<div class="nav" id="nav"> <div class="title"> <img alt="logo" class="logo" id="logo" src="./imgs/defaultLogo.png"/> </div> <div class="search-box" id="search-box"> <input id="search-input"class="field field-block"placeholder="搜索 web"/> <span id="search-btn" title="search"></span> </div> <div id="homePage"> <div class="company-title" id="company-title"> <h1 id="title"></h1> </div> <div class="nav-tabs" id="tab-wrap"> </div> <div class="peeler-pack"> <img id="skin_peeler" src="./imgs/appearancel_icon.png" alt=""> <p>换 肤</p> </div> <div id="peeler-nav" class="peeler-nav mini-peeler-nav"> <div class="peeler-container"> <div class="peeler-title"> <h3>外观设置</h3> <img id="peeler_close" src="./imgs/close_icon.png" alt=""> </div> <div class="peeler-content"> <h4>主页背景</h4> <ul id="list-unstyled"> <li> <img class="bg-li" id="bg-1" src="./imgs/background/abb-1.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>迷夜（默认）</p> </li> <li> <img class="bg-li" id="bg-2" src="./imgs/background/abb-2.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>星河</p> </li> <li> <img class="bg-li" id="bg-3" src="./imgs/background/abb-3.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>绮梦</p> </li> <li> <img class="bg-li" id="bg-4" src="./imgs/background/abb-4.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>莱茵</p> </li> <li> <img class="bg-li" id="bg-5" src="./imgs/background/abb-5.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>极光</p> </li> <li> <img class="bg-li" id="bg-6" src="./imgs/background/abb-6.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>都市</p> </li> <li> <img class="bg-li" id="bg-7" src="./imgs/background/abb-7.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>峡谷</p> </li> <li> <img class="bg-li" id="bg-8" src="./imgs/background/abb-8.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>星轨</p> </li> </ul> </div> </div> </div> </div> <div class="market" id="tab-wrap-market"> <div class="market-banner"></div> <div class="back-pack"> <img class="back" id="back_app" src="./imgs/back_normal_icon.png" alt=""> <p>返回</p> </div> <div class="market-container" id="market_container"> </div> </div> </div>'); 
+    $('#content').append('<div class="nav" id="nav"> <div class="title"> <img alt="logo" class="logo" id="logo" src="./imgs/defaultLogo.png"/> </div> <div class="search-box" id="search-box"> <input id="search-input"class="field field-block"placeholder="搜索 web"/> <span id="search-btn" title="search"></span> </div> <div id="homePage"> <div class="company-title" id="company-title"> <h1 id="title"></h1> </div> <div class="nav-tabs" id="tab-wrap"> </div> <div class="peeler-pack"> <img id="skin_peeler" src="./imgs/appearancel_icon.png" alt=""> <p>换 肤</p> </div> <div id="peeler-nav" class="peeler-nav mini-peeler-nav"> <div class="peeler-container"> <div class="peeler-title"> <h3>外观设置</h3> <img id="peeler_close" src="./imgs/close_icon.png" alt=""> </div> <div class="peeler-content"> <h4>主页背景</h4> <ul id="list-unstyled"> <li> <img class="bg-li" id="bg-1" src="./imgs/background/abb-1.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>迷夜（默认）</p> </li> <li> <img class="bg-li" id="bg-2" src="./imgs/background/abb-2.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>星河</p> </li> <li> <img class="bg-li" id="bg-3" src="./imgs/background/abb-3.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>绮梦</p> </li> <li> <img class="bg-li" id="bg-4" src="./imgs/background/abb-4.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>莱茵</p> </li> <li> <img class="bg-li" id="bg-5" src="./imgs/background/abb-5.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>极光</p> </li> <li> <img class="bg-li" id="bg-6" src="./imgs/background/abb-6.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>都市</p> </li> <li> <img class="bg-li" id="bg-7" src="./imgs/background/abb-7.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>峡谷</p> </li> <li> <img class="bg-li" id="bg-8" src="./imgs/background/abb-8.png"> <img class="selected" src="./imgs/selected_icon.png"> <p>星轨</p> </li> </ul> </div> </div> </div> </div> <div class="market" id="tab-wrap-market"> <div class="market-banner"></div> <div class="back-pack"> <img class="back" id="back_app" src="./imgs/back_normal_icon.png" alt=""> <p>返回</p> </div> <div class="market-container" id="market_container"> </div> </div> </div>');
     var bgId = localStorage.getItem('background') || 'bg-1';
     for (var i = 0; i < $('.bg-li').length; i ++) {
         if ($('.bg-li')[i].id == bgId) {
@@ -43,7 +43,7 @@ function switchPage(isLogin) {
 
   } else {
     $('#content').empty();
-    $('#content').append('<div id="login" class="login"> <div class="wrap"> <div class="wrap-left"></div> <div class="form" id="form"> <div class="company_domain" id="company_domain"> <h2>服务器地址</h2> <input id="domain" type="text" class="field field-block" placeholder="请输入Redcore服务器地址" pattern="\S+" tip="" /> <p>忘记服务器地址？请联系您的企业管理员获取。</p> <button class="button block" id="next-btn" name="">确定</button> </div> <div class="company_userMessage" id="company_userMessage"> <img src="./imgs/login/qrcode.png" alt="扫码登录" id="QRcode"> <h2>账号登录</h2> <p class="userName-pack"> <img src="./imgs/login/user_icon.png"> <input id="userid" type="text" class="field field-block" placeholder="请输入您的邮箱或手机号" pattern="\S+" tip="" /> </p> <p class="password-pack"> <img src="./imgs/login/password_icon.png"> <input id="password" type="password" class="field field-block" placeholder="请输入密码" pattern="\S+" tip="" /> </p> <div class="setting setting-server"> <span id="server-setting" class="link"> 设置服务器地址 </span> </div> <div id="error-row" class="row"> <span class="error-tip" id="error-tip"></span> </div> <button class="button block" id="login-btn">登 录</button> <div class="setting"> <label class="checkbox-label"> <input type="checkbox" id="auto-login-checkbox" /> <span class="checkbox"></span> <span>自动登录</span> </label> <span class="forget" id="openTip">忘记密码？</span> </div> </div> <div class="company_QRcode" id="company_QRcode"> <img src="./imgs/login/back-user.png" alt="返回登录" id="back_login"> <h2>二维码登录</h2> <div id="code_pack"> <div id="qrcode_img"></div> <div id="code_tip" style=""> <img src="./imgs/login/scan.png" alt=""> </div> </div> <div id="code_pack_qrcodeInvalid" style="display: block"> <p>二维码已失效</p> <button class="button block refresh" id="refresh_qrcode">请点击刷新</button> </div> <div id="code_pack_qrcodeSuccess" style="display: none"> <img src="./imgs/login/qrcodeSuccess.png" alt=""> <p>扫描成功</p> <p>请在手机上确认登录</p> </div> <div id="error-row1" class="row code-row"> <span class="error-tip" id="error-tip1"></span> </div> <p id="app_tip">请使用 <span>红芯APP</span> 扫描二维码</p> <p class="app_group"> <img src="./imgs/login/Group.png" alt=""> </p> <p class="download"> <a href="https://www.redcore.cn/download/index.html">下载红芯APP</a> </p> </div> </div> <div class="forgetPassword" id="forgetPassword"> <p> 忘记密码? 请联系您的企业管理员， </p> <p> 企业管理员可在控制台修改您的密码。 </p> <p class="bottom"> <button id="closeTip">确定</button> </p> </div> </div> </div>'); }
+    $('#content').append('<div id="login" class="login"> <div class="wrap"> <div class="wrap-left"></div> <div class="form" id="form"> <div class="cut_off_line"></div> <div class="company_domain" id="company_domain"> <h2>服务器地址</h2> <input id="domain" type="text" class="field field-block" placeholder="请输入Redcore服务器地址" pattern="\S+" tip="" /> <p>忘记服务器地址？请联系您的企业管理员获取。</p> <button class="button block" id="next-btn" name="">确定</button> </div> <div class="company_userMessage" id="company_userMessage"> <h2 id="QRcode">扫描登录</h2> <h2>账号登录</h2> <p class="userName-pack"> <img src="./imgs/login/user_icon.png"> <input id="userid" type="text" class="field field-block" placeholder="请输入您的邮箱或手机号" pattern="\S+" tip="" /> </p> <p class="password-pack"> <img src="./imgs/login/password_icon.png"> <input id="password" type="password" class="field field-block" placeholder="请输入密码" pattern="\S+" tip="" /> </p> <div class="setting setting-server"> <span id="server-setting" class="link"> 设置服务器地址 </span> </div> <div id="error-row" class="row"> <span class="error-tip" id="error-tip"></span> </div> <button class="button block" id="login-btn">登 录</button> <div class="setting"> <label class="checkbox-label"> <input type="checkbox" id="auto-login-checkbox" /> <span class="checkbox"></span> <span>自动登录</span> </label> <span class="forget" id="openTip">忘记密码？</span> </div> </div> <div class="company_QRcode" id="company_QRcode"> <h2 id="back_login">账号登录</h2> <h2 class="QRcode_login">扫码登录</h2> <div id="code_pack"> <div id="qrcode_img"></div> <div id="code_tip" style=""> <img src="./imgs/login/scan_blue.png" alt=""> </div> </div> <div id="code_pack_qrcodeInvalid" style="display: block"> <p>二维码已失效</p> <button class="button block refresh" id="refresh_qrcode">请点击刷新</button> </div> <div id="code_pack_qrcodeSuccess" style="display: none"> <img src="./imgs/login/qrcodeSuccess.png" alt=""> <p>扫描成功</p> <p>请在手机上确认登录</p> </div> <div id="error-row1" class="row code-row"> <span class="error-tip" id="error-tip1"></span> </div> <p id="app_tip">请使用 Mobile 扫描二维码</p> <p class="app_group"> <img src="./imgs/login/Group.png" alt=""> </p> <p class="download"> <a href="https://www.redcore.cn/download/index.html">下载 Redcore mobile</a> </p> </div> </div> <div class="forgetPassword" id="forgetPassword"> <p> 忘记密码? 请联系您的企业管理员， </p> <p> 企业管理员可在控制台修改您的密码。 </p> <p class="bottom"> <button id="closeTip">确定</button> </p> </div> </div> </div>'); }
 }
 
 /*
@@ -58,13 +58,13 @@ function Login() {
     function Validator(id) {
       this.$input = $(id);
       this.state = false;
-  
+
       this.$input.focus(function() {
         $(this).removeClass('error')
         _this.errorTip('')
       })
     }
-  
+
     Validator.prototype.verify = function() {
       var _ = this;
 
@@ -88,7 +88,7 @@ function Login() {
       }
       return this.$input.val()
     }
-  
+
     this.domain = new Validator('#domain')
     this.userid = new Validator('#userid')
     this.password = new Validator('#password')
@@ -113,7 +113,7 @@ function Login() {
         } else {
 			// 正式地址
             domain = 'https://api.redcore.cn'
-			
+
 			// 测试地址
 			//domain = 'http://api.enterplorer.net'
         }
@@ -326,7 +326,7 @@ Login.prototype.loading = function() {
 
 /**
  * set default value
- * @param {*} data 
+ * @param {*} data
  */
 Login.prototype.setLoginInfo = function(data) {
   this.domain.val(data.domain)
