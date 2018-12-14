@@ -836,9 +836,10 @@ bool CookieCryptor::DecryptString(const std::string& cipher_text,
 }
 }  // namespace
 
+inline YspCryptoSingleton::YspCryptoSingleton():should_encrypt_(false) {}
 YspCryptoSingleton* YspCryptoSingleton::instance_ = nullptr;
 YspCryptoSingleton* YspCryptoSingleton::GetInstance() {
-  if (instance_ == nullptr)  //判断是否第一次调用
+  if (instance_ == nullptr)  // 判断是否第一次调用
     instance_ = new YspCryptoSingleton();
   return instance_;
 }
@@ -953,7 +954,7 @@ const std::vector<std::string>& YspCryptoSingleton::GetPinKeys(){
 }
 
 std::string YspCryptoSingleton::GetPinKey(int index) {
-  if (index >= 0 && index < pin_keys_.size())
+  if (index >= 0 && index < (int)pin_keys_.size())
     return pin_keys_[index];
   return "";
 }

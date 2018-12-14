@@ -489,7 +489,9 @@ class TouchBarNotificationBridge : public CommandObserver,
   }
 
   [starredButton_ setImage:CreateNSImageFromIcon(icon, iconColor)];
-  [starredButton_ setAccessibilityLabel:l10n_util::GetNSString(tooltipId)];
+  if (@available(macOS 10.10, *)) {
+    [starredButton_ setAccessibilityLabel:l10n_util::GetNSString(tooltipId)];
+  }
 }
 
 - (BrowserWindowTouchBarController*)controller {
@@ -576,11 +578,12 @@ class TouchBarNotificationBridge : public CommandObserver,
         [CreateTouchBarButton(icon, self, commandId, tooltipId) retain]);
     return;
   }
-
-  [reloadStopButton_
-      setImage:CreateNSImageFromIcon(icon, kTouchBarDefaultIconColor)];
-  [reloadStopButton_ setTag:commandId];
-  [reloadStopButton_ setAccessibilityLabel:l10n_util::GetNSString(tooltipId)];
+  if (@available(macOS 10.10, *)) {
+    [reloadStopButton_
+        setImage:CreateNSImageFromIcon(icon, kTouchBarDefaultIconColor)];
+    [reloadStopButton_ setTag:commandId];
+    [reloadStopButton_ setAccessibilityLabel:l10n_util::GetNSString(tooltipId)];
+  }
 }
 
 - (NSButton*)reloadStopButton {

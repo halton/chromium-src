@@ -638,11 +638,13 @@ Browser::Browser(const CreateParams& params)
 #if defined(IE_REDCORE)
       ie_crypto_ua_timer_(new base::RepeatingTimer()),
 #endif
-      chrome_updater_factory_(this),
 #if defined(REDCORE)
       first_create_(params.first_create),
+#endif  // REDCORE
+      chrome_updater_factory_(this),
+#if defined(REDCORE)
       crypto_ua_factory_(this),
-#endif
+#endif  // REDCORE
       weak_factory_(this) {
   // If this causes a crash then a window is being opened using a profile type
   // that is disallowed by policy. The crash prevents the disabled window type

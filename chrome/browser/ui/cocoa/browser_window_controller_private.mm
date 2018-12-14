@@ -725,7 +725,6 @@ willPositionSheet:(NSWindow*)sheet
     DCHECK(bubbleWindow);
     [bubbleWindow orderFront:nil];
   }
-#endif
 
   // Ensure that the window is layout properly.
   [self layoutSubviews];

@@ -32,10 +32,10 @@
 #include "chrome/browser/extensions/extension_service.h"
 #include "components/prefs/pref_service.h"
 #include "chrome/common/pref_names.h"
+#include "chrome/browser/ui/view_ids.h"
 #if defined(IE_REDCORE)
 #include "ui/views/win/hwnd_util.h"
 #include "chrome/browser/browser_process.h"
-#include "chrome/browser/ui/view_ids.h"
 #include "chrome/browser/ui/ysp_download_activex_infobar_delegate.h"
 #endif
 #include "base/json/json_writer.h"
@@ -117,7 +117,7 @@ YSPAccountView::YSPAccountView(BrowserView* browser_view)
      head_image_(nullptr),
      weakFactoryForFile(this),
      weakFactoryForUI(this) {
-     set_id(VIEW_ID_YSP_ACCOUNT_VIEW);
+     set_id(ViewID::VIEW_ID_YSP_ACCOUNT_VIEW);
      YSPLoginManager::GetInstance()->AddObserver(this);
      set_notify_enter_exit_on_child(true);
    SetEventTargeter(

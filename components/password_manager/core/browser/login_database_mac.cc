@@ -24,4 +24,23 @@ LoginDatabase::EncryptionResult LoginDatabase::DecryptedString(
              : ENCRYPTION_RESULT_SERVICE_FAILURE;
 }
 
+#ifdef REDCORE
+LoginDatabase::EncryptionResult LoginDatabase::YspEncryptedString(
+    const base::string16& plain_text,
+    int& key_index,
+    std::string* cipher_text) const {
+  // TODO(sunlm04)
+  return EncryptionResult::ENCRYPTION_RESULT_HARDWARE_SUCCESS;
+}
+
+LoginDatabase::EncryptionResult LoginDatabase::YspDecryptedString(
+    const std::string& cipher_text,                                      
+    int key_index,
+    base::string16* plain_text,
+    bool hardware_crypto) const {
+  // TODO(sunlm04)
+  return EncryptionResult::ENCRYPTION_RESULT_HARDWARE_SUCCESS;  
+}
+#endif  // REDCORE
+
 }  // namespace password_manager

@@ -139,11 +139,13 @@ PermissionsData::PageAccess CanExtensionAccessURLInternal(
     case WebRequestPermissions::REQUIRE_HOST_PERMISSION_FOR_URL_AND_INITIATOR: {
       PermissionsData::PageAccess request_access =
           GetHostAccessForURL(*extension, url, tab_id);
-      if (!initiator || initiator->opaque() ||
+      if (!initiator || 
+#if defined(IE_REDCORE)
+          initiator->opaque() ||
+#endif  // IE_REDCORE
           request_access == PermissionsData::PageAccess::kDenied) {
         return request_access;
       }
-
       DCHECK(request_access == PermissionsData::PageAccess::kWithheld ||
              request_access == PermissionsData::PageAccess::kAllowed);
 

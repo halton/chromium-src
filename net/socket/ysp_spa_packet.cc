@@ -409,7 +409,8 @@ int YSPRedcoreSpaPacket::SendUdpPacket(net::CompletionCallback callback) {
                         net::NetLogSource());
   socket.Open(net::AddressFamily::ADDRESS_FAMILY_IPV4);
   net::IPAddress ip_number;
-  net::ParseURLHostnameToAddress(server_ip_, &ip_number);
+  bool ret; 
+  ret = net::ParseURLHostnameToAddress(server_ip_, &ip_number);
   socket.Connect(net::IPEndPoint(ip_number, 62201));
   net::IPEndPoint endpoint;
   socket.GetLocalAddress(&endpoint);

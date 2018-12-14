@@ -24,9 +24,9 @@
 #include "sandbox/mac/seatbelt_exec.h"
 #endif  // defined(HELPER_EXECUTABLE)
 
-namespace {
+void check_update(bool);
 
-extern void check_update(bool);
+namespace {
 
 typedef int (*ChromeMainPtr)(int, char**);
 

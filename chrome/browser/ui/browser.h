@@ -184,7 +184,7 @@ class Browser : public TabStripModelObserver,
   };
 
 #if defined(REDCORE)
-  enum YSPLockStatus{UNLOCKED, SCREEN_LOCKED};
+  enum YSPLockStatus{UNLOCKED, SCREEN_LOCKED, TOKEN_EXPIRED_LOCKED};
 #endif
 
   struct CreateParams {
@@ -589,6 +589,7 @@ class Browser : public TabStripModelObserver,
       const GURL& host);  // ysp+ { URL Blacklist And Whitelist }
   bool WhiteUrlCompared(
       const GURL& host);  // ysp+ { URL Blacklist And Whitelist }
+  bool FirstCreate();
   // YSPLoginManagerObserver
   void OnTokenStatusChanged(const std::string& type) override;
   void OnConfigDataUpdated(const std::string& type,
@@ -611,7 +612,6 @@ class Browser : public TabStripModelObserver,
   // ysp+{IE Function Control}
   std::wstring GetIEFunctionControlJsonString();
   void NotifyIEFunctionControl();
-  bool FirstCreate();
 #endif
 #endif  // REDCORE
 

@@ -36,8 +36,10 @@ bool WebContentsDelegate::ShouldTransferNavigation(
 
 bool WebContentsDelegate::CanOverscrollContent() const { return false; }
 
-
-void WebContentsDelegate::DidGetWindowsDomainUserInfo(base::string16* userName, base::string16* password){}
+#if defined(IE_REDCORE)
+void WebContentsDelegate::DidGetWindowsDomainUserInfo(
+  base::string16* username, base::string16* password) {}
+#endif  // IE_REDCORE
 
 bool WebContentsDelegate::ShouldSuppressDialogs(WebContents* source) {
   return false;
@@ -70,10 +72,12 @@ bool WebContentsDelegate::ShouldFocusPageAfterCrash() {
   return true;
 }
 
+#if defined(IE_REDCORE)
 //YSP+ { Kernel switching
 bool WebContentsDelegate::UrlCompared(const GURL& host, RendererMode& mode) {
-	return false;
+  return false;
 }
+#endif
 
 bool WebContentsDelegate::ShouldResumeRequestsForCreatedWindow() {
   return true;

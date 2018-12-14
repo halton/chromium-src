@@ -104,7 +104,7 @@ static void EncryptValueFormFile(int64_t offset,
                                  int size,
                                  char* enc_data) {
   size_t key_len = strlen(kDefaultKey);
-  for (size_t i = 0; i < size; i++)
+  for (size_t i = 0; i < (size_t)size; i++)
     enc_data[i] = data[i] ^ kDefaultKey[(offset + i) % key_len];
 }
 
@@ -113,7 +113,7 @@ void DecryptValueFormFile(int64_t offset,
                           int size,
                           const char* dec_data) {
   size_t key_len = strlen(kDefaultKey);
-  for (size_t i = 0; i < size; i++)
+  for (size_t i = 0; i < (size_t)size; i++)
     data[i] = dec_data[i] ^ kDefaultKey[(offset + i) % key_len];
 }
 // YSP+ }

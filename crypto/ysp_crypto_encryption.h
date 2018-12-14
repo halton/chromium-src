@@ -12,7 +12,9 @@
 
 class CRYPTO_EXPORT YspCryptoSingleton {
  private:
-  YspCryptoSingleton():should_encrypt_(false){};
+  YspCryptoSingleton();
+  ~YspCryptoSingleton();
+
   bool should_encrypt_ ;
   static YspCryptoSingleton* instance_;
 

@@ -29,8 +29,7 @@ YSPSetPINViewHolder::YSPSetPINViewHolder(
     OpaqueBrowserFrameView* opaque_browser_frame_view,
     BrowserView* browser_view)
     : ysp_set_pin_view_(
-          new YSPSetPINView(opaque_browser_frame_view, browser_view)),
-      opaque_browser_frame_view_(opaque_browser_frame_view) {
+          new YSPSetPINView(opaque_browser_frame_view, browser_view)) {
   const ui::ThemeProvider* tp = browser_view->frame()->GetThemeProvider();
   SetImage(tp->GetImageSkiaNamed(IDR_YSP_SET_PIN_BACKGROUND));
   AddChildView(ysp_set_pin_view_);

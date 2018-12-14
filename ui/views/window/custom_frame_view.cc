@@ -643,6 +643,9 @@ ImageButton* CustomFrameView::GetImageButton(views::FrameButton frame_button) {
       button = close_button_;
       break;
     }
+
+    default:
+      break;
   }
   return button;
 }

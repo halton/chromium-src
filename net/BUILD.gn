@@ -379,7 +379,7 @@ component("net") {
   }
 
   # TODO(halton): enable gm support for non-win
-  if (is_redcore || is_win) {
+  if (is_redcore && is_win) {
     sources += [
       "http/gm_stream.cc",
       "http/gm_stream.h",

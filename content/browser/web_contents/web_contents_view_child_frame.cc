@@ -28,7 +28,9 @@ WebContentsViewChildFrame::WebContentsViewChildFrame(
 
 WebContentsViewChildFrame::~WebContentsViewChildFrame() {}
 
+#if defined(IE_REDCORE)
 void WebContentsViewChildFrame::OnWebContentDestroying() {}
+#endif
 
 WebContentsView* WebContentsViewChildFrame::GetOuterView() {
   return web_contents_->GetOuterWebContents()->GetView();

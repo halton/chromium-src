@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "components/ysp_login/ysp_login_manager.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "base/mac/mac_util.h"
 #include "base/strings/sys_string_conversions.h"
-#include "base/prefs/pref_service.h"
-#include "grit/theme_resources.h"
+#include "components/prefs/pref_service.h"
+#include "chrome/grit/theme_resources.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/theme_provider.h"
@@ -297,17 +297,17 @@ void LoginObserver::OnLockStatusChanged() {
 
     [self addCustomWindowControls];
     // TODO: register ysp manager listener
-    loginObserver_.reset(new LoginObserver());
-    loginObserver_->SetController(self);
-    YSPLoginManager::GetInstance()->AddObserver(loginObserver_.get());
+    login_observer_ = std::make_unique<LoginObserver>();
+    login_observer_->SetController(self);
+    YSPLoginManager::GetInstance()->AddObserver(login_observer_.get());
   }
   return self;
 }
 
 - (void)browserWillBeDestroyed {
   browser_ = nullptr;
-  YSPLoginManager::GetInstance()->RemoveObserver(loginObserver_.get());
-  loginObserver_->SetController(nullptr);
+  YSPLoginManager::GetInstance()->RemoveObserver(login_observer_.get());
+  login_observer_->SetController(nullptr);
 }
 
 - (void)dealloc {
@@ -332,10 +332,10 @@ void LoginObserver::OnLockStatusChanged() {
     url_str = "redcore://newtab";
 
   const GURL url(url_str);
-  const content::Referrer ref(url, blink::WebReferrerPolicyDefault);
+  const content::Referrer ref(url, blink::kWebReferrerPolicyDefault);
   content::OpenURLParams param(url,
                                ref,
-                               SINGLETON_TAB,
+                               WindowOpenDisposition::SINGLETON_TAB,
                                ui::PAGE_TRANSITION_AUTO_TOPLEVEL,
                                false);
   browser_->OpenURL(param);

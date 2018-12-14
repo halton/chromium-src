@@ -36,7 +36,7 @@
 #include "base/android/scoped_java_ref.h"
 #endif
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
 #include "content\common\IE\version_ie.h"
 #endif
 class GURL;
@@ -103,7 +103,7 @@ class CONTENT_EXPORT WebContentsDelegate {
   virtual WebContents* OpenURLFromTab(WebContents* source,
                                       const OpenURLParams& params);
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
   virtual bool UrlCompared(const GURL& host, RendererMode& mode); //YSP+ { Kernel switching
   virtual void DidGetWindowsDomainUserInfo(base::string16* username, base::string16* password);
 #endif

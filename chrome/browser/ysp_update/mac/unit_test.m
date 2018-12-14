@@ -32,13 +32,11 @@ void ExtractFiles()
 {
 }
 
-static NSRunLoop *loop = nil;
 int main()
 {
     NSLog(@"Start");
     NSString * res = [[NSBundle mainBundle] resourcePath];
     NSString * exec = [[NSBundle mainBundle] executablePath];
-    NSCondition *cond = [[NSCondition alloc] init];
     NSLog(@"resource path: %@", res);
     NSLog(@"executable path: %@", exec);
     SUDiskImageUnarchiver * unarchiver = [[SUDiskImageUnarchiver alloc] initWithArchivePath:@"/Users/liuwei/work2/autoupdate/Redcore.dmg"

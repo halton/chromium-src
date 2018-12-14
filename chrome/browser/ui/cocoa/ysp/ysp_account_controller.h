@@ -6,7 +6,8 @@
 #define _YSP_AVATAR_CONTROLLER_H_ 
 
 #import <Cocoa/Cocoa.h>
-#include "base/memory/scoped_ptr.h"
+#include <memory>
+
 #include "base/mac/scoped_nsobject.h"
 #import "chrome/browser/ui/cocoa/themed_window.h"
 #import "chrome/browser/ui/cocoa/ysp/ysp_lock_view.h"
@@ -41,7 +42,7 @@ class LoginObserver;
 
  base::scoped_nsobject<YSPLockViewController> lockViewController_;
 
- scoped_ptr<LoginObserver> loginObserver_;
+ std::unique_ptr<LoginObserver> login_observer_;
  Browser* browser_;
  id<YSPControllerDelegate> delegate_;
 

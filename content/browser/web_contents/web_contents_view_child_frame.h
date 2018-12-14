@@ -35,7 +35,9 @@ class WebContentsViewChildFrame : public WebContentsView,
   void StoreFocus() override;
   void RestoreFocus() override;
   void FocusThroughTabTraversal(bool reverse) override;
+#if defined(IE_REDCORE)
   void OnWebContentDestroying() override;
+#endif
   DropData* GetDropData() const override;
   gfx::Rect GetViewBounds() const override;
   void CreateView(const gfx::Size& initial_size,

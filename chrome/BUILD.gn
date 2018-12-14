@@ -632,6 +632,10 @@ if (is_win) {
     sources = [
       "app/chrome_exe_main_mac.cc",
     ]
+    
+    if(is_redcore && is_mac) {
+      sources += [ "app/update_mac.mm" ]
+    }
 
     extra_configs = [ "//build/config/compiler:wexit_time_destructors" ]
 

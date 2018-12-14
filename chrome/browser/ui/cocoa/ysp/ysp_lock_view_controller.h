@@ -6,7 +6,6 @@
 #define ysp_lock_view_controller_h
 
 #import <Cocoa/Cocoa.h>
-#include "base/memory/scoped_ptr.h"
 #include "base/mac/scoped_nsobject.h"
 #import "chrome/browser/ui/cocoa/themed_window.h"
 

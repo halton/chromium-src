@@ -216,3 +216,62 @@ void OSCrypt::UseLockedMockKeychainForTesting(bool use_locked) {
   if (use_locked_mock_keychain)
     use_mock_keychain = true;
 }
+
+#ifdef REDCORE
+// static 
+bool OSCrypt::EncryptString(
+    const std::string& plaintext,
+    const std::string& key_text,
+    std::string* ciphertext) {
+  // TODO(sunlm04)    
+  return true;
+}
+
+// static 
+bool OSCrypt::DecryptString(
+    const std::string& ciphertext,
+    const std::string& key_text,
+    std::string* plaintext) {
+  // TODO(sunlm04)
+  return true;
+}
+
+// static
+bool OSCrypt::IsSupportHardwareCrypto() {
+  // TODO(sunlm04)
+  return true;
+}
+
+// static 
+bool OSCrypt::HardwareEncryptString16(
+    const base::string16& plaintext,
+    std::string* ciphertext) {
+  // TODO(sunlm04)
+  return true;
+}
+
+// static 
+bool OSCrypt::HardwareDecryptString16(
+    const std::string& ciphertext,
+    base::string16* plaintext) {
+  // TODO(sunlm04)
+  return true;
+}
+
+// static  
+bool OSCrypt::HardwareEncryptString(
+    const std::string& plaintext,
+    std::string* ciphertext) {
+  // TODO(sunlm04)
+  return true;
+}
+
+// static 
+bool OSCrypt::HardwareDecryptString(
+    const std::string& ciphertext,
+    std::string* plaintext) {
+  // TODO(sunlm04)
+  return true;
+}
+
+#endif  // REDCORE

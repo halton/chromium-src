@@ -285,15 +285,6 @@ NSString* BrowserWindowCocoa::WindowTitle() {
 bool BrowserWindowCocoa::IsToolbarShowing() const {
   if (!IsFullscreen())
     return true;
-#ifdef REDCORE
-  // copy / cut control
-  if (!YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
-    DLOG(INFO) << "checking copy enabled, event.windowsKeyCode: " << event.windowsKeyCode
-    << ", event.modifiers: " << std::hex << event.modifiers;
-    if ((event.windowsKeyCode == 'C' || event.windowsKeyCode == 'X') && (event.modifiers & blink::WebInputEvent::MetaKey))
-      return true;
-  }
-#endif
 
   return [cocoa_controller() isToolbarShowing] == YES;
 }
@@ -598,7 +589,16 @@ BrowserWindowCocoa::PreHandleKeyboardEvent(
 
   if (![BrowserWindowUtils shouldHandleKeyboardEvent:event])
     return Result::NOT_HANDLED;
-
+#ifdef REDCORE
+  // copy / cut control
+  if (!YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+    DLOG(INFO) << "checking copy enabled, event.windowsKeyCode: " << event.windows_key_code
+               << ", event.modifiers: " << std::hex << event.GetModifiers();
+    if ((event.windows_key_code== 'C' || event.windows_key_code== 'X') && 
+        (event.GetModifiers() & blink::WebInputEvent::kMetaKey))
+      return Result::NOT_HANDLED_IS_SHORTCUT;
+  }
+#endif  // REDCORE
   int command = CommandForKeyEvent(event.os_event).chrome_command;
   if (command == -1)
     command = DelayedWebContentsCommandForKeyEvent(event.os_event);

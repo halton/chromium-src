@@ -7,6 +7,7 @@
 #include "components/password_manager/core/common/password_manager_pref_names.h"
 
 using password_manager::MigrationStatus;
+using password_manager::PasswordStoreChangeList;
 
 PasswordStoreMac::PasswordStoreMac(
     std::unique_ptr<password_manager::LoginDatabase> login_db,
@@ -30,14 +31,6 @@ void PasswordStoreMac::ShutdownOnUIThread() {
   // Unsubscribe the observer, otherwise it's too late in the destructor.
   migration_status_.Destroy();
 }
-
-#ifdef REDCORE
-// TODO (ysp): implement
-PasswordStoreChangeList PasswordStoreProxyMac::SaveLoginForEnterplorerImpl(
-    const autofill::PasswordForm& form) {
-  return PasswordStoreChangeList();
-}
-#endif
 
 PasswordStoreMac::~PasswordStoreMac() = default;
 

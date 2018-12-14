@@ -41,8 +41,9 @@ class WebContentsViewGuest : public WebContentsView,
 
   void OnGuestDetached(WebContentsView* old_parent_view);
 
+#if defined(IE_REDCORE)
   void OnWebContentDestroying() override;
-
+#endif
   // WebContentsView implementation --------------------------------------------
   gfx::NativeView GetNativeView() const override;
   gfx::NativeView GetContentNativeView() const override;

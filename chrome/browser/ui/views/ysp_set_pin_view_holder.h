@@ -46,8 +46,6 @@ class YSPSetPINViewHolder : public content::WebContentsDelegate,
   bool HandleContextMenu(const content::ContextMenuParams& params) override;
 
   YSPSetPINView* ysp_set_pin_view_;
-
-  OpaqueBrowserFrameView* opaque_browser_frame_view_;
 };
 
 #endif  // CHROME_BROWSER_UI_VIEWS_YSP_SET_PIN_VIEW_HOLDER_H_

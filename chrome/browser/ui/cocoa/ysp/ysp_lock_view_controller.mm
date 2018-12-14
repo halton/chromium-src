@@ -19,8 +19,8 @@
 #include "base/mac/sdk_forward_declarations.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "base/strings/sys_string_conversions.h"
-#include "components/ysp_login/ysp_login_manager.h"
-#include "base/prefs/pref_service.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#include "components/prefs/pref_service.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/common/pref_names.h"
 #include "chrome/browser/ui/browser.h"
@@ -115,7 +115,10 @@ const CGFloat kAvatarSize = 70;
     [password_ setEditable:YES];
     [[password_ cell] setUsesSingleLineMode:YES];
     [[password_ cell] setScrollable:YES];
-    [password_ setPlaceholderString:base::SysUTF16ToNSString(l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK))];
+    if (@available(macOS 10.10, *)) {
+      [password_ setPlaceholderString:base::SysUTF16ToNSString( 
+         l10n_util::GetStringUTF16(IDS_YSP_LOCK_BROWSER_ENTER_PASSWORD_TO_UNLOCK))];
+    }
     [password_ setBordered:NO];
     [password_ setFocusRingType:NSFocusRingTypeNone];
     [password_ setBackgroundColor:[NSColor colorWithWhite:1 alpha:1]];

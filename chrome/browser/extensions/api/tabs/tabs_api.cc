@@ -72,7 +72,6 @@
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/render_widget_host_view.h"
 #include "content/public/browser/web_contents.h"
-#include "content/browser/web_contents/web_contents_ie.h"
 #include "content/public/common/url_constants.h"
 #include "extensions/browser/app_window/app_window.h"
 #include "extensions/browser/extension_api_frame_id_map.h"
@@ -109,6 +108,10 @@
 #include "ui/base/clipboard/clipboard.h"
 #include "ui/base/clipboard/clipboard_types.h"
 #include "ui/base/ui_base_features.h"
+#endif
+
+#ifdef IE_REDCORE
+#include "content/browser/web_contents/web_contents_ie.h"
 #endif
 
 using content::BrowserThread;

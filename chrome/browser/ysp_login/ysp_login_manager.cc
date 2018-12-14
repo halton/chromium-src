@@ -3686,7 +3686,7 @@ void YSPLoginManager::InitPinKeys() {
   PrefService* prefs = g_browser_process->local_state();
   const base::ListValue* pin_list = prefs->GetList(prefs::kYSPPinKeys);
   std::vector<std::string> pin_keys;
-  for (int index = 0; index < pin_list->GetSize(); index++) {
+  for (int index = 0; (size_t)index < pin_list->GetSize(); index++) {
     const base::Value* key_value = NULL;
     if (pin_list->Get(index, &key_value)) {
       pin_keys.push_back(key_value->GetString());

@@ -85,7 +85,6 @@ typedef int (*GM_STREAM_ERROR_CALLBACK)(_In const char* c_szErrorString,
 
 /******************************************************************************/
 
-#ifdef WIN32
 
 #ifdef __cplusplus
 extern "C" {
@@ -189,7 +188,6 @@ extern void (*GMCertDestroy)(_In GM_CERT gmCert);
 }
 #endif
 
-#endif  // WIN32
 
 class GmStream {
  public:

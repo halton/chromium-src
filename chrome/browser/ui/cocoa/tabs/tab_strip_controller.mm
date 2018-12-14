@@ -1920,7 +1920,9 @@ contextMenuModelForController:(TabControllerCocoa*)controller
   }
 #else
   } else if ([area isEqual:customWindowControlsTrackingArea_]) {
-    [customWindowControls_ setMouseInside:YES];
+    if(customWindowControls_) {
+      [customWindowControls_ setMouseInside:YES];
+    }
   }
 #endif
 }
@@ -2370,13 +2372,17 @@ contextMenuModelForController:(TabControllerCocoa*)controller
     [self regenerateSubviewList];
   }
 }
-#endif //REDCORE
+#endif  // REDCORE
 
 - (void)removeCustomWindowControls {
   if (customWindowControls_)
     [permanentSubviews_ removeObject:customWindowControls_];
   [self regenerateSubviewList];
-  [customWindowControls_ setMouseInside:NO];
+#ifndef REDCORE
+  if(customWindowControls_) {
+    [customWindowControls_ setMouseInside:NO];
+  }
+#endif  // REDCORE
 }
 
 // Gets the tab and the alert state to check whether the window

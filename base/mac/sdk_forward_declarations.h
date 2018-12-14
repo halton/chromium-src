@@ -22,6 +22,13 @@
 #include "base/base_export.h"
 #include "base/mac/availability.h"
 
+#ifdef REDCORE
+// to fix the compile warning caused by micro MAC_OS_X_VERSION_MIN_REQUIRED at mac 70_dev
+// mac 70_dev only support 10.12+ SDK
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
+#define MAC_OS_X_VERSION_MIN_REQUIRED 101200
+#endif  // REDCORE
+
 // ----------------------------------------------------------------------------
 // Define typedefs, enums, and protocols not available in the version of the
 // OSX SDK being compiled against.

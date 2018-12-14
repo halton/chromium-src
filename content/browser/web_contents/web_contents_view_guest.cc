@@ -49,7 +49,9 @@ WebContentsViewGuest::WebContentsViewGuest(
 
 WebContentsViewGuest::~WebContentsViewGuest() {}
 
+#if defined(IE_REDCORE)
 void WebContentsViewGuest::OnWebContentDestroying() {}
+#endif
 
 gfx::NativeView WebContentsViewGuest::GetNativeView() const {
   return platform_view_->GetNativeView();

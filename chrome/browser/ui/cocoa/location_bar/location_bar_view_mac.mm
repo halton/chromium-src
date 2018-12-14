@@ -242,6 +242,12 @@ LocationBarTesting* LocationBarViewMac::GetLocationBarForTesting() {
   return this;
 }
 
+#ifdef REDCORE
+  void LocationBarViewMac::SetAddressBarEnable(bool is_enble) {
+  // TODO(sunlm04)
+}
+#endif  // REDCORE
+
 bool LocationBarViewMac::GetBookmarkStarVisibility() {
   DCHECK(star_decoration_.get());
   return star_decoration_->IsVisible();
