@@ -211,6 +211,10 @@ extern const char kRendererCmdPrefix[];
 CONTENT_EXPORT extern const char kRendererProcess[];
 CONTENT_EXPORT extern const char kRendererProcessLimit[];
 CONTENT_EXPORT extern const char kRendererStartupDialog[];
+#if defined(REDCORE) && defined(IE_REDCORE)
+CONTENT_EXPORT extern const char kTridentProcess[];        // ysp+{IE Embedded}
+CONTENT_EXPORT extern const char kTridentStartupDialog[];  // ysp+{IE Embedded}
+#endif
 extern const char kSandboxIPCProcess[];
 CONTENT_EXPORT extern const char kSavePreviousDocumentResources[];
 extern const char kShowPaintRects[];

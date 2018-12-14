@@ -8,7 +8,7 @@
 #include <comdef.h>
 #include <urlmon.h>
 
-#include "content/common/IE/IEInterface_h.h"
+#include "content/common/IE/IEInterface.h"
 #include "content/common/IE/atl_include.h"
 
 namespace ie {

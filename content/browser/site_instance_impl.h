@@ -66,6 +66,11 @@ class CONTENT_EXPORT SiteInstanceImpl final : public SiteInstance,
   bool RequiresDedicatedProcess() override;
   bool IsDefaultSubframeSiteInstance() const override;
 
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  void SetRenderMode(const RendererMode& mode) override;
+  RendererMode GetRenderMode() const override;
+#endif  // ysp {+
+
   // The policy to apply when selecting a RenderProcessHost for the
   // SiteInstance. If no suitable RenderProcessHost for the SiteInstance exists
   // according to the policy, and there are processes with unmatched service
@@ -298,6 +303,11 @@ class CONTENT_EXPORT SiteInstanceImpl final : public SiteInstance,
   // effective URLs, such as hosted apps.  In those cases, this URL is a site
   // URL that is computed without the use of effective URLs.
   GURL lock_url_;
+
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  // render process type
+  RendererMode render_mode_;
+#endif  // ysp {+
 
   // The ProcessReusePolicy to use when creating a RenderProcessHost for this
   // SiteInstance.

@@ -15,7 +15,7 @@
 #include "base/win/windows_version.h"
 #include "content/browser/frame_host/navigation_controller_impl.h"
 #include "content/browser/web_contents/web_contents_ie.h"
-#include "content/common/IE/IEInterface_h.h"
+#include "content/common/IE/IEInterface.h"
 #include "content/common/IE/atl_include.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_thread.h"
@@ -27,15 +27,13 @@
 #include "ui/events/event.h"
 #include "ui/events/keycodes/keyboard_code_conversion_win.h"
 #include "url/gurl.h"
-
-// just for cmp
-#define GWL_USERDATA (-21)
+#include "base/logging.h"
 
 #pragma warning(disable : 4302)
 #pragma warning(disable : 4189)
 
 namespace FOR_INCLUDE {
-#include "IEInterface_i.c"
+#include "content/common/IE/IEInterface_i.c"
 }
 
 namespace {
@@ -231,13 +229,13 @@ STDMETHODIMP BrowserHostEventDelegant::OnDownLoadFile(BSTR url,
       buffer.append(data, size);
       SafeArrayUnaccessData(safe_array);
       content::BrowserThread::PostTask(
-          content::BrowserThread::UI, FROM_HERE,
+          content::BrowserThread::IO, FROM_HERE,
           base::Bind(&BrowserHostEventDelegant::OnJSWindowClose,
                      delegant_weak_factory_.GetWeakPtr()));
     } else if (status == (int)ENDDOWNLOAD || status == (int)DOWNLOADERROR) {
       std::string buffer = "";
       content::BrowserThread::PostTask(
-          content::BrowserThread::UI, FROM_HERE,
+          content::BrowserThread::IO, FROM_HERE,
           base::Bind(&BrowserHostEventDelegant::OnJSWindowClose,
                      delegant_weak_factory_.GetWeakPtr()));
     }
@@ -313,7 +311,7 @@ STDMETHODIMP BrowserHostEventDelegant::OnGetMainWndPos(int* left,
 }
 
 STDMETHODIMP BrowserHostEventDelegant::OnIEServerWndCreated(int window_handle) {
-  ie_browser_handle_ = (HWND)window_handle;
+  ie_browser_handle_ = reinterpret_cast<HWND>(window_handle);
   return S_OK;
 }
 
@@ -337,7 +335,7 @@ STDMETHODIMP BrowserHostEventDelegant::OnUpdateCookie(BSTR cookie) {
     base::ListValue::const_iterator iter = list->begin();
     for (; iter != list->end(); iter++) {
       std::wstring buffer = L"";
-      (*iter).GetAsString(&buffer);
+      iter->GetAsString(&buffer);
       cookie_vector.push_back(buffer);
     }
     ie_content_->OnUpdateCookie(GURL(url), cookie_vector);
@@ -381,11 +379,9 @@ STDMETHODIMP BrowserHostEventDelegant::OnRequestAcceleratorFromMouseWheel(
     blink::WebMouseWheelEvent event;
     event.wheel_ticks_y = delta / 120;
     event.SetModifiers(modifiers);
-    // comment just for compiling
-    // event.x = ponit_x;
-    // event.y = ponit_y;
-    // event.canScroll = false;
-    // ie_content_->HandleWheelEvent(event);
+    event.delta_x = ponit_x;
+    event.delta_y = ponit_y;
+    ie_content_->HandleWheelEvent(event);
   }
   return S_OK;
 }
@@ -446,9 +442,15 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
   }
 
   IClassFactory* class_factory = NULL;
+  HRESULT hr;
   while (class_factory == NULL) {
-    CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
+    hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
                      IID_IClassFactory, (LPVOID*)&class_factory);
+	if (FAILED(hr))
+	{
+      LOG(WARNING)
+          << "class factory of CLSID_BrowserContainer register error";
+	}
   }
 
   if (class_factory) {
@@ -727,7 +729,7 @@ HWND BrowserHostEventDelegant::CreateHostWindow(HWND parent_window) {
     }
   }
 
-  SetWindowLong(window_handle, GWL_USERDATA, (LONG)this);
+  SetWindowLong(window_handle, GWLP_USERDATA, (LONG)this);
   ::ShowWindow(window_handle, SW_SHOW);
   return window_handle;
 }
@@ -748,6 +750,8 @@ void BrowserHostEventDelegant::RegisterWndClass(HINSTANCE instance) {
   wcex.lpszMenuName = L"YSPHostWnd";
   wcex.lpszClassName = L"YSPHostWnd";
   wcex.hIconSm = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));
+
+  ATOM ret = RegisterClassExW(&wcex);
 }
 
 void BrowserHostEventDelegant::UpdateDownloadData(const int& status,
@@ -781,7 +785,7 @@ LRESULT BrowserHostEventDelegant::WndProc(HWND window_handle,
       break;
     }
     case WM_DESTROY: {
-      SetWindowLong(window_handle, GWL_USERDATA, 0);
+      SetWindowLong(window_handle, GWLP_USERDATA, 0);
       break;
     }
     default:

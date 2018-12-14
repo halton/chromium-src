@@ -1,4 +1,4 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+﻿// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -183,7 +183,13 @@ int MainDllLoader::Launch(HINSTANCE instance,
   sandbox::SandboxInterfaceInfo sandbox_info = {0};
   const bool is_browser = process_type_.empty();
   const bool is_sandboxed =
-      !cmd_line.HasSwitch(service_manager::switches::kNoSandbox);
+      !cmd_line.HasSwitch(service_manager::switches::kNoSandbox)
+#if defined(REDCORE) && defined(IE_REDCORE)
+      // ysp+ {IE Embedded}	//IE 子进程
+      // 不启用DEP，原因http://blog.csdn.net/charlessimonyi/article/details/30479131
+	  || cmd_line.HasSwitch(switches::kTridentProcess);
+#endif
+
   if (is_browser || is_sandboxed) {
     // For child processes that are running as --no-sandbox, don't initialize
     // the sandbox info, otherwise they'll be treated as brokers (as if they

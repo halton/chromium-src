@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "content/common/IE/IEInterface_h.h"
+#include "content/common/IE/IEInterface.h"
 #include "content/common/IE/atl_include.h"
 #include "content/common/IE/event_handler_ie.h"
 

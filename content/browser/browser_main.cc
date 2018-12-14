@@ -10,6 +10,10 @@
 #include "content/browser/browser_main_runner_impl.h"
 #include "content/common/content_constants_internal.h"
 
+#include "base/logging.h"
+#include "content/common/IE/atl_include.h"
+#include "content/common/IE/dll_module_ie.h"
+
 namespace content {
 
 namespace {
@@ -33,6 +37,13 @@ class ScopedBrowserMainEvent {
 int BrowserMain(const MainFunctionParams& parameters) {
   ScopedBrowserMainEvent scoped_browser_main_event;
 
+  ie::DllModule _AtlModule;
+  HRESULT hr = OleInitialize(NULL);
+
+  if (!SUCCEEDED(hr)) {
+    return 0;
+  }
+
   base::trace_event::TraceLog::GetInstance()->set_process_name("Browser");
   base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
       kTraceEventBrowserProcessSortIndex);
@@ -47,7 +58,9 @@ int BrowserMain(const MainFunctionParams& parameters) {
   exit_code = main_runner->Run();
 
   main_runner->Shutdown();
-
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  OleUninitialize();
+#endif  // ysp {+
   return exit_code;
 }
 

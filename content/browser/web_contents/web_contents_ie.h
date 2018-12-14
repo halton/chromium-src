@@ -235,10 +235,10 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   bool is_navigate_stopped_;
   bool need_fire_unload_event_;
   bool is_new_window_;  // 是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
-  base::WeakPtrFactory<WebContentsIE> weak_factory_for_io_;
   std::wstring query_dns_json_string_;
   base::WeakPtrFactory<WebContentsIE> self_;
-
+  base::WeakPtrFactory<WebContentsIE> weak_factory_for_io_;
+  
   DISALLOW_COPY_AND_ASSIGN(WebContentsIE);
 };
 

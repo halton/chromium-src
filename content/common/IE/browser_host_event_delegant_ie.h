@@ -13,7 +13,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "components/download/public/common/download_file_ie.h"
-#include "content/common/IE/IEInterface_h.h"
+#include "content/common/IE/IEInterface.h"
 #include "content/common/IE/atl_include.h"
 #include "content/common/IE/event_ie.h"
 

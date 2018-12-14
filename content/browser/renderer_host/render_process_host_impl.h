@@ -857,7 +857,7 @@ class CONTENT_EXPORT RenderProcessHostImpl
   base::WaitableEvent never_signaled_;
 #endif
 
-#ifdef IE_REDCORE
+#if defined(REDCORE) && defined(IE_REDCORE)
   bool use_ie_;                            // ysp+ {IE Embedded}
   ResourceMessageFilter* res_msg_filter_;  // ysp+ {IE Embedded}
 #endif

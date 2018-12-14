@@ -505,6 +505,20 @@ class RendererSandboxedProcessLauncherDelegate
   }
 };
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+// ysp+ {IE Embedded}
+class TridentSandboxedProcessLauncherDelegate
+    : public RendererSandboxedProcessLauncherDelegate {
+ public:
+  TridentSandboxedProcessLauncherDelegate()
+      : RendererSandboxedProcessLauncherDelegate() {}
+  ~TridentSandboxedProcessLauncherDelegate() override {}
+  bool ShouldLaunchElevated() override { return true; }
+  // bool ShouldSandbox() override { return false; }
+  bool DisableDefaultPolicy() override { return false; }
+};
+#endif
+
 const char kSessionStorageHolderKey[] = "kSessionStorageHolderKey";
 
 class SessionStorageHolder : public base::SupportsUserData::Data {
@@ -1498,6 +1512,15 @@ RenderProcessHost* RenderProcessHostImpl::CreateRenderProcessHost(
         site_instance->GetSiteURL());
   }
 
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+  if (site_instance && site_instance->GetRenderMode().core == IE_CORE) {
+    RenderProcessHostImpl* rphi = new RenderProcessHostImpl(
+        browser_context, storage_partition_impl, is_for_guests_only);
+    rphi->SetTridentCore(true);
+    return rphi;
+  }
+#endif  // ysp {+
+
   return new RenderProcessHostImpl(browser_context, storage_partition_impl,
                                    is_for_guests_only);
 }
@@ -1571,6 +1594,10 @@ RenderProcessHostImpl::RenderProcessHostImpl(
 #if defined(OS_ANDROID)
       never_signaled_(base::WaitableEvent::ResetPolicy::MANUAL,
                       base::WaitableEvent::InitialState::NOT_SIGNALED),
+#endif
+#ifdef IE_REDCORE
+      use_ie_(false),
+      res_msg_filter_(NULL),
 #endif
       renderer_host_binding_(this),
       instance_weak_factory_(
@@ -1827,6 +1854,29 @@ bool RenderProcessHostImpl::Init() {
       cmd_line->PrependWrapper(renderer_prefix);
     AppendRendererCommandLine(cmd_line.get());
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+    // ysp+{IE Embedded}
+    std::string procType =
+        cmd_line->GetSwitchValueASCII(switches::kProcessType);
+    if (procType.compare(switches::kTridentProcess) == 0) {
+      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
+          std::unique_ptr<RendererSandboxedProcessLauncherDelegate>(
+              new TridentSandboxedProcessLauncherDelegate),
+          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
+          base::NullCallback());
+    } else {
+      // Spawn the child process asynchronously to avoid blocking the UI thread.
+      // As long as there's no renderer prefix, we can use the zygote process
+      // at this stage.
+      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
+          std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
+          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
+          base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
+      channel_->Pause();
+
+      fast_shutdown_started_ = false;
+    }
+#else
     // Spawn the child process asynchronously to avoid blocking the UI thread.
     // As long as there's no renderer prefix, we can use the zygote process
     // at this stage.
@@ -1837,6 +1887,7 @@ bool RenderProcessHostImpl::Init() {
     channel_->Pause();
 
     fast_shutdown_started_ = false;
+#endif
   }
 
   if (!gpu_observer_registered_) {
@@ -2873,8 +2924,24 @@ static void AppendCompositorCommandLineFlags(base::CommandLine* command_line) {
 void RenderProcessHostImpl::AppendRendererCommandLine(
     base::CommandLine* command_line) {
   // Pass the process type first, so it shows first in process listings.
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  // ysp+ {IE Embedded}
+  if (UseTridentCore()) {
+    command_line->AppendSwitchASCII(switches::kProcessType,
+                                    switches::kTridentProcess);
+    base::CommandLine* cmd = base::CommandLine::ForCurrentProcess();
+    if (cmd->HasSwitch(switches::kTridentStartupDialog)) {
+      command_line->AppendSwitch(switches::kTridentStartupDialog);
+    }
+  } else {
+    command_line->AppendSwitchASCII(switches::kProcessType,
+                                    switches::kRendererProcess);
+  }
+#else
   command_line->AppendSwitchASCII(switches::kProcessType,
                                   switches::kRendererProcess);
+#endif
 
 #if defined(OS_WIN)
   command_line->AppendArg(switches::kPrefetchArgumentRenderer);

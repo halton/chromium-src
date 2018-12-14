@@ -15,6 +15,18 @@ if (is_mac) {
   import("//build/config/mac/mac_sdk.gni")
 }
 
+import("//build/config/redcore.gni") 
+if (is_win) {
+  import("//build/toolchain/win/midl.gni")
+
+  midl("IEInterface") {
+    sources = ["//content/common/IE/IEInterface.idl"]
+    out_dir = "$target_gen_dir/IE"
+    print(out_dir)
+  }
+}
+
+
 # For feature flags internal to content. See content/public/common:features
 # for feature flags that clients of contents need to know about.
 buildflag_header("buildflags") {
@@ -365,6 +377,10 @@ source_set("common") {
     "//url/ipc:url_ipc",
   ]
 
+  if (is_ie_redcore) {
+    public_deps += [":IEInterface"]
+  }
+
   defines = []
   include_dirs = []
   libs = []
@@ -396,10 +412,6 @@ source_set("common") {
       "../../third_party/minhook/src/hde/hde64.c",
       "../../third_party/minhook/src/hook.c",
       "../../third_party/minhook/src/trampoline.c",
-      "IE/IEInterface.idl",
-      "IE/IEInterface_h.h",
-      "IE/IEInterface_i.c",
-      "IE/IEInterface_p.c",
       "IE/atl_include.h",
       "IE/browser_host_event_delegant_ie.cc",
       "IE/browser_host_event_delegant_ie.h",
@@ -408,7 +420,6 @@ source_set("common") {
       "IE/devtools_host_ie.cc",
       "IE/devtools_host_ie.h",
       "IE/dll_module_ie.h",
-      "IE/dlldata.c",
       "IE/doc_host_ui_handler_ie.cc",
       "IE/doc_host_ui_handler_ie.h",
       "IE/event_handler_ie.h",

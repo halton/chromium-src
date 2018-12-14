@@ -158,6 +158,11 @@ extern int PpapiBrokerMain(const MainFunctionParams&);
 #endif
 extern int RendererMain(const content::MainFunctionParams&);
 extern int UtilityMain(const MainFunctionParams&);
+
+#ifdef IE_REDCORE
+extern int TridentMain(const MainFunctionParams&);  // ysp+ {IE Embedded}
+#endif
+
 }  // namespace content
 
 namespace content {
@@ -553,6 +558,9 @@ int RunOtherNamedProcessTypeMain(const std::string& process_type,
     {switches::kUtilityProcess, UtilityMain},
     {switches::kRendererProcess, RendererMain},
     {switches::kGpuProcess, GpuMain},
+#ifdef IE_REDCORE
+    {switches::kTridentProcess, TridentMain},  // ysp+ {IE Embedded}
+#endif
   };
 
   for (size_t i = 0; i < base::size(kMainFunctions); ++i) {
@@ -670,6 +678,13 @@ int ContentMainRunnerImpl::Initialize(const ContentMainParams& params) {
       *base::CommandLine::ForCurrentProcess();
   std::string process_type =
       command_line.GetSwitchValueASCII(switches::kProcessType);
+
+#if defined(REDCORE) && defined(IE_REDCORE)  //ysp {+
+  // add --disable-gpu-compositing
+  base::CommandLine* command_line_temp = base::CommandLine::ForCurrentProcess();
+  command_line_temp->AppendSwitch(switches::kDisableGpuCompositing);
+  command_line_temp->AppendSwitch(switches::kDisableGpu);
+#endif   //ysp }+
 
 #if defined(OS_WIN)
   if (command_line.HasSwitch(switches::kDeviceScaleFactor)) {

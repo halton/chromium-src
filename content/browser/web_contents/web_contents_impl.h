@@ -366,10 +366,12 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   WebContentsImpl* GetOutermostWebContents() override;
   void DidChangeVisibleSecurityState() override;
   void NotifyPreferencesChanged() override;
-#if defined(IE_REDCORE)
+                                         
+#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
   bool IsAutoSelect() override;
   RendererMode GetRendererMode() override;
-#endif  // IE_REDCORE
+#endif  // ysp {+
+                                         
   void Stop() override;
   void SetPageFrozen(bool frozen) override;
   std::unique_ptr<WebContents> Clone() override;

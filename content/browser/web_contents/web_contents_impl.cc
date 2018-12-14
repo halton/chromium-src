@@ -9,6 +9,7 @@
 #include <stddef.h>
 
 #include <cmath>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -698,8 +699,30 @@ std::unique_ptr<WebContentsImpl> WebContentsImpl::CreateWithOpener(
   FrameTreeNode* opener = nullptr;
   if (opener_rfh)
     opener = opener_rfh->frame_tree_node();
+
+
+
+
+#ifdef REDCORE  // ysp+ {IE Embedded}
+  std::unique_ptr<WebContentsImpl> new_contents;  //WebContentsImpl* new_contents = NULL;
+#if defined(IE_REDCORE)
+  // ysp+ {IE Embedded}
+
+  if (params.renderer_mode.core == IE_CORE)
+    new_contents.reset(new WebContentsIE(params.browser_context));
+  else
+#endif
+    new_contents.reset(new WebContentsImpl(params.browser_context));
+#if defined(IE_REDCORE)
+  if (!params.auto_select_content)
+    new_contents->auto_seclect_ = false;
+#endif
+
+#else // chromium 
   std::unique_ptr<WebContentsImpl> new_contents(
       new WebContentsImpl(params.browser_context));
+#endif
+
   new_contents->SetOpenerForNewContents(opener, params.opener_suppressed);
 
   // If the opener is sandboxed, a new popup must inherit the opener's sandbox
@@ -1427,6 +1450,7 @@ void WebContentsImpl::DecrementCapturerCount() {
     const gfx::Size old_size = preferred_size_for_capture_;
     preferred_size_for_capture_ = gfx::Size();
     OnPreferredSizeChanged(old_size);
+  
 
     if (visibility_ == Visibility::HIDDEN) {
       DVLOG(1) << "Executing delayed WasHidden().";
@@ -1894,6 +1918,9 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params) {
   // it should be hidden.
   visibility_ =
       params.initially_hidden ? Visibility::HIDDEN : Visibility::VISIBLE;
+#if defined(REDCORE) && defined(IE_REDCORE)
+  rendererMode_ = params.renderer_mode;
+#endif
 
   if (!params.last_active_time.is_null())
     last_active_time_ = params.last_active_time;
@@ -1909,6 +1936,11 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params) {
   scoped_refptr<SiteInstance> site_instance = params.site_instance;
   if (!site_instance)
     site_instance = SiteInstance::Create(params.browser_context);
+
+#if defined(REDCORE) && defined(IE_REDCORE)
+  site_instance->SetRenderMode(params.renderer_mode);
+#endif
+
   if (params.desired_renderer_state == CreateParams::kNoRendererProcess) {
     static_cast<SiteInstanceImpl*>(site_instance.get())
         ->PreventAssociationWithSpareProcess();
@@ -2416,41 +2448,6 @@ void WebContentsImpl::FullscreenStateChanged(RenderFrameHost* rfh,
         RenderFrameHost::kNoFrameTreeNodeId;
   }
 }
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp+ { Kernel switching
-void WebContentsImpl::CreateNewIEWindow(const GURL& url, RendererMode mode) {
-  scoped_refptr<SiteInstance> site_instance =
-      SiteInstance::CreateForURL(GetBrowserContext(), url);
-  site_instance->GetProcess()->SetTridentCore(true);
-  site_instance->GetProcess()->Init();
-
-  CreateParams create_params(GetBrowserContext(), site_instance.get());
-  create_params.renderer_mode = mode;
-  create_params.initial_size = GetContainerBounds().size();
-  std::unique_ptr<WebContents> new_contents =
-      WebContents::Create(create_params);
-  WebContentsDelegate* delegate = GetDelegate();
-  if (delegate) {
-    WindowOpenDisposition disposition =
-        WindowOpenDisposition::NEW_FOREGROUND_TAB;
-    gfx::Rect initial_rect;
-    initial_rect.set_size(create_params.initial_size);
-    delegate->AddNewContents(this, std::move(new_contents), disposition,
-                             initial_rect, false, NULL);
-  }
-  // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
-  OpenURLParams open_params(url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-                            ui::PAGE_TRANSITION_LINK,
-                            true /* is_renderer_initiated */);
-  new_contents->OpenURL(open_params);
-}
-/*
-static std::string GetDomainNameForHost(std::string host) {
-        const char *domain = strchr(host.c_str(), '.');
-        std::string DomainName(domain + 1);
-        return DomainName;
-}
-*/
-#endif
 
 bool WebContentsImpl::IsFullscreenForCurrentTab() const {
   return delegate_ ? delegate_->IsFullscreenForTabOrPending(this) : false;
@@ -2564,6 +2561,43 @@ bool WebContentsImpl::RequestKeyboardLock(
     delegate_->RequestKeyboardLock(this, esc_key_locked_);
   return true;
 }
+#if defined(REDCORE) && defined(IE_REDCORE)  //ysp+ { Kernel switching
+void WebContentsImpl::CreateNewIEWindow(const GURL& url, RendererMode mode) {
+
+	scoped_refptr<SiteInstance> site_instance = SiteInstance::CreateForURL(GetBrowserContext(), url);
+	site_instance->GetProcess()->SetTridentCore(true);
+	site_instance->GetProcess()->Init();
+	CreateParams create_params(GetBrowserContext(), site_instance.get());
+	create_params.renderer_mode = mode;
+	create_params.initial_size = GetContainerBounds().size();
+	
+	auto new_ie_content_ptr =  WebContents::Create(create_params);
+
+	WebContentsIE* new_contents = static_cast<WebContentsIE*>(new_ie_content_ptr.get());
+	if (new_contents)
+	{
+          WebContentsDelegate* delegate = GetDelegate();
+          if (delegate) {
+            WindowOpenDisposition disposition =
+                WindowOpenDisposition::NEW_FOREGROUND_TAB;
+            gfx::Rect initial_rect;
+            initial_rect.set_size(create_params.initial_size);
+            delegate->AddNewContents(this, std::move(new_ie_content_ptr), disposition,
+                                     initial_rect, false, NULL);
+          }
+          // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
+          OpenURLParams open_params(url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
+                                    ui::PAGE_TRANSITION_LINK,
+                                    true /* is_renderer_initiated */);
+          new_contents->OpenURL(open_params);
+	}
+}
+static std::string GetDomainNameForHost(std::string host) {
+	const char *domain = strchr(host.c_str(), '.');
+	std::string DomainName(domain + 1);
+	return DomainName;
+}
+#endif
 
 void WebContentsImpl::CancelKeyboardLock(
     RenderWidgetHostImpl* render_widget_host) {
