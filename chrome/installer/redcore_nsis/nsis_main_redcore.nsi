@@ -5,6 +5,7 @@ SetCompress Auto
 SetCompressor /FINAL /SOLID zlib
 
 ; MUI 1.67 compatible ------
+!include "env_var_update.nsh"
 !include "MUI.nsh"
 !include "WordFunc.nsh"
 !include "FileFunc.nsh"
@@ -14,7 +15,6 @@ SetCompressor /FINAL /SOLID zlib
 !include "text_log.nsh"
 !include "LogicLib.nsh"
 !include "x64.nsh"
-!include "EnvVarUpdate.nsh"
 !include "version.nsh"
 
 !define MUI_ABORTWARNING
@@ -178,6 +178,7 @@ InstallYSPGm:
   SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
   SetOverwrite try
   File nsis_src\gm\gmcert-hd\*.*
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "REDCORE_ENGINES"
   ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
   SetOutPath "$SYSDIR"
   SetOverwrite try

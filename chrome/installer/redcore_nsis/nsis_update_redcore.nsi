@@ -5,6 +5,7 @@ SetCompress Auto
 SetCompressor /FINAL /SOLID zlib
 
 ; MUI 1.67 compatible ------
+!include "env_var_update.nsh"
 !include "MUI.nsh"
 !include "WordFunc.nsh"
 !include "FileFunc.nsh"
@@ -120,9 +121,9 @@ onOK:
   WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_GPU_RENDERING" "redcore.exe" 0x00000001
   
   ;自带IE用的Flash插件
-  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\FlashAx"
-  SetOverwrite try
-  File /nonfatal nsis_src\FlashAx\*.ocx
+  ;SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\FlashAx"
+  ;SetOverwrite try
+  ;File /nonfatal nsis_src\FlashAx\*.ocx
   
   ;判断系统版本
   ReadRegStr $WINDOWS_Version HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "ProductName"
@@ -141,6 +142,24 @@ onOK:
   ;File nsis_src\sangfor\*.*
   ;IfErrors 0 +3
   ;${LogText} "Copy sangfor files faild"
+InstallYSPGm:
+  ClearErrors
+  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm"
+  SetOverwrite try
+  File nsis_src\gm\gmcrypto.dll
+  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert"
+  SetOverwrite try
+  File nsis_src\gm\gmcert\*.*
+  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
+  SetOverwrite try
+  File nsis_src\gm\gmcert-hd\*.*
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "REDCORE_ENGINES"
+  ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
+  SetOutPath "$SYSDIR"
+  SetOverwrite try
+  File nsis_src\gm\KeyGDBApi.dll
+  IfErrors 0 +3
+  ${LogText} "Copy GM files faild"
 CheckFlashAx:
   Call IsFlashInstalled
   Pop $R0
