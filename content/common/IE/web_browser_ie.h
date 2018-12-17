@@ -12,6 +12,7 @@
 #include <Windows.h>
 #include <comdef.h>
 #include <tchar.h>
+#include <list>
 #include <map>
 #include <string>
 #include <vector>
@@ -21,6 +22,11 @@
 #include "content/common/IE/version_ie.h"
 
 namespace ie {
+
+struct PrivateDnsIp {
+  std::wstring host;
+  std::list<std::wstring> ip_list;
+};
 
 class EventHandler;
 class DevToolsHost;

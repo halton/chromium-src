@@ -308,10 +308,6 @@
 #include "content/browser/web_contents/web_contents_ie.h"  //ysp+{IE Function Control}
 #endif                                                     // ysp {+
 
-#if defined(IE_REDCORE)
-
-#endif  // IE_REDCORE
-
 using base::TimeDelta;
 using base::UserMetricsAction;
 using content::NativeWebKeyboardEvent;
@@ -4145,6 +4141,11 @@ std::wstring Browser::GetIEFunctionControlJsonString() {
   } else
     function_control->SetString("userAgentString", "");
   root_dict.Set("ieFunctionControl", std::move(function_control));
+  base::DictionaryValue* private_dns =
+      YSPLoginManager::GetInstance()->GetPrivateDNS();
+  if (private_dns)
+    root_dict.Set("privateDNS", private_dns->DeepCopyWithoutEmptyChildren());
+
   std::string buff = "";
   base::JSONWriter::Write(root_dict, &buff);
   std::wstring json_str = base::UTF8ToUTF16(buff);

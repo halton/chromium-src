@@ -9,6 +9,8 @@
 #include <string>
 
 #include "content/common/IE/event_handler_ie.h"
+#include "net/dns/host_resolver_impl.h"
+#include "base/strings/sys_string_conversions.h"
 
 namespace ie {
 
@@ -48,8 +50,6 @@ STDMETHODIMP HttpMonitorIe::Start(LPCWSTR url,
                                   IInternetBindInfo* bind_info,
                                   DWORD flags,
                                   HANDLE_PTR reserved) {
-  return INET_E_USE_DEFAULT_PROTOCOLHANDLER;  // 暂时不启用拦截过滤HTTP请求、应答的功能
-
   IClassFactory* factory = NULL;
   HRESULT handle_result;
 
@@ -74,13 +74,29 @@ STDMETHODIMP HttpMonitorIe::Start(LPCWSTR url,
   if (protocol_ == NULL)
     return INET_E_USE_DEFAULT_PROTOCOLHANDLER;
 
+  // 绝对链接处理
+  GURL redcore_url(url_tmp);
+  std::string domain =
+      net::HostResolverImpl::AbsoluteLinkReverseDnsCompared(redcore_url);
+  if (!domain.empty()) {
+    std::string port = "";
+    if (redcore_url.port() != "") {
+      port = ":" + redcore_url.port();
+    }
+    std::string dest_url =
+        "https://" + domain + port + redcore_url.PathForRequest();
+    DLOG(INFO) << "dest_url: " << dest_url;
+    url_tmp = base::SysNativeMBToWide(dest_url);
+  }
+
   protocol_->AddRef();
   bind_info_ = bind_info;
   protocal_sink_ = new ProtocolSinkIe(protocol_sink);
   // 创建一个新的IInternetProtocol 执行start方法
   // 将自己创建的IInternetProtocolSink和IInternetBindInfo类实例传入，
   // 达到能够截取http请求和应答的功能。
-  handle_result = protocol_->Start(url, protocal_sink_, this, flags, reserved);
+  handle_result =
+      protocol_->Start(url_tmp.data(), protocal_sink_, this, flags, reserved);
   return handle_result;
 }
 

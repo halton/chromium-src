@@ -8,6 +8,8 @@
 #include <WinUser.h>
 #include <Windows.h>
 #include <Wininet.h>
+#include <Ws2def.h>
+#include <Ws2tcpip.h>
 #include <io.h>
 #include <sddl.h>
 #include <shellapi.h>
@@ -32,12 +34,14 @@
 #include "content/common/IE/event_handler_ie.h"
 #include "content/common/IE/http_monitor_ie.h"
 #include "content/common/IE/xpath_parse_ie.h"
+#include "net/dns/host_resolver_impl.h"
 #include "third_party/blink/public/platform/web_input_event.h"
 #include "third_party/minhook/include/MinHook.h"
 #include "url/gurl.h"
 
 #define WM_IE_MOUSEACTIVATE WM_USER + 5255
 #define WM_COOKIEUPDATED WM_USER + 5801
+#define WM_QUERYDNS WM_USER + 5802
 // #define GWL_WNDPROC (-4) just for compiling
 #define GWL_WNDPROC (-4)
 
@@ -163,6 +167,28 @@ typedef HRESULT(
     __stdcall* LOADREGTYPELIB)(REFGUID, WORD, WORD, LCID, ITypeLib**);
 static LOADREGTYPELIB fpLoadRegTypeLib = NULL;
 
+typedef void(__stdcall* FREEADDRINFOEXW)(PADDRINFOEX);
+FREEADDRINFOEXW fpFreeAddrInfoExW = NULL;
+typedef int(__stdcall* GETADDRINFOEXW)(PCTSTR,
+                                       PCTSTR,
+                                       DWORD,
+                                       LPGUID,
+                                       const ADDRINFOEX*,
+                                       PADDRINFOEX*,
+                                       timeval*,
+                                       LPOVERLAPPED,
+                                       LPLOOKUPSERVICE_COMPLETION_ROUTINE,
+                                       LPHANDLE);
+GETADDRINFOEXW fpGetAddrInfoExW = NULL;
+
+typedef void(__stdcall* FREEADDRINFOW)(PADDRINFOW);
+FREEADDRINFOW fpFreeAddrInfoW = NULL;
+typedef int(__stdcall* GETADDRINFOW)(PCWSTR,
+                                     PCWSTR,
+                                     const ADDRINFOW*,
+                                     PADDRINFOW*);
+GETADDRINFOW fpGetAddrInfoW = NULL;
+
 static bool cookie_hook_flag = false;
 
 WNDPROC WebBrowser::old_window_proc_ = NULL;
@@ -171,6 +197,10 @@ HHOOK WebBrowser::next_hook_ = NULL;
 WebBrowser* WebBrowser::self_ = NULL;
 IOleInPlaceActiveObject* WebBrowser::ole_in_place_active_object_ = NULL;
 static bool s_is_flash_activex_hook = false;
+
+static std::map<PADDRINFOEXW, bool> addr_infoex_map_;
+static std::map<PADDRINFOW, bool> addr_infor_map_;
+CRITICAL_SECTION addr_info_section_;
 
 // xp下设置cookie时，可能还未能够完成hook
 // api，所以如果还未hook就把cookie记录在cookieBuffer中，等到hook完成时再设置
@@ -991,6 +1021,229 @@ bool DisableLoadLibraryHook() {
   return true;
 }
 
+void WINAPI DetourFreeAddrInfoExW(PADDRINFOEX info) {
+  EnterCriticalSection(&addr_info_section_);
+  auto mapIterator = addr_infoex_map_.find(info);
+  if (fpFreeAddrInfoExW == NULL || mapIterator == addr_infoex_map_.end()) {
+    LeaveCriticalSection(&addr_info_section_);
+    return;
+  }
+  bool isCreateByHook = mapIterator->second;
+  addr_infoex_map_.erase(mapIterator);
+  LeaveCriticalSection(&addr_info_section_);
+
+  int verNum = base::win::OSInfo::GetInstance()->version();
+  if (!isCreateByHook) {
+    fpFreeAddrInfoExW(info);
+    return;
+  }
+
+  if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
+      verNum == base::win::VERSION_WIN10 ||
+      verNum == base::win::VERSION_WIN10_TH2) {
+    PADDRINFOEXW pcur = info;
+
+    while (pcur != NULL) {
+      PADDRINFOEXW pnext = pcur->ai_next;
+      if (pcur->ai_canonname) {
+        delete[] pcur->ai_canonname;
+      }
+      if (pcur->ai_addr)
+        delete pcur->ai_addr;
+      delete pcur;
+      pcur = pnext;
+    }
+  }
+}
+
+int WINAPI
+DetourGetAddrInfoExW(PCTSTR pName,
+                     PCTSTR pServiceName,
+                     DWORD dwNameSpace,
+                     LPGUID lpNspId,
+                     const ADDRINFOEX* pHints,
+                     PADDRINFOEX* ppResult,
+                     timeval* timeout,
+                     LPOVERLAPPED lpOverlapped,
+                     LPLOOKUPSERVICE_COMPLETION_ROUTINE lpCompletionRoutine,
+                     LPHANDLE lpNameHandle) {
+  int ret = fpGetAddrInfoExW(pName, pServiceName, dwNameSpace, lpNspId, pHints,
+                             ppResult, timeout, lpOverlapped,
+                             lpCompletionRoutine, lpNameHandle);
+
+  if (!pName)
+    return ret;
+
+  int verNum = base::win::OSInfo::GetInstance()->version();
+  if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
+      verNum == base::win::VERSION_WIN10 ||
+      verNum == base::win::VERSION_WIN10_TH2) {
+    HWND hwnd = WebBrowser::GetWebBrowser()->GetControlWindow();
+    PrivateDnsIp dnsIp;
+    dnsIp.host = pName;
+    dnsIp.ip_list.clear();
+    HANDLE QueryDnsEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    ResetEvent(QueryDnsEvent);
+    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dnsIp);
+    WaitForSingleObject(QueryDnsEvent, INFINITE);
+    CloseHandle(QueryDnsEvent);
+    std::list<std::wstring> ip_list = dnsIp.ip_list;
+    if (ip_list.empty() == false) {
+      std::wstring canonname = pName;
+      if (ret == 0 && (*ppResult)->ai_canonname)
+        canonname = (*ppResult)->ai_canonname;
+      ADDRINFOEX* lastAddr = NULL;
+
+      for (auto wsIp : ip_list) {
+        ADDRINFOEX* addr = new ADDRINFOEX;
+        wchar_t* canonname1 = new wchar_t[wcslen(wsIp.c_str()) + 1];
+        memset(canonname1, 0, sizeof(wchar_t) * (wcslen(wsIp.c_str()) + 1));
+        wcscpy(canonname1, wsIp.c_str());
+        addr->ai_canonname = canonname1;
+        addr->ai_family = AF_INET;
+        addr->ai_protocol = IPPROTO_TCP;
+        addr->ai_flags = 0;
+        addr->ai_socktype = SOCK_STREAM;
+        sockaddr_in* temp = new sockaddr_in;
+        memset(temp, 0, sizeof(sockaddr_in));
+        temp->sin_family = AF_INET;
+        temp->sin_addr.s_addr = inet_addr(base::UTF16ToASCII(wsIp).c_str());
+        temp->sin_port = htons(0);
+        addr->ai_addr = (sockaddr*)temp;
+        addr->ai_next = lastAddr;
+        addr->ai_blob = 0;
+        addr->ai_provider = 0;
+        addr->ai_bloblen = 0;
+        addr->ai_addrlen = sizeof(sockaddr);
+
+        lastAddr = addr;
+      }
+      if (fpFreeAddrInfoExW && ret == 0)
+        fpFreeAddrInfoExW(*ppResult);
+      *ppResult = lastAddr;
+
+      EnterCriticalSection(&addr_info_section_);
+      addr_infoex_map_[*ppResult] = true;
+      LeaveCriticalSection(&addr_info_section_);
+      return 0;
+    }
+  }
+
+  if (ret == 0 && *ppResult) {
+    EnterCriticalSection(&addr_info_section_);
+    addr_infoex_map_[*ppResult] = false;
+    LeaveCriticalSection(&addr_info_section_);
+  }
+
+  return ret;
+}
+
+void WINAPI DetourFreeAddrInfoW(ADDRINFOW* info) {
+  EnterCriticalSection(&addr_info_section_);
+  auto mapIterator = addr_infor_map_.find(info);
+  if (fpFreeAddrInfoW == NULL || mapIterator == addr_infor_map_.end()) {
+    LeaveCriticalSection(&addr_info_section_);
+    return;
+  }
+
+  bool isCreateByHook = mapIterator->second;
+  addr_infor_map_.erase(mapIterator);
+  LeaveCriticalSection(&addr_info_section_);
+
+  if (!isCreateByHook) {
+    fpFreeAddrInfoW(info);
+    return;
+  }
+
+  int verNum = base::win::OSInfo::GetInstance()->version();
+  if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
+      verNum == base::win::VERSION_WIN10 ||
+      verNum == base::win::VERSION_WIN10_TH2) {
+    PADDRINFOW pcur = info;
+    while (pcur != NULL) {
+      PADDRINFOW pnext = pcur->ai_next;
+      if (pcur->ai_canonname)
+        delete[] pcur->ai_canonname;
+      if (pcur->ai_addr)
+        delete pcur->ai_addr;
+      delete pcur;
+      pcur = pnext;
+    }
+  }
+}
+
+int WINAPI DetourGetAddrInfoW(PCWSTR pNodeName,
+                              PCWSTR pServiceName,
+                              const ADDRINFOW* pHints,
+                              PADDRINFOW* ppResult) {
+  int ret = fpGetAddrInfoW(pNodeName, pServiceName, pHints, ppResult);
+
+  if (!pNodeName)
+    return ret;
+
+  int verNum = base::win::OSInfo::GetInstance()->version();
+  if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
+      verNum == base::win::VERSION_WIN10 ||
+      verNum == base::win::VERSION_WIN10_TH2) {
+    PrivateDnsIp dnsIp;
+    dnsIp.host = pNodeName;
+    dnsIp.ip_list.clear();
+
+    HWND hwnd = WebBrowser::GetWebBrowser()->GetControlWindow();
+    HANDLE QueryDnsEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    ResetEvent(QueryDnsEvent);
+    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dnsIp);
+    WaitForSingleObject(QueryDnsEvent, INFINITE);
+    CloseHandle(QueryDnsEvent);
+
+    std::list<std::wstring> ip_list = dnsIp.ip_list;
+
+    if (ip_list.empty() == false) {
+      std::wstring canonname = pNodeName;
+      if (ret == 0)
+        canonname = (*ppResult)->ai_canonname;
+      ADDRINFOW* lastAddr = NULL;
+      std::list<std::wstring>::iterator iter = ip_list.begin();
+      for (; iter != ip_list.end(); iter++) {
+        ADDRINFOW* addr = new ADDRINFOW;
+        int wlen = wcslen(canonname.c_str()) + 1;
+        wchar_t* canonname1 = new wchar_t[wlen];
+        memset(canonname1, 0, sizeof(wchar_t) * wlen);
+        wcscpy(canonname1, canonname.c_str());
+        addr->ai_canonname = canonname1;  // canonname1;
+        addr->ai_family = AF_INET;
+        addr->ai_protocol = IPPROTO_TCP;
+        addr->ai_flags = 0;
+        addr->ai_socktype = SOCK_STREAM;
+        sockaddr_in* temp = new sockaddr_in;
+        memset(temp, 0, sizeof(sockaddr_in));
+        temp->sin_family = AF_INET;
+        temp->sin_addr.s_addr = inet_addr(base::UTF16ToASCII(*iter).c_str());
+        temp->sin_port = htons(0);
+        addr->ai_addr = (sockaddr*)temp;
+        addr->ai_next = lastAddr;
+        addr->ai_addrlen = sizeof(sockaddr);
+
+        lastAddr = addr;
+      }
+      if (fpFreeAddrInfoW && ret == 0)
+        fpFreeAddrInfoW(*ppResult);
+      *ppResult = lastAddr;
+
+      EnterCriticalSection(&addr_info_section_);
+      addr_infor_map_[*ppResult] = true;
+      LeaveCriticalSection(&addr_info_section_);
+      return 0;
+    }
+  }
+  if (ret == 0 && *ppResult) {
+    EnterCriticalSection(&addr_info_section_);
+    addr_infor_map_[*ppResult] = false;
+    LeaveCriticalSection(&addr_info_section_);
+  }
+  return ret;
+}
+
 WebBrowser::WebBrowser(HWND parent_handle,
                        EventHandler* delegate,
                        int browser_emu,
@@ -1134,6 +1387,28 @@ bool WebBrowser::CreateBrowser(bool is_new) {
   if (s_is_flash_activex_hook)
     EnableFlashHook();
 
+  int sysIEVer = base::win::GetSystemIEVersion();
+  if (sysIEVer >= 10 && sysIEVer <= 11) {
+    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoExW", &DetourGetAddrInfoExW,
+                         (LPVOID*)&fpGetAddrInfoExW) != MH_OK)
+      return false;
+    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoExW",
+                         &DetourFreeAddrInfoExW,
+                         (LPVOID*)&fpFreeAddrInfoExW) != MH_OK)
+      return false;
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+      return false;
+  } else if (sysIEVer >= 6 && sysIEVer <= 9) {
+    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoW", &DetourGetAddrInfoW,
+                         (LPVOID*)&fpGetAddrInfoW) != MH_OK)
+      return false;
+    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoW", &DetourFreeAddrInfoW,
+                         (LPVOID*)&fpFreeAddrInfoW) != MH_OK)
+      return false;
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+      return false;
+  }
+
   // XP下直接加载Wininet.dll会失败，这里也无法hook，所以XP下是在
   // LoadLibraryExW的hook函数中进行的Wininet.dll hook
   win_inet_handle_ = ::LoadLibraryExW(L"wininet.dll", NULL, NULL);
@@ -1184,8 +1459,8 @@ bool WebBrowser::CreateBrowser(bool is_new) {
   if (doc_host_hander_ == NULL)
     doc_host_hander_ = new DocHostUIHandler(delegate_, this);
 
-  // web_browser2_->put_Silent(VARIANT_TRUE);
-  // web_browser2_->put_RegisterAsDropTarget(VARIANT_TRUE);
+  web_browser2_->put_RegisterAsBrowser(VARIANT_TRUE);
+  web_browser2_->put_RegisterAsDropTarget(VARIANT_TRUE);
   web_browser2_->put_Visible(VARIANT_FALSE);
   IConnectionPointContainer* container = NULL;
   handle_result = web_browser2_->QueryInterface(IID_IConnectionPointContainer,
@@ -1201,7 +1476,7 @@ bool WebBrowser::CreateBrowser(bool is_new) {
   handle_result = connection_point_->Advise(event_handler_, &cookie_);
   container->Release();
 
-  // HttpMonitorIe::Init();
+  HttpMonitorIe::Init();
   // //IE8下会造成访问有些页面IE内核死锁，取消http请求过程拦截。
 
   // DomainAuthenticate接口在不是通过DISPID_NEWWINDOW3建立的ie时，
@@ -1301,6 +1576,12 @@ void WebBrowser::SetFunctionControl(const std::wstring& json) {
     doc_host_hander_->EnableMouseRightButton(mouse_right_button_enabled_);
     doc_host_hander_->EnablePrint(print_enabled_);
     doc_host_hander_->EnableSaveFile(save_file_enabled_);
+  }
+  base::DictionaryValue* private_dns = NULL;
+  if (root_dict->GetDictionary("privateDNS", &private_dns)) {
+    std::string buff = "";
+    base::JSONWriter::Write(*private_dns, &buff);
+    net::HostResolverImpl::SetPrivateDnsValue(buff);
   }
 }
 
