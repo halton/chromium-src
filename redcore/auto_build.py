@@ -86,7 +86,7 @@ def modifyBuildVersion():
   # 记录版本号，在编译成功以后，push代码
   global _INTERNAL_VERSION, _WINDOW_VERSION
   _INTERNAL_VERSION = "%s.%s.%s.%s" % (major, minor, build, patch)
-  _WINDOW_VERSION = "%s.%s.%s" % (yspMajor, yspMinor, yspBuild)
+  _WINDOW_VERSION = "%s.%s.%s.%s" % (yspMajor, major, yspMinor, yspBuild)
 
 
 def needIncreaseCustomVersion():
@@ -164,7 +164,7 @@ def resourceReplace():
   if not _IS_MASTER_BRANCH:
     replacePythonCmdLine = "%s \
       cd %s &&;\
-      python redcore%sresource_replace_win.py --working-dir=%s --product-name=%s\
+      python redcore%sresource_replace.py --working-dir=%s --product-name=%s\
       " % (getDiskString(_WORKING_DIR), _WORKING_DIR, os.path.sep, _WORKING_DIR, _PRODUCT_NAME)
     execCmd(replacePythonCmdLine)
 
@@ -181,7 +181,7 @@ def buildRelease49Win():
 def buildRelease70Win():
   autoBuild = "%s \
     cd %s &&;\
-    gn gen --ide=\"vs2017\" --winsdk=10.0.17134.1  --filters=//chrome out/release_win --args=\"is_component_build=false is_debug=false is_official_build=false enable_nacl=false enable_precompiled_headers=false treat_warnings_as_errors=false\" &&;\
+    gn gen --ide=\"vs2017\" --winsdk=10.0.17134.1  --filters=//chrome out/Release --args=\"is_component_build=false is_debug=false is_official_build=false enable_nacl=false enable_precompiled_headers=false treat_warnings_as_errors=false\" &&;\
     ninja -C out/Release mini_installer \
     " % (getDiskString(_WORKING_DIR), _WORKING_DIR)
   execCmd(autoBuild)
@@ -195,6 +195,14 @@ def buildRelease49Mac():
   execCmd(autoBuild)
 
 
+def buildRelease70Mac():
+  autoBuild = "cd %s &&;\
+    gn gen --filters=//chrome out/Release --args=\"is_component_build=false is_debug=false is_official_build=false enable_nacl=false enable_precompiled_headers=false treat_warnings_as_errors=false\" &&;\
+    ninja -C out/Release chrome \
+    " % (_WORKING_DIR)
+  execCmd(autoBuild)
+
+
 def buildRelease():
   buildType = getBuildType(_WORKING_DIR)
   if buildType == "build_type_win_49":
@@ -203,12 +211,14 @@ def buildRelease():
     buildRelease70Win()
   elif buildType == "build_type_mac_49":
     buildRelease49Mac()
+  elif buildType == "build_type_mac_70":
+    buildRelease70Mac()
 
 
 def sign():
   signCmdLine = "%s \
     cd %s &&;\
-    python redcore%ssign_win.py --working-dir=%s --product-name=%s\
+    python redcore%ssign.py --working-dir=%s --product-name=%s\
     " % (getDiskString(_WORKING_DIR), _WORKING_DIR, os.path.sep, _WORKING_DIR, _PRODUCT_NAME)
   execCmd(signCmdLine)
 

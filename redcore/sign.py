@@ -17,9 +17,6 @@ args = parser.parse_args()
 _WORKING_DIR = args.working_dir
 _PRODUCT_NAME = args.product_name
 
-if platform.system() != "Windows":
-  raise Exception("\nThis python script is only support windows platform!")
-
 # 不在这个列表中的product_name，最终生成的安装包会将redcore替换为对应的product-name
 _MASTER_BRANCH_LIST = [
     "49_dev",
@@ -204,20 +201,50 @@ def getRedcoreVersion():
   major = 0
   minor = 0
   build = 0
+  codeVersion = 0
   with codecs.open(os.path.join(_WORKING_DIR, "chrome", "VERSION"), "r", encoding='utf-8') as tempFile:
     for line in tempFile:
       if line.startswith('YSPMAJOR='):
         major = int(line[9:])
+      elif line.startswith('MAJOR='):
+        codeVersion = int(line[6:])
       elif line.startswith('YSPMINOR='):
         minor = int(line[9:])
       elif line.startswith('YSPBUILD='):
         build = int(line[9:])
-  return "%s.%s.%s" % (major, minor, build)
+  return "%s.%s.%s.%s" % (major, codeVersion, minor, build)
 
 
-firstSignWithNewKey()
-# firstSignWithOldkey()
-nsisPackage()
-finalSignWithNewKey()
-# finalSignWithOldKey()
-renameExe()
+def signMacApp():
+  signMacLine = "codesign -s \"Developer ID Application: Allmobilize Inc. (FD9594D6YV)\" %s" % (os.path.join(_WORKING_DIR, "out", "Release", "Redcore.app"))
+  execCmd(signMacLine)
+
+
+def dmgPackage():
+  releaseDir = os.path.join(_WORKING_DIR, "out", "Release")
+  redcoreOutDir = os.path.join(releaseDir, "redcore_out")
+  if os.path.exists(redcoreOutDir):
+    shutil.rmtree(redcoreOutDir)
+  os.makedirs(redcoreOutDir)
+  shutil.copytree(os.path.join(releaseDir, "Redcore.app"), os.path.join(redcoreOutDir, "Redcore.app"))
+  # 创建软链接
+  execCmd("ln -s /Applications %s" % (redcoreOutDir))
+  # 使用系统工具打dmg
+  installNamePerfix = "install_redcore."
+  if not _IS_MASTER_BRANCH:
+    installNamePerfix = installNamePerfix.replace("redcore", _PRODUCT_NAME)
+  packageLine = "printf \"redcore\" | hdiutil create -srcfolder %s -stdinpass %s\
+    " % (redcoreOutDir,os.path.join(redcoreOutDir, installNamePerfix + getRedcoreVersion() + ".dmg"))
+  execCmd(packageLine)
+
+
+if platform.system() == "Windows":
+  firstSignWithNewKey()
+  # firstSignWithOldkey()
+  nsisPackage()
+  finalSignWithNewKey()
+  # finalSignWithOldKey()
+  renameExe()
+elif platform.system() == "Darwin":
+  signMacApp()
+  dmgPackage()

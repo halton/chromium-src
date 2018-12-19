@@ -45,7 +45,7 @@ def applyGitPatch():
     return
   filesList.sort()
   for filename in filesList:
-    applyCmdLine += "git apply %s &&;" % (os.path.join(patchDir, filename))
+    applyCmdLine += "git apply --ignore-space-change %s &&;" % (os.path.join(patchDir, filename))
   applyCmdLine = applyCmdLine[:-4]
   execCmd(applyCmdLine)
 
