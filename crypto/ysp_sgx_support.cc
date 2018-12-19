@@ -6,16 +6,25 @@
 
 #include <tchar.h>
 
-YspSgxSupport::YspSgxSupport() : support_type_(SGX_SUPPORT_UNKNOWN) {}
+YspSgxSupport::YspSgxSupport()
+    : support_type_(SGX_SUPPORT_UNKNOWN),
+      dll_handle_(nullptr),
+      enable_device_handle_(nullptr) {
+}
 
 YspSgxSupport::~YspSgxSupport() {}
 
-int YspSgxSupport::IsPswInstalled() {
+bool YspSgxSupport::IsPswInstalled() {
+  // TODO Release 版本暂时屏蔽对sgx_uae_service.dll的加载
+#ifdef _DEBUG
   if ((dll_handle_ = LoadLibrary(_T("sgx_uae_service.dll"))) == NULL) {
-    return 0;
+    return false;
   }
   LoadFunctions();
-  return 1;
+  return true;
+#else
+  return false;
+#endif
 }
 
 void YspSgxSupport::CheckSgxSupport() {
@@ -48,8 +57,10 @@ void YspSgxSupport::CheckSgxSupport() {
 }
 
 void YspSgxSupport::LoadFunctions() {
-  enable_device_handle_ = (SgxEnableDeviceFunctionHandle)GetProcAddress(
-      dll_handle_, "sgx_enable_device");
+  if (dll_handle_) {
+    enable_device_handle_ = (SgxEnableDeviceFunctionHandle)GetProcAddress(
+        dll_handle_, "sgx_enable_device");
+	}
 }
 
 sgx_status_t YspSgxSupport::EnableDevice(sgx_device_status_t* device_status) {

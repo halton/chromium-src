@@ -23,13 +23,13 @@ class YspSgxSupport {
  public:
   YspSgxSupport();
   ~YspSgxSupport();
-  SGX_SUPPORT_TYPE GetSgxSupport(void);
+  SGX_SUPPORT_TYPE GetSgxSupport();
   sgx_status_t EnableDevice(sgx_device_status_t* device_status);
 
  private:
-  int IsPswInstalled(void);
-  void CheckSgxSupport(void);
-  void LoadFunctions(void);
+  bool IsPswInstalled();
+  void CheckSgxSupport();
+  void LoadFunctions();
 
   SGX_SUPPORT_TYPE support_type_;
   HINSTANCE dll_handle_;
