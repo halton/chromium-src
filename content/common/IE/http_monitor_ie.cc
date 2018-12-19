@@ -8,9 +8,9 @@
 #include <algorithm>
 #include <string>
 
+#include "base/strings/sys_string_conversions.h"
 #include "content/common/IE/event_handler_ie.h"
 #include "net/dns/host_resolver_impl.h"
-#include "base/strings/sys_string_conversions.h"
 
 namespace ie {
 

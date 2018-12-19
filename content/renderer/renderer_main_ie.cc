@@ -51,21 +51,31 @@ static void HandleTridentErrorTestParameters(
     WaitForDebugger("Trident");
 }
 
+static void InitTridentLog() {
+  logging::LoggingSettings settings;
+  settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
+  logging::InitLogging(settings);
+  // To view log output with IDs and timestamps use "adb logcat -v threadtime".
+  logging::SetLogItems(false,   // Process ID
+                       false,   // Thread ID
+                       true,    // Timestamp
+                       false);  // Tick count
+}
+
 }  // namespace
 
 int TridentMain(const MainFunctionParams& parameters) {
-  TRACE_EVENT_ASYNC_BEGIN0("startup", "TridentMain", 0);
+  InitTridentLog();
 
-  WaitForDebugger("Trident");
+  TRACE_EVENT_ASYNC_BEGIN0("startup", "TridentMain", 0);
 
   ie::DllModule _AtlModule;
   HRESULT hr = OleInitialize(NULL);
   DCHECK(SUCCEEDED(hr)) << "Com initialize failed !";
-  
- if (!SUCCEEDED(hr)) {
-    return 0;  
+
+  if (!SUCCEEDED(hr)) {
+    return 0;
   }
-  //// base::win::ScopedCOMInitializer scoped_com_initializer;
 
   base::trace_event::TraceLog::GetInstance()->set_process_name("Trident");
   base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
@@ -75,12 +85,11 @@ int TridentMain(const MainFunctionParams& parameters) {
   HandleTridentErrorTestParameters(parsed_command_line);
 
   TridentMainPlatformDelegate platform(parameters);
-//////////////fatal
-  std::unique_ptr<base::MessageLoop> main_message_loop(new base::MessageLoopForUI());
   base::PlatformThread::SetName("CrTridentMain");
   platform.PlatformInitialize();
+  std::unique_ptr<base::MessageLoop> main_message_loop(
+      new base::MessageLoopForUI());
   TRACE_EVENT_ASYNC_BEGIN0("toplevel", "TridentMain.START_MSG_LOOP", 0);
-
   base::RunLoop().Run();
 
   TRACE_EVENT_ASYNC_END0("toplevel", "TridentMain.START_MSG_LOOP", 0);

@@ -15,14 +15,15 @@
 
 namespace ie {
 
+const static char kRegisterObjectEventName[] = "Register_Object_Event_Name";
+
 DWORD BrowserProcess::register_ = 0;
 
-BrowserProcess::BrowserProcess() {
-  ie_browser_ = NULL;
-  host_app_ = NULL;
-  should_be_show_ = VARIANT_FALSE;
-  ie_handle_ = NULL;
-}
+BrowserProcess::BrowserProcess()
+    : ie_browser_(nullptr),
+      host_app_(nullptr),
+      should_be_show_(VARIANT_FALSE),
+      ie_handle_(nullptr) {}
 
 BrowserProcess::~BrowserProcess() {}
 
@@ -568,17 +569,31 @@ void BrowserProcess::OnQueryPrivateDNS(const std::wstring& host,
   }
 }
 bool BrowserProcess::RegisterClassObject() {
+  // lamda used for notify browser process before leaving the function
+  auto open_event_functor = [=]() {
+    HANDLE register_object_event =
+        OpenEventA(EVENT_ALL_ACCESS, FALSE, kRegisterObjectEventName);
+    // in case of open error[almost impossible]
+    // try to open event once per second
+    while (!register_object_event) {
+      Sleep(1000);
+      register_object_event =
+          OpenEventA(EVENT_ALL_ACCESS, FALSE, kRegisterObjectEventName);
+    }
+    SetEvent(register_object_event);
+  };
+
   CComPtr<IUnknown> cf;
   HRESULT hr = AtlComModuleGetClassObject(
       &_AtlComModule, CLSID_BrowserContainer, IID_IUnknown, (void**)&cf);
   if (FAILED(hr)) {
+    open_event_functor();
     return false;
   }
   hr = CoRegisterClassObject(CLSID_BrowserContainer, cf, CLSCTX_LOCAL_SERVER,
                              REGCLS_SINGLEUSE, &register_);
-  if (SUCCEEDED(hr))
-    return true;
-  return false;
+  open_event_functor();
+  return SUCCEEDED(hr);
 }
 
 bool BrowserProcess::UnregisterClassObject() {

@@ -19,7 +19,7 @@ import("//build/config/redcore.gni")
 if (is_win) {
   import("//build/toolchain/win/midl.gni")
 
-  midl("IEInterface") {
+  midl("AppIEInterface") {
     sources = ["//chrome/app/IEInterface.idl"]
     out_dir = "$target_gen_dir"
   }
@@ -62,7 +62,7 @@ source_set("chrome_dll_resources") {
     sources += [ "chrome_dll.rc" ]
 
  if (is_ie_redcore) {
-    deps += [":IEInterface"]
+    deps += [":AppIEInterface"]
   }
 
 

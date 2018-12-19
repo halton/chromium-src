@@ -9,6 +9,7 @@
 #include <exdisp.h>
 
 #include "base/json/json_reader.h"
+#include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "base/win/win_util.h"
@@ -27,7 +28,6 @@
 #include "ui/events/event.h"
 #include "ui/events/keycodes/keyboard_code_conversion_win.h"
 #include "url/gurl.h"
-#include "base/logging.h"
 
 #pragma warning(disable : 4302)
 #pragma warning(disable : 4189)
@@ -61,6 +61,11 @@ void split(std::wstring string,
 }  // namespace
 
 namespace ie {
+
+const static char kRegisterObjectEventName[] = "Register_Object_Event_Name";
+// initialize once
+HANDLE BrowserHostEventDelegant::register_object_event_ =
+    CreateEventA(nullptr, true, false, kRegisterObjectEventName);
 
 BrowserHostEventDelegant::BrowserHostEventDelegant()
     : main_window_(NULL),
@@ -423,17 +428,6 @@ void BrowserHostEventDelegant::SetHostHWND(HWND window_handle) {
 
 bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
                                              bool is_new) {
-  // wstring path = L"F:\\Source\\src\\out\\Debug\\redcore.exe --type=trident
-  // /prefetch:1";  STARTUPINFO si = { sizeof(si) };  PROCESS_INFORMATION pi = {
-  // 0
-  // };
-
-  // BOOL b = CreateProcess(NULL, (LPWSTR)(path.c_str()), NULL, NULL, FALSE, 0,
-  // NULL, NULL, &si, &pi);  if (b == FALSE)
-  //  return false;
-  // if (pi.hThread) CloseHandle(pi.hThread);
-  // if (pi.hProcess) CloseHandle(pi.hProcess);
-
   HWND window_handle = GetParent(main_window_);
   if (IsWindow(host_window_) == FALSE) {
     host_window_ = CreateHostWindow(window_handle);
@@ -443,14 +437,25 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
 
   IClassFactory* class_factory = NULL;
   HRESULT hr;
-  while (class_factory == NULL) {
-    hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
-                     IID_IClassFactory, (LPVOID*)&class_factory);
-	if (FAILED(hr))
-	{
-      LOG(WARNING)
-          << "class factory of CLSID_BrowserContainer register error";
-	}
+
+  const static DWORD kRegisterEventWaitMillionSecond = 50000;
+
+  DWORD ret = WaitForSingleObject(register_object_event_,
+                                  kRegisterEventWaitMillionSecond);
+  switch (ret) {
+    case WAIT_ABANDONED:
+    case WAIT_TIMEOUT:
+    case WAIT_FAILED:
+      LOG(ERROR) << "trident WaitForSingleObject error code  "
+                 << GetLastError();
+      break;
+  }
+
+  DLOG(INFO) << "trident CreateHostWindow begin to create";
+  hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
+                        IID_IClassFactory, (LPVOID*)&class_factory);
+  if (FAILED(hr)) {
+    LOG(WARNING) << "class factory of CLSID_BrowserContainer register error";
   }
 
   if (class_factory) {

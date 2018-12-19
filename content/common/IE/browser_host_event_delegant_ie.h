@@ -140,6 +140,8 @@ class ATL_NO_VTABLE BrowserHostEventDelegant
   void UpdateDownloadData(const int& status, const std::string& data);
 
  private:
+  static HANDLE register_object_event_;
+
   HWND main_window_;
   IDispatch* web_browser2_;
   HWND host_window_;

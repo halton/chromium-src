@@ -52,6 +52,10 @@
 #include "content/public/common/url_constants.h"
 #include "content/public/common/url_utils.h"
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+#include "content/common/IE/version_ie.h"
+#endif
+
 #if defined(OS_MACOSX)
 #include "ui/gfx/mac/scoped_cocoa_disable_screen_updates.h"
 #endif  // defined(OS_MACOSX)
@@ -506,9 +510,12 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
       GetSiteInstanceForNavigationRequest(request);
 
   // The SiteInstance determines whether to switch RenderFrameHost or not.
-  bool use_current_rfh = 
-	  (current_site_instance == dest_site_instance
-		  || current_site_instance->GetRenderMode().core == IE_CORE);
+  bool use_current_rfh =
+      (current_site_instance == dest_site_instance
+#if defined(REDCORE) && defined(IE_REDCORE)
+       || current_site_instance->GetRenderMode().core == IE_CORE
+#endif
+       );
 
   bool notify_webui_of_rf_creation = false;
   if (use_current_rfh) {
