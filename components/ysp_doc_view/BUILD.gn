@@ -17,6 +17,7 @@ source_set("ysp_doc_view") {
     "//components/query_parser",
     "//components/strings",
     "//components/url_formatter",
+    "//content/public/common:interfaces",
     "//net",
     "//services/network/public/mojom",
     "//skia",
