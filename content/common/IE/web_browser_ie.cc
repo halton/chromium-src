@@ -1389,22 +1389,23 @@ bool WebBrowser::CreateBrowser(bool is_new) {
 
   int sysIEVer = base::win::GetSystemIEVersion();
   if (sysIEVer >= 10 && sysIEVer <= 11) {
-    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoExW", &DetourGetAddrInfoExW,
-                         (LPVOID*)&fpGetAddrInfoExW) != MH_OK)
-      return false;
-    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoExW",
-                         &DetourFreeAddrInfoExW,
-                         (LPVOID*)&fpFreeAddrInfoExW) != MH_OK)
-      return false;
-    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
-      return false;
-  } else if (sysIEVer >= 6 && sysIEVer <= 9) {
-    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoW", &DetourGetAddrInfoW,
-                         (LPVOID*)&fpGetAddrInfoW) != MH_OK)
-      return false;
-    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoW", &DetourFreeAddrInfoW,
-                         (LPVOID*)&fpFreeAddrInfoW) != MH_OK)
-      return false;
+    // TODO(qidi.ma): disable private dns functionality, should be opened before product release
+    // if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoExW", &DetourGetAddrInfoExW,
+    //                      (LPVOID*)&fpGetAddrInfoExW) != MH_OK)
+    //   return false;
+    // if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoExW",
+    //                      &DetourFreeAddrInfoExW,
+    //                      (LPVOID*)&fpFreeAddrInfoExW) != MH_OK)
+    //   return false;
+    // if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+    //   return false;
+    // } else if (sysIEVer >= 6 && sysIEVer <= 9) {
+    //   if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoW", &DetourGetAddrInfoW,
+    //                        (LPVOID*)&fpGetAddrInfoW) != MH_OK)
+    //     return false;
+    //   if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoW", &DetourFreeAddrInfoW,
+    //                        (LPVOID*)&fpFreeAddrInfoW) != MH_OK)
+    //     return false;
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
       return false;
   }

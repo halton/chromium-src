@@ -87,9 +87,17 @@ void ChildProcessLauncherHelper::StartLaunchOnClientThread() {
 
   BeforeLaunchOnClientThread();
 
+#if defined(REDCORE) && defined(IE_REDCORE)
+  if (GetProcessType().compare(switches::kTridentProcess) != 0) {
+    mojo_named_channel_ = CreateNamedPlatformChannelOnClientThread();
+    if (!mojo_named_channel_)
+      mojo_channel_.emplace();
+  }
+#else
   mojo_named_channel_ = CreateNamedPlatformChannelOnClientThread();
   if (!mojo_named_channel_)
     mojo_channel_.emplace();
+#endif
 
   GetProcessLauncherTaskRunner()->PostTask(
       FROM_HERE,
@@ -116,6 +124,12 @@ void ChildProcessLauncherHelper::LaunchOnLauncherThread() {
 
     AfterLaunchOnLauncherThread(process, options);
   }
+
+  #if defined(REDCORE) && defined(IE_REDCORE)
+  if (GetProcessType().compare(switches::kTridentProcess) == 0) {
+    return;
+  }
+#endif
 
   if (is_synchronous_launch) {
     PostLaunchOnLauncherThread(std::move(process), launch_result);

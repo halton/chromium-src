@@ -615,13 +615,14 @@ void Navigate(NavigateParams* params) {
                                  TabStripModel::ADD_INHERIT_OPENER;
   }
 
-  RendererMode mode;
-  mode.core = IE_CORE;
-  mode.version = ie::DOC10;
-  mode.emulation = ie::EMULATION10;
-  params->renderer_mode = mode;
+  // TODO(qidi.ma): used for debugging IE core.  should be delete later 
+  // RendererMode mode;
+  // mode.core = IE_CORE;
+  // mode.version = ie::DOC10;
+  // mode.emulation = ie::EMULATION10;
+  // params->renderer_mode = mode;
 
-  // params->renderer_mode = params->renderer_mode;
+   params->renderer_mode = params->renderer_mode;
 #endif
 
   // If no target WebContents was specified (and we didn't seek and find a
