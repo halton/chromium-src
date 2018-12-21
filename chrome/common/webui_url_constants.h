@@ -298,7 +298,8 @@ extern const char kCleanupSubPage[];
 #endif
 
 #ifdef REDCORE
-extern const char kChromeUIShowConfigHost[];//ysp+ { show config }
+extern const char kChromeUIShowConfigHost[];
+extern const char kChromeUIMeUIHost[];
 #endif
 
 // Extensions sub pages.

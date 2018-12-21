@@ -49,7 +49,7 @@ class YSPAccountView : public views::View,
                            const std::string& data) override;
   void OnLoginRequestFailure(const std::string& error) override;
   void OnLoginResponseParseFailure(const std::string& error) override;
-  void OnLoginFailure(base::string16 message) override;
+  void OnLoginFailure(const base::string16& message) override;
   void OnLoginSuccess(const base::string16& name,
     const std::string& head_image_url) override;
   void OnLogout() override;

@@ -3882,7 +3882,7 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
     auto_lock_timer_->Stop();
 }
 
-void Browser::OnLoginFailure(base::string16 message) {
+void Browser::OnLoginFailure(const base::string16& message) {
 #ifdef IE_REDCORE
   NotifyIEFunctionControl();
 #endif

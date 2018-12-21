@@ -568,7 +568,7 @@ void YSPLoginView::OnLoginResponseParseFailure(const std::string& error) {
   ShowFailureWithMessage(IDS_YSP_LOGIN_ERROR_RESPONSE_PARSE_FAILED);
 }
 
-void YSPLoginView::OnLoginFailure(base::string16 message) {
+void YSPLoginView::OnLoginFailure(const base::string16& message) {
   ShowFailureWithMessage(message);
 }
 

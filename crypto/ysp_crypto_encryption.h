@@ -33,6 +33,7 @@ class CRYPTO_EXPORT YspCryptoSingleton {
   std::string GetPinKey(int index);
   std::string GetCurrentPinKey();
   void UpdateCurrentPinKey(const std::string& pin_key);
+  std::string SHA256HashString(const std::string& text);
   int GetCurrentPinKeyIndex();
 
  private:

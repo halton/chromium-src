@@ -222,6 +222,7 @@
 #endif
 
 #ifdef REDCORE
+#include "chrome/browser/ui/webui/ysp_me/me_ui.h"
 #include "chrome/browser/ui/webui/ysp_ntp/ep_newtab_ui.h"
 #include "chrome/browser/ui/webui/ysp_show_config/ep_show_config_ui.h"
 #endif
@@ -461,8 +462,11 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui,
   if (url.host_piece() == chrome::kChromeUINewTabHost)
 #ifdef REDCORE
     return &NewWebUI<EPNewTabUI>;
-  if (url.host() == chrome::kChromeUIShowConfigHost)//ysp+ { show config }
-   return &NewWebUI<EPShowConfigUI>;       //ysp+ { show config }
+  if (url.host() == chrome::kChromeUIShowConfigHost)
+    return &NewWebUI<EPShowConfigUI>;
+  if (url.host() == chrome::kChromeUIMeUIHost) {
+    return &NewWebUI<MeUI>;
+  }
 #else
     return &NewWebUI<NewTabUI>;
 #endif

@@ -1,0 +1,72 @@
+<!-- 
+// Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. 
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>用户信息</title>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="./jquery.js"></script>
+  <script type="text/javascript" src="./rdc_util.js"></script>
+  <link rel="stylesheet" type="text/css" href="./index.css">
+  <script type="text/javascript" src="./screenSet.js"></script>
+  <script type="text/javascript" src="./device.js"></script>
+  <script type="text/javascript" src="./user.js"></script>
+  <script type="text/javascript" src="./index.js"></script>
+</head>
+<body>
+  <div class="rdc-container-user">
+    <div id='rdc_user' class="rdc-item">
+      <h5>用户信息</h5>
+      <div id="rdc_user_info_holder" class="rdc-info"> 
+        <div class="rdc-head"> 
+          <div class="img"> 
+            <img id="rdc_user_head_img" src="./imgs/not_login.png" /> 
+            <div class="rdc-masker"> 
+              <div class="rdc-img-head"> 
+                <img src="./imgs/upload_icon.png" /> 
+                <p><button id="btn_rdc_upload_user_img">上传头像</button></p> 
+              </div> 
+            </div> 
+          </div> 
+          <div id="rdc_user_head_info" class="info"> <p>未登录</p> </div> 
+          <div class="rdc-ctl"> 
+            <button id="btn_rdc_login" class="rdc-btn primary"> 登录 </button> 
+          </div> 
+        </div> 
+      </div>
+    </div>
+
+    <div id="rdc_screen_set" class="rdc-item">
+      <h5>锁屏设置</h5>
+      <div class="rdc-info" style="padding: 0">
+        <div class="rdc-content">
+          <div class="rdc-list-row">
+            <i class="lock"></i>
+            <label>锁屏时间</label>
+            <p id="rdc_srceen_lock_time">10分钟</p>
+          </div>
+          <div class="rdc-list-row">
+            <i class="change"></i>
+            <label>修改锁屏密码</label>
+            <div>
+              <button id="btn_rdc_showPop" class="rdc-btn-icon">
+                <span class="rdc-shadow"></span>
+                <span class="rdc-caret-angle rdc-pos-mm"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rdc_device_set" class="rdc-item">
+      <h5>设备管理</h5>
+    </div>
+  </div>
+
+</body>
+</html>

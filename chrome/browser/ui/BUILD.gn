@@ -1041,6 +1041,8 @@ jumbo_split_static_library("ui") {
       # FIXME(halton):
       # "webui/options/ysp_password_manager_handler.cc",
       # "webui/options/ysp_password_manager_handler.h",
+      "webui/ysp_me/me_ui.cc",
+      "webui/ysp_me/me_ui.h",
       "webui/ysp_ntp/ep_newtab_ui.cc",
       "webui/ysp_ntp/ep_newtab_ui.h",
       "webui/ysp_show_config/ep_show_config_ui.cc",

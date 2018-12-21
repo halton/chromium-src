@@ -83,7 +83,7 @@
         focus-config="[[focusConfig_]]">
       <neon-animatable route-path="default">
         <template is="dom-if" if="[[!unifiedConsentEnabled_]]">
-          <div class="settings-box first">
+          <div class="settings-box first" style="display:none">
             <p class="privacy-explanation">
               $i18nRaw{improveBrowsingExperience}
             </p>
@@ -95,7 +95,7 @@
             label="$i18n{signinAllowedTitle}"
             sub-label="$i18n{signinAllowedDescription}"
             on-settings-boolean-control-change="onSigninAllowedChange_"
-            disabled="[[syncStatus.signedIn]]">
+            disabled="[[syncStatus.signedIn]]" style="display:none">
         </settings-toggle-button>
 </if><!-- not chromeos -->
         <template is="dom-if" if="[[!unifiedConsentEnabled_]]">

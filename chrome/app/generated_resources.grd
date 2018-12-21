@@ -9519,6 +9519,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
       <message name="IDS_WEBAUTHN_CABLE_ACTIVATE_DESCRIPTION" desc="Contents of the dialog shown when the user tries to sign-in using a phone as a security key.">
         A notification was sent to your phone. Follow the prompts to confirm it's you.
       </message>
+      <message name="IDS_USER_INFO" desc="user information.">User information</message>
       <message name="IDS_SET_PIN_TITLE" desc="set pin page title.">Set PIN Code</message>
       <message name="IDS_SET_PIN_DESC" desc="pin code setting page desc.">PIN is used to open screen</message>
       <message name="IDS_SET_SIX_PIN_CODE" desc="pin code setting textfield.">Enter 6-digit PIN</message>

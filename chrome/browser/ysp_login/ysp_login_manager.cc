@@ -93,6 +93,7 @@ const char kGetAuthTokenPath[] = "/client/v3/auth/token";  // 更新access_token
 const char kSdpDevicePath[] = "/client/v3/sdp/device/";  // 获取/删除用户设备
 const char kModifyPasswordPath[] =
     "/client/v3/device/password";  // 修改密码接口
+const char kUploadAvatar[] = "/client/v3/user/avatar";  // 修改密码接口
 const char kApplictionStatusPath[] =
     "/client/v3/strategy/application/market/";  // 启用/关闭应用市场应用
 const char kGatewayApplictionPath[] =
@@ -720,6 +721,7 @@ YSPLoginManager::YSPLoginManager()
       put_appliction_status_fetcher_(nullptr),
       get_gateway_appliction_fetcher_(nullptr),
       put_modify_password_fetcher_(nullptr),
+      post_upload_avatar_fetcher_(nullptr),
       autoConfig_fetcher_(nullptr),
       login_info_(nullptr),
       application_info_(nullptr),
@@ -1025,6 +1027,47 @@ void YSPLoginManager::ModifyPassword(const std::string& old_password,
   net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
   put_modify_password_fetcher_->StarFetcherResource(
       net::URLFetcher::PUT, url, header_list, post_data, false);
+  header_list.clear();
+}
+
+void YSPLoginManager::UploadAvatar(const std::string& avatar_path) {
+  if (!post_upload_avatar_fetcher_) {
+    post_upload_avatar_fetcher_ = new YSPFetcherResource(
+        this, g_browser_process->system_request_context());
+  } else if (post_upload_avatar_fetcher_->IsLoading()) {
+    return;
+  }
+  std::vector<std::string> header_list;
+  std::string access_token = GetAccessToken();
+  if (!access_token.empty()) {
+    header_list.push_back("access-token: " + access_token);
+  }
+
+  std::string url = GetManageServer() + kUploadAvatar;
+  std::string post_data;
+  net::AddMultipartValueForUpload("id", GetUserId(), kMultipartBoundary, "",
+                                  &post_data);
+  net::AddMultipartValueForUpload("companyId", GetCompanyId(),
+                                  kMultipartBoundary, "", &post_data);
+
+  base::FilePath path(base::UTF8ToUTF16(avatar_path));
+  std::string avatar_data;
+  if (base::ReadFileToString(path, &avatar_data)) {
+    post_data.append("--");
+    post_data.append(kMultipartBoundary);
+    post_data.append("\r\nContent-Disposition: form-data; name=\"");
+    post_data.append("photo");
+    post_data.append("\"; filename=\"");
+    post_data.append("avatar.");
+    post_data.append(base::UTF16ToUTF8(path.Extension()));
+    post_data.append("\"\r\nContent-Type: image/png\r\n\r\n");
+
+    post_data.append(avatar_data.data(), avatar_data.size());
+    post_data.append("\r\n");
+    net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
+    post_upload_avatar_fetcher_->StarFetcherResource(
+        net::URLFetcher::POST, url, header_list, post_data, false);
+  }
   header_list.clear();
 }
 
@@ -1390,9 +1433,8 @@ void YSPLoginManager::OnUserFetcherResponseParse(
   response_data->GetDictionary("data.company", &company_dict_new);
 
   if (login_info_ && user_dict_new && company_dict_new) {
-    login_info_->Set("data.user", std::make_unique<base::Value>(user_dict_new));
-    login_info_->Set("data.company",
-                     std::make_unique<base::Value>(company_dict_new));
+    login_info_->Set("data.user", user_dict_new->CreateDeepCopy());
+    login_info_->Set("data.company", company_dict_new->CreateDeepCopy());
   }
 
   response_data->Clear();
@@ -1487,6 +1529,20 @@ void YSPLoginManager::OnGatewayApplictionResponseParse(
 void YSPLoginManager::OnModifyPasswordResponseParse(std::string response) {
   LOG(INFO) << "YSPLoginManager::OnModifyPasswordResponseParse";
   NotifyConfigureUpdate("modifyPassword", response);
+}
+
+void YSPLoginManager::OnUploadAvatarResponseParse(
+    std::unique_ptr<base::DictionaryValue>& response_data) {
+  if (GetResponseStatusCode(response_data) != "0")
+    return;
+  base::DictionaryValue* data = nullptr;
+  if (response_data->GetDictionary("data", &data)) {
+    std::string url;
+    data->GetString("url", &url);
+    if (!url.empty()) {
+      NotifyConfigureUpdate("uploadAvatar", url);
+    }
+  }
 }
 
 // YSP+ { Fetcher resource
@@ -2648,6 +2704,8 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(
       OnTokenFetcherResponseParse(response_data, from_local, auto_fetch);
     } else if (url.spec().find(kGetSWAPath) != std::string::npos) {
       OnSwaFetcherResponseParse(response_data, from_local, auto_fetch);
+    } else if (url.spec().find(kUploadAvatar) != std::string::npos) {
+      OnUploadAvatarResponseParse(response_data);
     } else if (url.spec().find(kGetUserPath) != std::string::npos) {
       OnUserFetcherResponseParse(response_data, from_local, auto_fetch);
     } else if (url.spec().find(kGetAuthTokenPath) != std::string::npos) {
@@ -2656,10 +2714,8 @@ void YSPLoginManager::OnFetcherResourceResponseParseSuccessInternal(
       OnSdpDeviceFetcherResponseParse(response_data, from_local, auto_fetch);
     } else if (url.spec().find(kGatewayApplictionPath) != std::string::npos) {
       OnGatewayApplictionResponseParse(response_data);
-    }
-    if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
+    } else if (url.spec().find(kModifyPasswordPath) != std::string::npos) {
       OnModifyPasswordResponseParse(response_status);
-      return;
     }
 
     LOG(INFO) << " login_status_code_: " << login_status_code_
@@ -2899,6 +2955,15 @@ std::string YSPLoginManager::generateUserInfoForSettings() {
         if (data_dict->GetString("user.avatarPath", &ret)) {
           return_dict.SetString("avatarPath", ret);
         }
+        if (data_dict->GetString("user.title", &ret)) {
+          return_dict.SetString("title", ret);
+        }
+        if (data_dict->GetString("user.title", &ret)) {
+          return_dict.SetString("title", ret);
+        }
+        if (data_dict->GetString("company.name", &ret)) {
+          return_dict.SetString("companyName", ret);
+        }
 
         base::string16 username = GetYSPUserName();
         base::char16 head_name = 0;
@@ -2975,8 +3040,9 @@ std::string YSPLoginManager::GetValueForKey(const std::string& key) {
     const std::string userid("userid");
     data_dict.SetString(userid, GetLastUID());
     base::JSONWriter::Write(data_dict, &result);
+  } else if (key.compare("pinCode") == 0) {
+    result = GetUserPinKey();
   }
-
   return result;
 }
 // YSP+ { passwords AD manager
@@ -3705,6 +3771,10 @@ void YSPLoginManager::UpdatePinKey(const std::string& value) {
 
 std::string YSPLoginManager::GetUserPinKey() {
   return YspCryptoSingleton::GetInstance()->GetCurrentPinKey();
+}
+
+std::string YSPLoginManager::SHA256HashString(const std::string& text) {
+  return YspCryptoSingleton::GetInstance()->SHA256HashString(text);
 }
 
 std::string YSPLoginManager::GetLastCID() {

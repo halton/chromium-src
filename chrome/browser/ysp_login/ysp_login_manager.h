@@ -61,7 +61,7 @@ class YSPLoginManagerObserver {
   virtual void OnTokenStatusChanged(const std::string& type) {}
   virtual void OnLoginRequestFailure(const std::string& error) = 0;
   virtual void OnLoginResponseParseFailure(const std::string& error) = 0;
-  virtual void OnLoginFailure(base::string16 message) = 0;
+  virtual void OnLoginFailure(const base::string16& message) = 0;
   virtual void OnLoginSuccess(const base::string16& name,
                               const std::string& head_image_url) = 0;
   virtual void OnLogout() = 0;
@@ -89,6 +89,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
 
   void InitPinKeys();
   void UpdatePinKey(const std::string& value);
+  std::string SHA256HashString(const std::string& text);
   std::string GetUserPinKey();
 
   void Init();
@@ -238,6 +239,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
       bool auto_fetch);
   void ModifyPassword(const std::string& old_password,
                       const std::string& new_password);
+  void UploadAvatar(const std::string& avatar_path);
 
   base::string16 GetYSPUserName();
   std::string GetHeadImageUrl();
@@ -276,6 +278,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   void OnGatewayApplictionResponseParse(
       std::unique_ptr<base::DictionaryValue>& response_data);
   void OnModifyPasswordResponseParse(std::string response);
+  void OnUploadAvatarResponseParse(
+      std::unique_ptr<base::DictionaryValue>& response_data);
   // YSP+ } /*Fetcher resource*/
  private:
   void OnLoginResponseParseSuccessInternal(
@@ -364,6 +368,7 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
   YSPFetcherResource* put_appliction_status_fetcher_;
   YSPFetcherResource* get_gateway_appliction_fetcher_;
   YSPFetcherResource* put_modify_password_fetcher_;
+  YSPFetcherResource* post_upload_avatar_fetcher_;
 
   YSPAutoConfigFetcher* autoConfig_fetcher_;
   bool auto_login_;

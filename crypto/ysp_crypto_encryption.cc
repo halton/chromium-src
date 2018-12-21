@@ -973,6 +973,14 @@ void YspCryptoSingleton::UpdateCurrentPinKey(const std::string& pin_key) {
   pin_keys_.push_back(sha_key);
 }
 
+std::string YspCryptoSingleton::SHA256HashString(const std::string& text) {
+  if (text.empty()) {
+    return text;
+  }
+  std::string sha_key = crypto::SHA256HashString(text);
+  return base::HexEncode(sha_key.data(), sha_key.length());
+}
+
 int YspCryptoSingleton::GetCurrentPinKeyIndex() {
   return pin_keys_.size() - 1;
 }

@@ -15,7 +15,10 @@ namespace chrome {
 
 // Note: Add hosts to |kChromePaths| in browser_about_handler.cc to be listed by
 // chrome://chrome-urls (about:about) and the built-in AutocompleteProvider.
-const char kChromeUIShowConfigHost[] = "show-config";//ysp+ { show config }
+#ifdef REDCORE
+const char kChromeUIShowConfigHost[] = "show-config";
+const char kChromeUIMeUIHost[] = "me";
+#endif
 const char kChromeUIAboutHost[] = "about";
 const char kChromeUIAboutURL[] = "chrome://about/";
 const char kChromeUIAccessibilityHost[] = "accessibility";

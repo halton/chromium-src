@@ -116,9 +116,9 @@
             <div class="wrap-left"></div>
           <div class="form" id="form">
               <div class="cut_off_line"></div>
-              <div class="company_domain" id="company_domain">
-                  <h2>服务器地址</h2>
-                  <input id="domain" type="text" class="field field-block" placeholder="请输入Redcore服务器地址" pattern="\S+" tip="" />
+              <div class="company_domain" style="display: block" id="company_domain">
+                  <h2 class="set_server">服务器地址</h2>
+                  <input id="domain" type="text" class="field field-block" placeholder="pertest.redcore.cn" pattern="\S+" tip="" />
                   <p>忘记服务器地址？请联系您的企业管理员获取。</p>
                   <button class="button block" id="next-btn" name="">确定</button>
               </div>
@@ -153,7 +153,7 @@
                       <span class="forget" id="openTip">忘记密码？</span>
                   </div>
               </div>
-              <div class="company_QRcode" style="display: block" id="company_QRcode">
+              <div class="company_QRcode" style="display: none" id="company_QRcode">
                   &lt;!&ndash;<img src="./imgs/login/back-user.png" alt="返回登录" id="back_login">&ndash;&gt;
                   <h2 id="back_login">账号登录</h2>
                   <h2 class="QRcode_login">扫码登录</h2>

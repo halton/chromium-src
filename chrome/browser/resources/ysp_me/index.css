@@ -1,0 +1,437 @@
+/**
+ *  Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+ *  Use of this source code is governed by a BSD-style license that can be
+ *  found in the LICENSE file.
+ */
+body {
+  background-color: #f7f9f9;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+/* 按钮相关 */
+.rdc-btn {
+  background-color: #fff;
+  padding: 8px 16px;
+  color: #457dff;
+  border-radius: 4px;
+  border: 1px solid #dadce0;
+  margin-left: 10px;
+}
+.rdc-btn:hover {
+  background-color: rgba(66, 133, 244, 0.04);
+  color: #457dff;
+}
+.rdc-btn:focus {
+  outline: none;
+}
+.rdc-btn.primary {
+  background-color: #457dff;
+  color: #fff;
+}
+.rdc-btn-icon {
+  padding: 0;
+  border: none;
+  width: 36px;
+  height: 36px;
+  background-color: transparent;
+  position: relative;
+}
+.rdc-btn-icon:focus {
+  outline: none;
+}
+.rdc-btn-icon.on .rdc-caret-arrow {
+  transform: translate(-50%, -50%) rotate(225deg);
+}
+/* 阴影效果 */
+.rdc-shadow {
+  width: 1px;
+  height: 1px;
+  border-radius: 50%;
+  border: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ddd;
+}
+.rdc-shadow.act {
+  animation-name: rdcShadowCircle;
+  animation-duration: 0.3s;
+  animation-timing-function: linear;
+  animation-fill-mode: none;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  -webkit-animation-name: rdcShadowCircle;
+  -webkit-animation-duration: 0.3s;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-fill-mode: none;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-direction: normal;
+}
+@keyframes rdcShadowCircle {
+  1% {
+    display: block;
+  }
+  99% {
+    transform: scale(36);
+  }
+  100% {
+    display: none;
+    transform: scale(1);
+  }
+}
+@-webkit-keyframes rdcShadowCircle {
+  1% {
+    display: block;
+  }
+  99% {
+    display: block;
+    transform: scale(36);
+  }
+  100% {
+    display: none;
+    transform: scale(1);
+  }
+}
+/* 定位相关 */
+.rdc-pos-tr {
+  top: 0;
+  right: 0;
+  bottom: unset;
+  left: unset;
+}
+.rdc-pos-br {
+  bottom: 0;
+  right: 0;
+  top: unset;
+  left: unset;
+}
+.rdc-pos-tl {
+  top: 0;
+  left: 0;
+  right: unset;
+  bottom: unset;
+}
+.rdc-pos-bl {
+  bottom: 0;
+  left: 0;
+  top: unset;
+  right: unset;
+}
+.rdc-pos-mm {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* 控制元素相关 */
+.rdc-ctl {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: unset;
+  left: unset;
+}
+.rdc-ctl-br {
+  position: absolute;
+  top: 0;
+  bottom: unset;
+  bottom: 0;
+  right: 0;
+  top: unset;
+  left: unset;
+}
+.rdc-ctl-mm {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: unset;
+  left: unset;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* 小图标 */
+.rdc-arrow {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-left: 2px solid #aaa;
+  border-top: 2px solid #aaa;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.rdc-arrow.on {
+  transform: rotate(225deg);
+  transition: transform 0.1s;
+}
+.rdc-angle {
+  display: block;
+  width: 0;
+  height: 0;
+  border-width: 6px;
+  border-style: solid;
+  border-left-color: #555;
+}
+.rdc-caret {
+  border-color: transparent;
+  position: absolute;
+}
+.rdc-caret-arrow {
+  border-color: transparent;
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-left: 2px solid #aaa;
+  border-top: 2px solid #aaa;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.rdc-caret-arrow.on {
+  transform: rotate(225deg);
+  transition: transform 0.1s;
+}
+.rdc-caret-angle {
+  border-color: transparent;
+  position: absolute;
+  display: block;
+  width: 0;
+  height: 0;
+  border-width: 6px;
+  border-style: solid;
+  border-left-color: #555;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.rdc-masker {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.rdc-masker .rdc-masker-content {
+  position: absolute;
+  background-color: #fff;
+  width: 460px;
+  border-radius: 4px;
+  padding: 20px 20px 10px;
+}
+.rdc-masker .rdc-masker-content h5 {
+  font-size: 18px;
+  color: #333;
+  line-height: 2;
+}
+.rdc-masker .rdc-masker-content p {
+  line-height: 2;
+}
+.rdc-masker-fix {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  position: fixed;
+}
+.rdc-masker-fix .rdc-masker-content {
+  position: absolute;
+  background-color: #fff;
+  width: 460px;
+  border-radius: 4px;
+  padding: 20px 20px 10px;
+}
+.rdc-masker-fix .rdc-masker-content h5 {
+  font-size: 18px;
+  color: #333;
+  line-height: 2;
+}
+.rdc-masker-fix .rdc-masker-content p {
+  line-height: 2;
+}
+/* 具体页面 */
+.rdc-container-user {
+  width: 660px;
+  margin: 20px auto;
+  font-size: 14px;
+  font-family: "Microsoft Yahei";
+}
+.rdc-container-user .rdc-item {
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+.rdc-container-user .rdc-item h5 {
+  color: #333;
+  line-height: 40px;
+  margin: 0;
+}
+.rdc-container-user .rdc-item .rdc-info {
+  padding: 20px;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 1px 1px 1px #ccc;
+}
+.rdc-container-user .rdc-item .rdc-info.device {
+  margin-bottom: 20px;
+}
+.rdc-container-user .rdc-item .rdc-info.device .rdc-head .img {
+  width: 90px;
+}
+.rdc-container-user .rdc-item .rdc-info.device .rdc-content .rdc-form-row label {
+  width: 90px;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head {
+  position: relative;
+  display: flex;
+  line-height: 30px;
+  margin-bottom: 20px;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img {
+  width: 60px;
+  height: 60px;
+  margin-right: 30px;
+  position: relative;
+  border-radius: 4px;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img:hover .rdc-masker {
+  display: block;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img .rdc-img-head {
+  height: 100%;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img .rdc-img-head img {
+  display: block;
+  margin: 8px auto 4px;
+  width: 14px;
+  height: 14px;
+  line-height: 30px;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img .rdc-img-head p {
+  text-align: center;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img .rdc-img-head p button {
+  background-color: transparent;
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 30px;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .img img {
+  width: 100%;
+  height: 100%;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .info {
+  flex: 1;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .info p:only-child {
+  line-height: 60px;
+  font-weight: 400;
+}
+.rdc-container-user .rdc-item .rdc-info .rdc-head .info p {
+  color: #333;
+  font-weight: 600;
+}
+.rdc-content {
+  position: relative;
+}
+.rdc-content .rdc-form-row {
+  line-height: 40px;
+}
+.rdc-content .rdc-form-row label {
+  color: #666;
+  display: inline-block;
+  margin-right: 20px;
+}
+.rdc-content .rdc-form-row span {
+  display: inline-block;
+  color: #333;
+  font-weight: 600;
+}
+.rdc-content .rdc-form-row input {
+  padding: 0 6px;
+  background-color: #f1f3f4;
+  border: none;
+  height: 32px;
+  border-radius: 4px;
+  width: 270px;
+}
+.rdc-content .rdc-form-row input.error {
+  border: 1px solid #f21648;
+}
+.rdc-content .rdc-form-valid span {
+  display: inline-block;
+  font-size: 14px;
+  color: #f21648;
+  margin-left: 90px;
+}
+.rdc-content .rdc-ctl {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+.rdc-content .rdc-list-row {
+  padding: 0 20px;
+  height: 48px;
+  line-height: 48px;
+  display: flex;
+  justify-content: flex-start;
+  position: relative;
+}
+.rdc-content .rdc-list-row i {
+  width: 14px;
+  height: 100%;
+  display: inline-block;
+  margin-right: 10px;
+}
+.rdc-content .rdc-list-row i.lock {
+  background: url(./imgs/lock_time_icon.png) center no-repeat;
+}
+.rdc-content .rdc-list-row i.change {
+  background: url(./imgs/pin_modify.png) center no-repeat;
+}
+.rdc-content .rdc-list-row p {
+  text-align: right;
+  flex: 1;
+}
+.rdc-content .rdc-list-row div {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  top: 6px;
+  right: 20px;
+}
+.rdc-content .rdc-list-row + .rdc-list-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.rdc-content.rdc-pop {
+  margin-top: 16px;
+  padding-bottom: 70px;
+}
+.rdc-content.rdc-pop .rdc-form-row {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.rdc-content.rdc-pop .rdc-form-row label {
+  margin-left: 1em;
+  width: 116px;
+}
+.rdc-content.rdc-pop .rdc-form-valid span {
+  margin-left: 150px;
+}

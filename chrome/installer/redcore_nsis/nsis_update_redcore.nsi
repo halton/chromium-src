@@ -5,7 +5,6 @@ SetCompress Auto
 SetCompressor /FINAL /SOLID zlib
 
 ; MUI 1.67 compatible ------
-!include "env_var_update.nsh"
 !include "MUI.nsh"
 !include "WordFunc.nsh"
 !include "FileFunc.nsh"
@@ -32,15 +31,15 @@ SilentInstall silent
 RequestExecutionLevel admin
 
 ;add english support
-LangString ProductName ${LANG_ENGLISH} "Redcore Browser"
+LangString ProductName ${LANG_ENGLISH} "Enterplorer Browser"
 LangString Shortcut_Unintall ${LANG_ENGLISH} "Uninstall.lnk"
 LangString ShortcutDescription ${LANG_ENGLISH} "Browse the web"
-LangString ShortcutName ${LANG_ENGLISH} "Redcore Browser"
+LangString ShortcutName ${LANG_ENGLISH} "Enterplorer Browser"
 ;add chinese support
-LangString ProductName ${LANG_SIMPCHINESE} "红芯企业浏览器"
+LangString ProductName ${LANG_SIMPCHINESE} "Enterplorer企业浏览器"
 LangString Shortcut_Unintall ${LANG_SIMPCHINESE} "卸载.lnk"
 LangString ShortcutDescription ${LANG_SIMPCHINESE} "访问互联网"
-LangString ShortcutName ${LANG_SIMPCHINESE} "红芯企业浏览器"
+LangString ShortcutName ${LANG_SIMPCHINESE} "Enterplorer企业浏览器"
 
 VIProductVersion "${CHROME_VERSION}"
 
@@ -121,9 +120,9 @@ onOK:
   WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_GPU_RENDERING" "redcore.exe" 0x00000001
   
   ;自带IE用的Flash插件
-  ;SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\FlashAx"
-  ;SetOverwrite try
-  ;File /nonfatal nsis_src\FlashAx\*.ocx
+  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\FlashAx"
+  SetOverwrite try
+  File /nonfatal nsis_src\FlashAx\*.ocx
   
   ;判断系统版本
   ReadRegStr $WINDOWS_Version HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "ProductName"
@@ -142,24 +141,6 @@ onOK:
   ;File nsis_src\sangfor\*.*
   ;IfErrors 0 +3
   ;${LogText} "Copy sangfor files faild"
-InstallYSPGm:
-  ClearErrors
-  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm"
-  SetOverwrite try
-  File nsis_src\gm\gmcrypto.dll
-  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert"
-  SetOverwrite try
-  File nsis_src\gm\gmcert\*.*
-  SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
-  SetOverwrite try
-  File nsis_src\gm\gmcert-hd\*.*
-  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "REDCORE_ENGINES"
-  ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
-  SetOutPath "$SYSDIR"
-  SetOverwrite try
-  File nsis_src\gm\KeyGDBApi.dll
-  IfErrors 0 +3
-  ${LogText} "Copy GM files faild"
 CheckFlashAx:
   Call IsFlashInstalled
   Pop $R0

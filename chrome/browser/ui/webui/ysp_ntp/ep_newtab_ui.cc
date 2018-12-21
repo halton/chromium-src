@@ -293,7 +293,7 @@ void EPNewTabUI::OnLoginResponseParseFailure(const std::string& error) {
   CallJsFunc2(str_function_name, &status, &str);
 }
 
-void EPNewTabUI::OnLoginFailure(base::string16 message) {
+void EPNewTabUI::OnLoginFailure(const base::string16& message) {
   if (!YSPLoginManager::GetInstance()->get_web_initialized())
     return;
   DLOG(INFO) << "EPNewTabUI::OnLoginFailure";

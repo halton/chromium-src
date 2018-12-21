@@ -21,17 +21,17 @@ document.write('<link id="incognitothemecss" rel="stylesheet" ' +
 <div class="content">
   <div class="icon" role="presentation" alt=""></div>
   <h1>$i18n{incognitoTabHeading}</h1>
-  <p id="subtitle">
+  <p id="subtitle" style="display: none">
     <span>$i18n{incognitoTabDescription}</span>
     <a class="learn-more-button"
         href="$i18n{learnMoreLink}">$i18n{learnMore}</a>
   </p>
-  <div>
+  <div style="display: none">
     <div class="bulletpoints">$i18nRaw{incognitoTabFeatures}</div>
     <div class="bulletpoints">$i18nRaw{incognitoTabWarning}</div>
     <div class="clearer"></div>
   </div>
-  <a class="learn-more-button" href="$i18n{learnMoreLink}">$i18n{learnMore}</a>
+  <a class="learn-more-button" href="$i18n{learnMoreLink}" style="display: none">$i18n{learnMore}</a>
 </div>
 <script src="chrome://resources/js/cr.js"></script>
 <script src="chrome://resources/js/util.js"></script>

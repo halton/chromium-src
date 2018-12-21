@@ -884,6 +884,28 @@
       <include name="IDR_YSP_CONFIG_JQUERY_MIN_JS" file="resources\ysp_config\jquery.min.js" flattenhtml="true" type="BINDATA" />
       <include name="IDR_YSP_CONFIG_SHOW_JS" file="resources\ysp_config\show.js" flattenhtml="true" type="BINDATA" />
       <!-- //ysp+ } /* show config */-->
+      <!-- //ysp+ { me -->
+      <include name="IDR_YSP_ME_IMGS_ANDROID_PNG" file="resources\ysp_me\imgs\android.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_IPAD_PNG" file="resources\ysp_me\imgs\iPad.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_IPHONE_PNG" file="resources\ysp_me\imgs\iphone.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_LINUX_PNG" file="resources\ysp_me\imgs\linux.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_LOCK_TIME_ICON_PNG" file="resources\ysp_me\imgs\lock_time_icon.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_MAC_PNG" file="resources\ysp_me\imgs\mac.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_MACBOOK_PNG" file="resources\ysp_me\imgs\macbook.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_NOT_LOGIN_PNG" file="resources\ysp_me\imgs\not_login.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_PAD_ANDROID_PNG" file="resources\ysp_me\imgs\pad_android.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_PIN_MODIFY_PNG" file="resources\ysp_me\imgs\pin_modify.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_UPLOAD_ICON_PNG" file="resources\ysp_me\imgs\upload_icon.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_WINDOWS_PC_PNG" file="resources\ysp_me\imgs\windows_pc.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_WINDOWSBOOK_PNG" file="resources\ysp_me\imgs\windowsbook.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_INDEX_HTML" file="resources\ysp_me\index.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" />
+      <include name="IDR_YSP_ME_INDEX_JS" file="resources\ysp_me\index.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_ME_DEVICE_JS" file="resources\ysp_me\device.js" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_ME_INDEX_CSS" file="resources\ysp_me\index.css" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_YSP_ME_SCREENSET_JS" file="resources\ysp_me\screenSet.js" type="BINDATA" />
+      <include name="IDR_YSP_ME_USER_JS" file="resources\ysp_me\user.js" type="BINDATA" />
+      <include name="IDR_YSP_ME_JQUERY_JS" file="resources\ysp_me\jquery.js" type="BINDATA" />
+      <include name="IDR_YSP_ME_RDC_UTIL_JS" file="resources\ysp_me\rdc_util.js" type="BINDATA" />
     </includes>
   </release>
 </grit>

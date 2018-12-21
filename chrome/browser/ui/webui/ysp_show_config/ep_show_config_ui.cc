@@ -129,7 +129,7 @@ void EPShowConfigUI::OnLoginResponseParseFailure(const std::string& error) {
   DLOG(INFO) << "EPShowConfigUI::OnLoginResponseParseFailure";
 }
 
-void EPShowConfigUI::OnLoginFailure(base::string16 message) {
+void EPShowConfigUI::OnLoginFailure(const base::string16& message) {
   DLOG(INFO) << "EPShowConfigUI::OnLoginFailure";
   is_login_ = false;
   base::Value str(message);

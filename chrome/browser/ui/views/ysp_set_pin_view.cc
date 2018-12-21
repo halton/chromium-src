@@ -123,6 +123,18 @@ void YSPSetPINView::ButtonPressed(views::Button* sender,
 
 void YSPSetPINView::ContentsChanged(views::Textfield* sender,
                                     const base::string16& new_contents) {
+  if (!new_contents.empty()) {
+    const base::string16& last_text =
+        (base::string16)new_contents.substr(new_contents.length() - 1, 1);
+    if (!IsDigitString(last_text)) {
+      base::string16 available_text =
+          new_contents.substr(0, new_contents.length() - 1);
+      sender->SetText(available_text);
+    }
+    if (new_contents.length() > 6) {
+      sender->SetText(new_contents.substr(0, 6));
+    }
+  }
   prompt_label_->SetVisible(false);
 }
 

@@ -158,7 +158,7 @@ YSPLockScreenView::YSPLockScreenView(
 }
 
 YSPLockScreenView::~YSPLockScreenView() {
-  
+  YSPLoginManager::GetInstance()->RemoveObserver(this);
 }
 
 void YSPLockScreenView::Submit() {
@@ -182,8 +182,7 @@ void YSPLockScreenView::Submit() {
 
 void YSPLockScreenView::DownloadImage(const std::string& url) {
   content::WebContents* webContents = browser_view_->GetActiveWebContents();
-  if (!webContents)
-    return;
+  if (!webContents)  return;
 
   webContents->DownloadImage(GURL(url), true, 0, true,
                              base::Bind(&YSPLockScreenView::DidDownloadFavicon,
@@ -359,6 +358,8 @@ void YSPLockScreenView::Layout() {
       bg_image_x, bg_image_y, forget_password_button_size.width(),
       forget_password_button_size.height());
 
+  if (YSPLoginManager::GetInstance()->GetUserPinKey().empty())  return;
+
   Browser::YSPLockStatus lock = static_cast<Browser::YSPLockStatus>(
       g_browser_process->local_state()->GetInteger(prefs::kYSPLockScreen));
   if (lock == Browser::UNLOCKED) {
@@ -441,7 +442,7 @@ void YSPLockScreenView::OnLoginRequestFailure(const std::string& error) {}
 
 void YSPLockScreenView::OnLoginResponseParseFailure(const std::string& error) {}
 
-void YSPLockScreenView::OnLoginFailure(base::string16 message) {}
+void YSPLockScreenView::OnLoginFailure(const base::string16& message) {}
 
 void YSPLockScreenView::OnLoginSuccess(const base::string16& name,
                                        const std::string& head_image_url) {

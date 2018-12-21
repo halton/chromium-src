@@ -168,7 +168,7 @@ void YSPAccountView::Layout() {
   int x = (width() - AvatarImageSize) / 2;
   int y = (height() - AvatarImageSize) / 2;
   head_view_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
-  head_view_->SetDrawCircle(false);
+  head_view_->SetDrawCircle(true);
   if (name_label_->visible()) {
     name_label_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
   }
@@ -189,16 +189,10 @@ const char* YSPAccountView::GetClassName() const {
 
 bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
   // TODO (LIUWEI): work around when personal settings are not ready
-  std::string url_str;
-
+  std::string url_str = "chrome://newtab";
   if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
-    YSPLoginManager::GetInstance()->GetAutoConfigfetcher(true);
-    url_str = "chrome://settings";
+    url_str = "chrome://me";
   }
-  else {
-    url_str = "chrome://newtab";
-  }
-
   const GURL url(url_str);
   const content::Referrer ref(url, blink::kWebReferrerPolicyDefault);
   content::OpenURLParams param(url,
@@ -243,7 +237,7 @@ void YSPAccountView::OnLoginResponseParseFailure(const std::string& error) {
   DLOG(INFO) << "YSPAccountView::OnLoginResponseParseFailure";
 }
 
-void YSPAccountView::OnLoginFailure(base::string16 message) {
+void YSPAccountView::OnLoginFailure(const base::string16& message) {
   DLOG(INFO) << "YSPAccountView::OnLoginFailure";
 }
 
