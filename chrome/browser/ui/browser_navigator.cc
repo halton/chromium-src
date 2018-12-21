@@ -428,6 +428,12 @@ std::unique_ptr<content::WebContents> CreateTargetContents(
     create_params.auto_select_content = params.auto_select;
 #endif
 
+#ifdef IE_REDCORE
+  create_params.renderer_mode = params.renderer_mode;
+  if (!params.auto_select)
+    create_params.auto_select_content = params.auto_select;
+#endif
+
   std::unique_ptr<WebContents> target_contents =
       WebContents::Create(create_params);
 

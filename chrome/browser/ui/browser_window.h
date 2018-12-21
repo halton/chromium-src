@@ -142,6 +142,10 @@ class BrowserWindow : public ui::BaseWindow {
   // Sets whether the translate icon is lit for the current tab.
   virtual void SetTranslateIconToggled(bool is_lit) = 0;
 
+#ifdef IE_REDCORE
+  virtual void SetRendererModeIconToggled(RendererMode mode) = 0;
+#endif
+
   // Called when the active tab changes.  Subclasses which implement
   // TabStripModelObserver should implement this instead of ActiveTabChanged();
   // the Browser will call this method while processing that one.

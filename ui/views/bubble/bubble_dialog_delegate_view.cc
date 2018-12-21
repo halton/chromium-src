@@ -57,6 +57,10 @@ Widget* CreateBubbleWidget(BubbleDialogDelegateView* bubble) {
   Widget::InitParams bubble_params(Widget::InitParams::TYPE_BUBBLE);
   bubble_params.delegate = bubble;
   bubble_params.opacity = Widget::InitParams::TRANSLUCENT_WINDOW;
+#ifdef IE_REDCORE
+  // 解决切换IE内核后，BubbleWidget在IE窗口中的部分显示不全的问题
+  bubble_params.force_software_compositing = true;
+#endif
   bubble_params.accept_events = bubble->accept_events();
   // Use a window default shadow if the bubble doesn't provides its own.
   bubble_params.shadow_type = bubble->shadow() == BubbleBorder::NO_ASSETS

@@ -196,14 +196,6 @@ void LocationBarView::Init() {
       is_popup_mode_, this, font_list);
   omnibox_view_->Init();
   AddChildView(omnibox_view_);
-
-#ifdef IE_REDCORE
-  ysp_renderer_mode_view_ =
-      new YspRendererModeView(command_updater(), browser_, this);
-  ysp_renderer_mode_view_->SetVisible(false);
-  AddChildView(ysp_renderer_mode_view_);
-#endif
-
   RefreshBackground();
 
   // Initialize the inline autocomplete view which is visible only when IME is
@@ -487,6 +479,11 @@ gfx::Size LocationBarView::CalculatePreferredSize() const {
     trailing_width += IncrementalMinimumWidth(local_card_migration_icon_view_);
   trailing_width += IncrementalMinimumWidth(manage_passwords_icon_view_) +
                     IncrementalMinimumWidth(page_action_icon_container_view_);
+
+#ifdef IE_REDCORE
+  trailing_width += IncrementalMinimumWidth(ysp_renderer_mode_view_);
+#endif
+
 #if defined(OS_CHROMEOS)
   if (intent_picker_view_)
     trailing_width += IncrementalMinimumWidth(intent_picker_view_);

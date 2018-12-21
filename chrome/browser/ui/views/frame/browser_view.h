@@ -300,7 +300,7 @@ class BrowserView : public BrowserWindow,
   void SetStarredState(bool is_starred) override;
   void SetTranslateIconToggled(bool is_lit) override;
 #if defined(IE_REDCORE)
-  void SetRendererModeIconToggled(RendererMode mode);
+  void SetRendererModeIconToggled(RendererMode mode) override;
 #endif // defined(IE_REDCORE)
   void OnActiveTabChanged(content::WebContents* old_contents,
                           content::WebContents* new_contents,

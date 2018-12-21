@@ -1866,6 +1866,10 @@ std::unique_ptr<WebContents> WebContentsImpl::Clone() {
   // before.
   CreateParams create_params(GetBrowserContext(), GetSiteInstance());
   create_params.initial_size = GetContainerBounds().size();
+#if defined(REDCORE) && defined(IE_REDCORE)
+  create_params.renderer_mode = rendererMode_;
+#endif
+
   FrameTreeNode* opener = frame_tree_.root()->opener();
   RenderFrameHostImpl* opener_rfh = nullptr;
   if (opener)

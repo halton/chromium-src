@@ -10,6 +10,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/win/win_util.h"
 #include "chrome/app/chrome_command_ids.h"
 #include "chrome/browser/platform_util.h"
 #include "chrome/browser/profiles/profile.h"
@@ -21,10 +22,15 @@
 #include "chrome/grit/generated_resources.h"
 #include "chrome/grit/theme_resources.h"
 #include "components/strings/grit/components_strings.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "ui/accessibility/ax_enums.mojom.h"
 #include "ui/accessibility/ax_node_data.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/events/keycodes/keyboard_codes.h"
+#include "ui/gfx/canvas.h"
+#include "ui/views/background.h"
 #include "ui/views/bubble/bubble_frame_view.h"
 #include "ui/views/controls/button/label_button.h"
 #include "ui/views/controls/combobox/combobox.h"
@@ -34,11 +40,6 @@
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/layout/grid_layout.h"
 #include "ui/views/widget/widget.h"
-#include "base/win/win_util.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "ui/gfx/canvas.h"
-#include "ui/views/background.h"
 
 class RendererModeButtonBackGround : public views::Background {
  public:
@@ -48,15 +49,13 @@ class RendererModeButtonBackGround : public views::Background {
 
   // Overridden from views::Background.
   void Paint(gfx::Canvas* canvas, views::View* view) const override {
-    // comment just for compiling
-
-    // views::Button* button = views::Button::AsCustomButton(view);
-    // views::Button::ButtonState state = button ? button->state() :
-    // views::Button::STATE_NORMAL; if (state == views::Button::STATE_HOVERED ||
-    // 	state == views::Button::STATE_PRESSED)
-    // {
-    // 	canvas->DrawColor(SkColorSetARGB(255, 230, 230, 230));
-    // }
+    views::Button* button = views::Button::AsButton(view);
+    views::Button::ButtonState state =
+        button ? button->state() : views::Button::STATE_NORMAL;
+    if (state == views::Button::STATE_HOVERED ||
+        state == views::Button::STATE_PRESSED) {
+      canvas->DrawColor(SkColorSetARGB(255, 230, 230, 230));
+    }
   }
 };
 
@@ -67,7 +66,7 @@ RendererModeBubbleView::RendererModeBubbleView(views::View* anchor_view,
                                                Browser* browser,
                                                const GURL& url,
                                                RendererMode mode)
-    :  // BubbleDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
+    : BubbleDialogDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
       blink_button_(NULL),
       ie_button_(NULL),
       browser_(browser),
@@ -94,7 +93,8 @@ void RendererModeBubbleView::ShowBubble(views::View* anchor_view,
     renderer_mode_bubble_view_->SetAnchorRect(anchor_rect);
     renderer_mode_bubble_view_->set_parent_window(parent_window);
   }
-  // views::BubbleDelegateView::CreateBubble(renderer_mode_bubble_view_)->Show();
+  views::BubbleDialogDelegateView::CreateBubble(
+	  renderer_mode_bubble_view_)->Show();
 }
 
 void RendererModeBubbleView::Hide() {
@@ -116,11 +116,9 @@ void RendererModeBubbleView::Init() {
           IDR_YSP_BLINK_CORE);
   blink_button_->SetImageLabelSpacing(10);
   blink_button_->SetImage(views::Button::STATE_NORMAL, *blink_image);
-  // comment for compiling
-  // views::Background* blinkBackGround = new RendererModeButtonBackGround;
-  // blink_button_->set_background(blinkBackGround);
-  // blink_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,15));
-  // blink_button_->SetFontList(views::MenuConfig::instance().font_list);
+  blink_button_->SetBackground(
+      std::make_unique<RendererModeButtonBackGround>());
+  blink_button_->SetBorder(views::CreateEmptyBorder(4, 15, 4, 15));
 
   ie_button_ =
       new views::LabelButton(this, l10n_util::GetStringUTF16(IDS_IE_CORE));
@@ -129,16 +127,11 @@ void RendererModeBubbleView::Init() {
           IDR_YSP_IE_CORE);
   ie_button_->SetImageLabelSpacing(10);
   ie_button_->SetImage(views::Button::STATE_NORMAL, *ie_image);
-  // comment for compiling
-  // views::Background* sysIeBackGround = new RendererModeButtonBackGround;
-  // ie_button_->set_background(sysIeBackGround);
-  // ie_button_->SetBorder(views::Border::CreateEmptyBorder(4, 15, 4,
-  // 15));
-  // ie_button_->SetFontList(views::MenuConfig::instance().font_list);
+  ie_button_->SetBackground(std::make_unique<RendererModeButtonBackGround>());
+  ie_button_->SetBorder(views::CreateEmptyBorder(4, 15, 4, 15));
 
-  views::GridLayout* layout = new views::GridLayout(this);
-  // SetLayoutManager(layout);
-
+  views::GridLayout* layout =
+      SetLayoutManager(std::make_unique<views::GridLayout>(this));
   views::ColumnSet* column_set = layout->AddColumnSet(0);
   column_set->AddPaddingColumn(0, 0);
   column_set->AddColumn(views::GridLayout::FILL, views::GridLayout::FILL, 0,
@@ -201,7 +194,10 @@ void RendererModeBubbleView::SetButtonSelected(
     img = ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
         IDR_YSP_IE_CORE_WHITE);
   select_button->SetImage(views::Button::STATE_NORMAL, *img);
-  // views::Background* backGround =
-  // views::Background::CreateSolidBackground(55, 159, 255, 255);
-  // select_button->set_background(backGround);
+  select_button->SetBackground(
+      views::CreateSolidBackground(SkColorSetARGB(255, 55, 159, 255)));
+}
+
+int RendererModeBubbleView::GetDialogButtons() const {
+  return ui::DIALOG_BUTTON_NONE;
 }

@@ -1034,6 +1034,19 @@ void BrowserCommandController::UpdateCommandsForTabState() {
   window()->SetStarredState(
       BookmarkTabHelper::FromWebContents(current_web_contents)->is_starred());
   window()->ZoomChangedForActiveTab(false);
+
+#ifdef IE_REDCORE
+  NavigationEntry* entry =
+      current_web_contents->GetController().GetLastCommittedEntry();
+  if (entry) {
+    GURL url = entry->GetURL();
+    RendererMode mode;
+    if (url.SchemeIsHTTPOrHTTPS() || url.SchemeIsFile())
+      mode = current_web_contents->GetRendererMode();
+    window()->SetRendererModeIconToggled(mode);
+  }
+#endif
+
   command_updater_.UpdateCommandEnabled(IDC_VIEW_SOURCE,
                                         CanViewSource(browser_));
   command_updater_.UpdateCommandEnabled(IDC_EMAIL_PAGE_LOCATION,

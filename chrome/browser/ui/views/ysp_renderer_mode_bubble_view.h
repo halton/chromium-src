@@ -42,6 +42,7 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
  protected:
   // views::BubbleDelegateView method.
   void Init() override;
+  int GetDialogButtons() const override;
 
  private:
   const char* GetClassName() const override;

@@ -5509,5 +5509,20 @@
 <translation id="355226436098205131">请使用6位PIN码解锁屏幕</translation>
 <translation id="4425739312452866274">忘记PIN码？</translation>
 <translation id="1988735210256571067">很抱歉，PIN码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置PIN码。</translation>
+<translation id="8046918477839623462">红芯模式</translation>
+<translation id="6866314797536580459">兼容模式</translation>
+<translation id="6165082002909413608">兼容性设置</translation>
+<translation id="1511303038969068822">浏览器模式（IE7）</translation>
+<translation id="7136583529560447786">浏览器模式（IE8）</translation>
+<translation id="1088233849803779048">浏览器模式（IE9）</translation>
+<translation id="4304238654555771755">浏览器模式（IE10）</translation>
+<translation id="6077930117476482546">浏览器模式（IE11）</translation>
+<translation id="7558798926207291034">文档模式（IE6）</translation>
+<translation id="9130535412700539469">文档模式（IE7）</translation>
+<translation id="5303483316546662178">文档模式（IE8）</translation>
+<translation id="2536282495622946037">文档模式（IE9）</translation>
+<translation id="7724084639339978073">文档模式（IE10）</translation>
+<translation id="533706171072117994">文档模式（IE11）</translation>
+<translation id="4068302834681399009">文档模式（自动）</translation>
 <!-- //ysp+ } -->
 </translationbundle>

@@ -29,12 +29,16 @@ class YspRendererModeView : public PageActionIconView {
   void ExecuteCommand(ExecuteSource source) override;
   views::BubbleDialogDelegateView* GetBubble() const override;
   const gfx::VectorIcon& GetVectorIcon() const override;
+  void OnNativeThemeChanged(const ui::NativeTheme* native_theme) override;
+
+ private:
+  void UpdateImage();
 
  private:
   Browser* browser_;
   RendererMode renderer_mode_;
-
+  base::string16 tooltip_text_;
   DISALLOW_COPY_AND_ASSIGN(YspRendererModeView);
 };
 
-#endif //CHROME_BROWSER_UI_VIEWS_LOCATION_BAR_RENDERER_MODE_VIEW_H_
+#endif  // CHROME_BROWSER_UI_VIEWS_LOCATION_BAR_RENDERER_MODE_VIEW_H_

@@ -35,7 +35,7 @@ bool YspRendererModeView::Update() {
 }
 // just for compiling
 base::string16 YspRendererModeView::GetTextForTooltipAndAccessibleName() const {
-  return std::wstring();
+  return tooltip_text_;
 }
 
 void YspRendererModeView::SetToggled(RendererMode mode) {
@@ -44,8 +44,7 @@ void YspRendererModeView::SetToggled(RendererMode mode) {
   else
     PageActionIconView::SetActiveInternal(true);
   renderer_mode_ = mode;
-  // comment UpdateIcon just for compiling
-  // UpdateIcon();
+  UpdateImage();
   base::string16 tip_str = L"";
   if (renderer_mode_.core == BLINK_CORE)
     tip_str = l10n_util::GetStringUTF16(IDS_CHROME_CORE);
@@ -80,8 +79,7 @@ void YspRendererModeView::SetToggled(RendererMode mode) {
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_SYS);
     }
   }
-  // no implements in super class, comment it by webb.
-  // SetTooltipText(tip_str);
+  tooltip_text_ = tip_str;
 }
 
 void YspRendererModeView::OnExecuting(
@@ -100,20 +98,23 @@ views::BubbleDialogDelegateView* YspRendererModeView::GetBubble() const {
   return RendererModeBubbleView::GetBubbleView();
 }
 
-// comment just for compile
-// bool YspRendererModeView::SetRasterIcon()
-// {
-// 	if (active())
-// 	{
-// 		if (renderer_mode_.core == BLINK_CORE)
-// 			SetImage(ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_YSP_BLINK_CORE_GREY));
-// 		else
-// 			SetImage(ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_YSP_IE_CORE_GREY));
-// 	}
-// 	return true;
-// }
+void YspRendererModeView::OnNativeThemeChanged(
+    const ui::NativeTheme* native_theme) {
+  UpdateImage();
+}
 
-//
+void YspRendererModeView::UpdateImage() {
+  if (!active())
+    return;
+
+  if (renderer_mode_.core == BLINK_CORE) {
+    SetImage(*ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
+        IDR_YSP_BLINK_CORE_GREY));
+  } else {
+    SetImage(*ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
+        IDR_YSP_IE_CORE_GREY));
+  }
+}
 
 const gfx::VectorIcon& YspRendererModeView::GetVectorIcon() const {
   return active() ? toolbar::kStarActiveIcon : toolbar::kStarIcon;
