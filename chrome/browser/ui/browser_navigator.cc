@@ -498,15 +498,10 @@ void Navigate(NavigateParams* params) {
   // the target browser. This must happen first, before
   // GetBrowserForDisposition() has a chance to replace |params->browser| with
   // another one.
-
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
-  params->source_contents = nullptr;
-#else
   if (!params->source_contents && params->browser) {
     params->source_contents =
         params->browser->tab_strip_model()->GetActiveWebContents();
   }
-#endif  // ysp {+
 
   WebContents* contents_to_navigate_or_insert =
       params->contents_to_insert.get();
