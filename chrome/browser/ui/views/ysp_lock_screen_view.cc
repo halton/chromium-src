@@ -419,6 +419,16 @@ void YSPLockScreenView::ContentsChanged(views::Textfield* sender,
 
 bool YSPLockScreenView::HandleKeyEvent(views::Textfield* sender,
                                        const ui::KeyEvent& key_event) {
+  if (key_event.key_code() != ui::VKEY_BACK ||
+      key_event.type() != ui::ET_KEY_PRESSED)
+    return false;
+  for (size_t i = password_text_.size() - 1; i >= 0 && i<= 5; i--) {
+    if (!password_text_.at(i)->text().empty()) {
+      password_text_.at(i)->RequestFocus();
+      password_text_.at(i)->SetText(base::EmptyString16());
+      break;
+    }
+  }
   return false;
 }
 
