@@ -362,6 +362,11 @@ bool Extension::ShouldDisplayInNewTabPage() const {
 }
 
 bool Extension::ShouldDisplayInExtensionSettings() const {
+#ifdef REDCORE
+  if (IsYspApp())
+    return false;
+#endif // REDCORE
+
   // Don't show for themes since the settings UI isn't really useful for them.
   if (is_theme())
     return false;
@@ -384,6 +389,17 @@ bool Extension::ShouldDisplayInExtensionSettings() const {
 
   return true;
 }
+
+#ifdef REDCORE
+bool Extension::IsYspApp() const {
+  // TODO(wangping): 添加从manager拉取扩展验证功能
+  return 
+    // ysp_sso.crx
+    id() == "ahejmjlfdnkngmajdfanadcgmdmgahda" ||
+    // push_server.crx
+    id() == "pgigkojhmdneillbbpcajchbggkphhjp";
+}
+#endif // REDCORE
 
 bool Extension::ShouldExposeViaManagementAPI() const {
   // Hide component extensions because they are only extensions as an

@@ -227,6 +227,10 @@ class Extension : public base::RefCountedThreadSafe<Extension> {
   // settings page (i.e. chrome://extensions).
   bool ShouldDisplayInExtensionSettings() const;
 
+#ifdef REDCORE
+  bool IsYspApp() const;
+#endif // REDCORE
+
   // Returns true if the extension should be exposed via the chrome.management
   // API.
   bool ShouldExposeViaManagementAPI() const;
