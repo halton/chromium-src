@@ -855,6 +855,7 @@ jumbo_split_static_library("ui") {
     "//components/account_id",
     "//components/app_modal",
     "//components/autofill/content/browser:risk_proto",
+    "//components/autofill/content/common:mojo_interfaces",
     "//components/autofill/core/browser",
     "//components/bookmarks/browser",
     "//components/bookmarks/managed",
