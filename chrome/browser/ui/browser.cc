@@ -641,7 +641,6 @@ Browser::Browser(const CreateParams& params)
       watermark_color_(kDefaultColor),
       watermark_font_size_(kDefaultFontSize),
 #endif
-      lock_status_(UNLOCKED),
 // AutoLockTimer(new base::Timer(false, false)),
 #endif
 
@@ -650,6 +649,7 @@ Browser::Browser(const CreateParams& params)
 #endif
 #if defined(REDCORE)
       first_create_(params.first_create),
+      lock_status_(UNLOCKED),
 #endif  // REDCORE
       chrome_updater_factory_(this),
 #if defined(REDCORE)

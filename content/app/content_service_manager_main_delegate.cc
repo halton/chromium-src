@@ -47,9 +47,9 @@ bool ContentServiceManagerMainDelegate::IsEmbedderSubprocess() {
          type == switches::kRendererProcess ||
          type == switches::kUtilityProcess ||
          type == service_manager::switches::kZygoteProcess
-#ifdef REDCORE  // ysp {+
+#ifdef IE_REDCORE
          || type == switches::kTridentProcess
-#endif  // ysp {+
+#endif  // IE_REDCORE 
       ;
 }
 
