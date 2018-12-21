@@ -1819,7 +1819,7 @@
 <translation id="3719826155360621982">首页</translation>
 <translation id="3720996970802414353">确定切换</translation>
 <translation id="3722108462506185496">启动虚拟机服务时出错。请重试。</translation>
-<translation id="3723158278575423087">欢迎体验 Chromium 中的投射功能！</translation>
+<translation id="3723158278575423087">欢迎体验 Enterplorer 中的投射功能！</translation>
 <translation id="3725367690636977613">页码</translation>
 <translation id="3726463242007121105">系统不支持此设备的文件系统，因此无法打开此设备。</translation>
 <translation id="3727148787322499904">更改此设置将会影响所有共享网络</translation>
@@ -3514,7 +3514,7 @@
 <translation id="6286708577777130801">保存的密码详细信息</translation>
 <translation id="6287852322318138013">选择用于打开此文件的应用</translation>
 <translation id="6289452883081499048">体验个性化的 Google 服务（例如 Play）</translation>
-<translation id="6290556621549272952">借助此功能，您可将 Chromium 上的内容显示在您的电视或其他设备上。</translation>
+<translation id="6290556621549272952">借助此功能，您可将 Enterplorer 上的内容显示在您的电视或其他设备上。</translation>
 <translation id="6291949900244949761">当网站要访问 USB 设备时询问您（推荐）</translation>
 <translation id="6291953229176937411">在 Finder 中显示(&amp;S)</translation>
 <translation id="6295158916970320988">所有网站</translation>
@@ -5488,9 +5488,9 @@
 <translation id="996250603853062861">正在建立安全连接...</translation>
 <translation id="998747458861718449">检查(&amp;N)</translation>
 <!-- //ysp+ { -->
-<translation id="4852111869507463990">红芯企业浏览器</translation>
+<translation id="4852111869507463990">Enterplorer企业浏览器</translation>
 <translation id="632770826694814868">您的办公浏览器当前处于锁屏模式</translation>
-<translation id="6964321312176942428">请输入6位PIN码解锁</translation>
+<translation id="6964321312176942428">请输入6位锁屏密码解锁</translation>
 <translation id="4116513560936149887">密码输入错误，请重新输入</translation>
 <translation id="273844075565984758">您的身份认证已过期，请输入密码进行身份认证</translation>
 <translation id="7973262765199496975">登录系统</translation>
@@ -5500,16 +5500,16 @@
 <translation id="6867970763795157612">您的账号被管理员删除，已退出登录。</translation>
 <translation id="3174843802464425189">您的账号被管理员禁用，已退出登录。</translation>
 <translation id="7596913374482479303">设置在通过多功能框搜索时所用的搜索引擎。</translation>
-<translation id="2065749275561741829">PIN码将保护您的隐私，用于打开自动锁屏</translation>
-<translation id="3972708394175159725">设置6位PIN码</translation>
-<translation id="7492885667290119555">确认6位PIN码</translation>
-<translation id="8946472665790859936">设置PIN码</translation>
-<translation id="9222447453844795985">PIN码必须是6位数字</translation>
-<translation id="1443145956076335366">PIN码不一致，请重新输入</translation>
-<translation id="355226436098205131">请使用6位PIN码解锁屏幕</translation>
-<translation id="4425739312452866274">忘记PIN码？</translation>
-<translation id="1988735210256571067">很抱歉，PIN码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置PIN码。</translation>
-<translation id="8046918477839623462">红芯模式</translation>
+<translation id="2065749275561741829">锁屏密码将保护您的隐私，用于打开自动锁屏</translation>
+<translation id="3972708394175159725">设置6位锁屏密码</translation>
+<translation id="7492885667290119555">确认6位锁屏密码</translation>
+<translation id="8946472665790859936">设置锁屏密码</translation>
+<translation id="9222447453844795985">锁屏密码必须是6位数字</translation>
+<translation id="1443145956076335366">锁屏密码不一致，请重新输入</translation>
+<translation id="355226436098205131">请使用6位锁屏密码解锁屏幕</translation>
+<translation id="4425739312452866274">忘记锁屏密码？</translation>
+<translation id="1988735210256571067">很抱歉，锁屏密码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置锁屏密码。</translation>
+<translation id="8046918477839623462">极速模式</translation>
 <translation id="6866314797536580459">兼容模式</translation>
 <translation id="6165082002909413608">兼容性设置</translation>
 <translation id="1511303038969068822">浏览器模式（IE7）</translation>
