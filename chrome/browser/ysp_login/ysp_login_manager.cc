@@ -1050,7 +1050,8 @@ void YSPLoginManager::UploadAvatar(const std::string& avatar_path) {
   net::AddMultipartValueForUpload("companyId", GetCompanyId(),
                                   kMultipartBoundary, "", &post_data);
 
-  base::FilePath path(base::UTF8ToUTF16(avatar_path));
+  base::FilePath path;
+  path = path.AppendASCII(avatar_path);
   std::string avatar_data;
   if (base::ReadFileToString(path, &avatar_data)) {
     post_data.append("--");
