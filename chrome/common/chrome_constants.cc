@@ -15,7 +15,7 @@
 #define PRODUCT_STRING "Google Chrome"
 #elif defined(CHROMIUM_BUILD)
 #ifdef REDCORE
-#define PRODUCT_STRING "Redcore"
+#define PRODUCT_STRING "Enterplorer"
 #else
 #define PRODUCT_STRING "Chromium"
 #endif
@@ -48,13 +48,13 @@ const char kChromeVersion[] = CHROME_VERSION_STRING;
 #if defined(OS_WIN)
 #ifdef REDCORE
 const base::FilePath::CharType kBrowserProcessExecutableNameChromium[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kBrowserProcessExecutableName[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kHelperProcessExecutableNameChromium[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kHelperProcessExecutableName[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 #else
 const base::FilePath::CharType kBrowserProcessExecutableNameChromium[] =
     FPL("chrome.exe");
@@ -96,13 +96,13 @@ const base::FilePath::CharType kHelperProcessExecutableName[] = FPL("exe");
 #if defined(OS_WIN)
 #ifdef REDCORE
 const base::FilePath::CharType kBrowserProcessExecutablePathChromium[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kBrowserProcessExecutablePath[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kHelperProcessExecutablePathChromium[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 const base::FilePath::CharType kHelperProcessExecutablePath[] =
-    FPL("redcore.exe");     //ysp* { change executable name. }
+    FPL("enterplorer.exe");     //ysp* { change executable name. }
 #else
 const base::FilePath::CharType kBrowserProcessExecutablePathChromium[] =
     FPL("chrome.exe");

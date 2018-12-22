@@ -23,8 +23,8 @@ def reorder_imports(input_dir, output_dir, architecture):
   # correct executable in the first place, so that this script
   # only needs to verify that and not write a whole new exe.
 
-  input_image = os.path.join(input_dir, 'redcore.exe')     # //ysp* { change executable name. }
-  output_image = os.path.join(output_dir, 'redcore.exe')   # //ysp* { change executable name. }
+  input_image = os.path.join(input_dir, 'enterplorer.exe')     # //ysp* { change executable name. }
+  output_image = os.path.join(output_dir, 'enterplorer.exe')   # //ysp* { change executable name. }
 
   # pefile mmap()s the whole executable, and then parses parts of
   # it into python data structures for ease of processing.
@@ -72,7 +72,7 @@ def reorder_imports(input_dir, output_dir, architecture):
 
   pe.write(filename=output_image)
 
-  for fname in glob.iglob(os.path.join(input_dir, 'redcore.exe.*')):     # //ysp* { change executable name. }
+  for fname in glob.iglob(os.path.join(input_dir, 'enterplorer.exe.*')):     # //ysp* { change executable name. }
     shutil.copy(fname, os.path.join(output_dir, os.path.basename(fname)))
   return 0
 

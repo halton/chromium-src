@@ -57,13 +57,13 @@ if (is_win) {
     # See comment in chrome_dll.gypi in the hardlink_to_output
     # target for why this cannot be 'initial' like the DLL.
     inputs = [
-      "$root_out_dir/initialexe/redcore.exe",
+      "$root_out_dir/initialexe/enterplorer.exe",
     ]
     outputs = [
-      "$root_out_dir/redcore.exe",
+      "$root_out_dir/enterplorer.exe",
     ]
     if (symbol_level != 0) {
-      outputs += [ "$root_out_dir/redcore.exe.pdb" ]
+      outputs += [ "$root_out_dir/enterplorer.exe.pdb" ]
     }
     args = [
       "-i",
@@ -342,7 +342,7 @@ if (!is_android && !is_mac) {
 
   chrome_binary("chrome_initial") {
     if (is_win) {
-      output_name = "initialexe/redcore"
+      output_name = "initialexe/enterplorer"
     } else {
       output_name = "chrome"
     }
@@ -1862,14 +1862,14 @@ if (is_linux) {
     ]
     if (is_redcore) {
       sources += [
-        "//chrome/tools/build/linux/redcore-wrapper",
+        "//chrome/tools/build/linux/enterplorer-wrapper",
       ]
     }
   }
 }
 
 if (is_linux && is_redcore) {
-  action("redcore") {
+  action("enterplorer") {
     #visibility = [ ":*" ]
     script = "//build/linux/chrome2redcore.py"
     inputs = [
@@ -1878,7 +1878,7 @@ if (is_linux && is_redcore) {
       "$root_out_dir/chrome_200_percent.pak",
     ]
     outputs = [
-      "$root_out_dir/redcore",
+      "$root_out_dir/enterplorer",
     ]
     args = [
       rebase_path(root_out_dir, root_build_dir),

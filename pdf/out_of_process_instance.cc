@@ -48,11 +48,7 @@ namespace chrome_pdf {
 
 namespace {
 
-#ifdef REDCORE
-const char kChromePrint[] = "redcore://print/";
-#else
 const char kChromePrint[] = "chrome://print/";
-#endif
 const char kChromeExtension[] =
     "chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai";
 

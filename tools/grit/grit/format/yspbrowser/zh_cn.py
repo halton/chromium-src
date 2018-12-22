@@ -8,7 +8,7 @@
 # This file MUST be saved in utf-8 NO BOM, UNIT-LF line ending.
 
 preserved = [
-  '红芯企业浏览器',
+  '企业浏览器',
   'BEGIN_LINK_CHRChromiumEND_LINK_CHR',
   'BEGIN_LINK_CHROMIUMChromiumEND_LINK_CHROMIUM',
   '<a target="_blank" href="$1">Chromium</a>',
@@ -47,28 +47,28 @@ preserved = [
 
 # priority 1
 strings_p1 = {
-  'Google Chrome Canary':'红芯企业浏览器 Canary',
-  'Google Chrome Binaries':'红芯企业浏览器 Binaries',
+  'Google Chrome Canary':'企业浏览器 Canary',
+  'Google Chrome Binaries':'企业浏览器 Binaries',
   'The Chromium Authors':'红芯时代（北京）科技有限公司',
-  'Google Chrome浏览器':'红芯企业浏览器',
-  'Google Chrome 浏览器':'红芯企业浏览器',
+  'Google Chrome浏览器':'企业浏览器',
+  'Google Chrome 浏览器':'企业浏览器',
   'Terms of Service':'服务条款',
 }
 
 # priority 2
 strings_p2 = {
-  'Chrome Browser':'红芯企业浏览器',
-  'Chrome browser':'红芯企业浏览器',
-  'Chromium Browser':'红芯企业浏览器',
-  'Chromium browser':'红芯企业浏览器',
-  'Google Chrome':'红芯企业浏览器',
+  'Chrome Browser':'企业浏览器',
+  'Chrome browser':'企业浏览器',
+  'Chromium Browser':'企业浏览器',
+  'Chromium browser':'企业浏览器',
+  'Google Chrome':'企业浏览器',
   'Google Inc.':'红芯时代（北京）科技有限公司',
-  'Chrome 浏览器':'红芯企业浏览器',
+  'Chrome 浏览器':'企业浏览器',
 }
 
 # priority 3
 strings_p3 = {
-  'Chrome':'红芯企业浏览器',
-  'Chromium':'红芯企业浏览器',
-  'Google':'红芯时代',
+  'Chrome':'企业浏览器',
+  'Chromium':'企业浏览器',
+  'Google':'时代',
 }

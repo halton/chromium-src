@@ -4145,7 +4145,7 @@ void YSPLoginManager::ReportURLLoading(const GURL& url) {
   if (!login_info_ || !GetUSReportEnabled())
     return;
 
-  if (url.SchemeIs("redcore"))
+  if (url.SchemeIs("chrome"))
     return;
 
   // init report fetcher

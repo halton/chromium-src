@@ -697,7 +697,7 @@ LONG WINAPI DetourRegOpenKeyEx(HKEY hkey,
     int length = interface_position + interface_key.size();
     std::wstring sub_key_tmp = register_string.substr(length);
     sub_key_tmp =
-        L"Software\\AllMobilize\\Redcore\\IE8\\Interface\\" + sub_key_tmp;
+        L"Software\\AllMobilize\\Enterplorer\\IE8\\Interface\\" + sub_key_tmp;
     HKEY result_key = 0;
     if (fpRegOpenKeyEX(HKEY_CURRENT_USER, sub_key_tmp.c_str(), 0, KEY_READ,
                        &result_key) == ERROR_SUCCESS) {
@@ -718,7 +718,7 @@ LONG WINAPI DetourRegOpenKeyEx(HKEY hkey,
     int length = interface_position + interface_key1.size();
     std::wstring sub_key_tmp = register_string.substr(length);
     sub_key_tmp =
-        L"Software\\AllMobilize\\Redcore\\IE8\\Interface\\" + sub_key_tmp;
+        L"Software\\AllMobilize\\Enterplorer\\IE8\\Interface\\" + sub_key_tmp;
     HKEY result_key = 0;
     if (fpRegOpenKeyEX(HKEY_CURRENT_USER, sub_key_tmp.c_str(), 0, KEY_READ,
                        &result_key) == ERROR_SUCCESS) {
@@ -736,7 +736,7 @@ LONG WINAPI DetourRegOpenKeyEx(HKEY hkey,
   if (pos != register_string.npos && register_string.size() > key.size()) {
     int length = pos + key.size();
     std::wstring sub_key_tmp = register_string.substr(length);
-    sub_key_tmp = L"Software\\AllMobilize\\Redcore\\IE8\\CLSID\\" + sub_key_tmp;
+    sub_key_tmp = L"Software\\AllMobilize\\Enterplorer\\IE8\\CLSID\\" + sub_key_tmp;
     HKEY result_key = 0;
     if (fpRegOpenKeyEX(HKEY_CURRENT_USER, sub_key_tmp.c_str(), 0, KEY_READ,
                        &result_key) == ERROR_SUCCESS) {
@@ -754,7 +754,7 @@ LONG WINAPI DetourRegOpenKeyEx(HKEY hkey,
   if (pos != register_string.npos && register_string.size() > key2.size()) {
     int length = pos + key2.size();
     std::wstring sub_key_tmp = register_string.substr(length);
-    sub_key_tmp = L"Software\\AllMobilize\\Redcore\\IE8\\CLSID\\" + sub_key_tmp;
+    sub_key_tmp = L"Software\\AllMobilize\\Enterplorer\\IE8\\CLSID\\" + sub_key_tmp;
     HKEY result_key = 0;
     if (fpRegOpenKeyEX(HKEY_CURRENT_USER, sub_key_tmp.c_str(), 0, KEY_READ,
                        &result_key) == ERROR_SUCCESS) {

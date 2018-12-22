@@ -16,5 +16,5 @@ files = [
 ]
 
 for f in files:
-  newfile = f.replace('chrome', 'redcore')
+  newfile = f.replace('chrome', 'enterplorer')
   copy2(os.path.join(outdir, f), os.path.join(outdir, newfile))

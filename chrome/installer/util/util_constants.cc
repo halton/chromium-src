@@ -188,9 +188,9 @@ const wchar_t kActiveSetupExe[] = L"chrmstp.exe";
 const wchar_t kChromeDll[] = L"chrome.dll";
 const wchar_t kChromeChildDll[] = L"chrome_child.dll";
 #ifdef REDCORE
-const wchar_t kChromeExe[] = L"redcore.exe";
-const wchar_t kChromeNewExe[] = L"new_redcore.exe";
-const wchar_t kChromeOldExe[] = L"old_redcore.exe";
+const wchar_t kChromeExe[] = L"enterplorer.exe";
+const wchar_t kChromeNewExe[] = L"new_enterplorer.exe";
+const wchar_t kChromeOldExe[] = L"old_enterplorer.exe";
 #else
 const wchar_t kChromeExe[] = L"chrome.exe";
 const wchar_t kChromeNewExe[] = L"new_chrome.exe";

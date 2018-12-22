@@ -911,13 +911,13 @@ void LocationBarView::RefreshLocationIcon() {
       base::BindOnce(&LocationBarView::OnLocationIconFetched,
                      icon_fetch_weak_ptr_factory_.GetWeakPtr()));
 
-  // FIXME(mtz): display redcore icon
+  // FIXME(mtz): display icon
   // location_icon_view_->SetImage(icon);
   location_icon_view_->Update();
 }
 
 void LocationBarView::OnLocationIconFetched(const gfx::Image& image) {
-  // FIXME(mtz): display redcore icon
+  // FIXME(mtz): display icon
   // location_icon_view_->SetImage(image.AsImageSkia());
 }
 

@@ -372,18 +372,18 @@ namespace {
 
 std::string ChromeURLs() {
   std::string html;
-  AppendHeader(&html, 0, "Redcore URLs");
+  AppendHeader(&html, 0, "Enterplorer URLs");
   AppendBody(&html);
-  html += "<h2>List of Redcore URLs</h2>\n<ul>\n";
+  html += "<h2>List of Enterplorer URLs</h2>\n<ul>\n";
   std::vector<std::string> hosts(
       chrome::kChromeHostURLs,
       chrome::kChromeHostURLs + chrome::kNumberOfChromeHostURLs);
   std::sort(hosts.begin(), hosts.end());
   for (std::vector<std::string>::const_iterator i = hosts.begin();
-	  i != hosts.end(); ++i) {
-	  if (i->find("chrome") == std::string::npos) {
-		  html += "<li><a href='redcore://" + *i + "/'>redcore://" + *i + "</a></li>\n";
-	  }
+       i != hosts.end(); ++i) {
+    if (i->find("chrome") == std::string::npos) {
+      html += "<li><a href='chrome://" + *i + "/'>chrome://" + *i + "</a></li>\n";
+    }
   }
   html += "</ul>\n<h2>For Debug</h2>\n"
       "<p>The following pages are for debugging purposes only. Because they "

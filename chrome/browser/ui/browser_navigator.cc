@@ -600,7 +600,7 @@ void Navigate(NavigateParams* params) {
 #ifdef IE_REDCORE  // ysp+ {IE Embedded}
   if (params->source_contents &&
       params->source_contents->GetRendererMode().core == IE_CORE &&
-      params->url.SchemeIs("redcore") == true) {  //在IE页面开首页等自有页面，转为使用Chrome打开
+      params->url.SchemeIs("chrome") == true) {  //在IE页面开首页等自有页面，转为使用Chrome打开
     params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
   }
 

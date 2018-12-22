@@ -9165,7 +9165,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
       Kernel
     </message>-->
     <message name="IDS_CHROME_CORE" desc="">
-      Redcore mode
+      Enterplorer mode
     </message>
     <message name="IDS_IE_CORE" desc="">
       Compatibility mode
@@ -9198,7 +9198,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
       New version notification
     </message>
     <message name="IDS_YSP_AUTO_UPDATE_MESSAGE" desc="">
-      A new version of RedCore is available. click OK to update.
+      A new version of Enterplorer is available. click OK to update.
     </message>
     <message name="IDS_YSP_AUTO_UPDATE_BUTTON_OK" desc="">
       OK
@@ -9246,7 +9246,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
       Document mode(Auto)
     </message>
     <message name="IDS_SHOW_CONFIG_TITLE" desc="Title of the show config page, not to be confused with the action of opening a new tab.">
-      Redcore Config
+      Enterplorer Config
     </message>
     <message name="IDS_OPTIONS_PASSWORDS_MANAGE_AD_PASSWORDS_LINK" desc="The label of the 'Manage AD passwords' link">
       Setting
@@ -9300,13 +9300,13 @@ Please help our engineers fix this problem. Tell us what happened right before y
       Unknown error
     </message>
     <message name="IDS_YSP_CONNENT_SERVICE_FAILED" desc="">
-      Unable to connect to the redcore management server, contact the system administrator.
+      Unable to connect to the enterplorer management server, contact the system administrator.
     </message>
     <message name="IDS_YSP_SERVER_RESOURCE_ERROR" desc="">
-      Redcore management server resource error,please contact administrator.
+      Enterplorer management server resource error,please contact administrator.
     </message>
     <message name="IDS_YSP_SERVER_INTERNAL_ERROR" desc="">
-      Redcore management server internal error, please contact administrator.
+      Enterplorer management server internal error, please contact administrator.
     </message>
     <message name="IDS_YSP_SERVER_ERROR_CODE" desc="">
       Error code:
@@ -9324,7 +9324,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
       Your account has been disabled and logged out.
    </message>
     <message name="IDS_YSP_REDCORE_ENTERPRISE_BROWSER" desc="">
-      RedCore Enterprise Browser
+      Enterplorer Enterprise Browser
     </message>
     <message name="IDS_YSP_LOCK_BROWSER_IN_LOCK_MODE" desc="">
       Your browser is currently in lock mode.

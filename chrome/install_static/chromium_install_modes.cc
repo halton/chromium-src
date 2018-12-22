@@ -15,7 +15,7 @@ namespace install_static {
 #ifdef REDCORE
 const wchar_t kCompanyPathName[] = L"AllMobilize";
 
-const wchar_t kProductPathName[] = L"Redcore";
+const wchar_t kProductPathName[] = L"Enterplorer";
 #else
 const wchar_t kCompanyPathName[] = L"";
 

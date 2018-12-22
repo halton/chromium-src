@@ -59,8 +59,8 @@ elif getBuildType(_WORKING_DIR) == "build_type_win_70":
       "notification_helper.exe",
       "setup.exe",
       "mini_installer.exe",
-      "redcore.exe",
-      "initialexe/redcore.exe"
+      "enterplorer.exe",
+      "initialexe/enterplorer.exe"
   ]
 
 _PDB_FILES = [
@@ -68,7 +68,7 @@ _PDB_FILES = [
     "chrome_child.dll.pdb",
     "chrome_elf.dll.pdb",
     "chrome_watcher.dll.pdb", 
-    "initialexe/redcore.exe.pdb"
+    "initialexe/enterplorer.exe.pdb"
 ]
 
 
@@ -114,7 +114,8 @@ def nsisPackage():
   os.makedirs(nsisSrcDir)
   # 准备文件
   print "copying mini_installer.exe"
-  shutil.copy(os.path.join(releaseDir, "mini_installer.exe"), os.path.join(nsisSrcDir, "install_redcore.exe"))
+  shutil.copy(os.path.join(releaseDir, "mini_installer.exe"), 
+    os.path.join(nsisSrcDir, "mini_installer.exe"))
   print "copying gm folder"
   shutil.copytree(os.path.join(releaseDir, "gm"), os.path.join(nsisSrcDir, "gm"))
   # 更改版本号
@@ -165,11 +166,11 @@ def finalSignWithOldKey():
 
 
 def renameExe():
-  installNamePerfix = "install_redcore."
-  updateNamePerfix = "update_redcore."
+  installNamePerfix = "install_enterplorer."
+  updateNamePerfix = "update_enterplorer."
   if not _IS_MASTER_BRANCH:
-    installNamePerfix = installNamePerfix.replace("redcore", _PRODUCT_NAME)
-    updateNamePerfix = updateNamePerfix.replace("redcore", _PRODUCT_NAME)
+    installNamePerfix = installNamePerfix.replace("enterplorer", _PRODUCT_NAME)
+    updateNamePerfix = updateNamePerfix.replace("enterplorer", _PRODUCT_NAME)
   redcoreOutPath = os.path.join(_WORKING_DIR, "out", "Release", "redcore_out")
   installExePath = os.path.join(redcoreOutPath, "install_" + getBuildVersion() + ".exe")
   renameInstallExePath = os.path.join(redcoreOutPath, installNamePerfix + getRedcoreVersion() + ".exe")
@@ -216,7 +217,8 @@ def getRedcoreVersion():
 
 
 def signMacApp():
-  signMacLine = "codesign -s \"Developer ID Application: Allmobilize Inc. (FD9594D6YV)\" %s" % (os.path.join(_WORKING_DIR, "out", "Release", "Redcore.app"))
+  signMacLine = "codesign -s \"Developer ID Application: Allmobilize Inc. (FD9594D6YV)\" %s\
+    " % (os.path.join(_WORKING_DIR, "out", "Release", "Enterplorer.app"))
   execCmd(signMacLine)
 
 
@@ -226,14 +228,15 @@ def dmgPackage():
   if os.path.exists(redcoreOutDir):
     shutil.rmtree(redcoreOutDir)
   os.makedirs(redcoreOutDir)
-  shutil.copytree(os.path.join(releaseDir, "Redcore.app"), os.path.join(redcoreOutDir, "Redcore.app"))
+  shutil.copytree(os.path.join(releaseDir, "Enterplorer.app"), 
+    os.path.join(redcoreOutDir, "Enterplorer.app"))
   # 创建软链接
   execCmd("ln -s /Applications %s" % (redcoreOutDir))
   # 使用系统工具打dmg
-  installNamePerfix = "install_redcore."
+  installNamePerfix = "install_enterplorer."
   if not _IS_MASTER_BRANCH:
-    installNamePerfix = installNamePerfix.replace("redcore", _PRODUCT_NAME)
-  packageLine = "printf \"redcore\" | hdiutil create -srcfolder %s -stdinpass %s\
+    installNamePerfix = installNamePerfix.replace("enterplorer", _PRODUCT_NAME)
+  packageLine = "printf \"enterplorer\" | hdiutil create -srcfolder %s -stdinpass %s\
     " % (redcoreOutDir,os.path.join(redcoreOutDir, installNamePerfix + getRedcoreVersion() + ".dmg"))
   execCmd(packageLine)
 

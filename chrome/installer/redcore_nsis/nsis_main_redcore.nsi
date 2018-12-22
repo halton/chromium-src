@@ -13,7 +13,7 @@ SetCompressor /FINAL /SOLID zlib
 !include "str_contains.nsh"
 !include "is_flash_ax_Inst.nsh"
 !include "text_log.nsh"
-!include "redcore_config.nsh"
+!include "enterplorer_config.nsh"
 !include "EnvVarUpdate.nsh"
 
 !define SWP_NOMOVE 0x0002
@@ -163,9 +163,9 @@ Function .onInit
 
     ;User data folder as default  
 	${if} ${SYSTEM_INSTALL_LEVEL} == "TRUE"
-	  Strcpy $INSTDIR '$PROGRAMFILES\AllMobilize\Redcore'
+	  Strcpy $INSTDIR '$PROGRAMFILES\AllMobilize\Enterplorer'
     ${else}
-	  Strcpy $INSTDIR '$LOCALAPPDATA\AllMobilize\Redcore'
+	  Strcpy $INSTDIR '$LOCALAPPDATA\AllMobilize\Enterplorer'
     ${endif}
   
     Delete "$INSTDIR\InstallLog.log"
@@ -525,7 +525,7 @@ FunctionEnd
 
 Function CheckVersion
   ;check old version
-  ReadRegStr $0 HKCU "SOFTWARE\AllMobilize\Redcore" "pv"
+  ReadRegStr $0 HKCU "SOFTWARE\AllMobilize\Enterplorer" "pv"
   ${LogText} "old version:$0"
   ${VersionCompare} "${CHROME_VERSION}" $0 $R0
   IntCmp $R0 2 caseEqual caseLess
@@ -547,51 +547,51 @@ Function MainInstallLogic
   SetOverwrite try
 
   ClearErrors
-  File nsis_src\install_redcore.exe
+  File nsis_src\mini_installer.exe
   IfErrors onError onOK
 onError:  
-  ${LogText} "copy install_redcore.exe faild"
+  ${LogText} "copy mini_installer.exe faild"
   MessageBox MB_OK "Fail write data to path, please select another install directory."
   goto onEnd
 onOK:
   SetShellVarContext current
   ;${If} $is_set_default == '1'
-      ;nsYSP::ExecWait /NOUNLOAD "$INSTDIR\install_redcore.exe --make-chrome-default"
+      ;nsYSP::ExecWait /NOUNLOAD "$INSTDIR\mini_installer.exe --make-chrome-default"
   ;${Else}
-      ;nsYSP::ExecWait /NOUNLOAD "$INSTDIR\install_redcore.exe"
+      ;nsYSP::ExecWait /NOUNLOAD "$INSTDIR\mini_installer.exe"
   ;${EndIf}
   
   ${if} ${SYSTEM_INSTALL_LEVEL} == "TRUE"
-	ExecWait "$INSTDIR\install_redcore.exe --system-level"
+	ExecWait "$INSTDIR\mini_installer.exe --system-level"
   ${else}
-	ExecWait "$INSTDIR\install_redcore.exe"
+	ExecWait "$INSTDIR\mini_installer.exe"
   ${endif}
   
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_96DPI_PIXEL" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BEHAVIORS" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION" "redcore.exe" 0x00001b58
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_MK_PROTOCOL" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_SQM_UPLOAD_FOR_APP" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ENABLE_WEB_CONTROL_VISUALS" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_INTERNET_SHELL_FOLDERS" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LEGACY_DLCONTROL_BEHAVIORS" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LOCALMACHINE_LOCKDOWN" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_HANDLING" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_SNIFFING" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_NINPUT_LEGACYMODE" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_OBJECT_CACHING" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_PROTOCOL_LOCKDOWN" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_RESTRICT_ACTIVEXINSTALL" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SAFE_BINDTOOBJECT" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SCRIPTURL_MITIGATION" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SECURITYBAND" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SPELLCHECKING" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_TABBED_BROWSING" "redcore.exe" 0x00000000
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_DOCUMENT_ZOOM" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_POPUPMANAGEMENT" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WINDOW_RESTRICTIONS" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_XSSFILTER" "redcore.exe" 0x00000001
-  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ZONE_ELEVATION" "redcore.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_96DPI_PIXEL" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BEHAVIORS" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION" "enterplorer.exe" 0x00001b58
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_MK_PROTOCOL" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_SQM_UPLOAD_FOR_APP" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ENABLE_WEB_CONTROL_VISUALS" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_INTERNET_SHELL_FOLDERS" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LEGACY_DLCONTROL_BEHAVIORS" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LOCALMACHINE_LOCKDOWN" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_HANDLING" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_SNIFFING" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_NINPUT_LEGACYMODE" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_OBJECT_CACHING" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_PROTOCOL_LOCKDOWN" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_RESTRICT_ACTIVEXINSTALL" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SAFE_BINDTOOBJECT" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SCRIPTURL_MITIGATION" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SECURITYBAND" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SPELLCHECKING" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_TABBED_BROWSING" "enterplorer.exe" 0x00000000
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_DOCUMENT_ZOOM" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_POPUPMANAGEMENT" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WINDOW_RESTRICTIONS" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_XSSFILTER" "enterplorer.exe" 0x00000001
+  WriteRegDWORD HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ZONE_ELEVATION" "enterplorer.exe" 0x00000001
   
   ;自带IE用的Flash插件
   SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\FlashAx"
@@ -643,7 +643,7 @@ CheckFlashAx:
   ;  MessageBox MB_OK "$$R0 is not '0'"
   ;${EndIf}
 onEnd:
-  Delete "$INSTDIR\install_redcore.exe"
+  Delete "$INSTDIR\mini_installer.exe"
   ${LogSetOff}
   SetAutoClose true
 
@@ -668,18 +668,18 @@ Function CreateShortCuts
   
   ;MessageBox MB_OK "$SMPROGRAMS\$(ProductName)\$(Shortcut_Unintall)"
   Delete "$SMPROGRAMS\$(ProductName).lnk"
-  Delete "$SMPROGRAMS\redcore.lnk"
+  Delete "$SMPROGRAMS\enterplorer.lnk"
   Delete "$SMPROGRAMS\$(ProductName)\$(ProductName).lnk"
-  Delete "$DESKTOP\redcore.lnk"
+  Delete "$DESKTOP\enterplorer.lnk"
   CreateDirectory "$SMPROGRAMS\$(ProductName)"
-  ;MessageBox MB_OK "$INSTDIR\Application\redcore.exe"
+  ;MessageBox MB_OK "$INSTDIR\Application\enterplorer.exe"
   CreateShortCut "$SMPROGRAMS\$(ProductName)\$(ShortcutName).lnk" \
-    "$INSTDIR\Application\redcore.exe"
+    "$INSTDIR\Application\enterplorer.exe"
   CreateShortCut "$SMPROGRAMS\$(ProductName)\$(Shortcut_Unintall)" \
     "$INSTDIR\Application\${UNINSTALLER_NAME}"
-  CreateShortCut "$DESKTOP\$(ShortcutName).lnk" "$INSTDIR\Application\redcore.exe" "" "" 0 SW_SHOWNORMAL "" "$(ShortcutDescription)"
-  ;HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Redcore
-  WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Redcore" \          
+  CreateShortCut "$DESKTOP\$(ShortcutName).lnk" "$INSTDIR\Application\enterplorer.exe" "" "" 0 SW_SHOWNORMAL "" "$(ShortcutDescription)"
+  ;HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Enterplorer
+  WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Enterplorer" \          
     "UninstallString" \
     "$INSTDIR\Application\${UNINSTALLER_NAME}"
   
@@ -715,7 +715,7 @@ Var un_is_del_user_data
 Function un.onInit
 
     ;User data folder as default  
-    Strcpy $INSTDIR '$LOCALAPPDATA\AllMobilize\Redcore'
+    Strcpy $INSTDIR '$LOCALAPPDATA\AllMobilize\Enterplorer'
 
     InitPluginsDir
 
@@ -892,7 +892,7 @@ Function un.onClickDontUninstallButton
 FunctionEnd
 
 Function un.onClickConfirmUninstallButton
-    nsYSP::FindProc "redcore.exe"
+    nsYSP::FindProc "enterplorer.exe"
     Pop $R0
     ${If} $R0 == "1"
         push "请关闭所有 $(ProductName) 窗口并重试。"
@@ -947,30 +947,30 @@ Function un.MainUninstallLogic
   Delete "$SMPROGRAMS\$(ProductName)\$(ShortcutName).lnk"
   Delete "$SMPROGRAMS\$(ProductName)\$(Shortcut_Unintall)"
   RMDir /r "$SMPROGRAMS\$(ProductName)"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_96DPI_PIXEL" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BEHAVIORS" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_MK_PROTOCOL" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_SQM_UPLOAD_FOR_APP" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_INTERNET_SHELL_FOLDERS" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LEGACY_DLCONTROL_BEHAVIORS" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LOCALMACHINE_LOCKDOWN" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_HANDLING" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_SNIFFING" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_NINPUT_LEGACYMODE" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_OBJECT_CACHING" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_PROTOCOL_LOCKDOWN" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_RESTRICT_ACTIVEXINSTALL" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SAFE_BINDTOOBJECT" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SCRIPTURL_MITIGATION" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SECURITYBAND" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SPELLCHECKING" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_TABBED_BROWSING" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_DOCUMENT_ZOOM" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_POPUPMANAGEMENT" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WINDOW_RESTRICTIONS" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_XSSFILTER" "redcore.exe"
-  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ZONE_ELEVATION" "redcore.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_96DPI_PIXEL" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BEHAVIORS" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_MK_PROTOCOL" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_DISABLE_SQM_UPLOAD_FOR_APP" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_INTERNET_SHELL_FOLDERS" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LEGACY_DLCONTROL_BEHAVIORS" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_LOCALMACHINE_LOCKDOWN" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_HANDLING" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_MIME_SNIFFING" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_NINPUT_LEGACYMODE" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_OBJECT_CACHING" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_PROTOCOL_LOCKDOWN" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_RESTRICT_ACTIVEXINSTALL" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SAFE_BINDTOOBJECT" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SCRIPTURL_MITIGATION" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SECURITYBAND" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_SPELLCHECKING" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_TABBED_BROWSING" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_DOCUMENT_ZOOM" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WEBOC_POPUPMANAGEMENT" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_WINDOW_RESTRICTIONS" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_XSSFILTER" "enterplorer.exe"
+  DeleteRegValue HKCU "Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_ZONE_ELEVATION" "enterplorer.exe"
   caseLess:
   caseMore:
   SetAutoClose true
