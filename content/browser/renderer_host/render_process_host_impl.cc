@@ -505,20 +505,6 @@ class RendererSandboxedProcessLauncherDelegate
   }
 };
 
-#if defined(REDCORE) && defined(IE_REDCORE)
-// ysp+ {IE Embedded}
-class TridentSandboxedProcessLauncherDelegate
-    : public RendererSandboxedProcessLauncherDelegate {
- public:
-  TridentSandboxedProcessLauncherDelegate()
-      : RendererSandboxedProcessLauncherDelegate() {}
-  ~TridentSandboxedProcessLauncherDelegate() override {}
-  bool ShouldLaunchElevated() override { return true; }
-  // bool ShouldSandbox() override { return false; }
-  bool DisableDefaultPolicy() override { return false; }
-};
-#endif
-
 const char kSessionStorageHolderKey[] = "kSessionStorageHolderKey";
 
 class SessionStorageHolder : public base::SupportsUserData::Data {
@@ -1854,40 +1840,19 @@ bool RenderProcessHostImpl::Init() {
       cmd_line->PrependWrapper(renderer_prefix);
     AppendRendererCommandLine(cmd_line.get());
 
-#if defined(REDCORE) && defined(IE_REDCORE)
-    // ysp+{IE Embedded}
-    std::string procType =
-        cmd_line->GetSwitchValueASCII(switches::kProcessType);
-    if (procType.compare(switches::kTridentProcess) == 0) {
-      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
-          std::unique_ptr<RendererSandboxedProcessLauncherDelegate>(
-              new TridentSandboxedProcessLauncherDelegate),
-          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
-          base::NullCallback());
-    } else {
       // Spawn the child process asynchronously to avoid blocking the UI thread.
       // As long as there's no renderer prefix, we can use the zygote process
       // at this stage.
-      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
-          std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
-          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
-          base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
-      channel_->Pause();
-
-      fast_shutdown_started_ = false;
-    }
-#else
-    // Spawn the child process asynchronously to avoid blocking the UI thread.
-    // As long as there's no renderer prefix, we can use the zygote process
-    // at this stage.
     child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
         std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
         std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
-        base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
-    channel_->Pause();
-
-    fast_shutdown_started_ = false;
-#endif
+        UseTridentCore()
+            ? base::NullCallback()
+            : base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
+    if (!UseTridentCore()) {
+      channel_->Pause();
+      fast_shutdown_started_ = false;
+    }
   }
 
   if (!gpu_observer_registered_) {

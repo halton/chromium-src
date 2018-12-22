@@ -11,6 +11,7 @@
 #include "content/browser/child_process_launcher.h"
 #include "content/browser/child_process_launcher_helper.h"
 #include "content/public/browser/child_process_launcher_utils.h"
+#include "content/public/common/content_switches.h"
 #include "content/public/common/result_codes.h"
 #include "content/public/common/sandbox_init.h"
 #include "content/public/common/sandboxed_process_launcher_delegate.h"
@@ -68,7 +69,14 @@ ChildProcessLauncherHelper::LaunchProcessOnLauncherThread(
     ChildProcessLauncherHelper::Process process;
     process.process = base::LaunchElevatedProcess(*command_line(), win_options);
     return process;
+  } else if (GetProcessType().compare(switches::kTridentProcess) == 0) {
+    base::LaunchOptions win_options;
+    win_options.start_hidden = true;
+    ChildProcessLauncherHelper::Process process;
+    process.process = base::LaunchProcess(*command_line(), win_options);
+    return process;
   }
+
   base::HandlesToInheritVector handles;
   mojo_channel_->PrepareToPassRemoteEndpoint(&handles, command_line());
   base::FieldTrialList::AppendFieldTrialHandleIfNeeded(&handles);
