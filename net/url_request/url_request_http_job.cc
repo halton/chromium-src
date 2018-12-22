@@ -684,12 +684,6 @@ void URLRequestHttpJob::Start() {
           value += " " + ua_value;
         } else if (ua_type == "2") {
           value = ua_value;
-        } else if (ua_type == "3") {
-          // crypto http header
-          value = http_user_agent_settings_->GetUserAgent();
-          if (YspCryptoHeader::GetInstance()->isAddHeaders()) {
-            value += YspCryptoHeader::GetInstance()->GetEncString();
-          }
         } else {
           value = http_user_agent_settings_->GetUserAgent();
         }
