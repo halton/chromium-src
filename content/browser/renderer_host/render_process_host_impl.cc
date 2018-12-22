@@ -1843,6 +1843,7 @@ bool RenderProcessHostImpl::Init() {
       // Spawn the child process asynchronously to avoid blocking the UI thread.
       // As long as there's no renderer prefix, we can use the zygote process
       // at this stage.
+#if defined(IE_REDCORE)
     child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
         std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
         std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
@@ -1853,6 +1854,14 @@ bool RenderProcessHostImpl::Init() {
       channel_->Pause();
       fast_shutdown_started_ = false;
     }
+#else
+    child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
+        std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
+        std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
+        base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
+    channel_->Pause();
+    fast_shutdown_started_ = false;
+#endif  // IE_REDCORE
   }
 
   if (!gpu_observer_registered_) {

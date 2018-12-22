@@ -66,7 +66,7 @@ public:
   void OnConfigDataUpdated(const std::string& type, const std::string& data) override;
   void OnLoginRequestFailure(const std::string& error) override;
   void OnLoginResponseParseFailure(const std::string& error) override;
-  void OnLoginFailure(base::string16 message) override;
+  void OnLoginFailure(const base::string16& message) override;
   void OnLoginSuccess(const base::string16& name, const std::string& head_image_url) override;
   void OnLogout() override;
   void OnTokenStatusChanged(const std::string& type) override;
@@ -96,7 +96,7 @@ void LoginObserver::OnLoginResponseParseFailure(const std::string& error) {
   
 }
 
-void LoginObserver::OnLoginFailure(base::string16 message) {
+void LoginObserver::OnLoginFailure(const base::string16& message) {
   
 }
 

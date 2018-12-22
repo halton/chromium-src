@@ -1060,7 +1060,7 @@ void YSPLoginManager::UploadAvatar(const std::string& avatar_path) {
     post_data.append("photo");
     post_data.append("\"; filename=\"");
     post_data.append("avatar.");
-    post_data.append(base::UTF16ToUTF8(path.Extension()));
+    post_data.append(path.BaseName().MaybeAsASCII());
     post_data.append("\"\r\nContent-Type: image/png\r\n\r\n");
 
     post_data.append(avatar_data.data(), avatar_data.size());
