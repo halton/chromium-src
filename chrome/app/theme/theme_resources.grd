@@ -579,6 +579,7 @@
       </if>
       <if expr="not is_macosx">
         <structure type="chrome_scaled_image" name="IDR_YSP_LOGIN_AVATAR" file="ysp/login_avatar.png" />
+        <structure type="chrome_scaled_image" name="IDR_YSP_LOGIN_AVATAR_L" file="ysp/login_avatar_l.png" />
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN" file="ysp/browser_lock_normal.png" />
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN_H" file="ysp/browser_lock_hover.png" />
         <structure type="chrome_scaled_image" name="IDR_YSP_LOCK_SCREEN_P" file="ysp/browser_lock_pressed.png" />

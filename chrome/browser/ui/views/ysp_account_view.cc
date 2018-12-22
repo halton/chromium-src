@@ -463,10 +463,11 @@ void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) 
 
 void YSPAccountView::ShowDefaultAvatar()
 {
-    name_label_->SetText(user_name_);
+    base::string16 first_name(user_name_, 0, 1);
+    name_label_->SetText(first_name);
     name_label_->SetVisible(true);
     ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
-    head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
+    head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR_L));
 	return;
     base::char16 name = 0;
     if (user_name_.empty())

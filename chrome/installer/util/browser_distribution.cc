@@ -108,7 +108,11 @@ base::string16 BrowserDistribution::GetStartMenuShortcutSubfolder(
 }
 
 base::string16 BrowserDistribution::GetPublisherName() {
+#ifdef REDCORE
+  return L"红芯时代（北京）科技有限公司";
+#else
   return L"Chromium";
+#endif
 }
 
 base::string16 BrowserDistribution::GetLongAppDescription() {
