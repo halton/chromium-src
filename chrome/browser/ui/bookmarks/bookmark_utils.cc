@@ -158,6 +158,9 @@ bool IsAppsShortcutEnabled(Profile* profile) {
 }
 
 bool ShouldShowAppsShortcutInBookmarkBar(Profile* profile) {
+#ifdef REDCORE
+  return false;
+#endif
   return IsAppsShortcutEnabled(profile) &&
          profile->GetPrefs()->GetBoolean(
              bookmarks::prefs::kShowAppsShortcutInBookmarkBar);

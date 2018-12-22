@@ -145,9 +145,15 @@ const PrepopulatedEngine* const engines_CL[] = {
 };
 
 // China
+#ifdef REDCORE
+const PrepopulatedEngine* const engines_CN[] = {
+    &baidu, &bing, &google, &sogou,
+};
+#else
 const PrepopulatedEngine* const engines_CN[] = {
     &google, &baidu, &sogou, &so_360,
 };
+#endif
 
 // Colombia
 const PrepopulatedEngine* const engines_CO[] = {
