@@ -477,6 +477,10 @@ const base::string16& ManagePasswordsBubbleModel::GetCurrentUsername() const {
 }
 
 bool ManagePasswordsBubbleModel::ReplaceToShowPromotionIfNeeded() {
+#ifdef REDCORE
+  // RDC-6336: Disable show sync to Google message
+  return false;
+#endif
   Profile* profile = GetProfile();
   if (!profile)
     return false;
