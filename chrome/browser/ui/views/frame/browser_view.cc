@@ -1084,6 +1084,9 @@ void BrowserView::SetFocusToLocationBar(bool select_all) {
     location_bar->FocusLocation(select_all);
   } else {
     // If none of location bar got focus, then clear focus.
+#ifdef REDCORE
+    return;
+#endif
     views::FocusManager* focus_manager = GetFocusManager();
     DCHECK(focus_manager);
     focus_manager->ClearFocus();

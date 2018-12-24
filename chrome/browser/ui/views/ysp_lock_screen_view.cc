@@ -81,7 +81,6 @@ YSPLockScreenView::YSPLockScreenView(
   for (int i = 0; i < 6; i++) {
     views::Textfield* password_textfield = new views::Textfield();
     password_textfield->set_controller(this);
-    password_textfield->SetFocusBehavior(FocusBehavior::ALWAYS);
     password_textfield->SetHorizontalAlignment(gfx::ALIGN_CENTER);
     password_textfield->SetTextInputType(ui::TEXT_INPUT_TYPE_PASSWORD);
     AddChildView(password_textfield);
@@ -269,6 +268,7 @@ void YSPLockScreenView::LockInternal() {
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
   password_text_.at(0)->RequestFocus();
+  DLOG(INFO) << "request focus";
 }
 
 void YSPLockScreenView::UnlockInternal() {
