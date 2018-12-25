@@ -309,6 +309,23 @@ bool BrowserCommandController::ExecuteCommandWithDisposition(
   DCHECK(command_updater_.IsCommandEnabled(id)) << "Invalid/disabled command "
                                                 << id;
 
+#ifdef REDCORE
+  if (!YSPLoginManager::GetInstance()->GetPrintEnabled() &&
+      (id == IDC_PRINT || id == IDC_BASIC_PRINT))
+    return false;
+
+  if (!YSPLoginManager::GetInstance()->GetSaveFileEnabled() &&
+      id == IDC_SAVE_PAGE)
+    return false;
+
+  if (!YSPLoginManager::GetInstance()->GetDevToolsEnabled() &&
+      (id == IDC_DEV_TOOLS ||
+       id == IDC_DEV_TOOLS_CONSOLE ||
+       id == IDC_DEV_TOOLS_DEVICES ||
+       id == IDC_DEV_TOOLS_INSPECT ||
+       id == IDC_DEV_TOOLS_TOGGLE))
+    return false;
+#endif // REDCORE
   // The order of commands in this switch statement must match the function
   // declaration order in browser.h!
   switch (id) {

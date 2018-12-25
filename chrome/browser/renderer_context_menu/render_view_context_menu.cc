@@ -798,6 +798,9 @@ void RenderViewContextMenu::InitMenu() {
 
   bool editable =
       content_type_->SupportsGroup(ContextMenuContentType::ITEM_GROUP_EDITABLE);
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+#endif // REDCORE
   if (editable)
     AppendEditableItems();
 
@@ -805,6 +808,9 @@ void RenderViewContextMenu::InitMenu() {
     DCHECK(!editable);
     AppendCopyItem();
   }
+#ifdef REDCORE
+  }
+#endif // REDCORE
 
   if (content_type_->SupportsGroup(
           ContextMenuContentType::ITEM_GROUP_SEARCH_PROVIDER) &&
@@ -814,6 +820,9 @@ void RenderViewContextMenu::InitMenu() {
 
   if (!media_image &&
       content_type_->SupportsGroup(ContextMenuContentType::ITEM_GROUP_PRINT)) {
+#ifdef REDCORE
+    if (YSPLoginManager::GetInstance()->GetPrintEnabled())
+#endif // REDCORE
     AppendPrintItem();
   }
 
@@ -990,6 +999,10 @@ std::string RenderViewContextMenu::GetTargetLanguage() const {
 }
 
 void RenderViewContextMenu::AppendDeveloperItems() {
+#ifdef REDCORE
+  if (!YSPLoginManager::GetInstance()->GetDevToolsEnabled())
+    return;
+#endif //REDCORE
   // Show Inspect Element in DevTools itself only in case of the debug
   // devtools build.
   bool show_developer_items = !IsDevToolsURL(params_.page_url);
@@ -1149,11 +1162,19 @@ void RenderViewContextMenu::AppendLinkItems() {
       }
     }
 #endif  // !defined(OS_CHROMEOS)
+#ifdef REDCORE
+    if (YSPLoginManager::GetInstance()->GetSaveFileEnabled()) {
+#endif // REDCORE
     menu_model_.AddSeparator(ui::NORMAL_SEPARATOR);
     menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_SAVELINKAS,
                                     IDS_CONTENT_CONTEXT_SAVELINKAS);
+#ifdef REDCORE
+    }
+#endif // REDCORE
   }
-
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+#endif // REDCORE
   menu_model_.AddItemWithStringId(
       IDC_CONTENT_CONTEXT_COPYLINKLOCATION,
       params_.link_url.SchemeIs(url::kMailToScheme) ?
@@ -1166,6 +1187,9 @@ void RenderViewContextMenu::AppendLinkItems() {
     menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_COPYLINKTEXT,
                                     IDS_CONTENT_CONTEXT_COPYLINKTEXT);
   }
+#ifdef REDCORE
+  }
+#endif // REDCORE
 }
 
 void RenderViewContextMenu::AppendOpenWithLinkItems() {
@@ -1235,12 +1259,21 @@ void RenderViewContextMenu::AppendImageItems() {
     menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_OPENIMAGENEWTAB,
                                     IDS_CONTENT_CONTEXT_OPENIMAGENEWTAB);
   }
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetSaveFileEnabled())
+#endif // REDCORE
   menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_SAVEIMAGEAS,
                                   IDS_CONTENT_CONTEXT_SAVEIMAGEAS);
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetCutCopyEnabled()) {
+#endif // REDCORE
   menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_COPYIMAGE,
                                   IDS_CONTENT_CONTEXT_COPYIMAGE);
   menu_model_.AddItemWithStringId(IDC_CONTENT_CONTEXT_COPYIMAGELOCATION,
                                   IDS_CONTENT_CONTEXT_COPYIMAGELOCATION);
+#ifdef REDCORE
+  }
+#endif // REDCORE
 }
 
 void RenderViewContextMenu::AppendSearchWebForImageItems() {
@@ -1333,8 +1366,14 @@ void RenderViewContextMenu::AppendPageItems() {
   menu_model_.AddItemWithStringId(IDC_FORWARD, IDS_CONTENT_CONTEXT_FORWARD);
   menu_model_.AddItemWithStringId(IDC_RELOAD, IDS_CONTENT_CONTEXT_RELOAD);
   menu_model_.AddSeparator(ui::NORMAL_SEPARATOR);
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetSaveFileEnabled())
+#endif // REDCORE
   menu_model_.AddItemWithStringId(IDC_SAVE_PAGE,
                                   IDS_CONTENT_CONTEXT_SAVEPAGEAS);
+#ifdef REDCORE
+  if (YSPLoginManager::GetInstance()->GetPrintEnabled())
+#endif // REDCORE
   menu_model_.AddItemWithStringId(IDC_PRINT, IDS_CONTENT_CONTEXT_PRINT);
   AppendMediaRouterItem();
 

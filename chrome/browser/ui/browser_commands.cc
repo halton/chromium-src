@@ -1008,6 +1008,10 @@ bool CanEmailPageLocation(const Browser* browser) {
 }
 
 void CutCopyPaste(Browser* browser, int command_id) {
+#ifdef REDCORE
+  if (!YSPLoginManager::GetInstance()->GetCutCopyEnabled())
+    return;
+#endif
   if (command_id == IDC_CUT)
     base::RecordAction(UserMetricsAction("Cut"));
   else if (command_id == IDC_COPY)
