@@ -1026,11 +1026,18 @@ void YSPLoginManager::ModifyPassword(const std::string& old_password,
                                   kMultipartBoundary, "", &post_data);
   net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
   put_modify_password_fetcher_->StarFetcherResource(
-      net::URLFetcher::PUT, url, header_list, post_data, false);
+      net::URLFetcher::PUT, url, header_list, post_data, true);
   header_list.clear();
 }
 
-void YSPLoginManager::UploadAvatar(const std::string& avatar_path) {
+void YSPLoginManager::UploadAvatar(const std::string& file_name,
+                                   const std::string& avatar_data) {
+  if (file_name.empty() || avatar_data.empty() ||
+      avatar_data.find(",") == std::string::npos ||
+      avatar_data.find(":") == std::string::npos ||
+      avatar_data.find(";") == std::string::npos)
+    return;
+
   if (!post_upload_avatar_fetcher_) {
     post_upload_avatar_fetcher_ = new YSPFetcherResource(
         this, g_browser_process->system_request_context());
@@ -1049,26 +1056,28 @@ void YSPLoginManager::UploadAvatar(const std::string& avatar_path) {
                                   &post_data);
   net::AddMultipartValueForUpload("companyId", GetCompanyId(),
                                   kMultipartBoundary, "", &post_data);
-
-  base::FilePath path;
-  path = path.AppendASCII(avatar_path);
-  std::string avatar_data;
-  if (base::ReadFileToString(path, &avatar_data)) {
-    post_data.append("--");
-    post_data.append(kMultipartBoundary);
-    post_data.append("\r\nContent-Disposition: form-data; name=\"");
-    post_data.append("photo");
-    post_data.append("\"; filename=\"");
-    post_data.append("avatar.");
-    post_data.append(path.BaseName().MaybeAsASCII());
-    post_data.append("\"\r\nContent-Type: image/png\r\n\r\n");
-
-    post_data.append(avatar_data.data(), avatar_data.size());
-    post_data.append("\r\n");
-    net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
-    post_upload_avatar_fetcher_->StarFetcherResource(
-        net::URLFetcher::POST, url, header_list, post_data, false);
-  }
+  post_data.append("--");
+  post_data.append(kMultipartBoundary);
+  post_data.append("\r\nContent-Disposition: form-data; name=\"");
+  post_data.append("photo");
+  post_data.append("\"; filename=\"");
+  post_data.append(file_name);
+  int index = avatar_data.find(",");
+  std::string src_avatar =
+      avatar_data.substr(index + 1, avatar_data.length() - index - 1);
+  std::string avatar;
+  base::Base64Decode(src_avatar, &avatar);
+  std::string content_type =
+      avatar_data.substr(avatar_data.find(":") + 1,
+                         avatar_data.find(";") - avatar_data.find(":") - 1);
+  post_data.append("\"\r\nContent-Type: ");
+  post_data.append(content_type);
+  post_data.append("\r\n\r\n");
+  post_data.append(avatar.data(), avatar.size());
+  post_data.append("\r\n");
+  net::AddMultipartFinalDelimiterForUpload(kMultipartBoundary, &post_data);
+  post_upload_avatar_fetcher_->StarFetcherResource(
+      net::URLFetcher::POST, url, header_list, post_data, false);
   header_list.clear();
 }
 
@@ -1536,12 +1545,13 @@ void YSPLoginManager::OnUploadAvatarResponseParse(
     std::unique_ptr<base::DictionaryValue>& response_data) {
   if (GetResponseStatusCode(response_data) != "0")
     return;
+
   base::DictionaryValue* data = nullptr;
   if (response_data->GetDictionary("data", &data)) {
     std::string url;
     data->GetString("url", &url);
     if (!url.empty()) {
-      NotifyConfigureUpdate("uploadAvatar", url);
+      login_info_->SetString("data.user.avatarPath", url);
     }
   }
 }

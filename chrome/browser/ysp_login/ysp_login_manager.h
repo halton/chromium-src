@@ -239,7 +239,8 @@ class YSPLoginManager : public base::SupportsWeakPtr<YSPLoginManager>,
       bool auto_fetch);
   void ModifyPassword(const std::string& old_password,
                       const std::string& new_password);
-  void UploadAvatar(const std::string& avatar_path);
+  void UploadAvatar(const std::string& file_name,
+                    const std::string& avatar_data);
 
   base::string16 GetYSPUserName();
   std::string GetHeadImageUrl();

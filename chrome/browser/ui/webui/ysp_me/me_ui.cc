@@ -164,7 +164,7 @@ bool MeUI::IsDigitString(const base::string16& text) {
 void MeUI::DeleteDevice(const base::ListValue* args) {
   std::string device_id = "";
   args->GetString(0, &device_id);
-  YSPLoginManager::GetInstance()->PutSdpDevicefetcher(device_id);
+  YSPLoginManager::GetInstance()->PutSdpDevicefetcher(device_id, true);
 }
 
 // YSPLoginManagerObserver:
@@ -180,7 +180,7 @@ void MeUI::OnLoginSuccess(const base::string16& name,
       YSPLoginManager::GetInstance()->generateUserInfoForSettings());
   std::string str_function_name = "User.getUserInfoFinish";
   web_ui()->CallJavascriptFunctionUnsafe(str_function_name, user_info);
-  YSPLoginManager::GetInstance()->GetSdpDevicefetcher();
+  YSPLoginManager::GetInstance()->GetSdpDevicefetcher(true);
 }
 
 void MeUI::OnLogout() {
@@ -202,9 +202,6 @@ void MeUI::OnConfigDataUpdated(const std::string& type,
   if (type == "modifyPassword") {
     web_ui()->CallJavascriptFunctionUnsafe("User.modifyPasswordFinish", value);
   }
-  if (type == "uploadAvatar") {
-    web_ui()->CallJavascriptFunctionUnsafe("User.uploadAvatarFinish", value);
-  }
 }
 
 void MeUI::GetLockScreenTime(const base::ListValue* args) {
@@ -218,9 +215,11 @@ void MeUI::GetLockScreenTime(const base::ListValue* args) {
 }
 
 void MeUI::UploadAvatar(const base::ListValue* args) {
-  std::string path;
-  args->GetString(0, &path);
-  YSPLoginManager::GetInstance()->UploadAvatar(path);
+  std::string file_name;
+  args->GetString(0, &file_name);
+  std::string avatar_data;
+  args->GetString(1, &avatar_data);
+  YSPLoginManager::GetInstance()->UploadAvatar(file_name, avatar_data);
 }
 
 MeUIPageMessageHandler::MeUIPageMessageHandler(MeUI* me_ui) : me_ui_(me_ui) {}
