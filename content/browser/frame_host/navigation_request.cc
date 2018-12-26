@@ -597,7 +597,8 @@ void NavigationRequest::BeginNavigation() {
   if (net_error != net::OK) {
     // Create a navigation handle so that the correct error code can be set on
     // it by OnRequestFailedInternal().
-    CreateNavigationHandle();
+    if (!CreateNavigationHandle())
+      return;
     OnRequestFailedInternal(network::URLLoaderCompletionStatus(net_error),
                             false /* skip_throttles */,
                             base::nullopt /* error_page_content */,
@@ -613,7 +614,8 @@ void NavigationRequest::BeginNavigation() {
           LegacyProtocolInSubresourceCheckResult::BLOCK_REQUEST) {
     // Create a navigation handle so that the correct error code can be set on
     // it by OnRequestFailedInternal().
-    CreateNavigationHandle();
+    if (!CreateNavigationHandle())
+      return;
     OnRequestFailedInternal(
         network::URLLoaderCompletionStatus(net::ERR_ABORTED),
         false /* skip_throttles  */, base::nullopt /* error_page_content */,
@@ -624,7 +626,8 @@ void NavigationRequest::BeginNavigation() {
     return;
   }
 
-  CreateNavigationHandle();
+  if (!CreateNavigationHandle())
+    return;
 
   if (IsURLHandledByNetworkStack(common_params_.url) &&
       !navigation_handle_->IsSameDocument()) {
@@ -663,7 +666,7 @@ void NavigationRequest::SetWaitingForRendererResponse() {
   state_ = WAITING_FOR_RENDERER_RESPONSE;
 }
 
-void NavigationRequest::CreateNavigationHandle() {
+bool NavigationRequest::CreateNavigationHandle() {
   DCHECK_EQ(frame_tree_node_->navigation_request(), this);
   FrameTreeNode* frame_tree_node = frame_tree_node_;
 
@@ -699,7 +702,7 @@ void NavigationRequest::CreateNavigationHandle() {
   if (!frame_tree_node->navigation_request()) {
     // A callback could have cancelled this request synchronously in which case
     // |this| is deleted.
-    return;
+    return false;
   }
 
   navigation_handle_ = std::move(navigation_handle);
@@ -715,6 +718,7 @@ void NavigationRequest::CreateNavigationHandle() {
     navigation_handle_->set_source_location(
         common_params_.source_location.value());
   }
+  return true;
 }
 
 std::unique_ptr<NavigationHandleImpl>

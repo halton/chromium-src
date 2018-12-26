@@ -175,7 +175,7 @@ class CONTENT_EXPORT NavigationRequest : public NavigationURLLoaderDelegate {
 
   // Creates a NavigationHandle. This should be called after any previous
   // NavigationRequest for the FrameTreeNode has been destroyed.
-  void CreateNavigationHandle();
+  bool CreateNavigationHandle();
 
   // Returns ownership of the navigation handle.
   std::unique_ptr<NavigationHandleImpl> TakeNavigationHandle();
