@@ -438,7 +438,7 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
   IClassFactory* class_factory = NULL;
   HRESULT hr;
 
-  const static DWORD kRegisterEventWaitMillionSecond = 50000;
+  const static DWORD kRegisterEventWaitMillionSecond = 5000;
 
   DWORD ret = WaitForSingleObject(register_object_event_,
                                   kRegisterEventWaitMillionSecond);
@@ -451,9 +451,12 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
       break;
   }
 
-  DLOG(INFO) << "trident CreateHostWindow begin to create";
-  hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
-                        IID_IClassFactory, (LPVOID*)&class_factory);
+  while (class_factory == NULL) {
+    DLOG(INFO) << "trident CreateHostWindow begin to create";
+    hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
+                          IID_IClassFactory, (LPVOID*)&class_factory);
+  }
+  
   if (FAILED(hr)) {
     LOG(WARNING) << "class factory of CLSID_BrowserContainer register error";
   }

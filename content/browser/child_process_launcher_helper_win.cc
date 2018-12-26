@@ -69,12 +69,6 @@ ChildProcessLauncherHelper::LaunchProcessOnLauncherThread(
     ChildProcessLauncherHelper::Process process;
     process.process = base::LaunchElevatedProcess(*command_line(), win_options);
     return process;
-  } else if (GetProcessType().compare(switches::kTridentProcess) == 0) {
-    base::LaunchOptions win_options;
-    win_options.start_hidden = true;
-    ChildProcessLauncherHelper::Process process;
-    process.process = base::LaunchProcess(*command_line(), win_options);
-    return process;
   }
 
   base::HandlesToInheritVector handles;

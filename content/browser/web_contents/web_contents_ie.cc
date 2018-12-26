@@ -537,9 +537,12 @@ void WebContentsIE::Activate() {
 }
 
 bool WebContentsIE::LoadUrl(const NavigationController::LoadURLParams& params) {
+  NavigationController::LoadURLParams* bind_param =
+      new NavigationController::LoadURLParams(params.url);
+  bind_param->transition_type = params.transition_type;
   content::BrowserThread::PostTask(
       content::BrowserThread::UI, FROM_HERE,
-      base::BindOnce(&WebContentsIE::NavigateUrl, self_.GetWeakPtr(), &params));
+      base::Bind(&WebContentsIE::NavigateUrl, self_.GetWeakPtr(), bind_param));
   return true;
 }
 
@@ -1255,6 +1258,7 @@ void WebContentsIE::NavigateUrl(
         base::Bind(&WebContentsIE::CommitToEntry, self_.GetWeakPtr(),
                    params->url, false));
   }
+  b = browser_event_handler_->LoadUrl(url);
   if (PageTransitionCoreTypeIs(
           params->transition_type,
           ui::PageTransition::PAGE_TRANSITION_IE_NEWWINDOW) &&

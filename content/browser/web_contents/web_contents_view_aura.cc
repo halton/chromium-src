@@ -83,7 +83,7 @@
 #include "ui/gfx/image/image_skia.h"
 #include "ui/touch_selection/touch_selection_controller.h"
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
 #include "content/browser/web_contents/web_contents_IE.h"
 #include "content/browser/web_contents/web_contents_ie_view_aura.h"
 #include "content/browser/web_contents/web_contents_impl.h"
@@ -95,7 +95,7 @@ WebContentsView* CreateWebContentsView(
     WebContentsViewDelegate* delegate,
     RenderViewHostDelegateView** render_view_host_delegate_view) {
   WebContentsViewAura* rv = NULL;
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
   if (web_contents->GetRendererMode().core == IE_CORE)
     rv = new WebContentsViewIEAura(web_contents, delegate);
   else
@@ -405,10 +405,10 @@ class WebContentsViewAura::WindowObserver
                              const gfx::Rect& old_bounds,
                              const gfx::Rect& new_bounds,
                              ui::PropertyChangeReason reason) override {
-    //#if defined(REDCORE) && defined(IE_REDCORE)
-    //    if (view_ == NULL || view_->web_contents_ == NULL)
-    //      return;
-    //#endif
+#if defined(IE_REDCORE)
+    if (view_ == NULL || view_->web_contents_ == NULL)
+      return;
+#endif
 
     if (window == host_window_ || window == view_->window_.get()) {
       SendScreenRects();
@@ -459,12 +459,11 @@ class WebContentsViewAura::WindowObserver
 
  private:
   void SendScreenRects() {
-    //#if defined(REDCORE) && defined(IE_REDCORE)
-    //    if (view_ == NULL || view_->web_contents_ == NULL) {  // ysp+ {IE
-    //    Embedded}
-    //      return;
-    //    }
-    //#endif
+#if defined(IE_REDCORE)
+    if (view_ == NULL || view_->web_contents_ == NULL) {
+      return;
+    }
+#endif
 
     view_->web_contents_->SendScreenRects();
   }
@@ -526,10 +525,10 @@ WebContentsViewAura::~WebContentsViewAura() {
 }
 
 void WebContentsViewAura::SizeChangedCommon(const gfx::Size& size) {
-  //#if defined(REDCORE) && defined(IE_REDCORE)
-  //  if (!web_contents_)  // ysp+ {IE Embedded}
-  //    return;
-  //#endif
+#if defined(IE_REDCORE)
+  if (!web_contents_)
+    return;
+#endif
 
   if (web_contents_->GetInterstitialPage())
     web_contents_->GetInterstitialPage()->SetSize(size);
@@ -797,6 +796,10 @@ void WebContentsViewAura::CreateAuraWindow(aura::Window* context) {
 }
 
 void WebContentsViewAura::UpdateWebContentsVisibility() {
+#if defined(IE_REDCORE)
+  if (web_contents_ == NULL)
+    return;
+#endif
   web_contents_->UpdateWebContentsVisibility(GetVisibility());
 }
 

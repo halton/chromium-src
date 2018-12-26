@@ -505,6 +505,21 @@ class RendererSandboxedProcessLauncherDelegate
   }
 };
 
+#if defined(IE_REDCORE)
+class TridentSandboxedProcessLauncherDelegate
+    : public RendererSandboxedProcessLauncherDelegate {
+ public:
+  TridentSandboxedProcessLauncherDelegate()
+      : RendererSandboxedProcessLauncherDelegate() {}
+  ~TridentSandboxedProcessLauncherDelegate() override {}
+  bool ShouldLaunchElevated() override { return false; }
+  service_manager::SandboxType GetSandboxType() override {
+    return service_manager::SANDBOX_TYPE_NO_SANDBOX;
+  }
+  bool DisableDefaultPolicy() override { return false; }
+};
+#endif  // IE_REDCORE
+
 const char kSessionStorageHolderKey[] = "kSessionStorageHolderKey";
 
 class SessionStorageHolder : public base::SupportsUserData::Data {
@@ -1555,7 +1570,7 @@ RenderProcessHostImpl::RenderProcessHostImpl(
                 ,
                 ChildProcessImportance::NORMAL
 #endif
-              ),
+                ),
       id_(ChildProcessHostImpl::GenerateChildProcessUniqueId()),
       browser_context_(browser_context),
       storage_partition_impl_(storage_partition_impl),
@@ -1840,20 +1855,26 @@ bool RenderProcessHostImpl::Init() {
       cmd_line->PrependWrapper(renderer_prefix);
     AppendRendererCommandLine(cmd_line.get());
 
+#if defined(IE_REDCORE)
+    std::string process_type =
+        cmd_line->GetSwitchValueASCII(switches::kProcessType);
+    if (process_type.compare(switches::kTridentProcess) == 0) {
+      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
+          std::unique_ptr<RendererSandboxedProcessLauncherDelegate>(
+              new TridentSandboxedProcessLauncherDelegate),
+          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
+          base::NullCallback());
+    } else {
       // Spawn the child process asynchronously to avoid blocking the UI thread.
       // As long as there's no renderer prefix, we can use the zygote process
       // at this stage.
-#if defined(IE_REDCORE)
-    child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
-        std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
-        std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
-        UseTridentCore()
-            ? base::NullCallback()
-            : base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
-    if (!UseTridentCore()) {
-      channel_->Pause();
-      fast_shutdown_started_ = false;
+      child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
+          std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
+          std::move(cmd_line), GetID(), this, std::move(mojo_invitation_),
+          base::BindRepeating(&RenderProcessHostImpl::OnMojoError, id_));
     }
+    channel_->Pause();
+    fast_shutdown_started_ = false;
 #else
     child_process_launcher_ = std::make_unique<ChildProcessLauncher>(
         std::make_unique<RendererSandboxedProcessLauncherDelegate>(),
@@ -4020,6 +4041,16 @@ RenderProcessHost* RenderProcessHostImpl::GetProcessHostForSiteInstance(
         UnmatchedServiceWorkerProcessTracker::MatchWithSite(site_instance);
   }
 
+#ifdef IE_REDCORE
+  if (site_instance->GetRenderMode().core == IE_CORE) {
+    if (!render_process_host) {
+      render_process_host = CreateRenderProcessHost(
+          browser_context, nullptr, site_instance, is_for_guests_only);
+    }
+    return render_process_host;
+  }
+#endif
+
   // See if the spare RenderProcessHost can be used.
   SpareRenderProcessHostManager& spare_process_manager =
       g_spare_render_process_host_manager.Get();
@@ -4072,8 +4103,13 @@ RenderProcessHost* RenderProcessHostImpl::GetProcessHostForSiteInstance(
   // two processes at the same time.  In this case the call to
   // PrepareForFutureRequests will be postponed until later (e.g. until the
   // navigation commits or a cross-site redirect happens).
+#ifdef IE_REDCORE
+  if (spare_was_taken && site_instance->GetRenderMode().core != IE_CORE)
+    spare_process_manager.PrepareForFutureRequests(browser_context);
+#else
   if (spare_was_taken)
     spare_process_manager.PrepareForFutureRequests(browser_context);
+#endif
 
   if (is_unmatched_service_worker) {
     UnmatchedServiceWorkerProcessTracker::Register(render_process_host,
