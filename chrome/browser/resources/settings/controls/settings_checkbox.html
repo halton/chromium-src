@@ -30,7 +30,7 @@
         margin-inline-start: var(--settings-controlled-by-spacing);
       }
     </style>
-    <div id="outerRow" noSubLabel$="[[!hasSubLabel_(subLabel, subLabelHtml)]]" style="display:none">
+    <div id="outerRow" noSubLabel$="[[!hasSubLabel_(subLabel, subLabelHtml)]]">
       <cr-checkbox id="checkbox" checked="{{checked}}"
           on-change="notifyChangedByUserInteraction"
           disabled="[[controlDisabled(disabled, pref.*)]]">

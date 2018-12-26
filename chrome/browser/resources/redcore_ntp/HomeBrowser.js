@@ -97,8 +97,6 @@ HomeBrowser.prototype = function () {
                 break;
             case "lastLoginInfo":
                 value = JSON.parse(value);
-                if (value && value.domain)
-                    value.domain = trimSchema(value.domain);
                 PROXYCALLBACK.getLastLoginInfoCallback(value);
                 break;
         }

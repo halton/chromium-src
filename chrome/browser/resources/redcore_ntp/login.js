@@ -105,7 +105,8 @@ function switchPage(isLogin) {
         <div class="cut_off_line"></div>
         <div class="company_domain" id="company_domain">
           <h2 class="set_server">服务器地址</h2>
-          <input id="domain" type="text" class="field field-block" placeholder="pertest.redcore.cn" pattern="\S+" tip="" />
+          <input id="domain" type="text" class="field field-block" 
+                 placeholder="https://pertest.redcore.cn" pattern="\S+" tip="" />
           <p>忘记服务器地址？请联系您的企业管理员获取。</p>
           <button class="button block" id="next-btn" name="">确定</button>
         </div>
@@ -228,9 +229,17 @@ function Login() {
     }
     var domain = _this.domain.val()
     if (domain) {
-
-      if (!/\/\//.test(domain)) {
-        domain = 'https://' + domain
+      if (!(domain.startsWith('http://') || domain.startsWith('https://'))) {
+        _this.errorTip('请输入正确的服务器地址')
+        return
+      } else {
+        let url = new URL(domain)
+        let regDomain = /[a-za-z0-9][\w\u4E00-\u9FA5]*(\.[\w\u4E00-\u9FA5]+)+/
+        let regIp = /^(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|[1-9])(\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)){3}$/
+        if (!(regDomain.test(url.host) || regIp.test(url.host))) {
+          _this.errorTip('请输入正确的服务器地址')
+          return
+        }
       }
     } else {
       // 正式地址
@@ -309,14 +318,14 @@ function Login() {
     $('#code_pack').css('visibility', 'hidden');
     serverAddress = _this.domain.val() || 'api.redcore.cn';
     // 建立长连接
-    window.__page_to_content_script__('http://' + serverAddress, deviceId);
+    window.__page_to_content_script__(serverAddress, deviceId);
     $('#code_pack_qrcodeInvalid').hide();
     $('#code_pack_qrcodeSuccess').hide();
     _this.errorTip('');
     // 获取二维码
     $.ajax({
       method: "GET",
-      url: "http://" + serverAddress + '/client/v3/push/qrlogin/qrcode?deviceId=' + deviceId,
+      url: serverAddress + '/client/v3/push/qrlogin/qrcode?deviceId=' + deviceId,
       success: function(res) {
         $('#code_pack').css('display', 'flex');
         $('#code_pack').css('visibility', 'visible');
@@ -344,7 +353,7 @@ function Login() {
   $('#refresh_qrcode').click(function() {
     $.ajax({
       method: "GET",
-      url: "http://" + serverAddress + '/client/v3/push/qrlogin/qrcode?deviceId=' + deviceId,
+      url: serverAddress + '/client/v3/push/qrlogin/qrcode?deviceId=' + deviceId,
       success: function(res) {
         var resData = JSON.parse(res);
         if (resData.qrcode) {
