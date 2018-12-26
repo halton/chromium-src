@@ -122,7 +122,7 @@ EXTERN_C const IID IID_IBrowserContainer;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("66707C49-E1DC-42EC-AD0C-C9F0B08F7813")
+    MIDL_INTERFACE("DB1BC009-56ED-4A59-B410-1D69AFE40950")
     IBrowserContainer : public IDispatch
     {
     public:
@@ -452,7 +452,7 @@ EXTERN_C const IID IID_IBrowserEventHandler;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("3130B1FC-06E5-4497-AD49-1210B86310E0")
+    MIDL_INTERFACE("E74F8824-D752-48A2-82E0-7DF0FDAAB786")
     IBrowserEventHandler : public IDispatch
     {
     public:
@@ -814,7 +814,7 @@ EXTERN_C const IID IID_IHttpMonitor;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("7B210509-86BE-47DE-850E-91F6C1EAB771")
+    MIDL_INTERFACE("8C11DD57-767B-480E-A72B-920A78D06D73")
     IHttpMonitor : public IDispatch
     {
     public:
@@ -937,7 +937,7 @@ EXTERN_C const CLSID CLSID_BrowserContainer;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("A8CEEC22-AF5E-44E2-A79D-2519C3F27EA6")
+class DECLSPEC_UUID("5C304C78-AD5B-4674-BADA-C96683423219")
 BrowserContainer;
 #endif
 
@@ -945,7 +945,7 @@ EXTERN_C const CLSID CLSID_BrowserHost;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("D4806415-6D82-452D-B4CC-A57EA46B85F9")
+class DECLSPEC_UUID("44EC5D79-21E6-45E3-BB21-C363BA401190")
 BrowserHost;
 #endif
 
@@ -953,7 +953,7 @@ EXTERN_C const CLSID CLSID_HttpMonitor;
 
 #ifdef __cplusplus
 
-class DECLSPEC_UUID("9306A4A9-3154-4E07-8855-2BC7AA5A8DD4")
+class DECLSPEC_UUID("1144F1D5-3CDB-4525-83D4-78D4A40A3901")
 HttpMonitor;
 #endif
 #endif /* __IEBrowserLib_LIBRARY_DEFINED__ */

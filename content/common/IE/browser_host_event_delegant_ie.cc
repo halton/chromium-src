@@ -428,7 +428,12 @@ void BrowserHostEventDelegant::SetHostHWND(HWND window_handle) {
 
 bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
                                              bool is_new) {
-  HWND window_handle = GetParent(main_window_);
+  HWND parent_hwnd = GetParent(main_window_);
+  HWND window_handle = FindWindowExW(parent_hwnd, main_window_,
+                                     L"Intermediate Software Window", nullptr);
+
+  DCHECK(!!window_handle);
+
   if (IsWindow(host_window_) == FALSE) {
     host_window_ = CreateHostWindow(window_handle);
     // host_window_ = CreateHostWindow(NULL);
@@ -453,12 +458,9 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
 
   while (class_factory == NULL) {
     DLOG(INFO) << "trident CreateHostWindow begin to create";
+    Sleep(500);
     hr = CoGetClassObject(CLSID_BrowserContainer, CLSCTX_LOCAL_SERVER, NULL,
                           IID_IClassFactory, (LPVOID*)&class_factory);
-  }
-  
-  if (FAILED(hr)) {
-    LOG(WARNING) << "class factory of CLSID_BrowserContainer register error";
   }
 
   if (class_factory) {

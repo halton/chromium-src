@@ -133,6 +133,13 @@ void ChromeDataUseAscriberService::ReadyToCommitNavigation(
     return;
 
   content::WebContents* web_contents = navigation_handle->GetWebContents();
+#ifdef IE_REDCORE
+  // TODO(qidi.ma) do not reply commit event when core type is trident
+  if (web_contents->GetRendererMode().core == IE_CORE) {
+    return;
+  }
+#endif
+
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::BindOnce(&ChromeDataUseAscriber::ReadyToCommitMainFrameNavigation,

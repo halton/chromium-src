@@ -421,17 +421,9 @@ std::unique_ptr<content::WebContents> CreateTargetContents(
         params.browser->window()->GetNativeWindow();
   }
 #endif
-#ifdef IE_REDCORE  // ysp+{IE Embedded}
-  create_params.renderer_mode = params.renderer_mode;
-  // ysp+
-  if (!params.auto_select)
-    create_params.auto_select_content = params.auto_select;
-#endif
-
 #ifdef IE_REDCORE
   create_params.renderer_mode = params.renderer_mode;
-  if (!params.auto_select)
-    create_params.auto_select_content = params.auto_select;
+  create_params.auto_select_content = params.auto_select;
 #endif
 
   std::unique_ptr<WebContents> target_contents =
@@ -498,7 +490,13 @@ void Navigate(NavigateParams* params) {
   // the target browser. This must happen first, before
   // GetBrowserForDisposition() has a chance to replace |params->browser| with
   // another one.
-  if (!params->source_contents && params->browser) {
+
+#ifdef IE_REDCORE
+  if (params->renderer_mode.core == IE_CORE) {
+    params->source_contents = nullptr;
+  } else
+#endif
+   if (!params->source_contents && params->browser) {
     params->source_contents =
         params->browser->tab_strip_model()->GetActiveWebContents();
   }
@@ -597,7 +595,7 @@ void Navigate(NavigateParams* params) {
   // Did we use a prerender?
   bool swapped_in_prerender = false;
 
-#ifdef IE_REDCORE  // ysp+ {IE Embedded}
+#ifdef IE_REDCORE
   if (params->source_contents &&
       params->source_contents->GetRendererMode().core == IE_CORE &&
       params->url.SchemeIs("chrome") == true) {  //在IE页面开首页等自有页面，转为使用Chrome打开
@@ -615,7 +613,16 @@ void Navigate(NavigateParams* params) {
                                  TabStripModel::ADD_FORCE_INDEX |
                                  TabStripModel::ADD_INHERIT_OPENER;
   }
+
+// TODO(qidi.ma): used for debugging IE core.  should be delete later
+// RendererMode mode;
+// mode.core = IE_CORE;
+// mode.version = ie::DOC10;
+// mode.emulation = ie::EMULATION10;
+// params->renderer_mode = mode;
+
 #endif
+  params->renderer_mode = params->renderer_mode;
 
   // If no target WebContents was specified (and we didn't seek and find a
   // singleton), we need to construct one if we are supposed to target a new

@@ -2920,8 +2920,7 @@ void RenderProcessHostImpl::AppendRendererCommandLine(
     base::CommandLine* command_line) {
   // Pass the process type first, so it shows first in process listings.
 
-#if defined(REDCORE) && defined(IE_REDCORE)
-  // ysp+ {IE Embedded}
+#if  defined(IE_REDCORE)
   if (UseTridentCore()) {
     command_line->AppendSwitchASCII(switches::kProcessType,
                                     switches::kTridentProcess);
@@ -2936,7 +2935,7 @@ void RenderProcessHostImpl::AppendRendererCommandLine(
 #else
   command_line->AppendSwitchASCII(switches::kProcessType,
                                   switches::kRendererProcess);
-#endif
+#endif // IE_REDCORE
 
 #if defined(OS_WIN)
   command_line->AppendArg(switches::kPrefetchArgumentRenderer);

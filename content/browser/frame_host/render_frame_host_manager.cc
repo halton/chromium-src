@@ -558,7 +558,11 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
     navigation_rfh = render_frame_host_.get();
 
     DCHECK(!speculative_render_frame_host_);
-  } else {
+  } else
+#if defined(IE_REDCORE)
+      if (dest_site_instance->GetRenderMode().core != IE_CORE)
+#endif
+  {
     // If the current RenderFrameHost cannot be used a speculative one is
     // created with the SiteInstance for the current URL. If a speculative
     // RenderFrameHost already exists we try as much as possible to reuse it and
@@ -654,6 +658,10 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
 
     notify_webui_of_rf_creation = true;
 
+#ifdef IE_REDCORE
+    if (dest_site_instance->GetRenderMode().core != IE_CORE) {
+#endif
+
     if (navigation_rfh == render_frame_host_.get()) {
       EnsureRenderFrameHostVisibilityConsistent();
       EnsureRenderFrameHostPageFocusConsistent();
@@ -666,6 +674,9 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
       delegate_->NotifyMainFrameSwappedFromRenderManager(
           nullptr, render_frame_host_.get());
     }
+#ifdef IE_REDCORE
+    }
+#endif
   }
 
   // If a WebUI was created in a speculative RenderFrameHost or a new
@@ -1073,6 +1084,11 @@ RenderFrameHostManager::GetSiteInstanceForNavigation(
   if (new_instance == current_instance) {
     // If we're navigating to the same site instance, we won't need to use the
     // current spare RenderProcessHost.
+
+#ifdef IE_REDCORE
+    SiteInstanceImpl* new_instance_impl = (SiteInstanceImpl*)new_instance.get();
+    if (new_instance_impl->GetRenderMode().core != IE_CORE)
+#endif
     RenderProcessHostImpl::NotifySpareManagerAboutRecentlyUsedBrowserContext(
         browser_context);
   }

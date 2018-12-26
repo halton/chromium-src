@@ -2261,7 +2261,7 @@ static const USER_MARSHAL_ROUTINE_QUADRUPLE UserMarshalRoutines[ WIRE_MARSHAL_TA
 
 
 /* Object interface: IBrowserContainer, ver. 0.0,
-   GUID={0x66707C49,0xE1DC,0x42EC,{0xAD,0x0C,0xC9,0xF0,0xB0,0x8F,0x78,0x13}} */
+   GUID={0xDB1BC009,0x56ED,0x4A59,{0xB4,0x10,0x1D,0x69,0xAF,0xE4,0x09,0x50}} */
 
 #pragma code_seg(".orpc")
 static const unsigned short IBrowserContainer_FormatStringOffsetTable[] =
@@ -2380,7 +2380,7 @@ CInterfaceStubVtbl _IBrowserContainerStubVtbl =
 
 
 /* Object interface: IBrowserEventHandler, ver. 0.0,
-   GUID={0x3130B1FC,0x06E5,0x4497,{0xAD,0x49,0x12,0x10,0xB8,0x63,0x10,0xE0}} */
+   GUID={0xE74F8824,0xD752,0x48A2,{0x82,0xE0,0x7D,0xF0,0xFD,0xAA,0xB7,0x86}} */
 
 #pragma code_seg(".orpc")
 static const unsigned short IBrowserEventHandler_FormatStringOffsetTable[] =
@@ -2505,7 +2505,7 @@ CInterfaceStubVtbl _IBrowserEventHandlerStubVtbl =
 
 
 /* Object interface: IHttpMonitor, ver. 0.0,
-   GUID={0x7B210509,0x86BE,0x47DE,{0x85,0x0E,0x91,0xF6,0xC1,0xEA,0xB7,0x71}} */
+   GUID={0x8C11DD57,0x767B,0x480E,{0xA7,0x2B,0x92,0x0A,0x78,0xD0,0x6D,0x73}} */
 
 #pragma code_seg(".orpc")
 static const unsigned short IHttpMonitor_FormatStringOffsetTable[] =
@@ -2595,25 +2595,25 @@ static const MIDL_STUB_DESC Object_StubDesc =
 
 const CInterfaceProxyVtbl * const _IEInterface_ProxyVtblList[] = 
 {
-    ( CInterfaceProxyVtbl *) &_IHttpMonitorProxyVtbl,
     ( CInterfaceProxyVtbl *) &_IBrowserContainerProxyVtbl,
     ( CInterfaceProxyVtbl *) &_IBrowserEventHandlerProxyVtbl,
+    ( CInterfaceProxyVtbl *) &_IHttpMonitorProxyVtbl,
     0
 };
 
 const CInterfaceStubVtbl * const _IEInterface_StubVtblList[] = 
 {
-    ( CInterfaceStubVtbl *) &_IHttpMonitorStubVtbl,
     ( CInterfaceStubVtbl *) &_IBrowserContainerStubVtbl,
     ( CInterfaceStubVtbl *) &_IBrowserEventHandlerStubVtbl,
+    ( CInterfaceStubVtbl *) &_IHttpMonitorStubVtbl,
     0
 };
 
 PCInterfaceName const _IEInterface_InterfaceNamesList[] = 
 {
-    "IHttpMonitor",
     "IBrowserContainer",
     "IBrowserEventHandler",
+    "IHttpMonitor",
     0
 };
 
