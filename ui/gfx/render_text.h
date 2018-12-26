@@ -194,7 +194,11 @@ class GFX_EXPORT RenderText {
   // The character used for displaying obscured text. Use a bullet character.
   // TODO(pbos): This is highly font dependent, consider replacing the character
   // with a vector glyph.
+#ifdef REDCORE
+  static constexpr base::char16 kPasswordReplacementChar = 0x204E;
+#else
   static constexpr base::char16 kPasswordReplacementChar = 0x2022;
+#endif
 
   virtual ~RenderText();
 

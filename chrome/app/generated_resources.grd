@@ -9086,9 +9086,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
     </if>
 
     <!-- //ysp+ { -->
-    <message name="IDS_ACCNAME_YSP_LOCK_SCREEN" desc="The accessible name for the button that is used to close a specific tab.">
-      Close <ph name="TAB_NAME">$1<ex>Google Search</ex></ph>
-    </message>
+    <message name="IDS_ACCNAME_YSP_LOCK_SCREEN" desc="lock screen button">Lock screen</message>
     <message name="IDS_ABOUT_YSP_PRODUCT_VERSION" desc="The text label describing the version of the browser">
       Version <ph name="PRODUCT_VERSION">$1<ex>1.0.0</ex></ph>
     </message>

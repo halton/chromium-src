@@ -459,6 +459,9 @@ void OpaqueBrowserFrameView::ResetWindowControls() {
   restore_button_->SetState(views::Button::STATE_NORMAL);
   minimize_button_->SetState(views::Button::STATE_NORMAL);
   maximize_button_->SetState(views::Button::STATE_NORMAL);
+#ifdef REDCORE
+  lock_button_->SetState(views::Button::STATE_NORMAL);
+#endif
   // The close button isn't affected by this constraint.
   if (hosted_app_button_container_)
     hosted_app_button_container_->UpdateContentSettingViewsVisibility();
