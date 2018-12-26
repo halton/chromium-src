@@ -34,12 +34,12 @@ _PRODUCT_NAME_NEEDED_REPLACE_FILES = [
 
 # apply git patch
 def applyGitPatch():
+  patchDir = os.path.join(_PRODUCT_DIR, "patches")
+  if not os.path.exists(patchDir) or not os.listdir(patchDir):
+    return
   applyCmdLine = "%s \
     cd %s &&;\
     " % (getDiskString(_WORKING_DIR), _WORKING_DIR)
-  patchDir = os.path.join(_PRODUCT_DIR, "patches")
-  if not os.path.exists(patchDir):
-    return
   filesList = os.listdir(patchDir)
   if len(filesList) == 0:
     return
@@ -53,6 +53,8 @@ def applyGitPatch():
 # replace grd and cpp file content
 def replaceNewtab():
   ntpDir = os.path.join(_PRODUCT_DIR, "new_tab_page")
+  if not os.path.exists(ntpDir) or not os.listdir(ntpDir):
+    return
   cppFileString = ""
   grdElementString = ""
   for (filePath, dirs ,files) in os.walk(ntpDir):
@@ -63,12 +65,13 @@ def replaceNewtab():
       cppFileString += createCppFileString(uniqueName, relativePath)
   if len(grdElementString) != 0:
     replaceFileContentUseRegular(os.path.join(_WORKING_DIR, "chrome", "browser",
-                                    "ui", "webui", "ysp_ntp", "ep_newtab_ui.cc"),
-                       r"\/\/ redcore_start_tag([\s\S]+)\/\/ redcore_stop_tag", cppFileString)
+                                              "ui", "webui", "ysp_ntp", "ep_newtab_ui.cc"),
+                                 r"\/\/ redcore_start_tag([\s\S]+)\/\/ redcore_stop_tag", cppFileString)
     print "replace ep_newtab_ui.cc success"
   if len(cppFileString) != 0:
     replaceFileContentUseRegular(os.path.join(_WORKING_DIR, "chrome", "browser", "browser_resources.grd"),
-                       "<!-- redcore_start_tag -->([\\s\\S]+)<!-- redcore_stop_tag -->", grdElementString)
+                                 "<!-- redcore_start_tag -->([\\s\\S]+)<!-- redcore_stop_tag -->",
+                                 grdElementString)
     print "replace browser_resources.grd success"
   targetNtpDir = os.path.join(_WORKING_DIR, "chrome", "browser", "resources", "redcore_ntp")
   shutil.rmtree(targetNtpDir)
@@ -89,13 +92,14 @@ def replaceSpecialString(path):
 def createGrdElementString(fileName, filePath):
   elementString = ""
   if filePath.lower().endswith(".html"):
-    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + "\" flattenhtml=\"true\"\
-     allowexternalscript=\"true\" type=\"BINDATA\" />\n      "
+    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + \
+     "\" flattenhtml=\"true\" allowexternalscript=\"true\" type=\"BINDATA\" />\n      "
   elif filePath.lower().endswith(".js"):
-    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + "\" flattenhtml=\"true\" \
-    type=\"BINDATA\" />\n      "
+    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + \
+     "\" flattenhtml=\"true\" type=\"BINDATA\" />\n      "
   else:
-    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + "\" type=\"BINDATA\" />\n      "
+    elementString = "<include name=\"" + fileName + "\" file=\"resources\\redcore_ntp\\" + filePath + \
+     "\" type=\"BINDATA\" />\n      "
   return elementString
 
 
@@ -129,6 +133,8 @@ def replaceFileContent(filePath, oldStr, newStr):
 # replace product name
 def replaceIcon():
   iconDir = os.path.join(_PRODUCT_DIR, "icons")
+  if not os.path.exists(iconDir) or not os.listdir(iconDir):
+    return
   for (filePath, dirs ,files) in os.walk(iconDir):
     for file in files:
       sourcePath = os.path.join(filePath, file);
@@ -139,11 +145,14 @@ def replaceIcon():
 
 def updateProductInfo():
   productInfoPath = os.path.join(_PRODUCT_DIR, "product_info.json")
+  if not os.path.exists(productInfoPath) or not os.listdir(productInfoPath):
+    return
   with codecs.open(productInfoPath, "r", encoding='utf-8') as tempFile:
     productJson = json.load(tempFile)
     for filepath in _PRODUCT_NAME_NEEDED_REPLACE_FILES:
       for key in productJson["replace"].keys():
-        replaceFileContent(os.path.join(_WORKING_DIR, os.path.normcase(filepath)), key, productJson["replace"][key])
+        replaceFileContent(os.path.join(_WORKING_DIR, os.path.normcase(filepath)),
+                           key, productJson["replace"][key])
   print "update product info success"
 
 
