@@ -9,15 +9,15 @@ const config = {
       <h5>修改密码</h5>
       <p>很抱歉，非红芯SDP控制台本地认证用户，无权修改密码。</p>
       <div class="rdc-ctl" style="bottom: 20px; right:20px; top: unset"> 
-        <button id="btn_rdc_tocancel" class="rdc-btn primary"> 确认 </button>
-      </div>
+          <button id="btn_rdc_tocancel" class="rdc-btn primary"> 确认 </button> 
+        </div> 
     </div>`,
   pop_psw_success: `<div class="rdc-masker-content rdc-pos-mm" style="padding-bottom:60px">
       <h5>修改密码</h5>
       <p>密码修改成功，浏览器将自动退出，请重新登录。</p>
       <div class="rdc-ctl" style="bottom: 20px; right:20px; top: unset"> 
-        <button id="btn_rdc_toLoginout" class="rdc-btn primary"> 确认 </button>
-      </div>
+          <button id="btn_rdc_toLoginout" class="rdc-btn primary"> 确认 </button> 
+        </div> 
     </div>`,
   pop_modify_psw: `<div id="rdc_pop_modify_psw" class="rdc-masker-fix">
     <div class="rdc-masker-content rdc-pos-mm">
@@ -80,6 +80,7 @@ class User {
       <span class="rdc-shadow"></span>
       <span class="rdc-caret-arrow rdc-pos-mm"></span>
     </button>`)
+    $('#rdc_user_info_holder .rdc-content').remove();
     $('#rdc_user_info_holder').append(`<div class="rdc-content"> 
       <div class="rdc-form-row"> 
         <label>手机</label> <span>${user.mobile || ''}</span> 
@@ -118,7 +119,9 @@ class User {
       chrome.send('checkIfCanModifyPassword')
     })
     $('#btn_rdc_upload_user_img').click(function() {
-
+      let el = document.createElement('input');
+      el.type = 'file';
+      el.click();
     })
   }
 
@@ -140,19 +143,14 @@ class User {
   }
 
   static logoutFinish() {
-    console.log('loginout finish')
     top.location.reload()
   }
 
   static getLockScreenTimeFinish(data) {
-    console.log(`core lock screen time data`)
-    console.log(data)
     this.screenSet.setLockTime(data);
   }
 
   static getDeviceInfoFinish(data) {
-    console.log('core Device data')
-    console.log(data)
     if (typeof data === 'string') {
       data = JSON.parse(data)
     }
@@ -212,7 +210,6 @@ class User {
    * @return {[none]}
    */
   static modifyPasswordFinish(data) {
-    console.log(data)
     switch (data) {
       case '0':
         {
@@ -252,7 +249,6 @@ class User {
    * 正确返回值： {"errCode":"0"}
    */
   static deleteDeviceFinish(data) {
-    console.log(`core data for deleteDevice`)
     data = JSON.parse(data)
     if (data.errCode === '0') {
       this.rdc_user_device.getDeviceInfo()
@@ -260,7 +256,6 @@ class User {
   }
 
   static checkIfCanModifyPasswordFinish(data) {
-    console.log('check modfify psw' + data)
     if (data === 'true') {
       $(document.body).append($(config.pop_modify_psw))
       $('#rdc_pop_modify_psw').show()
@@ -277,6 +272,10 @@ class User {
         if (np != cp) {
           return false;
         }
+        if (!/^(?=.*[a-zA-Z]+)(?=.*\d)[^\s]{6,16}$/.test(np)) {
+          $('#rdc_pop_modify_psw').find('.rdc-form-valid span').html('6-14位，至少包含英文字母及数字')
+          return false;
+        }
         chrome.send('modifyPassword', [op, np])
       })
     } else {
@@ -285,6 +284,16 @@ class User {
       $('#btn_rdc_tocancel').click(function() {
         $('#rdc_pop_modify_psw').remove()
       })
+    }
+  }
+
+  static uploadAvatarFinish(res) {
+    if (typeof res === 'string') {
+      res = JSON.parse(res);
+    }
+    // toto: UI 没有设计如果上传失败的情况
+    if (res.errCode === '0') {
+      $('#rdc_user_head_img').attr('src', res.data.url);
     }
   }
 }

@@ -27,7 +27,7 @@ class Device {
     return /windows/i.test(str) ? './imgs/windows_pc.png' :
            /Android/i.test(str) ? './imgs/android.png' :
            /os x/i.test(str) ? './imgs/macbook.png' :
-           /iphone/i.test(str) ? './imgs/iphone.png' :
+           /iphone|ios/i.test(str) ? './imgs/iphone.png' :
            /ipad/i.test(str) ? './imgs/iPad.png' :
            /linux/i.test(str) ? './imgs/linux.png' : './imgs/mac.png'
   }

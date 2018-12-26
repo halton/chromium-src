@@ -24,4 +24,20 @@ $(function() {
       _el.parents('.rdc-head').siblings('.rdc-content').slideUp();
     }
   });
+
+  let el = document.getElementById('temp_file_element')
+  el.onchange = function() {
+    let that = this;
+    if (this.files.length > 0) {
+      var fr = new FileReader();
+      fr.onloadstart = function(e) {};
+      fr.onload = function() {
+        let imgData = this.result;
+        chrome.send('uploadAvatar', [that.files[0].name, imgData])
+      };
+      fr.readAsDataURL(this.files[0]);
+    }
+    return false;
+  };
+
 })
