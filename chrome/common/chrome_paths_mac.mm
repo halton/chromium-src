@@ -55,7 +55,7 @@ char* ProductDirNameForBundle(NSBundle* chrome_bundle) {
 
   if (!product_dir_name) {
 #ifdef REDCORE
-    product_dir_name = "Redcore";
+    product_dir_name = "Enterplorer";
 #else
 #if defined(GOOGLE_CHROME_BUILD)
     product_dir_name = "Google/Chrome";
