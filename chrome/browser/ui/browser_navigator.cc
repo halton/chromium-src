@@ -622,7 +622,6 @@ void Navigate(NavigateParams* params) {
 // params->renderer_mode = mode;
 
 #endif
-  params->renderer_mode = params->renderer_mode;
 
   // If no target WebContents was specified (and we didn't seek and find a
   // singleton), we need to construct one if we are supposed to target a new
