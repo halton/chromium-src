@@ -68,6 +68,7 @@ def modifyBuildVersion():
         build = int(line[6:])
       elif line.startswith("PATCH="):
         patch = int(line[6:])
+        patch += 1
       elif line.startswith("YSPMAJOR="):
         yspMajor = int(line[9:])
       elif line.startswith("YSPMINOR="):
