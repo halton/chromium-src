@@ -5488,7 +5488,7 @@
 <translation id="996250603853062861">正在建立安全连接...</translation>
 <translation id="998747458861718449">检查(&amp;N)</translation>
 <!-- //ysp+ { -->
-<translation id="4852111869507463990">Enterplorer企业浏览器</translation>
+<translation id="8031131407479825832">Enterplorer企业浏览器</translation>
 <translation id="632770826694814868">您的办公浏览器当前处于锁屏模式</translation>
 <translation id="6964321312176942428">请输入6位锁屏密码解锁</translation>
 <translation id="4116513560936149887">密码输入错误，请重新输入</translation>
@@ -5509,7 +5509,7 @@
 <translation id="355226436098205131">请使用6位锁屏密码解锁屏幕</translation>
 <translation id="4425739312452866274">忘记锁屏密码？</translation>
 <translation id="1988735210256571067">很抱歉，锁屏密码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置锁屏密码。</translation>
-<translation id="8046918477839623462">极速模式</translation>
+<translation id="6912338534754641922">极速模式</translation>
 <translation id="6866314797536580459">兼容模式</translation>
 <translation id="6165082002909413608">兼容性设置</translation>
 <translation id="1511303038969068822">浏览器模式（IE7）</translation>
@@ -5554,9 +5554,9 @@
 <translation id="7475686565470763896">立即更新</translation>
 <translation id="6704974176646225423">忽略本次</translation>
 <translation id="7672146502103052125">不再提醒</translation>
-<translation id="5933871001532188743">有新版本客户端可用，点击确定进行更新。</translation>
+<translation id="8554416422115145288">有新版本客户端可用，点击确定进行更新。</translation>
 <translation id="3646546102288517063">新版本更新提示</translation>
-<translation id="5271934099897009424">Enterplorer配置参数</translation>
+<translation id="1963106243865139429">Enterplorer配置参数</translation>
 <translation id="5885162333974325916">配置</translation>
 <translation id="3980994903368377230">AD密码代理认证</translation>
 <translation id="3045552195448420286">密码有改动请及时修改配置，以确保该功能可用。</translation>
@@ -5569,9 +5569,9 @@
 <translation id="5528624741967122478">设备禁用</translation>
 <translation id="6341497124566626732">禁止访问</translation>
 <translation id="5127384121078416246">服务器内部错误，请联系管理员</translation>
-<translation id="6080153527359007819">无法连接到Enterplorer 服务器，请联系管理员</translation>
-<translation id="3168288437889927286">Enterplorer 服务器资源错误，请联系管理员</translation>
-<translation id="2703022118474979629">Enterplorer 服务器内部错误，请联系管理员</translation>
+<translation id="4217731870483130407">无法连接到Enterplorer 服务器，请联系管理员</translation>
+<translation id="3257568109176284995">Enterplorer 服务器资源错误，请联系管理员</translation>
+<translation id="6465722745665504978">Enterplorer 服务器内部错误，请联系管理员</translation>
 <translation id="4539284317591009800">错误码：</translation>
 <translation id="639801747395300942">用户已禁用</translation>
 <translation id="7295438806371625384">access_token过期</translation>
