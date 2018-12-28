@@ -33,15 +33,20 @@ class Device {
   }
 
   initDOM(data) {
-    this.cfg.arrDevices = [].concat(data.data)
+    this.cfg.arrDevices = [].concat(data.data).sort((a, b) => {
+      if (a.lastLoginTime && b.lastLoginTime) {
+        return new Date(b.lastLoginTime) - new Date(a.lastLoginTime)
+      }
+      return 0;
+    });
     this.cfg.holder.html(`<h5>设备管理</h5> ${data.data.map(item => 
       `<div class="rdc-info device">
       <div class="rdc-head">
         <div class="img" data-imgSrc="${this.discernDevice(item.operatingSystem)}">
           </div>
           <div class="info">
-            <p>${this.cfg.user.name}</p>
-            <p>${item.model}</p>
+            <p>${item.name || ''}</p>
+            <p>${item.model || ''}</p>
           </div>
           <div class="rdc-ctl">
             <button class="rdc-btn-icon on">
@@ -53,15 +58,15 @@ class Device {
         <div class="rdc-content">
           <div class="rdc-form-row">
             <label>操作系统</label>
-            <span>${item.operatingSystem}</span>
+            <span>${item.operatingSystem || ''}</span>
           </div>
           <div class="rdc-form-row">
             <label>设备ID</label>
-            <span>${item.id}</span>
+            <span>${item.id || ''}</span>
           </div>
           <div class="rdc-form-row">
             <label>客户端版本</label>
-            <span>${item.clientVersion}</span>
+            <span>${item.clientVersion || ''}</span>
           </div>
           <div class="rdc-form-row">
             <label>上次登录时间</label>
