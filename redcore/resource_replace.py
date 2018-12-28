@@ -145,7 +145,7 @@ def replaceIcon():
 
 def updateProductInfo():
   productInfoPath = os.path.join(_PRODUCT_DIR, "product_info.json")
-  if not os.path.exists(productInfoPath) or not os.listdir(productInfoPath):
+  if not os.path.exists(productInfoPath):
     return
   with codecs.open(productInfoPath, "r", encoding='utf-8') as tempFile:
     productJson = json.load(tempFile)
