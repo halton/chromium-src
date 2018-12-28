@@ -118,15 +118,9 @@ class User {
     $('#btn_rdc_modify_psw').click(function() {
       chrome.send('checkIfCanModifyPassword')
     })
-    $('#btn_rdc_upload_user_img').click(function() {
-      let el = document.createElement('input');
-      el.type = 'file';
-      el.click();
-    })
   }
 
   static getUserInfoFinish(userInfo) {
-    console.log(userInfo)
     if (userInfo) {
       let user = JSON.parse(userInfo);
       this[_ins][init_rdc_user_html](user);
@@ -139,7 +133,6 @@ class User {
   }
 
   static loginFinish(data) {
-    console.log('login finish')
   }
 
   static logoutFinish() {
@@ -164,7 +157,6 @@ class User {
    * @return {[type]}
    */
   static modifyPINCodeFinish(data) {
-    console.log(data)
     switch (data) {
       case 0:
         {
@@ -291,7 +283,7 @@ class User {
     if (typeof res === 'string') {
       res = JSON.parse(res);
     }
-    // toto: UI 没有设计如果上传失败的情况
+    // TODO: UI 没有设计如果上传失败的情况
     if (res.errCode === '0') {
       $('#rdc_user_head_img').attr('src', res.data.url);
     }
