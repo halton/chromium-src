@@ -42,8 +42,6 @@
 #define WM_IE_MOUSEACTIVATE WM_USER + 5255
 #define WM_COOKIEUPDATED WM_USER + 5801
 #define WM_QUERYDNS WM_USER + 5802
-// #define GWL_WNDPROC (-4) just for compiling
-#define GWL_WNDPROC (-4)
 
 namespace ie {
 
@@ -191,8 +189,8 @@ GETADDRINFOW fpGetAddrInfoW = NULL;
 
 static bool cookie_hook_flag = false;
 
-WNDPROC WebBrowser::old_window_proc_ = NULL;
-WNDPROC WebBrowser::old_control_proc_ = NULL;
+LONG_PTR WebBrowser::old_window_proc_ = NULL;
+LONG_PTR WebBrowser::old_control_proc_ = NULL;
 HHOOK WebBrowser::next_hook_ = NULL;
 WebBrowser* WebBrowser::self_ = NULL;
 IOleInPlaceActiveObject* WebBrowser::ole_in_place_active_object_ = NULL;
@@ -1303,8 +1301,10 @@ WebBrowser::WebBrowser(HWND parent_handle,
   // ShowWindow(GetControlWindow(), SW_SHOW);
   ShowWindow(GetControlWindow(), SW_HIDE);
 
-  old_control_proc_ = (WNDPROC)SetWindowLong(GetControlWindow(), GWL_WNDPROC,
-                                             (long)SubClassControlWndProc);
+  old_control_proc_ =
+      SetWindowLongPtr(GetControlWindow(), GWLP_WNDPROC,
+                       reinterpret_cast<LONG_PTR>(SubClassControlWndProc));
+
   dev_tools_host_ = new DevToolsHost(web_browser2_);
 }
 
@@ -1313,7 +1313,7 @@ WebBrowser::~WebBrowser() {
     delete dev_tools_host_;
 
   if (old_control_proc_)
-    SetWindowLong(GetControlWindow(), GWL_WNDPROC, (long)old_control_proc_);
+    SetWindowLongPtr(GetControlWindow(), GWLP_WNDPROC, old_control_proc_);
 
   if (ole_in_place_object_) {
     ole_in_place_object_->InPlaceDeactivate();
@@ -1987,16 +1987,16 @@ LRESULT WebBrowser::SubClassControlWndProc(HWND window_handle,
   } else if (message == WM_DESTROY) {
     if (WebBrowser::GetWebBrowser())
       WebBrowser::GetWebBrowser()->event_handler_->ResetDocHostUIHandler();
-    LRESULT ret = CallWindowProc(old_control_proc_, window_handle, message,
-                                 w_param, l_param);
+    LRESULT ret = CallWindowProc((WNDPROC)old_control_proc_, window_handle,
+                                 message, w_param, l_param);
     if (WebBrowser::GetWebBrowser())
       WebBrowser::GetWebBrowser()->delegate_->OnBrowserClosing();
 
     return ret;
   }
 
-  return CallWindowProc(old_control_proc_, window_handle, message, w_param,
-                        l_param);
+  return CallWindowProc((WNDPROC)old_control_proc_, window_handle, message,
+                        w_param, l_param);
 }
 
 bool WebBrowser::PreTranslateMsg(LPMSG message) {
@@ -2121,8 +2121,8 @@ bool WebBrowser::EnableSubClass(HWND window_handle) {
   next_hook_ = SetWindowsHook(WH_MSGFILTER, MessageProc);
 
   ie_browser_handle_ = window_handle;
-  old_window_proc_ =
-      (WNDPROC)SetWindowLong(window_handle, GWL_WNDPROC, (long)SubClassWndProc);
+  old_window_proc_ = SetWindowLongPtr(
+      window_handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(SubClassWndProc));
   return true;
 }
 
@@ -2131,7 +2131,7 @@ void WebBrowser::DisableSubClass(HWND window_handle) {
       next_hook_ == NULL)
     return;
 
-  SetWindowLong(window_handle, GWL_WNDPROC, (long)old_window_proc_);
+  SetWindowLongPtr(window_handle, GWLP_WNDPROC, old_window_proc_);
   UnhookWindowsHookEx(next_hook_);
   self_ = NULL;
 
@@ -2195,8 +2195,8 @@ LRESULT WebBrowser::SubClassWndProc(HWND window_handle,
     }
   }
 
-  return CallWindowProc(old_window_proc_, window_handle, message, w_param,
-                        l_param);
+  return CallWindowProc((WNDPROC)old_window_proc_, window_handle, message,
+                        w_param, l_param);
 }
 
 HWND WebBrowser::GetMainFrameHwnd(HWND window_handle) {
