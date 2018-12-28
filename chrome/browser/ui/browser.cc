@@ -650,6 +650,7 @@ Browser::Browser(const CreateParams& params)
 #if defined(REDCORE)
       first_create_(params.first_create),
       lock_status_(UNLOCKED),
+      auto_lock_timer_(std::make_unique<base::RepeatingTimer>()),
 #endif  // REDCORE
       chrome_updater_factory_(this),
 #if defined(REDCORE)
@@ -739,6 +740,7 @@ Browser::Browser(const CreateParams& params)
   YSPLoginManager::GetInstance()->Init();
   YSPLoginManager::GetInstance()->AddObserver(this);
   YSPLoginManager::GetInstance()->Restore();
+  ResetLockScreenTimer(kDefaultLockScreenTime);
 #endif
 }
 
@@ -3710,15 +3712,25 @@ void Browser::OnAutoLockScreenTimer(int64_t time_out_sec) {
     }
   }
 #endif  // OS_WIN
-  if (auto_lock_timer_.get()) {
-    base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
-    auto_lock_timer_->Stop();
-    if (time_out_sec > 0)
-      auto_lock_timer_->Start(
-          FROM_HERE, delay_time,
-          base::Bind(&Browser::OnAutoLockScreenTimer,
-                     crypto_ua_factory_.GetWeakPtr(), time_out_sec));
-  }
+  if (!auto_lock_timer_.get()) return;
+
+  base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
+  auto_lock_timer_->Stop();
+  if (time_out_sec > 0)
+    auto_lock_timer_->Start(
+        FROM_HERE, delay_time,
+        base::Bind(&Browser::OnAutoLockScreenTimer,
+                   crypto_ua_factory_.GetWeakPtr(), time_out_sec));
+}
+
+void Browser::ResetLockScreenTimer(int64_t time) {
+  if (!auto_lock_timer_.get()) return;
+
+  base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
+  auto_lock_timer_->Stop();
+  auto_lock_timer_->Start(FROM_HERE, delay_time,
+                          base::Bind(&Browser::OnAutoLockScreenTimer,
+                                     crypto_ua_factory_.GetWeakPtr(), time));
 }
 
 void Browser::OnConfigDataUpdated(const std::string& type,
@@ -3727,16 +3739,11 @@ void Browser::OnConfigDataUpdated(const std::string& type,
   if (type == "pc") {
     SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
-    if (auto_lock_timer_.get()) {
-      int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
-      base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
-      auto_lock_timer_->Stop();
-      if (time > 0)
-        auto_lock_timer_->Start(
-            FROM_HERE, delay_time,
-            base::Bind(&Browser::OnAutoLockScreenTimer,
-                       crypto_ua_factory_.GetWeakPtr(), time));
+    int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
+    if (time / 60 == 0) {
+      time = kDefaultLockScreenTime;
     }
+    ResetLockScreenTimer(time);
   } else if (type == "strategy") {
     UpdateStrategy();
   }
@@ -3846,8 +3853,6 @@ void Browser::OnLoginRequestFailure(const std::string& error) {
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
-  if (auto_lock_timer_.get())
-    auto_lock_timer_->Stop();
 }
 
 void Browser::OnLoginResponseParseFailure(const std::string& error) {
@@ -3879,8 +3884,6 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
-  if (auto_lock_timer_.get())
-    auto_lock_timer_->Stop();
 }
 
 void Browser::OnLoginFailure(const base::string16& message) {
@@ -3907,8 +3910,6 @@ void Browser::OnLoginFailure(const base::string16& message) {
 #endif
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
-  if (auto_lock_timer_.get())
-    auto_lock_timer_->Stop();
 }
 
 void Browser::OnLoginSuccess(const base::string16& name,
@@ -3933,17 +3934,6 @@ void Browser::OnLoginSuccess(const base::string16& name,
   NotifyIEFunctionControl();
 #endif
   UpdateStrategy();
-
-  int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
-  if (auto_lock_timer_.get()) {
-    base::TimeDelta delay_time = base::TimeDelta::FromSeconds(10);
-    auto_lock_timer_->Stop();
-    if (time > 0)
-      auto_lock_timer_->Start(
-          FROM_HERE, delay_time,
-          base::Bind(&Browser::OnAutoLockScreenTimer,
-                     crypto_ua_factory_.GetWeakPtr(), time));
-  }
 
   AppAutoUpdate();
   SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home pages
@@ -4037,6 +4027,11 @@ void Browser::OnLoginSuccess(const base::string16& name,
       base::Bind(&Browser::GetManagerLoginForms, base::Unretained(this),
                  form_list_string, username, password));
   // YSP+ } /*passwords AD manager*/
+  int64_t time = YSPLoginManager::GetInstance()->GetLockScreenTime();
+  if (time / 60 == 0) {
+    time = kDefaultLockScreenTime;
+  }
+  ResetLockScreenTimer(time);
 }
 
 void Browser::OnLogout() {
@@ -4086,12 +4081,11 @@ void Browser::OnLogout() {
   // ysp+ }
   content::RenderWidgetHostImpl::setDisableDrag(false);  // YSP+ { disable drag
                                                          // }
-  if (auto_lock_timer_.get())
-    auto_lock_timer_->Stop();
 #if defined(WATERMARK) && !defined(IE_REDCORE)
   std::vector<base::string16> str;
   SetWatermarkString(str, 0x00000000, 0);
 #endif
+  ResetLockScreenTimer(kDefaultLockScreenTime);
 }
 
 #ifdef IE_REDCORE
