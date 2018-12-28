@@ -973,6 +973,7 @@ class Browser : public TabStripModelObserver,
 
 #ifdef REDCORE
   void OnAutoLockScreenTimer(int64_t timeOutSec);
+  void ResetLockScreenTimer(int64_t time);
 #ifdef IE_REDCORE
   void GetKernelFromUrl(
       const GURL& host,
@@ -1138,6 +1139,7 @@ class Browser : public TabStripModelObserver,
   std::unique_ptr<ScopedKeepAlive> keep_alive_;
 
 #if defined(REDCORE)
+  const int64_t kDefaultLockScreenTime = 600;
   bool first_create_;
   YSPLockStatus lock_status_;
   std::unique_ptr<base::RepeatingTimer> auto_lock_timer_;
