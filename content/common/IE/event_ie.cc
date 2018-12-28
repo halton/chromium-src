@@ -178,8 +178,8 @@ HRESULT Event::GetTypeInfoCount(UINT* pctinfo) {
   return S_OK;
 }
 
-HRESULT Event::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo** ppTInfo) {
-  *ppTInfo = NULL;
+HRESULT Event::GetTypeInfo(UINT t_Info, LCID lcid, ITypeInfo** ppt_Info) {
+  *ppt_Info = NULL;
   return E_NOTIMPL;
 }
 
@@ -191,18 +191,21 @@ HRESULT Event::GetIDsOfNames(REFIID riid,
   return S_OK;
 }
 
-HRESULT Event::Invoke(DISPID dispIdMember,
+HRESULT Event::Invoke(DISPID disp_id,
                       REFIID riid,
                       LCID lcid,
-                      WORD wFlags,
-                      DISPPARAMS* pDispParams,
-                      VARIANT* pVarResult,
-                      EXCEPINFO* pExcepInfo,
-                      UINT* puArgErr) {
-  switch (dispIdMember) {
+                      WORD flags,
+                      DISPPARAMS* disp_params,
+                      VARIANT* var_result,
+                      EXCEPINFO* excep_Info,
+                      UINT* arg_err) {
+  switch (disp_id) {
     case DISPID_NAVIGATECOMPLETE2: {
-      if (pDispParams->rgvarg[0].vt == (VT_VARIANT | VT_BYREF)) {
-        variant_t variant = *(pDispParams->rgvarg[0].pvarVal);
+      if (disp_params->cArgs >= 2 && disp_params->rgvarg[1].vt == VT_DISPATCH)
+        SetCustomDoc(disp_params->rgvarg[1].pdispVal);
+
+      if (disp_params->rgvarg[0].vt == (VT_VARIANT | VT_BYREF)) {
+        variant_t variant = *(disp_params->rgvarg[0].pvarVal);
         if (variant.vt == VT_BSTR) {
           bstr_t url = variant.bstrVal;
           bool find_url = false;
@@ -223,7 +226,7 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       break;
     }
     case DISPID_BEFORENAVIGATE2: {
-      if (pDispParams->rgvarg[5].vt == (VT_VARIANT | VT_BYREF)) {
+      if (disp_params->rgvarg[5].vt == (VT_VARIANT | VT_BYREF)) {
         // if (pDispParams->rgvarg[4].vt == (VT_VARIANT | VT_BYREF))
         //{
         //  VARIANT* vv=NULL;
@@ -237,7 +240,7 @@ HRESULT Event::Invoke(DISPID dispIdMember,
         //  }
         //}
 
-        VARIANT* var_temp = (VARIANT*)pDispParams->rgvarg[5].byref;
+        VARIANT* var_temp = (VARIANT*)disp_params->rgvarg[5].byref;
         bstr_t url = var_temp->bstrVal;
         before_navigate_url_list_.push_back(url.GetBSTR());
         GURL gurl(url.GetBSTR());
@@ -249,8 +252,8 @@ HRESULT Event::Invoke(DISPID dispIdMember,
             navigate_new_url = true;
           cancel = delegate_->OnBeforeNavigate(url.GetBSTR(), navigate_new_url);
           if (cancel) {
-            ((VARIANT*)pDispParams->rgvarg[0].byref)->vt = VT_BOOL;
-            ((VARIANT*)pDispParams->rgvarg[0].byref)->boolVal = VARIANT_TRUE;
+            ((VARIANT*)disp_params->rgvarg[0].byref)->vt = VT_BOOL;
+            ((VARIANT*)disp_params->rgvarg[0].byref)->boolVal = VARIANT_TRUE;
           }
         }
         click_url_ = L"";
@@ -303,13 +306,13 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       }
     } break;
     case DISPID_DOCUMENTCOMPLETE: {
-      if (pDispParams->rgvarg[1].vt == VT_DISPATCH) {
-        IDispatch* dispatch = pDispParams->rgvarg[1].pdispVal;
+      if (disp_params->rgvarg[1].vt == VT_DISPATCH) {
+        IDispatch* dispatch = disp_params->rgvarg[1].pdispVal;
         if (dispatch == web_browser_) {
-          if (pDispParams->rgvarg[0].vt !=
+          if (disp_params->rgvarg[0].vt !=
               (VT_VARIANT | VT_BYREF))  // Delegate handler
             return S_OK;
-          VARIANT* var_temp = (VARIANT*)pDispParams->rgvarg[0].byref;
+          VARIANT* var_temp = (VARIANT*)disp_params->rgvarg[0].byref;
           bstr_t url = var_temp->bstrVal;
           if (url.GetBSTR())
             OnFinishLoad(url.GetBSTR());
@@ -317,7 +320,7 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       }
     } break;
     case DISPID_TITLECHANGE: {
-      if (pDispParams->rgvarg[0].vt == VT_BSTR) {
+      if (disp_params->rgvarg[0].vt == VT_BSTR) {
         //为了解决chrome49中
         // IE无法直接在Chrome里创建子窗口的问题，先让IE建立桌面的子窗口，待窗口创建完成后再将IE设为Chrome的子窗口。
         HWND parent_handle = ::GetParent(child_handle_);
@@ -358,7 +361,7 @@ HRESULT Event::Invoke(DISPID dispIdMember,
           }
         }
 
-        bstr_t title = pDispParams->rgvarg[0].bstrVal;
+        bstr_t title = disp_params->rgvarg[0].bstrVal;
         if (delegate_) {
           delegate_->OnTitleChange(title.GetBSTR());
         }
@@ -366,13 +369,13 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       break;
     }
     case DISPID_NEWWINDOW3: {
-      if (pDispParams->rgvarg[0].vt == (VT_BSTR)) {
-        bstr_t url = pDispParams->rgvarg[0].bstrVal;
+      if (disp_params->rgvarg[0].vt == (VT_BSTR)) {
+        bstr_t url = disp_params->rgvarg[0].bstrVal;
         // nwmf == 0x00000006 (NWMF_USERINITED | NWMF_FIRST_USERINITED)
         // 是点击链接打开新窗口 nwmf == 0x00010086
         // 是从右键菜单中选择在新窗口打开 nwmf == 0x00040004 目前已知是弹出窗口
         long flag = ie::NewWindowFlag::TRANSITION;
-        long nwmf = pDispParams->rgvarg[2].intVal;
+        long nwmf = disp_params->rgvarg[2].intVal;
         if (((nwmf & 0x40000) == 0x40000 && (nwmf & 0x20000) == 0) ||
             (nwmf & 0x10000) == 0x10000)
           flag = ie::NewWindowFlag::POPUP;
@@ -387,19 +390,19 @@ HRESULT Event::Invoke(DISPID dispIdMember,
           bool cancel =
               delegate_->OnLoadUrlNewWnd(url.GetBSTR(), flag, &dispatch);
           if (dispatch) {
-            *(pDispParams->rgvarg[4].ppdispVal) = dispatch;
+            *(disp_params->rgvarg[4].ppdispVal) = dispatch;
           }
           if (cancel) {
-            pDispParams->rgvarg[3].vt = VT_BOOL | VT_BYREF;
-            *(pDispParams->rgvarg[3].pboolVal) = VARIANT_TRUE;
+            disp_params->rgvarg[3].vt = VT_BOOL | VT_BYREF;
+            *(disp_params->rgvarg[3].pboolVal) = VARIANT_TRUE;
           }
         }
       }
       break;
     }
     case DISPID_WINDOWSETLEFT: {
-      if (delegate_ && pDispParams->rgvarg[0].vt == VT_I4) {
-        int left = pDispParams->rgvarg[0].intVal;
+      if (delegate_ && disp_params->rgvarg[0].vt == VT_I4) {
+        int left = disp_params->rgvarg[0].intVal;
         RECT rc;
         delegate_->OnGetMainWndPos(&rc);
         int width = rc.right - rc.left;
@@ -408,8 +411,8 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       break;
     }
     case DISPID_WINDOWSETTOP: {
-      if (delegate_ && pDispParams->rgvarg[0].vt == VT_I4) {
-        int top = pDispParams->rgvarg[0].intVal;
+      if (delegate_ && disp_params->rgvarg[0].vt == VT_I4) {
+        int top = disp_params->rgvarg[0].intVal;
         RECT rc;
         delegate_->OnGetMainWndPos(&rc);
         int height = rc.bottom - rc.top;
@@ -418,8 +421,8 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       break;
     }
     case DISPID_WINDOWSETWIDTH: {
-      if (delegate_ && pDispParams->rgvarg[0].vt == VT_I4) {
-        int width = pDispParams->rgvarg[0].intVal;
+      if (delegate_ && disp_params->rgvarg[0].vt == VT_I4) {
+        int width = disp_params->rgvarg[0].intVal;
         RECT rc;
 
         GetWindowRect(parent_handle_, &rc);
@@ -436,8 +439,8 @@ HRESULT Event::Invoke(DISPID dispIdMember,
       break;
     }
     case DISPID_WINDOWSETHEIGHT: {
-      if (delegate_ && pDispParams->rgvarg[0].vt == VT_I4) {
-        int height = pDispParams->rgvarg[0].intVal;
+      if (delegate_ && disp_params->rgvarg[0].vt == VT_I4) {
+        int height = disp_params->rgvarg[0].intVal;
         RECT rc;
 
         GetWindowRect(parent_handle_, &rc);
@@ -771,6 +774,32 @@ void Event::GetFaviconUrls(const std::string& page_url,
   }
 }
 
+void Event::SetCustomDoc(LPDISPATCH lp_disp) {
+  if (lp_disp == NULL)
+    return;
+
+  IWebBrowser2* web_browser2 = NULL;
+  HRESULT hr = lp_disp->QueryInterface(IID_IWebBrowser2, (void**)&web_browser2);
+
+  if (SUCCEEDED(hr) && web_browser2) {
+    IDispatch* doc = NULL;
+    hr = web_browser2->get_Document(&doc);
+
+    if (SUCCEEDED(hr) && doc) {
+      ICustomDoc* cust_doc = NULL;
+      hr = doc->QueryInterface(IID_ICustomDoc, (void**)&cust_doc);
+      if (SUCCEEDED(hr) && cust_doc != NULL) {
+        cust_doc->SetUIHandler(doc_host_ui_handler_ie_);
+        cust_doc->Release();
+      }
+
+      doc->Release();
+    }
+
+    web_browser2->Release();
+  }
+}
+
 DocumentEventIe::DocumentEventIe(Event* event)
     : com_ref_count_(0),
       event_ie_(event),
@@ -824,10 +853,10 @@ HRESULT DocumentEventIe::GetTypeInfoCount(UINT* pctinfo) {
   return S_OK;
 }
 
-HRESULT DocumentEventIe::GetTypeInfo(UINT iTInfo,
+HRESULT DocumentEventIe::GetTypeInfo(UINT t_Info,
                                      LCID lcid,
-                                     ITypeInfo** ppTInfo) {
-  *ppTInfo = NULL;
+                                     ITypeInfo** ppt_info) {
+  *ppt_info = NULL;
   return E_NOTIMPL;
 }
 
@@ -839,17 +868,18 @@ HRESULT DocumentEventIe::GetIDsOfNames(REFIID riid,
   return S_OK;
 }
 
-HRESULT DocumentEventIe::Invoke(DISPID dispIdMember,
-                                REFIID riid,
-                                LCID lcid,
-                                WORD wFlags,
-                                DISPPARAMS* pDispParams,
-                                VARIANT* pVarResult,
-                                EXCEPINFO* pExcepInfo,
-                                UINT* puArgErr) {
-  if (dispIdMember == DISPID_HTMLDOCUMENTEVENTS2_ONCLICK) {
+HRESULT
+DocumentEventIe::Invoke(DISPID disp_id,
+                        REFIID riid,
+                        LCID lcid,
+                        WORD flags,
+                        DISPPARAMS* disp_params,
+                        VARIANT* var_result,
+                        EXCEPINFO* excep_Info,
+                        UINT* arg_err) {
+  if (disp_id == DISPID_HTMLDOCUMENTEVENTS2_ONCLICK) {
     IHTMLEventObj* event_obj = NULL;
-    IDispatch* dispatch = pDispParams->rgvarg[0].pdispVal;
+    IDispatch* dispatch = disp_params->rgvarg[0].pdispVal;
     dispatch->QueryInterface(IID_IHTMLEventObj, (void**)&event_obj);
     IHTMLElement* element = NULL;
     event_obj->get_srcElement(&element);
@@ -873,9 +903,9 @@ HRESULT DocumentEventIe::Invoke(DISPID dispIdMember,
       element_temp->Release();
     }
     event_obj->Release();
-  } else if (dispIdMember == DISPID_HTMLDOCUMENTEVENTS2_ONKEYPRESS) {
+  } else if (disp_id == DISPID_HTMLDOCUMENTEVENTS2_ONKEYPRESS) {
     IHTMLEventObj* event_obj = NULL;
-    IDispatch* dispatch = pDispParams->rgvarg[0].pdispVal;
+    IDispatch* dispatch = disp_params->rgvarg[0].pdispVal;
     dispatch->QueryInterface(IID_IHTMLEventObj, (void**)&event_obj);
     if (event_obj) {
       long key_code = 0;
@@ -887,7 +917,7 @@ HRESULT DocumentEventIe::Invoke(DISPID dispIdMember,
       }
       event_obj->Release();
     }
-  } else if (dispIdMember == DISPID_HTMLDOCUMENTEVENTS2_ONREADYSTATECHANGE) {
+  } else if (disp_id == DISPID_HTMLDOCUMENTEVENTS2_ONREADYSTATECHANGE) {
     // 解决刷新没有DISPID_DOCUMENTCOMPLETE事件问题，在此消息中判断readyState判断是否刷新完成
     if (web_browser2_ && refresh_flag_ && event_ie_) {
       CComPtr<IDispatch> dispatch = NULL;

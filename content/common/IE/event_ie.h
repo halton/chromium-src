@@ -73,21 +73,21 @@ class Event : public DWebBrowserEvents2 {
 
   /* [local] */ HRESULT STDMETHODCALLTYPE Invoke(
       /* [annotation][in] */
-      _In_ DISPID dispIdMember,
+      _In_ DISPID disp_id,
       /* [annotation][in] */
       _In_ REFIID riid,
       /* [annotation][in] */
       _In_ LCID lcid,
       /* [annotation][in] */
-      _In_ WORD wFlags,
+      _In_ WORD flags,
       /* [annotation][out][in] */
-      _In_ DISPPARAMS* pDispParams,
+      _In_ DISPPARAMS* disp_params,
       /* [annotation][out] */
-      _Out_opt_ VARIANT* pVarResult,
+      _Out_opt_ VARIANT* var_result,
       /* [annotation][out] */
-      _Out_opt_ EXCEPINFO* pExcepInfo,
+      _Out_opt_ EXCEPINFO* excep_Info,
       /* [annotation][out] */
-      _Out_opt_ UINT* puArgErr) override;
+      _Out_opt_ UINT* arg_err) override;
 
  public:
   void SetWebBrowser(IWebBrowser2* web);
@@ -103,11 +103,14 @@ class Event : public DWebBrowserEvents2 {
   void OnFinishLoad(const std::wstring& url);
   void OnClickHtmlElement(CComPtr<IHTMLElement> click_element);
   void OnEnterKeyPressedHtmlElement(CComPtr<IHTMLElement> click_element);
-  void ListenDocmentEvent(IHTMLDocument2* pDoc2);
+  void ListenDocmentEvent(IHTMLDocument2* document2);
   void ResetDocHostUIHandler();  // 恢复IE内核创建的IDocHostUIHandler接口
  private:
   void GetFaviconUrls(const std::string& page_url,
                       std::vector<std::string>& favicon_urls);
+
+ private:
+  void SetCustomDoc(LPDISPATCH lp_disp);
 
  private:
   volatile long com_ref_count_;
@@ -158,9 +161,9 @@ class DocumentEventIe : public HTMLDocumentEvents2 {
       /* [out] */ __RPC__out UINT* pctinfo) override;
 
   HRESULT STDMETHODCALLTYPE GetTypeInfo(
-      /* [in] */ UINT iTInfo,
+      /* [in] */ UINT t_info,
       /* [in] */ LCID lcid,
-      /* [out] */ __RPC__deref_out_opt ITypeInfo** ppTInfo) override;
+      /* [out] */ __RPC__deref_out_opt ITypeInfo** ppt_info) override;
 
   HRESULT STDMETHODCALLTYPE GetIDsOfNames(
       /* [in] */ __RPC__in REFIID riid,
@@ -172,21 +175,21 @@ class DocumentEventIe : public HTMLDocumentEvents2 {
 
   /* [local] */ HRESULT STDMETHODCALLTYPE Invoke(
       /* [annotation][in] */
-      _In_ DISPID dispIdMember,
+      _In_ DISPID disp_id,
       /* [annotation][in] */
       _In_ REFIID riid,
       /* [annotation][in] */
       _In_ LCID lcid,
       /* [annotation][in] */
-      _In_ WORD wFlags,
+      _In_ WORD flags,
       /* [annotation][out][in] */
-      _In_ DISPPARAMS* pDispParams,
+      _In_ DISPPARAMS* disp_params,
       /* [annotation][out] */
-      _Out_opt_ VARIANT* pVarResult,
+      _Out_opt_ VARIANT* var_result,
       /* [annotation][out] */
-      _Out_opt_ EXCEPINFO* pExcepInfo,
+      _Out_opt_ EXCEPINFO* excep_Info,
       /* [annotation][out] */
-      _Out_opt_ UINT* puArgErr) override;
+      _Out_opt_ UINT* arg_err) override;
 
  private:
   volatile long com_ref_count_;
