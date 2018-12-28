@@ -2359,6 +2359,10 @@ int TabStrip::GenerateIdealBoundsForPinnedTabs(int* first_non_pinned_index) {
 }
 
 int TabStrip::GetTabAreaWidth() const {
+#ifdef REDCORE
+  return width() - GetFrameGrabWidth() - new_tab_button_bounds_.width() -
+         TabToFollowingNewTabButtonSpacing() - 35;
+#endif
   return width() - GetFrameGrabWidth() - new_tab_button_bounds_.width() -
          TabToFollowingNewTabButtonSpacing();
 }

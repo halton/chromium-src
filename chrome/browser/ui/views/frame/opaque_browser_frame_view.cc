@@ -774,6 +774,8 @@ views::ImageButton* OpaqueBrowserFrameView::InitWindowCaptionButton(
         tp->GetImageSkiaNamed(IDR_THEME_WINDOW_CONTROL_BACKGROUND),
         tp->GetImageSkiaNamed(mask_image_id));
   }
+  button->SetTooltipText(
+      l10n_util::GetStringUTF16(accessibility_string_id));
   button->SetAccessibleName(
       l10n_util::GetStringUTF16(accessibility_string_id));
   button->set_id(view_id);
