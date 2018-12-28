@@ -3723,6 +3723,7 @@ void Browser::OnAutoLockScreenTimer(int64_t time_out_sec) {
 
 void Browser::OnConfigDataUpdated(const std::string& type,
                                   const std::string& data) {
+  DLOG(INFO) << "type: " + type + " data: " + data;
   if (type == "pc") {
     SetStartupAndHomePages();  // TODO (matianzhi): YSP+ { startup and home
                                // pages }
