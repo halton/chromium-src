@@ -305,6 +305,7 @@ HRESULT DocHostUIHandler::Exec(const GUID* guid_cmd_group,
 }
 
 void DocHostUIHandler::EnableMouseRightButton(bool enable) {
+  LOG(INFO) << "EnableMouseRightButton : " << enable;
   mouse_right_button_enabled_ = enable;
 }
 
