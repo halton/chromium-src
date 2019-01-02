@@ -24,19 +24,19 @@ DWORD BrowserProcess::register_ = 0;
 BrowserProcess::BrowserProcess()
     : ie_browser_(nullptr),
       host_app_(nullptr),
-      should_be_show_(VARIANT_FALSE),
-      ie_handle_(nullptr) {}
+      ie_handle_(nullptr),
+      should_be_show_(VARIANT_FALSE) {
+}
 
-BrowserProcess::~BrowserProcess() {}
+BrowserProcess::~BrowserProcess() {
+}
 
 STDMETHODIMP BrowserProcess::CreateBrowser(long window_handle,
                                            int browser_emulation,
                                            VARIANT_BOOL is_new_window) {
-  bool is_new = false;
-  if (is_new_window == VARIANT_TRUE)
-    is_new = true;
-  ie_browser_ =
-      new WebBrowser((HWND)window_handle, this, browser_emulation, is_new);
+  HWND handle = static_cast<HWND>(LongToPtr(window_handle));
+  ie_browser_ = new WebBrowser(handle, this, browser_emulation,
+                               is_new_window == VARIANT_TRUE);
   return S_OK;
 }
 
