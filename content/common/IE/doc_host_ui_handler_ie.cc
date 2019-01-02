@@ -573,7 +573,7 @@ HRESULT ServiceProvider::QueryService(
   return result;
 }
 
-const LPOLESTR oBindCtxBSCBObjectParam = L"_BSCB_Holder_";
+const LPOLESTR oBindCtxBSCBObjectParam = const_cast<LPOLESTR>(L"_BSCB_Holder_");
 
 DownLoadManager::DownLoadManager()
     : com_ref_count_(0),

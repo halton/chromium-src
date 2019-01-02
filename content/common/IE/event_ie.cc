@@ -532,7 +532,7 @@ HRESULT Event::ExcuteJs(const std::wstring& code, variant_t* result) {
   if (html_dispatch_ == NULL)
     return E_UNEXPECTED;
 
-  LPOLESTR ss = L"eval";
+  LPOLESTR ss = const_cast<LPOLESTR>(L"eval");
   DISPID id = -1;
   HRESULT result_tmp = html_dispatch_->GetIDsOfNames(
       IID_NULL, &ss, 1, LOCALE_SYSTEM_DEFAULT, &id);
@@ -700,7 +700,7 @@ void Event::GetFaviconUrls(const std::string& page_url,
       break;
 
     CComPtr<IHTMLElementCollection> link_elements = NULL;
-    result = doc3->getElementsByTagName(L"link", &link_elements);
+    result = doc3->getElementsByTagName(const_cast<BSTR>(L"link"), &link_elements);
     if (!SUCCEEDED(result) || link_elements == NULL)
       break;
 
@@ -890,7 +890,7 @@ DocumentEventIe::Invoke(DISPID disp_id,
       if (_bstr_t("a") == tag_name || _bstr_t("A") == tag_name) {
         // 已找到 "a" 标签，在这里写相应代码
         _variant_t href_variant;
-        element->getAttribute(L"href", 0, &href_variant);
+        element->getAttribute(const_cast<BSTR>(L"href"), 0, &href_variant);
         // event_obj->put_returnValue(_variant_t(VARIANT_TRUE, VT_BOOL));
         if (event_ie_ && href_variant.vt == VT_BSTR && href_variant.bstrVal) {
           event_ie_->SetClickUrl(href_variant.bstrVal);
