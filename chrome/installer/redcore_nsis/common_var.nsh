@@ -54,7 +54,6 @@ Function ExecuteInstall
 FunctionEnd
 
 Function InstallComplete
-  Delete "$INSTDIR\mini_installer.exe"
   Delete "$SMPROGRAMS\$(ProductName).lnk"
   Delete "$SMPROGRAMS\enterplorer.lnk"
   Delete "$SMPROGRAMS\$(ProductName)\$(ProductName).lnk"

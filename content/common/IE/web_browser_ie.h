@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include <Windows.h>
+
 #include "content/common/IE/doc_host_ui_handler_ie.h"
 #include "content/common/IE/event_ie.h"
 #include "content/common/IE/version_ie.h"
@@ -303,8 +305,8 @@ class WebBrowser : public IOleClientSite,
   bool save_file_enabled_;
   std::map<std::wstring, DWORD> auto_login_times_;
 
-  static WNDPROC old_window_proc_;
-  static WNDPROC old_control_proc_;
+  static LONG_PTR old_window_proc_;
+  static LONG_PTR old_control_proc_;
   static HHOOK next_hook_;
   static WebBrowser* self_;
   static IOleInPlaceActiveObject* ole_in_place_active_object_;
