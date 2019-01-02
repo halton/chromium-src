@@ -189,11 +189,7 @@ const char* YSPAccountView::GetClassName() const {
 
 bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
   // TODO (LIUWEI): work around when personal settings are not ready
-  std::string url_str = "chrome://newtab";
-  if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
-    url_str = "chrome://me";
-  }
-  const GURL url(url_str);
+  const GURL url("chrome://me");
   const content::Referrer ref(url, blink::kWebReferrerPolicyDefault);
   content::OpenURLParams param(url,
                                ref,

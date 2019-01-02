@@ -234,11 +234,12 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   net::CookieList cookie_list_temp_;
   bool is_navigate_stopped_;
   bool need_fire_unload_event_;
-  bool is_new_window_;  // 是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
+  // 是否是由IE的DISPID_NEWWINDOW3事件创建的WebContent
+  bool is_new_window_;
   std::wstring query_dns_json_string_;
-  base::WeakPtrFactory<WebContentsIE> self_;
   base::WeakPtrFactory<WebContentsIE> weak_factory_for_io_;
-  
+  base::WeakPtrFactory<WebContentsIE> self_;
+
   DISALLOW_COPY_AND_ASSIGN(WebContentsIE);
 };
 

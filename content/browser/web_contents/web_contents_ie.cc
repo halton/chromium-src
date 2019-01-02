@@ -179,8 +179,8 @@ WebContentsIE::WebContentsIE(BrowserContext* browser_context)
       is_navigate_stopped_(false),
       need_fire_unload_event_(true),
       is_new_window_(false),
-      weak_factory_for_io_(this),
       query_dns_json_string_(L""),
+      weak_factory_for_io_(this),
       self_(this) {
   cookie_event_ = CreateEvent(NULL, TRUE, FALSE, NULL);
   ResetEvent(cookie_event_);
