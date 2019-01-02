@@ -270,6 +270,10 @@ void YSPLockScreenView::LockInternal() {
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
   if ((password_text_.at(0)->text()).empty()) {
+    views::FocusManager* focus_manager = browser_view_->GetFocusManager();
+    if (focus_manager) {
+      focus_manager->ClearFocus();
+    }
     password_text_.at(0)->RequestFocus();
   }
   DLOG(INFO) << "request focus";
