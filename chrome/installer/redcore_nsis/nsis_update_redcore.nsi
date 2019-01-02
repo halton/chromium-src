@@ -61,6 +61,7 @@ onError:
 onOK:
   call ExecuteInstall
 onEnd:
+  Delete "$INSTDIR\mini_installer.exe"
   call InstallComplete
   ${LogSetOff}
   SetAutoClose true

@@ -305,6 +305,7 @@ HRESULT DocHostUIHandler::Exec(const GUID* guid_cmd_group,
 }
 
 void DocHostUIHandler::EnableMouseRightButton(bool enable) {
+  LOG(INFO) << "EnableMouseRightButton : " << enable;
   mouse_right_button_enabled_ = enable;
 }
 
@@ -572,7 +573,7 @@ HRESULT ServiceProvider::QueryService(
   return result;
 }
 
-const LPOLESTR oBindCtxBSCBObjectParam = L"_BSCB_Holder_";
+const LPOLESTR oBindCtxBSCBObjectParam = const_cast<LPOLESTR>(L"_BSCB_Holder_");
 
 DownLoadManager::DownLoadManager()
     : com_ref_count_(0),

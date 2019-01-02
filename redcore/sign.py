@@ -9,8 +9,8 @@ from build_utils import execCmd
 from build_utils import getBuildType
 
 parser = argparse.ArgumentParser(description='manual to this script')
-parser.add_argument('--working-dir', type=str, default = "")
-parser.add_argument('--product-name', type=str, default = "")
+parser.add_argument('--working-dir', type=str, default = "..")
+parser.add_argument('--product-name', type=str, default = "70_dev")
 
 args = parser.parse_args()
 
@@ -215,39 +215,54 @@ def getRedcoreVersion():
         build = int(line[9:])
   return "%s.%s.%s.%s" % (major, codeVersion, minor, build)
 
+class MacOperation:
+  def __init__(self, workingDir):
+    self._workingDir = workingDir       
+    self._appDir = os.path.join(self._workingDir, "out", "Release", "Enterplorer.app")
+  def signMacApp(self):
+    if not os.path.exists(self._appDir):
+      self._appDir = os.path.join(_workingDir, "out", "Release", "Redcore.app")
+      if not os.path.exists(self._appDir):
+        print "No known app directory exist, please check the building process!"
+        os._exit(-1)
+    
+    print "app dir is: %s" % self._appDir   
+    codeSignatureDir = os.path.join(self._appDir, "Contents", "_CodeSignature") 
+    signMacLine = "codesign -f -s \"Developer ID Application: Allmobilize Inc. (FD9594D6YV)\" %s\
+      " % self._appDir
+    print "execute signcode: %s" % signMacLine
+    execCmd(signMacLine)
 
-def signMacApp():
-  signMacLine = "codesign -s \"Developer ID Application: Allmobilize Inc. (FD9594D6YV)\" %s\
-    " % (os.path.join(_WORKING_DIR, "out", "Release", "Enterplorer.app"))
-  execCmd(signMacLine)
-
-
-def dmgPackage():
-  releaseDir = os.path.join(_WORKING_DIR, "out", "Release")
-  redcoreOutDir = os.path.join(releaseDir, "redcore_out")
-  if os.path.exists(redcoreOutDir):
-    shutil.rmtree(redcoreOutDir)
-  os.makedirs(redcoreOutDir)
-  shutil.copytree(os.path.join(releaseDir, "Enterplorer.app"), 
-    os.path.join(redcoreOutDir, "Enterplorer.app"))
+  def dmgPackage(self):
+    releaseDir = os.path.join(_WORKING_DIR, "out", "Release")
+    redcoreOutDir = os.path.join(releaseDir, "redcore_out")
+    if os.path.exists(redcoreOutDir):
+      shutil.rmtree(redcoreOutDir)
+    os.makedirs(redcoreOutDir)
+    shutil.copytree(os.path.join(releaseDir, "Enterplorer.app"), 
+    os.path.join(redcoreOutDir, "Enterplorer.app"), True)
   # 创建软链接
-  execCmd("ln -s /Applications %s" % (redcoreOutDir))
+    execCmd("ln -s /Applications %s" % (redcoreOutDir))
   # 使用系统工具打dmg
-  installNamePerfix = "install_enterplorer."
-  if not _IS_MASTER_BRANCH:
-    installNamePerfix = installNamePerfix.replace("enterplorer", _PRODUCT_NAME)
-  packageLine = "printf \"enterplorer\" | hdiutil create -srcfolder %s -stdinpass %s\
-    " % (redcoreOutDir,os.path.join(redcoreOutDir, installNamePerfix + getRedcoreVersion() + ".dmg"))
-  execCmd(packageLine)
+    installNamePerfix = "install_enterplorer."
+    if not _IS_MASTER_BRANCH:
+      installNamePerfix = installNamePerfix.replace("enterplorer", _PRODUCT_NAME)
+    packageLine = "printf \"enterplorer\" | hdiutil create -srcfolder %s -stdinpass %s\
+      " % (redcoreOutDir,os.path.join(redcoreOutDir, installNamePerfix + getRedcoreVersion() + ".dmg"))
+    execCmd(packageLine)
 
+def signAndPackage():
+  if platform.system() == "Windows":
+    firstSignWithNewKey()
+    # firstSignWithOldkey()
+    nsisPackage()
+    finalSignWithNewKey()
+    # finalSignWithOldKey()
+    renameExe()
+  elif platform.system() == "Darwin":
+    mac = MacOperation(_WORKING_DIR)    
+    mac.signMacApp()
+    mac.dmgPackage()
 
-if platform.system() == "Windows":
-  firstSignWithNewKey()
-  # firstSignWithOldkey()
-  nsisPackage()
-  finalSignWithNewKey()
-  # finalSignWithOldKey()
-  renameExe()
-elif platform.system() == "Darwin":
-  signMacApp()
-  dmgPackage()
+if __name__ == '__main__':
+  signAndPackage()

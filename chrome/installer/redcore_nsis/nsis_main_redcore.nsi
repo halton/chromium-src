@@ -305,6 +305,8 @@ Function InstallBgTimer
   GetFunctionAddress $0 MainInstallLogic
   BgWorker::CallAndWait
 
+  call InstallComplete
+
   GetFunctionAddress $0 WriteUninstaller
   BgWorker::CallAndWait
 
@@ -484,7 +486,7 @@ Function MainInstallLogic
     IfErrors 0 +3
     ${LogText} "Copy GM files faild"
   onEnd:
-    call InstallComplete
+    Delete "$INSTDIR\mini_installer.exe"
     ${LogSetOff}
     SetAutoClose true
 FunctionEnd

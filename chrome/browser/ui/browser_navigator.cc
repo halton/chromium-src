@@ -441,6 +441,7 @@ std::unique_ptr<content::WebContents> CreateTargetContents(
   return target_contents;
 }
 
+#if !defined(IE_REDCORE)
 // If a prerendered page exists for |url|, then replace
 // params.contents_being_navigated with it. When this occurs, the new page is
 // stored in params.replaced_contents.
@@ -456,6 +457,7 @@ bool SwapInPrerender(const GURL& url,
   return prerender_manager &&
       prerender_manager->MaybeUsePrerenderedPage(url, params);
 }
+#endif  // !defined(IE_REDCORE)
 
 }  // namespace
 
@@ -637,7 +639,7 @@ void Navigate(NavigateParams* params) {
       DCHECK(params->source_contents);
       contents_to_navigate_or_insert = params->source_contents;
 
-#if !defined(IE_REDCORE)  // ysp {+
+#if !defined(IE_REDCORE)
       prerender::PrerenderManager::Params prerender_params(
           params, params->source_contents);
 
@@ -646,7 +648,7 @@ void Navigate(NavigateParams* params) {
       swapped_in_prerender = SwapInPrerender(params->url, &prerender_params);
       if (swapped_in_prerender)
         contents_to_navigate_or_insert = prerender_params.replaced_contents;
-#endif  // ysp {+
+#endif  // !defined(IE_REDCORE)
     }
 
     if (user_initiated)

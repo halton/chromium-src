@@ -72,9 +72,14 @@ HMODULE WINAPI DevToolsHost::HookLoadLibraryW(LPCTSTR function_name) {
 
 DevToolsHost::DevToolsHost(IWebBrowser2* web_browser2)
     : com_ref_count_(0), is_open_(false), web_browser2_(web_browser2) {
+// Disable -Wmicrosoft-cast for MH_xxx calls
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmicrosoft-cast"
   MH_CreateHookApi(L"Kernel32", "LoadLibraryW", &HookLoadLibraryW,
                    (LPVOID*)&s_load_library_function);
   MH_EnableHook(&LoadLibraryW);
+#pragma GCC diagnostic push
+
   // IE 11
   CoCreateInstance(CLSID_IEDTExplorerBar, NULL, CLSCTX_INPROC_SERVER,
                    IID_DevTools, (void**)&devtools_);
