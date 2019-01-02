@@ -256,7 +256,11 @@ std::wstring CookieToJson(
   root_dict.SetString("url", cookie.first);
   base::ListValue* list = new base::ListValue;
   list->AppendStrings(cookie.second);
-  root_dict.Set("cookies", std::move(std::unique_ptr<base::ListValue>(list)));
+
+  std::unique_ptr<base::ListValue> tmp_list;
+  tmp_list = std::unique_ptr<base::ListValue>(list);
+  root_dict.Set("cookies", std::move((tmp_list)));
+
   std::string buffer = "";
   base::JSONWriter::Write(root_dict, &buffer);
   std::wstring json = base::UTF8ToUTF16(buffer);
@@ -285,12 +289,12 @@ BOOL WINAPI DetourHttpQueryInfoW(HINTERNET request,
     if (fpHttpQueryInfoW(request, HTTP_QUERY_RAW_HEADERS_CRLF, (LPVOID)buff,
                          &length, NULL) == FALSE &&
         GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-      buff = new byte[length + 1];
       length = sizeof(byte) * (length + 1);
+      buff = malloc(length);
       memset(buff, 0, length);
       DetourHttpQueryInfoW(request, HTTP_QUERY_RAW_HEADERS_CRLF, buff, &length,
                            NULL);
-      delete[] buff;
+      free(buff);
     }
   } else if (info_level == HTTP_QUERY_RAW_HEADERS_CRLF) {
     std::wstring buff = static_cast<wchar_t*>(buffer);
@@ -347,12 +351,12 @@ BOOL WINAPI DetourHttpQueryInfoA(HINTERNET request,
     if (fpHttpQueryInfoA(request, HTTP_QUERY_RAW_HEADERS_CRLF, (LPVOID)buff,
                          &length, NULL) == FALSE &&
         GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-      buff = new byte[length + 1];
       length = sizeof(byte) * (length + 1);
+      buff = malloc(length);
       memset(buff, 0, length);
       DetourHttpQueryInfoA(request, HTTP_QUERY_RAW_HEADERS_CRLF, buff, &length,
                            NULL);
-      delete[] buff;
+      free(buff);
     }
   } else if (info_level == HTTP_QUERY_RAW_HEADERS_CRLF) {
     std::wstring buff = base::ASCIIToUTF16(static_cast<char*>(buffer));
@@ -432,6 +436,10 @@ bool EnableCookieHook(const LPCTSTR win_inet_path) {
   if (cookie_hook_flag == true)
     return true;
 
+// Disable -Wmicrosoft-cast for MH_CreateHookApi calls
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmicrosoft-cast"
+
   // hook http response中设置的cookie,IE6版本要hook HttpQueryInfoA函数
   // 其他版本IE hook HttpQueryInfoW
   int system_ie_version = base::win::GetSystemIEVersion();
@@ -452,6 +460,8 @@ bool EnableCookieHook(const LPCTSTR win_inet_path) {
                        &DetourInternetSetCookieExW,
                        (LPVOID*)&fpInternetSetCookie) != MH_OK)
     return false;
+
+#pragma GCC diagnostic pop
 
   if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
     return false;
@@ -633,7 +643,7 @@ std::wstring QueryHkeyString(HKEY hkey) {
   stat =
       fpQueryObject(hkey, (OBJECT_INFORMATION_CLASS)1, NULL, handle, &handle);
   // STATUS_INFO_LENGTH_MISMATCH
-  if (stat != 0xC0000004)
+  if (stat != static_cast<long>(0xC0000004))
     return hkey_string;
 
   POBJECT_NAME_INFORMATION information =
@@ -957,6 +967,10 @@ bool EnableLoadLibraryHook() {
   kIeFileString = GetIECorePath();
   ::SetDllDirectory(kIeFileString.c_str());
 
+// Disable -Wmicrosoft-cast for MH_CreateHookApi calls
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmicrosoft-cast"
+
   if (MH_CreateHookApi(L"Kernel32", "LoadLibraryExW", &DetourLoadLibraryExW,
                        (LPVOID*)&s_load_library_exw) != MH_OK)
     return false;
@@ -985,6 +999,7 @@ bool EnableLoadLibraryHook() {
                          (LPVOID*)&fpRegOpenKeyEX) != MH_OK)
       return false;
   }
+#pragma GCC diagnostic pop
 
   if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
     return false;
@@ -993,6 +1008,10 @@ bool EnableLoadLibraryHook() {
 }
 
 bool EnableFlashHook() {
+// Disable -Wmicrosoft-cast for MH_CreateHookApi calls
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmicrosoft-cast"
+
   if (MH_CreateHookApi(L"Ole32.dll", "CoGetClassObject",
                        &DetourCoGetClassObject,
                        (LPVOID*)&fpCoGetClassObject) != MH_OK)
@@ -1001,6 +1020,7 @@ bool EnableFlashHook() {
   if (MH_CreateHookApi(L"OleAut32.dll", "LoadRegTypeLib", &DetourLoadRegTypeLib,
                        (LPVOID*)&fpLoadRegTypeLib) != MH_OK)
     return false;
+#pragma GCC diagnostic pop
 
   if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
     return false;
@@ -1009,11 +1029,16 @@ bool EnableFlashHook() {
 }
 
 bool DisableLoadLibraryHook() {
+// Disable -Wmicrosoft-cast for MH_*** calls
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmicrosoft-cast"
+
   if (MH_DisableHook(&LoadLibraryExW) != MH_OK)
     return false;
 
   if (MH_RemoveHook(&LoadLibraryExW) != MH_OK)
     return false;
+#pragma GCC diagnostic pop
 
   cookie_hook_flag = false;
   return true;
@@ -1077,15 +1102,15 @@ DetourGetAddrInfoExW(PCTSTR pName,
       verNum == base::win::VERSION_WIN10 ||
       verNum == base::win::VERSION_WIN10_TH2) {
     HWND hwnd = WebBrowser::GetWebBrowser()->GetControlWindow();
-    PrivateDnsIp dnsIp;
-    dnsIp.host = pName;
-    dnsIp.ip_list.clear();
+    PrivateDnsIp dns_ip;
+    dns_ip.host = pName;
+    dns_ip.ip_list.clear();
     HANDLE QueryDnsEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     ResetEvent(QueryDnsEvent);
-    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dnsIp);
+    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dns_ip);
     WaitForSingleObject(QueryDnsEvent, INFINITE);
     CloseHandle(QueryDnsEvent);
-    std::list<std::wstring> ip_list = dnsIp.ip_list;
+    std::list<std::wstring> ip_list = dns_ip.ip_list;
     if (ip_list.empty() == false) {
       std::wstring canonname = pName;
       if (ret == 0 && (*ppResult)->ai_canonname)
@@ -1183,18 +1208,18 @@ int WINAPI DetourGetAddrInfoW(PCWSTR pNodeName,
   if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
       verNum == base::win::VERSION_WIN10 ||
       verNum == base::win::VERSION_WIN10_TH2) {
-    PrivateDnsIp dnsIp;
-    dnsIp.host = pNodeName;
-    dnsIp.ip_list.clear();
+    PrivateDnsIp dns_ip;
+    dns_ip.host = pNodeName;
+    dns_ip.ip_list.clear();
 
     HWND hwnd = WebBrowser::GetWebBrowser()->GetControlWindow();
     HANDLE QueryDnsEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     ResetEvent(QueryDnsEvent);
-    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dnsIp);
+    PostMessage(hwnd, WM_QUERYDNS, (WPARAM)QueryDnsEvent, (LPARAM)&dns_ip);
     WaitForSingleObject(QueryDnsEvent, INFINITE);
     CloseHandle(QueryDnsEvent);
 
-    std::list<std::wstring> ip_list = dnsIp.ip_list;
+    std::list<std::wstring> ip_list = dns_ip.ip_list;
 
     if (ip_list.empty() == false) {
       std::wstring canonname = pNodeName;
@@ -1240,6 +1265,12 @@ int WINAPI DetourGetAddrInfoW(PCWSTR pNodeName,
     LeaveCriticalSection(&addr_info_section_);
   }
   return ret;
+}
+
+PrivateDnsIp::PrivateDnsIp() {
+}
+
+PrivateDnsIp::~PrivateDnsIp() {
 }
 
 WebBrowser::WebBrowser(HWND parent_handle,
@@ -1483,7 +1514,8 @@ bool WebBrowser::CreateBrowser(bool is_new) {
   // DomainAuthenticate接口在不是通过DISPID_NEWWINDOW3建立的ie时，
   // 必须要先加载一个页面后才能够初始化，应该是IE的bug
   if (is_new == false)
-    web_browser2_->Navigate(L"about:blank", NULL, NULL, NULL, NULL);
+    web_browser2_->Navigate(const_cast<BSTR>(L"about:blank"),
+                            NULL, NULL, NULL, NULL);
 
   return TRUE;
 }
@@ -1630,11 +1662,13 @@ bool WebBrowser::AutoLoginToSite(const std::wstring& frame_xpath,
   CComPtr<IHTMLElement> element = NULL;
   username_input->QueryInterface(IID_IHTMLElement, (void**)&element);
   if (element)
-    element->setAttribute(L"value", variant_t(uname_value.c_str()));
+    element->setAttribute(const_cast<BSTR>(L"value"),
+                          variant_t(uname_value.c_str()));
 
   password_input->QueryInterface(IID_IHTMLElement, (void**)&element);
   if (element)
-    element->setAttribute(L"value", variant_t(password_value.c_str()));
+    element->setAttribute(const_cast<BSTR>(L"value"),
+                          variant_t(password_value.c_str()));
 
   login_button->QueryInterface(IID_IHTMLElement, (void**)&element);
   if (element)
@@ -1701,12 +1735,14 @@ void WebBrowser::TryGetLoginInfo(CComPtr<IHTMLElement> click_element,
     CComPtr<IHTMLElement> name_element;
     username->QueryInterface(IID_IHTMLElement, (void**)&name_element);
     variant_t name = L"";
-    name_element->getAttribute(L"value", 0, name.GetAddress());
+    name_element->getAttribute(const_cast<BSTR>(L"value"),
+                               0, name.GetAddress());
 
     CComPtr<IHTMLElement> password_element;
     password->QueryInterface(IID_IHTMLElement, (void**)&password_element);
     variant_t pwd = L"";
-    password_element->getAttribute(L"value", 0, pwd.GetAddress());
+    password_element->getAttribute(const_cast<BSTR>(L"value"),
+                                   0, pwd.GetAddress());
 
     if (name.vt != VT_BSTR || name.bstrVal == NULL || pwd.vt != VT_BSTR ||
         pwd.bstrVal == NULL)
