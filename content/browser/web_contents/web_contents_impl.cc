@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 #include "content/browser/web_contents/web_contents_impl.h"
-#ifdef IE_REDCORE
-#include "content/browser/web_contents/web_contents_ie.h"  // ysp+{IE Embedded}
-#endif
-#include <stddef.h>
 
+#include <stddef.h>
 #include <cmath>
 #include <string>
 #include <utility>
@@ -172,6 +169,10 @@
 
 #if BUILDFLAG(ENABLE_PLUGINS)
 #include "content/browser/media/session/pepper_playback_observer.h"
+#endif
+
+#ifdef IE_REDCORE
+#include "content/browser/web_contents/web_contents_ie.h"
 #endif
 
 namespace content {
@@ -718,7 +719,7 @@ std::unique_ptr<WebContentsImpl> WebContentsImpl::CreateWithOpener(
     new_contents->auto_seclect_ = false;
 #endif
 
-#else // chromium 
+#else // chromium
   std::unique_ptr<WebContentsImpl> new_contents(
       new WebContentsImpl(params.browser_context));
 #endif
@@ -1450,7 +1451,7 @@ void WebContentsImpl::DecrementCapturerCount() {
     const gfx::Size old_size = preferred_size_for_capture_;
     preferred_size_for_capture_ = gfx::Size();
     OnPreferredSizeChanged(old_size);
-  
+
 
     if (visibility_ == Visibility::HIDDEN) {
       DVLOG(1) << "Executing delayed WasHidden().";
@@ -2574,7 +2575,7 @@ void WebContentsImpl::CreateNewIEWindow(const GURL& url, RendererMode mode) {
 	CreateParams create_params(GetBrowserContext(), site_instance.get());
 	create_params.renderer_mode = mode;
 	create_params.initial_size = GetContainerBounds().size();
-	
+
 	auto new_ie_content_ptr =  WebContents::Create(create_params);
 
 	WebContentsIE* new_contents = static_cast<WebContentsIE*>(new_ie_content_ptr.get());
@@ -2595,11 +2596,6 @@ void WebContentsImpl::CreateNewIEWindow(const GURL& url, RendererMode mode) {
                                     true /* is_renderer_initiated */);
           new_contents->OpenURL(open_params);
 	}
-}
-static std::string GetDomainNameForHost(std::string host) {
-	const char *domain = strchr(host.c_str(), '.');
-	std::string DomainName(domain + 1);
-	return DomainName;
 }
 #endif
 
@@ -2654,15 +2650,7 @@ void WebContentsImpl::CreateNewWindow(
   // if the opener is being suppressed (in a non-guest), we create a new
   // SiteInstance in its own BrowsingInstance.
   bool is_guest = BrowserPluginGuest::IsGuest(this);
-#if defined(REDCORE) && defined(IE_REDCORE)
-  // ysp+ { Kernel switching
-  // std::string DomainName =
-  // GetDomainNameForHost(params.target_url.HostNoBrackets()); DLOG(INFO) <<
-  // "URL: " << params.target_url << " Host: " << params.target_url.GetContent()
-  // << " PathForRequest: " << params.target_url.PathForRequest() << "
-  // ExtractFileName: " << params.target_url.ExtractFileName() << " ref: " <<
-  // params.target_url.ref();
-
+#if defined(IE_REDCORE)
   WebContentsDelegate* delegate = GetDelegate();
   if (delegate) {
     RendererMode mode = rendererMode_;
@@ -2673,7 +2661,7 @@ void WebContentsImpl::CreateNewWindow(
       }
     }
   }
-#endif
+#endif // IE_REDCORE
 
   // If the opener is to be suppressed, the new window can be in any process.
   // Since routing ids are process specific, we must not have one passed in
@@ -2734,8 +2722,8 @@ void WebContentsImpl::CreateNewWindow(
     create_params.initially_hidden = true;
   create_params.renderer_initiated_creation =
       main_frame_route_id != MSG_ROUTING_NONE;
-#if defined(REDCORE) && defined(IE_REDCORE)
-  create_params.renderer_mode = rendererMode_;  // ysp+ { Kernel switching}
+#if defined(IE_REDCORE)
+  create_params.renderer_mode = rendererMode_;
 #endif
 
   std::unique_ptr<WebContents> new_contents;

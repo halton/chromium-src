@@ -106,7 +106,7 @@ function switchPage(isLogin) {
         <div class="company_domain" id="company_domain">
           <h2 class="set_server">服务器地址</h2>
           <input id="domain" type="text" class="field field-block" 
-                 placeholder="https://pertest.redcore.cn" pattern="\S+" tip="" />
+                 placeholder="https://ysp.redcore.cn" pattern="\S+" tip="" />
           <p>忘记服务器地址？请联系您的企业管理员获取。</p>
           <button class="button block" id="next-btn" name="">确定</button>
         </div>
@@ -243,7 +243,7 @@ function Login() {
       }
     } else {
       // 正式地址
-      domain = 'https://pertest.redcore.cn'
+      domain = 'https://ysp.redcore.cn'
 
       // 测试地址
       //domain = 'http://api.enterplorer.net'
@@ -316,7 +316,7 @@ function Login() {
   // 点击二维码
   $('#QRcode').click(function() {
     $('#code_pack').css('visibility', 'hidden');
-    serverAddress = _this.domain.val() || 'api.redcore.cn';
+    serverAddress = _this.domain.val() || 'https://ysp.redcore.cn';
     // 建立长连接
     window.__page_to_content_script__(serverAddress, deviceId);
     $('#code_pack_qrcodeInvalid').hide();

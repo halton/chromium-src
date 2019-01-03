@@ -39,9 +39,9 @@
 namespace {
 #ifdef WIN32
 size_t strlcat(char* dst, const char* src, size_t siz) {
-  register char* d = dst;
-  register const char* s = src;
-  register size_t n = siz;
+  char* d = dst;
+  const char* s = src;
+  size_t n = siz;
   size_t dlen;
 
   while (n-- != 0 && *d != '\0')
@@ -64,9 +64,9 @@ size_t strlcat(char* dst, const char* src, size_t siz) {
 }
 
 size_t strlcpy(char* dst, const char* src, size_t siz) {
-  register char* d = dst;
-  register const char* s = src;
-  register size_t n = siz;
+  char* d = dst;
+  const char* s = src;
+  size_t n = siz;
 
   if (n != 0 && --n != 0) {
     do {
@@ -303,15 +303,8 @@ int YSPRedcoreSpaPacket::InitValues(const std::string& device_id,
     strlcat(const_cast<char*>(enc_msg), ":", 1024);
     strlcat(const_cast<char*>(enc_msg), b64_username_.c_str(), 1024);
     int offset = strlen(enc_msg);
-    snprintf(const_cast<char*>(enc_msg + offset), 1024 - offset, ":%u:"
-#ifdef WIN32
-             ,
-             (unsigned long)
-#else
-             ,
-             (unsigned int)
-#endif
-                 time_stamp_);
+    snprintf(const_cast<char*>(enc_msg + offset), 1024 - offset, ":%u:",
+             (unsigned int)time_stamp_);
 #ifdef TEST_REDCORE
     strlcat(enc_msg, ":", 1024);
     strlcat(enc_msg, "1535273604", 1024);
@@ -409,7 +402,7 @@ int YSPRedcoreSpaPacket::SendUdpPacket(net::CompletionCallback callback) {
                         net::NetLogSource());
   socket.Open(net::AddressFamily::ADDRESS_FAMILY_IPV4);
   net::IPAddress ip_number;
-  bool ret; 
+  bool ret;
   ret = net::ParseURLHostnameToAddress(server_ip_, &ip_number);
   socket.Connect(net::IPEndPoint(ip_number, 62201));
   net::IPEndPoint endpoint;

@@ -29,7 +29,7 @@ class MeUI : public content::WebUIController, public YSPLoginManagerObserver {
   void ModifyPINCode(const base::ListValue* args);
   void DeleteDevice(const base::ListValue* args);
   void CheckIfCanModifyPassword(const base::ListValue* args);
-  void GetLockScreenTime(const base::ListValue* args);
+  void GetLockScreenTime();
   void UploadAvatar(const base::ListValue* args);
 
   // YSPLoginManagerObserver:

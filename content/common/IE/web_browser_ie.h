@@ -24,6 +24,9 @@
 namespace ie {
 
 struct PrivateDnsIp {
+  PrivateDnsIp();
+  ~PrivateDnsIp();
+
   std::wstring host;
   std::list<std::wstring> ip_list;
 };
@@ -303,8 +306,8 @@ class WebBrowser : public IOleClientSite,
   bool save_file_enabled_;
   std::map<std::wstring, DWORD> auto_login_times_;
 
-  static WNDPROC old_window_proc_;
-  static WNDPROC old_control_proc_;
+  static LONG_PTR old_window_proc_;
+  static LONG_PTR old_control_proc_;
   static HHOOK next_hook_;
   static WebBrowser* self_;
   static IOleInPlaceActiveObject* ole_in_place_active_object_;

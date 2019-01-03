@@ -18,6 +18,9 @@ class CONTENT_EXPORT TridentMainPlatformDelegate {
   void PlatformInitialize();
   void PlatformUninitialize();
 
+ protected:
+  const MainFunctionParams& parameters() const { return parameters_; }
+
  private:
   const MainFunctionParams& parameters_;
 
