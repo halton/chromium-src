@@ -4110,7 +4110,9 @@ void Browser::NotifyIEFunctionControl() {
     web_content_ie->SendFunctionControl(json_str);
   }
 }
+#endif  // IE_REDCORE
 
+#if REDCORE
 bool Browser::FirstCreate() {
   return first_create_;
 }
