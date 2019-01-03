@@ -435,7 +435,7 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
   DCHECK(!!window_handle);
 
   if (IsWindow(host_window_) == FALSE) {
-    host_window_ = CreateHostWindow(window_handle);
+    host_window_ = CreateHostWindow(parent_hwnd);
     // host_window_ = CreateHostWindow(NULL);
     MoveWindow(host_window_, -300, -300, 300, 300, TRUE);
   }
@@ -666,8 +666,9 @@ bool BrowserHostEventDelegant::ExcuteJavaScript(std::wstring code,
 
 void BrowserHostEventDelegant::SetBrowserRect(RECT rect) {
   if (::IsWindow(host_window_)) {
-    ::MoveWindow(host_window_, rect.left, rect.top, rect.right - rect.left,
-                 rect.bottom - rect.top, TRUE);
+    ::SetWindowPos(host_window_, HWND_TOP, rect.left, rect.top,
+                   rect.right - rect.left, rect.bottom - rect.top,
+                   SWP_SHOWWINDOW);
   }
 
   if (browser_container_) {
