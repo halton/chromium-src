@@ -15,14 +15,13 @@ if (is_mac) {
   import("//build/config/mac/mac_sdk.gni")
 }
 
-import("//build/config/redcore.gni") 
+import("//build/config/redcore.gni")
 if (is_win) {
   import("//build/toolchain/win/midl.gni")
 
   midl("IEInterface") {
     sources = ["//content/common/IE/IEInterface.idl"]
     out_dir = "$target_gen_dir/IE"
-    print(out_dir)
   }
 }
 
