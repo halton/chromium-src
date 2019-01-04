@@ -960,10 +960,9 @@ void WebContentsIE::CommitToEntry(GURL gurl, bool is_set_history) {
   GetController().RendererDidNavigate(rfh, params, &details, true,
                                       navHandle.get());
 
-  // for(WebContentsObserver& observer: observers_)
-  // {
-  //   observer.DidNavigateMainFrame(details, params);
-  // }
+  for (WebContentsObserver& observer : observers_) {
+    observer.NavigationEntryCommitted(details);
+  }
 }
 
 void WebContentsIE::LoadFinishedAndUpdateEntry(GURL gurl) {
@@ -1234,14 +1233,14 @@ void WebContentsIE::NavigateUrl(
 
   GURL curUrl;
   NavigationEntryImpl* entry = GetController().GetLastCommittedEntry();
-  if (entry) {
+  if (entry)
     curUrl = entry->GetURL();
-  }
 
   bool b = false;
-  if (PageTransitionCoreTypeIs(params->transition_type,
-                               ui::PageTransition::PAGE_TRANSITION_RELOAD) &&
-      PageTransitionCoreTypeIs(
+  if (!PageTransitionTypeIncludingQualifiersIs(
+          params->transition_type,
+          ui::PageTransition::PAGE_TRANSITION_RELOAD) &&
+      !PageTransitionTypeIncludingQualifiersIs(
           params->transition_type,
           ui::PageTransition::PAGE_TRANSITION_FORWARD_BACK) &&
       curUrl != params->url) {
@@ -1258,15 +1257,16 @@ void WebContentsIE::NavigateUrl(
         base::Bind(&WebContentsIE::CommitToEntry, self_.GetWeakPtr(),
                    params->url, false));
   }
-  b = browser_event_handler_->LoadUrl(url);
-  if (PageTransitionCoreTypeIs(
+
+  if (!PageTransitionTypeIncludingQualifiersIs(
           params->transition_type,
           ui::PageTransition::PAGE_TRANSITION_IE_NEWWINDOW) &&
-      PageTransitionCoreTypeIs(params->transition_type,
-                               ui::PageTransition::PAGE_TRANSITION_RELOAD))
+      !PageTransitionTypeIncludingQualifiersIs(
+          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
     b = browser_event_handler_->LoadUrl(url);
-  if (PageTransitionCoreTypeIs(params->transition_type,
-                               ui::PageTransition::PAGE_TRANSITION_RELOAD))
+  
+  if (PageTransitionTypeIncludingQualifiersIs(
+          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
     browser_event_handler_->Refresh();
 
   // //chjy

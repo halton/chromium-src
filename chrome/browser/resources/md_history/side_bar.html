@@ -92,16 +92,16 @@
     <iron-selector id="menu" selected="{{selectedPage}}"
         selectable=".page-item" attr-for-selected="path"
         on-iron-activate="onSelectorActivate_">
-      <a href="/" class="page-item" path="history" on-click="onItemClick_">
+      <a href="/" class="page-item" path="history" on-click="onItemClick_" style="display:none">
         $i18n{historyMenuItem}
         <paper-ripple></paper-ripple>
       </a>
       <a href="/syncedTabs" class="page-item" path="syncedTabs"
-          on-click="onItemClick_">
+          on-click="onItemClick_" style="display:none">
         $i18n{openTabsMenuItem}
         <paper-ripple></paper-ripple>
       </a>
-      <div class="separator"></div>
+      <div class="separator" style="display:none"></div>
       <a id="clear-browsing-data"
           href="chrome://settings/clearBrowserData"
           on-click="onClearBrowsingDataTap_"

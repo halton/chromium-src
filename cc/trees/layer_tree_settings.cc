@@ -10,7 +10,11 @@
 namespace cc {
 
 LayerTreeSettings::LayerTreeSettings()
+#ifdef IE_REDCORE
+    : default_tile_size(gfx::Size(32, 32)),
+#else
     : default_tile_size(gfx::Size(256, 256)),
+#endif  // IE_REDCORE
       max_untiled_layer_size(gfx::Size(512, 512)),
       minimum_occlusion_tracking_size(gfx::Size(160, 160)),
       memory_policy(64 * 1024 * 1024,
