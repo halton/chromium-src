@@ -10,6 +10,7 @@
 #include <Mshtml.h>
 #include <WinUser.h>
 #include <Wininet.h>
+#include <comdef.h>
 #include <initguid.h>
 #include <objbase.h>
 #include <oleauto.h>
@@ -18,7 +19,7 @@
 #include <string>
 
 #include "base/strings/utf_string_conversions.h"
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 #include "content/common/IE/doc_host_ui_handler_ie.h"
 #include "content/common/IE/event_handler_ie.h"
 #include "url/gurl.h"

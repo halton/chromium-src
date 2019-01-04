@@ -11,6 +11,7 @@
 #include "base/debug/leak_annotations.h"
 #include "base/feature_list.h"
 #include "base/i18n/rtl.h"
+#include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "base/metrics/field_trial.h"
 #include "base/metrics/histogram.h"
@@ -22,6 +23,7 @@
 #include "base/time/time.h"
 #include "base/timer/hi_res_timer_manager.h"
 #include "base/trace_event/trace_event.h"
+#include "base/win/atl.h"
 #include "build/build_config.h"
 #include "content/child/child_process.h"
 #include "content/common/IE/dll_module_ie.h"
@@ -36,10 +38,6 @@
 #include "content/renderer/trident_main_platform_delegate.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "ui/base/ui_base_switches.h"
-
-#include "base/logging.h"
-#include "content/common/IE/atl_include.h"
-#include "content/common/IE/dll_module_ie.h"
 
 namespace content {
 

@@ -5,8 +5,8 @@
 #ifndef CONTENT_COMMON_IE_DLL_MODULE_IE_H_
 #define CONTENT_COMMON_IE_DLL_MODULE_IE_H_
 
+#include "base/win/atl.h"
 #include "content/common/IE/IEInterface.h"
-#include "content/common/IE/atl_include.h"
 
 namespace ie {
 // class IEProcessModule : public CAtlExeModuleT< IEProcessModule >

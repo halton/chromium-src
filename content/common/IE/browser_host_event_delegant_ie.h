@@ -6,15 +6,16 @@
 #define CONTENT_COMMON_IE_BROWSER_HOST_EVENT_DELEGENT_IE_H_
 
 #include <comdef.h>
+
 #include <map>
 #include <string>
 #include <vector>
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
+#include "base/win/atl.h"
 #include "components/download/public/common/download_file_ie.h"
 #include "content/common/IE/IEInterface.h"
-#include "content/common/IE/atl_include.h"
 #include "content/common/IE/event_ie.h"
 
 namespace content {

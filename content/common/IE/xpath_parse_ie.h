@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 #include "content/common/IE/xpath_node_ie.h"
 
 namespace ie {

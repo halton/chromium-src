@@ -4,6 +4,8 @@
 
 #include "content/common/IE/xpath_node_predicate_ie.h"
 
+#include <comdef.h>
+
 namespace ie {
 
 const wchar_t kAttribute = L'@';

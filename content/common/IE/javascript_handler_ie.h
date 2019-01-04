@@ -5,12 +5,13 @@
 #ifndef CONTENT_COMMON_IE_JAVASCRIPT_HANDLER_IE_H_
 #define CONTENT_COMMON_IE_JAVASCRIPT_HANDLER_IE_H_
 
-#include <OAIdl.h>
+#include <comdef.h>
+
 #include <map>
 #include <string>
 #include <vector>
 
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 
 namespace ie {
 

@@ -15,7 +15,7 @@
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/strings/utf_string_conversions.h"
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 #include "content/common/IE/event_handler_ie.h"
 #include "content/common/IE/javascript_handler_ie.h"
 #include "content/common/IE/version_ie.h"

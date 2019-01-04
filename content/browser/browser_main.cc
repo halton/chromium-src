@@ -11,9 +11,9 @@
 #include "content/common/content_constants_internal.h"
 
 #if defined(IE_REDCORE)
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 #include "content/common/IE/dll_module_ie.h"
-#endif
+#endif  // IE_REDCORE
 
 namespace content {
 
@@ -42,10 +42,9 @@ int BrowserMain(const MainFunctionParams& parameters) {
   ie::DllModule _AtlModule;
   HRESULT hr = OleInitialize(NULL);
 
-  if (!SUCCEEDED(hr)) {
+  if (!SUCCEEDED(hr))
     return 0;
-  }
-#endif
+#endif  // IE_REDCORE
 
   base::trace_event::TraceLog::GetInstance()->set_process_name("Browser");
   base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
@@ -63,7 +62,7 @@ int BrowserMain(const MainFunctionParams& parameters) {
   main_runner->Shutdown();
 #if defined(IE_REDCORE)
   OleUninitialize();
-#endif
+#endif  // IE_REDCORE
   return exit_code;
 }
 

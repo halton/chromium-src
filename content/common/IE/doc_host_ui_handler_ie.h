@@ -13,7 +13,7 @@
 #include <ShObjIdl.h>
 #include <string>
 
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 
 namespace ie {
 

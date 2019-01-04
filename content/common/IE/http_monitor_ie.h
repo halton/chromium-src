@@ -8,8 +8,8 @@
 #include <comdef.h>
 #include <urlmon.h>
 
+#include "base/win/atl.h"
 #include "content/common/IE/IEInterface.h"
-#include "content/common/IE/atl_include.h"
 
 namespace ie {
 class EventHandler;

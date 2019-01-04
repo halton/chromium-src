@@ -4,7 +4,7 @@
 
 #include "content/common/IE/javascript_handler_ie.h"
 
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 
 namespace ie {
 

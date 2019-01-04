@@ -5,7 +5,7 @@
 #ifndef CONTENT_COMMON_IE_EVENT_IE_H_
 #define CONTENT_COMMON_IE_EVENT_IE_H_
 
-#include "content/common/IE/atl_include.h"
+#include "base/win/atl.h"
 
 #include <Exdisp.h>
 #include <MsHtmHst.h>
