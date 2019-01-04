@@ -2,19 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifdef REDCORE
-// ysp
-
 #include "chrome/browser/ysp_update/ysp_update_manager.h"
 
-#if defined(OS_WIN)
-#include <comdef.h>
-#include <Iphlpapi.h>
-#include <shellapi.h>
-#include "setupapi.h"
-#endif
-
 #include <utility>
+
 #include "base/base64.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
@@ -52,13 +43,18 @@
 #include "ui/views/window/dialog_delegate.h"
 
 #if defined(OS_WIN)
+#include <Iphlpapi.h>
+#include <comdef.h>
+#include <setupapi.h>
+#include <shellapi.h>
+
 #include "ui/base/win/message_box_win.h"
 #include "ui/views/win/hwnd_util.h"
 
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "netapi32")
 #pragma comment(lib, "setupapi")
-#endif
+#endif  // OS_WIN
 
 class YSPAutoUpdateShowMessageBoxViews : public views::DialogDelegate {
  public:
@@ -220,19 +216,18 @@ void YSPAutoUpdateShowMessageBoxViews::Done() {
 UINT GetMessageBoxFlagsFromType(chrome::MessageBoxType type) {
   UINT flags = MB_SETFOREGROUND;
   switch (type) {
-    case chrome::MESSAGE_BOX_TYPE_INFORMATION:
-      return flags | MB_OK | MB_ICONINFORMATION;
     case chrome::MESSAGE_BOX_TYPE_WARNING:
       return flags | MB_OK | MB_ICONWARNING;
     case chrome::MESSAGE_BOX_TYPE_QUESTION:
       return flags | MB_YESNO | MB_ICONQUESTION;
-      // case chrome::MESSAGE_BOX_TYPE_WARNING:
-      //   return flags | MB_OKCANCEL | MB_ICONWARNING;
+    case chrome::MESSAGE_BOX_TYPE_INFORMATION:
+      return flags | MB_OK | MB_ICONINFORMATION;
   }
   NOTREACHED();
   return flags | MB_OK | MB_ICONWARNING;
 }
-#endif
+#endif  // OS_WIN
+
 chrome::MessageBoxResult YSPShowMessageBox(
     content::WebContents* contents,
     const base::string16& title,
@@ -565,5 +560,3 @@ void YSPUpdateManager::DownloadStarted(
   // item->SetIsTemporary(false);
   item->AddObserver(this);
 }
-
-#endif

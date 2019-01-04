@@ -27,11 +27,11 @@ enum MessageBoxResult {
 };
 
 enum MessageBoxType {
-#if defined(IE_REDCORE)
-  MESSAGE_BOX_TYPE_INFORMATION,  // Shows an OK button.
-#endif
   MESSAGE_BOX_TYPE_WARNING,   // Shows an OK button.
   MESSAGE_BOX_TYPE_QUESTION,  // Shows YES and NO buttons.
+#if defined(REDCORE) && defined(OS_WIN)
+  MESSAGE_BOX_TYPE_INFORMATION,  // Shows an OK button.
+#endif
 };
 
 // Shows a dialog box with the given |title| and |message|. If |parent| is

@@ -120,6 +120,8 @@ vs-chromium-project.txt
 /chrome/installer/mini_installer/mini_installer.aps
 /chrome/installer/mini_installer/support
 /chrome/installer/mini_installer_tests_run.xml
+/chrome/installer/redcore_nsis/*.exe
+/chrome/installer/redcore_nsis/nsis_src
 /chrome/installer_util_strings.xml
 /chrome/interactive_ui_tests_run.xml
 /chrome/setup.xml
@@ -224,6 +226,7 @@ vs-chromium-project.txt
 /out*/
 /ppapi/native_client/nacl_irt.xml
 /ppapi/native_client/ppapi_lib.xml
+/redcore/browser_customize/
 /remoting/android/internal/
 /remoting/appengine/
 /remoting/host/installer/linux/internal/
@@ -254,7 +257,7 @@ vs-chromium-project.txt
 /sync/sync.xml
 /sync_testserver.log
 /testserver.log
-third_party/sgxsdk/
+/third_party/sgxsdk
 # See third_party/.gitignore for entries covering src/third_party.
 /tools/.bisect-builds-cache.json
 /tools/cygprofile/*.wprgo
@@ -282,8 +285,3 @@ third_party/sgxsdk/
 /webpagereplay_logs/
 /x86-generic_out/
 /xcodebuild
-**/.vs/
-/tools/stats_viewer/obj/
-/third_party/sgxsdk
-/chrome/installer/redcore_nsis/*.exe
-/chrome/installer/redcore_nsis/nsis_src

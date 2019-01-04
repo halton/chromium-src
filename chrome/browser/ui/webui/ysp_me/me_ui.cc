@@ -202,12 +202,17 @@ void MeUI::OnConfigDataUpdated(const std::string& type,
   if (type == "modifyPassword") {
     web_ui()->CallJavascriptFunctionUnsafe("User.modifyPasswordFinish", value);
   }
+  if (type == "pc") {
+    GetLockScreenTime();
+  }
 }
 
-void MeUI::GetLockScreenTime(const base::ListValue* args) {
+void MeUI::GetLockScreenTime() {
   int lock_screen_time = YSPLoginManager::GetInstance()->GetLockScreenTime();
   if (lock_screen_time == 0) {
     lock_screen_time = 10;
+  } else {
+    lock_screen_time = lock_screen_time / 60;
   }
   base::Value command_value(lock_screen_time);
   web_ui()->CallJavascriptFunctionUnsafe("User.getLockScreenTimeFinish",
@@ -273,7 +278,7 @@ void MeUIPageMessageHandler::BindGetLockScreenTime(
     const base::ListValue* args) {
   if (!me_ui_) return;
 
-  me_ui_->GetLockScreenTime(args);
+  me_ui_->GetLockScreenTime();
 }
 
 void MeUIPageMessageHandler::BindUploadAvatar(const base::ListValue* args) {

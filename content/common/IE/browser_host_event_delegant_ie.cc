@@ -435,7 +435,7 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
   DCHECK(!!window_handle);
 
   if (IsWindow(host_window_) == FALSE) {
-    host_window_ = CreateHostWindow(window_handle);
+    host_window_ = CreateHostWindow(parent_hwnd);
     // host_window_ = CreateHostWindow(NULL);
     MoveWindow(host_window_, -300, -300, 300, 300, TRUE);
   }
@@ -481,9 +481,9 @@ bool BrowserHostEventDelegant::CreateBrowser(int browser_emulation,
     else
       param_new.boolVal = VARIANT_FALSE;
     params.push_back(param_new);
-    variant_t ret;
+    variant_t ret1;
     result = BrowserHostEventDelegant::DispatchInvoke(
-        browser_container_, L"CreateBrowser", DISPATCH_METHOD, params, ret);
+        browser_container_, L"CreateBrowser", DISPATCH_METHOD, params, ret1);
 
     web_browser2_ = GetIWebBrowser2();
     if (web_browser2_)
@@ -666,8 +666,9 @@ bool BrowserHostEventDelegant::ExcuteJavaScript(std::wstring code,
 
 void BrowserHostEventDelegant::SetBrowserRect(RECT rect) {
   if (::IsWindow(host_window_)) {
-    ::MoveWindow(host_window_, rect.left, rect.top, rect.right - rect.left,
-                 rect.bottom - rect.top, TRUE);
+    ::SetWindowPos(host_window_, HWND_TOP, rect.left, rect.top,
+                   rect.right - rect.left, rect.bottom - rect.top,
+                   SWP_SHOWWINDOW);
   }
 
   if (browser_container_) {
@@ -702,7 +703,7 @@ IDispatch* BrowserHostEventDelegant::GetIWebBrowser2() {
 
 void BrowserHostEventDelegant::SetHostIDispatch(IDispatch* host) {
   DISPID disp_id = 0;
-  OLECHAR* member = L"HostApp";
+  OLECHAR* member = const_cast<OLECHAR*>(L"HostApp");
   HRESULT result = browser_container_->GetIDsOfNames(
       IID_NULL, &member, 1, LOCALE_SYSTEM_DEFAULT, &disp_id);
 
@@ -761,7 +762,7 @@ void BrowserHostEventDelegant::RegisterWndClass(HINSTANCE instance) {
   wcex.lpszClassName = L"YSPHostWnd";
   wcex.hIconSm = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));
 
-  ATOM ret = RegisterClassExW(&wcex);
+  RegisterClassExW(&wcex);
 }
 
 void BrowserHostEventDelegant::UpdateDownloadData(const int& status,
