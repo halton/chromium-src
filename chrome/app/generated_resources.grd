@@ -9348,6 +9348,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
     <message name="IDS_YSP_REMOVE_USER_DESC" desc="">
       Your account has been deleted and logged out.
    </message>
+    <message name="IDS_YSP_APP_NAME" desc="">Enterplorer</message>
     <!-- //ysp+ } -->
     
     <!-- Web-modal dialog shown during Web Authenticaton API requests. -->

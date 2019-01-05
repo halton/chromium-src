@@ -149,8 +149,13 @@ void IncognitoModePrefs::SetAvailability(PrefService* prefs,
 // static
 void IncognitoModePrefs::RegisterProfilePrefs(
     user_prefs::PrefRegistrySyncable* registry) {
+#ifdef REDCORE
+  registry->RegisterIntegerPref(prefs::kIncognitoModeAvailability,
+                                IncognitoModePrefs::DISABLED);
+#else
   registry->RegisterIntegerPref(prefs::kIncognitoModeAvailability,
                                 IncognitoModePrefs::ENABLED);
+#endif
 }
 
 // static

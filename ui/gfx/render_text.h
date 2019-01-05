@@ -195,7 +195,7 @@ class GFX_EXPORT RenderText {
   // TODO(pbos): This is highly font dependent, consider replacing the character
   // with a vector glyph.
 #ifdef REDCORE
-  static constexpr base::char16 kPasswordReplacementChar = 0x204E;
+  static constexpr base::char16 kPasswordReplacementChar = 0x2217;
 #else
   static constexpr base::char16 kPasswordReplacementChar = 0x2022;
 #endif
