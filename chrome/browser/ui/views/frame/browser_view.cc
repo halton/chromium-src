@@ -1715,14 +1715,12 @@ bool BrowserView::CanActivate() const {
 }
 
 base::string16 BrowserView::GetWindowTitle() const {
+#ifdef REDCORE
+  if (!visible())
+    return l10n_util::GetStringUTF16(IDS_YSP_APP_NAME);
+#endif
   base::string16 title =
       browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
-
-#if defined(REDCORE) // ysp (LIUWEI) TODO: find a better place for setting?
-  title = base::string16();
-#else
-  title = browser_->GetWindowTitleForCurrentTab(true /* include_app_name */);
-#endif // defined(REDCORE)
 
 #if defined(OS_MACOSX)
   TabAlertState state =
