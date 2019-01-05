@@ -280,9 +280,13 @@ AboutHandler* AboutHandler::Create(content::WebUIDataSource* html_source,
       l10n_util::GetStringFUTF16(
           IDS_SETTINGS_ABOUT_PAGE_BROWSER_VERSION,
           base::UTF8ToUTF16(version_info::GetYSPVersionNumber()),
+#ifdef REDCORE
+          base::UTF8ToUTF16(""),
+#else
           l10n_util::GetStringUTF16(version_info::IsOfficialBuild()
                                         ? IDS_VERSION_UI_OFFICIAL
                                         : IDS_VERSION_UI_UNOFFICIAL),
+#endif
           base::UTF8ToUTF16(chrome::GetChannelName()),
           l10n_util::GetStringUTF16(sizeof(void*) == 8
                                         ? IDS_VERSION_UI_64BIT
