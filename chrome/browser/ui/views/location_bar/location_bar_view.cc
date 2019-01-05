@@ -266,17 +266,19 @@ void LocationBarView::Init() {
     page_action_icons_.push_back(intent_picker_view_ =
                                      new IntentPickerView(browser_, this));
 #endif
-  if (browser_) {
-    page_action_icons_.push_back(
-        star_view_ = new StarView(command_updater(), browser_, this));
-    star_view_->SetVisible(true);
-  }
-
   for (PageActionIconView* icon_view : page_action_icons_) {
     icon_view->Init();
     icon_view->SetVisible(false);
     icon_view->SetIconColor(icon_color);
     AddChildView(icon_view);
+  }
+
+  if (browser_) {
+    page_action_icons_.push_back(
+        star_view_ = new StarView(command_updater(), browser_, this));
+    star_view_->SetVisible(true);
+    star_view_->SetIconColor(icon_color);
+    AddChildView(star_view_);
   }
 
   clear_all_button_ = views::CreateVectorImageButton(this);
