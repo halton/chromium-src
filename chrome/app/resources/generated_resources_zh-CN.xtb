@@ -816,7 +816,7 @@
 <translation id="2200356397587687044">Chrome 需要获得相应权限才能继续</translation>
 <translation id="220138918934036434">隐藏按钮</translation>
 <translation id="2202898655984161076">列出打印机时发生问题。您的某些打印机可能尚未成功使用“<ph name="CLOUD_PRINT_NAME" />”进行注册。</translation>
-<translation id="2203682048752833055"><ph name="BEGIN_LINK" />地址栏<ph name="END_LINK" />中使用的搜索引擎</translation>
+<translation id="7213903639823314449">地址栏中使用的搜索引擎</translation>
 <translation id="2204034823255629767">读取和更改您输入的任何内容</translation>
 <translation id="2208158072373999562">Zip 归档</translation>
 <translation id="220858061631308971">请在“<ph name="DEVICE_NAME" />”上输入此 PIN 码：</translation>
@@ -5508,7 +5508,7 @@
 <translation id="1443145956076335366">锁屏密码不一致，请重新输入</translation>
 <translation id="355226436098205131">请使用6位锁屏密码解锁屏幕</translation>
 <translation id="4425739312452866274">忘记锁屏密码？</translation>
-<translation id="1988735210256571067">很抱歉，锁屏密码不支持找回功能。您可以卸载浏览器并重新安装，在用户资料中重新设置锁屏密码。</translation>
+<translation id="1988735210256571067">很抱歉，锁屏密码不支持找回功能。您可以卸载浏览器并重新安装，重新设置锁屏密码。</translation>
 <translation id="6912338534754641922">极速模式</translation>
 <translation id="6866314797536580459">兼容模式</translation>
 <translation id="6165082002909413608">兼容性设置</translation>
