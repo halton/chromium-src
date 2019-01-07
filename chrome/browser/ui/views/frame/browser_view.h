@@ -300,8 +300,8 @@ class BrowserView : public BrowserWindow,
   void SetStarredState(bool is_starred) override;
   void SetTranslateIconToggled(bool is_lit) override;
 #if defined(IE_REDCORE)
-  void SetRendererModeIconToggled(RendererMode mode) override;
-#endif // defined(IE_REDCORE)
+  void SetRendererModeIconToggled(ie::RenderMode mode) override;
+#endif  // defined(IE_REDCORE)
   void OnActiveTabChanged(content::WebContents* old_contents,
                           content::WebContents* new_contents,
                           int index,
@@ -357,8 +357,8 @@ class BrowserView : public BrowserWindow,
 #endif  //  defined(OS_CHROMEOS)
   void ShowBookmarkBubble(const GURL& url, bool already_bookmarked) override;
 #if defined(IE_REDCORE)
-  void ShowRendererModeBubble(const GURL& url, RendererMode mode) override;
-#endif // defined(IE_REDCORE)
+  void ShowRendererModeBubble(const GURL& url, ie::RenderMode mode) override;
+#endif  // defined(IE_REDCORE)
   autofill::SaveCardBubbleView* ShowSaveCreditCardBubble(
       content::WebContents* contents,
       autofill::SaveCardBubbleController* controller,

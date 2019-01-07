@@ -1308,8 +1308,8 @@ void OpenCurrentUrlUseIe(Browser* browser,
   ui::PageTransition page_transition = location_bar->GetPageTransition();
   NavigateParams params(browser, actual_url, page_transition);
 
-  RendererMode mode;
-  mode.core = IE_CORE;
+  ie::RenderMode mode;
+  mode.core = ie::IE_CORE;
   mode.emulation = emulation;
   mode.version = version;
   params.renderer_mode = mode;
@@ -1349,7 +1349,7 @@ void OpenCurrentUrlUseChrome(Browser* browser,
 
   ui::PageTransition page_transition = location_bar->GetPageTransition();
   NavigateParams params(browser, actual_url, page_transition);
-  params.renderer_mode.core = BLINK_CORE;
+  params.renderer_mode.core = ie::BLINK_CORE;
   params.auto_select = auto_select;
   params.transition = ui::PAGE_TRANSITION_TYPED;
   params.disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
@@ -1361,15 +1361,15 @@ void OpenCurrentUrlUseChrome(Browser* browser,
 
 void SwitchRendererMode(Browser* browser,
                         const GURL& url,
-                        const RendererMode& mode,
+                        const ie::RenderMode& mode,
                         bool auto_select) {
   if (browser == NULL)
     return;
 
   WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
-  if (mode.core == BLINK_CORE)
+  if (mode.core == ie::BLINK_CORE)
     OpenCurrentUrlUseChrome(browser, url, auto_select);
-  else if (mode.core == IE_CORE)
+  else if (mode.core == ie::IE_CORE)
     OpenCurrentUrlUseIe(browser, url, mode.version, mode.emulation,
                         auto_select);
 
@@ -1379,7 +1379,7 @@ void SwitchRendererMode(Browser* browser,
                                                    TabStripModel::CLOSE_NONE);
 }
 
-void ShowRendererModeSwitchBubble(Browser* browser, RendererMode mode) {
+void ShowRendererModeSwitchBubble(Browser* browser, ie::RenderMode mode) {
   WebContents* contents = browser->tab_strip_model()->GetActiveWebContents();
   NavigationEntry* entry = contents->GetController().GetLastCommittedEntry();
   if (entry == NULL)

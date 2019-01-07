@@ -4,21 +4,20 @@
 
 #include "content/common/IE/doc_host_ui_handler_ie.h"
 
-#include <ExDisp.h>
 #include <ShlGuid.h>
 #include <Strsafe.h>
 #include <WinInet.h>
 #include <mshtmcid.h>
 #include <mshtml.h>
+
 #include <vector>
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/win/atl.h"
+#include "content/common/IE/common_ie.h"
 #include "content/common/IE/event_handler_ie.h"
 #include "content/common/IE/javascript_handler_ie.h"
-#include "content/common/IE/version_ie.h"
 #include "content/common/IE/web_browser_ie.h"
 #include "content/public/browser/browser_thread.h"
 #include "url/gurl.h"

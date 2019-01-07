@@ -37,8 +37,9 @@
 #endif
 
 #if defined(IE_REDCORE)
-#include "content\common\IE\version_ie.h"
-#endif
+#include "content/common/IE/render_mode_ie.h"
+#endif  // defined(IE_REDCORE)
+
 class GURL;
 
 namespace base {
@@ -104,9 +105,10 @@ class CONTENT_EXPORT WebContentsDelegate {
                                       const OpenURLParams& params);
 
 #if defined(IE_REDCORE)
-  virtual bool UrlCompared(const GURL& host, RendererMode& mode); //YSP+ { Kernel switching
-  virtual void DidGetWindowsDomainUserInfo(base::string16* username, base::string16* password);
-#endif
+  virtual bool UrlCompared(const GURL& host, ie::RenderMode& mode);
+  virtual void DidGetWindowsDomainUserInfo(base::string16* username,
+                                           base::string16* password);
+#endif  // IE_REDCORE
 
   // Allows the delegate to optionally cancel navigations that attempt to
   // transfer to a different process between the start of the network load and

@@ -805,10 +805,10 @@ void BrowserView::SetTranslateIconToggled(bool is_lit) {
 }
 
 #if defined(IE_REDCORE)
-void BrowserView::SetRendererModeIconToggled(RendererMode mode) {
+void BrowserView::SetRendererModeIconToggled(ie::RenderMode mode) {
   GetLocationBarView()->SetRendererModeToggled(mode);
 }
-#endif // defined(IE_REDCORE)
+#endif  // defined(IE_REDCORE)
 
 void BrowserView::OnActiveTabChanged(content::WebContents* old_contents,
                                      content::WebContents* new_contents,
@@ -903,11 +903,13 @@ void BrowserView::OnActiveTabChanged(content::WebContents* old_contents,
 }
 
 #if defined(IE_REDCORE)
-void BrowserView::ShowRendererModeBubble(const GURL &url, RendererMode mode) {
-  RendererModeBubbleView::ShowBubble(toolbar()->GetRendererModeBubbleAnchor(),
+void BrowserView::ShowRendererModeBubble(const GURL &url,
+                                         ie::RenderMode mode) {
+  RendererModeBubbleView::ShowBubble(
+      toolbar()->GetRendererModeBubbleAnchor(),
       gfx::Rect(), nullptr, browser_.get(), url, mode);
 }
-#endif // defined(IE_REDCORE)
+#endif  // defined(IE_REDCORE)
 
 void BrowserView::ZoomChangedForActiveTab(bool can_show_bubble) {
   const AppMenuButton* app_menu_button =

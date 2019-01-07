@@ -26,7 +26,7 @@ YspRendererModeView::YspRendererModeView(CommandUpdater* command_updater,
                                          Delegate* delegate)
     : PageActionIconView(command_updater, IDC_RENDERER_MODE_SWITCH, delegate),
       browser_(browser),
-      renderer_mode_(RendererMode()) {}
+      render_mode_(ie::RenderMode()) {}
 
 YspRendererModeView::~YspRendererModeView() {}
 
@@ -38,44 +38,44 @@ base::string16 YspRendererModeView::GetTextForTooltipAndAccessibleName() const {
   return tooltip_text_;
 }
 
-void YspRendererModeView::SetToggled(RendererMode mode) {
-  if (mode.core == NONE_CORE)
+void YspRendererModeView::SetToggled(ie::RenderMode mode) {
+  if (mode.core == ie::NONE_CORE)
     PageActionIconView::SetActiveInternal(false);
   else
     PageActionIconView::SetActiveInternal(true);
-  renderer_mode_ = mode;
+  render_mode_ = mode;
   UpdateImage();
   base::string16 tip_str = L"";
-  if (renderer_mode_.core == BLINK_CORE)
+  if (render_mode_.core == ie::BLINK_CORE)
     tip_str = l10n_util::GetStringUTF16(IDS_CHROME_CORE);
-  else if (renderer_mode_.core == IE_CORE) {
+  else if (render_mode_.core == ie::IE_CORE) {
     if (base::win::GetSystemIEVersion() < 8)
       tip_str = l10n_util::GetStringUTF16(IDS_IE_CORE);
     else {
-      if (renderer_mode_.emulation == ie::EMULATION7)
+      if (render_mode_.emulation == ie::EMULATION7)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_7) + L" + ";
-      else if (renderer_mode_.emulation == ie::EMULATION8)
+      else if (render_mode_.emulation == ie::EMULATION8)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_8) + L" + ";
-      else if (renderer_mode_.emulation == ie::EMULATION9)
+      else if (render_mode_.emulation == ie::EMULATION9)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_9) + L" + ";
-      else if (renderer_mode_.emulation == ie::EMULATION10)
+      else if (render_mode_.emulation == ie::EMULATION10)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_10) + L" + ";
-      else if (renderer_mode_.emulation == ie::EMULATION11)
+      else if (render_mode_.emulation == ie::EMULATION11)
         tip_str = l10n_util::GetStringUTF16(IDS_YSP_EMULATION_11) + L" + ";
 
-      if (renderer_mode_.version == ie::DOC6)
+      if (render_mode_.version == ie::DOC6)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_6);
-      else if (renderer_mode_.version == ie::DOC7)
+      else if (render_mode_.version == ie::DOC7)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_7);
-      else if (renderer_mode_.version == ie::DOC8)
+      else if (render_mode_.version == ie::DOC8)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_8);
-      else if (renderer_mode_.version == ie::DOC9)
+      else if (render_mode_.version == ie::DOC9)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_9);
-      else if (renderer_mode_.version == ie::DOC10)
+      else if (render_mode_.version == ie::DOC10)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_10);
-      else if (renderer_mode_.version == ie::DOC11)
+      else if (render_mode_.version == ie::DOC11)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_11);
-      else if (renderer_mode_.version == ie::DOCSYS)
+      else if (render_mode_.version == ie::DOCSYS)
         tip_str = tip_str + l10n_util::GetStringUTF16(IDS_YSP_DOCMODE_SYS);
     }
   }
@@ -86,9 +86,9 @@ void YspRendererModeView::OnExecuting(
     PageActionIconView::ExecuteSource execute_source) {}
 
 void YspRendererModeView::ExecuteCommand(ExecuteSource source) {
-  if (browser_ && renderer_mode_.core != NONE_CORE) {
+  if (browser_ && render_mode_.core != ie::NONE_CORE) {
     OnExecuting(source);
-    chrome::ShowRendererModeSwitchBubble(browser_, renderer_mode_);
+    chrome::ShowRendererModeSwitchBubble(browser_, render_mode_);
   } else {
     PageActionIconView::ExecuteCommand(source);
   }
@@ -107,7 +107,7 @@ void YspRendererModeView::UpdateImage() {
   if (!active())
     return;
 
-  if (renderer_mode_.core == BLINK_CORE) {
+  if (render_mode_.core == ie::BLINK_CORE) {
     SetImage(*ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(
         IDR_YSP_BLINK_CORE_GREY));
   } else {

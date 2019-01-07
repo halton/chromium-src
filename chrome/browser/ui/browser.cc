@@ -466,8 +466,8 @@ namespace {
 void StartAndRedirectNavigation(Browser* browser,
                                 content::WebContents* web_contents,
                                 const GURL& url) {
-#ifdef IE_REDCORE
-  RendererMode mode;
+#if defined(IE_REDCORE)
+  ie::RenderMode mode;
 #endif
   // URL Blacklist And Whitelist
   DLOG(INFO) << "URLhost:[" << url << "] url_host:[" << url.host() << ']';
@@ -494,7 +494,7 @@ void StartAndRedirectNavigation(Browser* browser,
     }
   }
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
   if (web_contents->IsAutoSelect() && browser->UrlCompared(url, mode) &&
       web_contents->GetRendererMode() != mode) {
     web_contents->Stop();
@@ -1267,7 +1267,7 @@ void Browser::TabInsertedAt(TabStripModel* tab_strip_model,
 
 #if defined(IE_REDCORE)
   // IE Function Control
-  if (contents->GetRendererMode().core == IE_CORE) {
+  if (contents->GetRendererMode().core == ie::IE_CORE) {
     content::WebContentsIE* ie_content = (content::WebContentsIE*)(contents);
     ie_content->SendFunctionControl(GetIEFunctionControlJsonString());
   }
@@ -1752,21 +1752,23 @@ WebContents* Browser::OpenURLFromTab(WebContents* source,
   nav_params.blob_url_loader_factory = params.blob_url_loader_factory;
 
 #if defined(IE_REDCORE)
-  if (!ui::PageTransitionCoreTypeIs(params.transition,
+  if (source &&
+  	  !ui::PageTransitionCoreTypeIs(params.transition,
                                     ui::PAGE_TRANSITION_AUTO_BOOKMARK)) {
-    if (source)
-      nav_params.renderer_mode = source->GetRendererMode();
+  	nav_params.renderer_mode = source->GetRendererMode();
   }
-  RendererMode mode;
+
+  ie::RenderMode mode;
   if (UrlCompared(params.url, mode))
     nav_params.renderer_mode = mode;
 #endif  // IE_REDCORE
 
   bool is_popup = source && PopupBlockerTabHelper::ConsiderForPopupBlocking(
                                 params.disposition);
-  if (is_popup && PopupBlockerTabHelper::MaybeBlockPopup(
-                      source, base::Optional<GURL>(), &nav_params, &params,
-                      blink::mojom::WindowFeatures())) {
+  if (is_popup &&
+  	  PopupBlockerTabHelper::MaybeBlockPopup(
+          source, base::Optional<GURL>(), &nav_params, &params,
+          blink::mojom::WindowFeatures())) {
     return nullptr;
   }
 
@@ -3187,8 +3189,8 @@ void Browser::TrySetIEConetentZoom(content::WebContents* web_content) {
   if (!web_content)
     return;
 
-  RendererMode mode = web_content->GetRendererMode();
-  if (mode.core == IE_CORE && !web_content->IsLoading()) {
+  ie::RenderMode mode = web_content->GetRendererMode();
+  if (mode.core == ie::IE_CORE && !web_content->IsLoading()) {
     zoom::ZoomController* zoom_ctr =
         zoom::ZoomController::FromWebContents(web_content);
     if (zoom_ctr) {
@@ -3480,8 +3482,8 @@ void Browser::GetKernelFromUrl(const GURL& host,
   DoGetKernelFromUrl(&list_kernel, core_version, core_emulation);
 }
 
-void Browser::MatchSystemIEVersion(RendererMode& mode) {
-  if (mode.core != IE_CORE)
+void Browser::MatchSystemIEVersion(ie::RenderMode& mode) {
+  if (mode.core != ie::IE_CORE)
     return;
 
   int system_ie_version = base::win::GetSystemIEVersion();
@@ -3498,7 +3500,7 @@ void Browser::MatchSystemIEVersion(RendererMode& mode) {
     mode.version = (ie::Version)system_ie_version;
 }
 
-bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
+bool Browser::UrlCompared(const GURL& host, ie::RenderMode& mode) {
   std::string core_version = "";
   std::string core_emulation = "";
   GetKernelFromUrl(host, core_version, core_emulation);
@@ -3508,7 +3510,7 @@ bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
   if (core_emulation.empty())
     return false;
 
-  mode.core = IE_CORE;
+  mode.core = ie::IE_CORE;
   if (core_emulation == "emulation7")
     mode.emulation = ie::EMULATION7;
   else if (core_emulation == "emulation8")
@@ -3520,9 +3522,9 @@ bool Browser::UrlCompared(const GURL& host, RendererMode& mode) {
   else if (core_emulation == "emulation11")
     mode.emulation = ie::EMULATION11;
   else if (core_emulation == "chrome")
-    mode.core = BLINK_CORE;
+    mode.core = ie::BLINK_CORE;
 
-  if (mode.core == IE_CORE && !core_version.empty()) {
+  if (mode.core == ie::IE_CORE && !core_version.empty()) {
     if (core_version == "IE6")
       mode.version = ie::DOC6;
     else if (core_version == "IE7")
@@ -4099,7 +4101,8 @@ void Browser::NotifyIEFunctionControl() {
   std::wstring json_str = GetIEFunctionControlJsonString();
   for (int i = 0; i < tab_strip_model_->count(); i++) {
     WebContents* web_content = tab_strip_model_->GetWebContentsAt(i);
-    if (web_content == NULL || web_content->GetRendererMode().core != IE_CORE)
+    if (web_content == NULL ||
+    	web_content->GetRendererMode().core != ie::IE_CORE)
       continue;
 
     content::WebContentsIE* web_content_ie =

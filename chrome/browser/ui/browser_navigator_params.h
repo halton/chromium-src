@@ -23,10 +23,6 @@
 #include "ui/gfx/geometry/rect.h"
 #include "url/gurl.h"
 
-#if defined(IE_REDCORE)
-#include "content/common/IE/version_ie.h"
-#endif
-
 class Browser;
 class Profile;
 
@@ -259,9 +255,9 @@ struct NavigateParams {
   bool open_pwa_window_if_possible = false;
 
 #if defined(IE_REDCORE)
-  RendererMode renderer_mode;
+  ie::RenderMode renderer_mode;
   bool auto_select;
-#endif
+#endif  // IE_REDCORE
 
  private:
   NavigateParams();

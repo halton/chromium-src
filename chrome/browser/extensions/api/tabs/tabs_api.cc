@@ -110,9 +110,9 @@
 #include "ui/base/ui_base_features.h"
 #endif
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
 #include "content/browser/web_contents/web_contents_ie.h"
-#endif
+#endif  // defined(IE_REDCORE)
 
 using content::BrowserThread;
 using content::NavigationController;
@@ -2236,112 +2236,110 @@ ExtensionFunction::ResponseAction TabsDiscardFunction::Run() {
 TabsDiscardFunction::TabsDiscardFunction() {}
 TabsDiscardFunction::~TabsDiscardFunction() {}
 
-#ifdef REDCORE
+#if defined(REDCORE)
 bool TabsSetIEAutoLoginInfoFunction::RunAsync() {
-#ifdef IE_REDCORE
- std::unique_ptr<tabs::SetIEAutoLoginInfo::Params> params(
-   tabs::SetIEAutoLoginInfo::Params::Create(*args_));
- EXTENSION_FUNCTION_VALIDATE(params);
- int tab_id = params->tab_id;
- std::wstring frame_xpath = base::UTF8ToUTF16(params->frame_xpath);
- std::wstring name_xpath = base::UTF8ToUTF16(params->name_xpath);
- std::wstring name_value = base::UTF8ToUTF16(params->name_value);
- std::wstring pwd_xpath = base::UTF8ToUTF16(params->pwd_xpath);
- std::wstring pwd_value = base::UTF8ToUTF16(params->pwd_value);
- std::wstring login_xpath = base::UTF8ToUTF16(params->login_xpath);
- if (tab_id < 0)
+#if defined(IE_REDCORE)
+  std::unique_ptr<tabs::SetIEAutoLoginInfo::Params> params(
+      tabs::SetIEAutoLoginInfo::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params);
+
+  int tab_id = params->tab_id;
+  if (tab_id < 0)
    return false;
- WebContents* web_contents = GetWebContents(tab_id);
- if (web_contents) {
-   RendererMode mode= web_contents->GetRendererMode();
-   if (mode.core == IE_CORE) {
-     content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
-     pIEContent->SetIEAutoLoginInfo(frame_xpath, name_xpath, name_value, pwd_xpath, pwd_value, login_xpath);
-   }
- }
-#endif /*IE_REDCORE*/
- return true;
+
+  WebContents* web_contents = GetWebContents(tab_id);
+  if (web_contents &&
+      ie::IE_CORE == web_contents->GetRendererMode().core) {
+    content::WebContentsIE* web_contents_ie =
+        dynamic_cast<content::WebContentsIE*>(web_contents);
+    web_contents_ie->SetIEAutoLoginInfo(
+        base::UTF8ToUTF16(params->frame_xpath),
+        base::UTF8ToUTF16(params->name_xpath),
+        base::UTF8ToUTF16(params->name_value),
+        base::UTF8ToUTF16(params->pwd_xpath),
+        base::UTF8ToUTF16(params->pwd_value),
+        base::UTF8ToUTF16(params->login_xpath));
+  }
+#endif  // defined(IE_REDCORE)
+
+  return true;
 }
 
-content::WebContents * TabsSetIEAutoLoginInfoFunction::GetWebContents(int tab_id)
-{
- content::WebContents* pWebContent = NULL;
-#ifdef IE_REDCORE
- if (tab_id != -1)   {
-   // We assume this call leaves web_contents unchanged if it is unsuccessful.
-   GetTabById(tab_id,
-     GetProfile(),
-     include_incognito_information(),
-     NULL /* ignore Browser* output */,
-     NULL /* ignore TabStripModel* output */,
-     &pWebContent,
-     NULL /* ignore int tab_index output */,
-     &error_);
- }
- else {
-  //  Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();;
-  //  if (!browser)
-  //    error_ = keys::kNoCurrentWindowError;
-  //  else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
-  //    error_ = keys::kNoSelectedTabError;
- }
-#endif /*IE_REDCORE*/
- return pWebContent;
+content::WebContents*
+TabsSetIEAutoLoginInfoFunction::GetWebContents(int tab_id) {
+  content::WebContents* web_contents = NULL;
+#if defined(IE_REDCORE)
+  if (tab_id != -1)   {
+    // We assume this call leaves web_contents unchanged if it is unsuccessful.
+    GetTabById(tab_id,
+               GetProfile(),
+               include_incognito_information(),
+               NULL, // ignore Browser* output
+               NULL, // ignore TabStripModel* output
+               &web_contents,
+               NULL, // ignore int tab_index output
+               &error_);
+  } else {
+  // Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();
+  // if (!browser)
+  //   error_ = keys::kNoCurrentWindowError;
+  // else if (!ExtensionTabUtil::GetDefaultTab(browser, &web_contents, NULL))
+  //   error_ = keys::kNoSelectedTabError;
+  }
+#endif  // defined(IE_REDCORE)
+  return web_contents;
 }
-
 
 bool TabsStartListenIELoginFunction::RunAsync() {
-#ifdef IE_REDCORE
- std::unique_ptr<tabs::StartListenIELogin::Params> params(
-   tabs::StartListenIELogin::Params::Create(*args_));
- EXTENSION_FUNCTION_VALIDATE(params);
+#if defined(IE_REDCORE)
+  std::unique_ptr<tabs::StartListenIELogin::Params> params(
+      tabs::StartListenIELogin::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params);
 
- int tab_id = params->tab_id;
- std::wstring url = base::UTF8ToUTF16(params->url);
- std::wstring frame_xpath = base::UTF8ToUTF16(params->frame_xpath);
- std::wstring name_xpath = base::UTF8ToUTF16(params->name_xpath);
- std::wstring pwd_xpath = base::UTF8ToUTF16(params->pwd_xpath);
-std::wstring login_xpath = base::UTF8ToUTF16(params->login_xpath);
- if (tab_id < 0)
-   return false;
- WebContents* web_contents = GetWebContents(tab_id);
- if (web_contents) {
-   RendererMode mode = web_contents->GetRendererMode();
-   if (mode.core == IE_CORE) {
-     content::WebContentsIE* pIEContent = dynamic_cast<content::WebContentsIE*>(web_contents);
-     pIEContent->SetListenLoginXPath(url, frame_xpath, name_xpath, pwd_xpath, login_xpath);
-   }
- }
-#endif /*IE_REDCORE*/
+  int tab_id = params->tab_id;
+  if (tab_id < 0)
+    return false;
+
+  WebContents* web_contents = GetWebContents(tab_id);
+  if (web_contents &&
+      ie::IE_CORE == web_contents->GetRendererMode().core) {
+    content::WebContentsIE* web_contents_ie =
+        dynamic_cast<content::WebContentsIE*>(web_contents);
+    web_contents_ie->SetListenLoginXPath(
+        base::UTF8ToUTF16(params->url),
+        base::UTF8ToUTF16(params->frame_xpath),
+        base::UTF8ToUTF16(params->name_xpath),
+        base::UTF8ToUTF16(params->pwd_xpath),
+        base::UTF8ToUTF16(params->login_xpath));
+  }
+#endif  // defined(IE_REDCORE)
  return true;
 }
 
-content::WebContents * TabsStartListenIELoginFunction::GetWebContents(int tab_id)
-{
- content::WebContents* pWebContent = NULL;
-#ifdef IE_REDCORE
- if (tab_id != -1) {
-   // We assume this call leaves web_contents unchanged if it is unsuccessful.
-   GetTabById(tab_id,
-     GetProfile(),
-     include_incognito_information(),
-     NULL /* ignore Browser* output */,
-     NULL /* ignore TabStripModel* output */,
-     &pWebContent,
-     NULL /* ignore int tab_index output */,
-     &error_);
- }
- else {
+content::WebContents*
+TabsStartListenIELoginFunction::GetWebContents(int tab_id) {
+  content::WebContents* web_contents = NULL;
+#if defined(IE_REDCORE)
+  if (tab_id != -1) {
+    // We assume this call leaves web_contents unchanged if it is unsuccessful.
+    GetTabById(tab_id,
+               GetProfile(),
+               include_incognito_information(),
+               NULL, // ignore Browser* output
+               NULL, // ignore TabStripModel* output
+               &web_contents,
+               NULL, // ignore int tab_index output
+               &error_);
+  } else {
   //  Browser* browser = ChromeExtensionFunctionDetails(this).GetCurrentBrowser();
   //  if (!browser)
   //    error_ = keys::kNoCurrentWindowError;
-  //  else if (!ExtensionTabUtil::GetDefaultTab(browser, &pWebContent, NULL))
+  //  else if (!ExtensionTabUtil::GetDefaultTab(browser, &web_contents, NULL))
   //    error_ = keys::kNoSelectedTabError;
- }
-#endif /*IE_REDCORE*/
- return pWebContent;
+  }
+#endif  // defined(IE_REDCORE)
+  return web_contents;
 }
-//ysp+ }
-#endif /*REDCORE*/
+#endif  // defined(REDCORE)
 
 }  // namespace extensions

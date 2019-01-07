@@ -18,7 +18,8 @@
 #include "ui/base/window_open_disposition.h"
 
 #if defined(IE_REDCORE)
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/common_ie.h"
+#include "content/common/IE/render_mode_ie.h"
 #endif
 
 class Browser;
@@ -178,10 +179,10 @@ void OpenCurrentUrlUseChrome(Browser* browser,
                              bool auto_select);
 void SwitchRendererMode(Browser* browser,
                         const GURL& url,
-                        const RendererMode& mode,
+                        const ie::RenderMode& mode,
                         bool auto_select);
-void ShowRendererModeSwitchBubble(Browser* browser, RendererMode mode);
-#endif
+void ShowRendererModeSwitchBubble(Browser* browser, ie::RenderMode mode);
+#endif  // IE_REDCORE
 
 }  // namespace chrome
 

@@ -5,10 +5,12 @@
 #ifndef CONTENT_COMMON_IE_HTTP_MONITOR_IE_H_
 #define CONTENT_COMMON_IE_HTTP_MONITOR_IE_H_
 
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <comdef.h>
 #include <urlmon.h>
 
-#include "base/win/atl.h"
 #include "content/common/IE/IEInterface.h"
 
 namespace ie {
@@ -20,8 +22,8 @@ class ATL_NO_VTABLE HttpMonitorIe
       public IDispatchImpl<IHttpMonitor,
                            &IID_IHttpMonitor,
                            &LIBID_IEBrowserLib,
-                           0xFFFF,   // wMajor
-                           0xFFFF>,  // wMinor
+                           0xFFFF,
+                           0xFFFF>,
       public IInternetProtocol,
       public IWinInetHttpInfo,
       public IInternetBindInfo {

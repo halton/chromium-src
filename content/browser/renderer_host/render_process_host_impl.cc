@@ -1513,14 +1513,15 @@ RenderProcessHost* RenderProcessHostImpl::CreateRenderProcessHost(
         site_instance->GetSiteURL());
   }
 
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
-  if (site_instance && site_instance->GetRenderMode().core == IE_CORE) {
-    RenderProcessHostImpl* rphi = new RenderProcessHostImpl(
+#if defined(IE_REDCORE)
+  if (site_instance &&
+      site_instance->GetRenderMode().core == ie::IE_CORE) {
+    RenderProcessHostImpl* impl = new RenderProcessHostImpl(
         browser_context, storage_partition_impl, is_for_guests_only);
-    rphi->SetTridentCore(true);
-    return rphi;
+    impl->SetTridentCore(true);
+    return impl;
   }
-#endif  // ysp {+
+#endif  // defined(IE_REDCORE)
 
   return new RenderProcessHostImpl(browser_context, storage_partition_impl,
                                    is_for_guests_only);
@@ -4040,15 +4041,15 @@ RenderProcessHost* RenderProcessHostImpl::GetProcessHostForSiteInstance(
         UnmatchedServiceWorkerProcessTracker::MatchWithSite(site_instance);
   }
 
-#ifdef IE_REDCORE
-  if (site_instance->GetRenderMode().core == IE_CORE) {
+#if defined(IE_REDCORE)
+  if (site_instance->GetRenderMode().core == ie::IE_CORE) {
     if (!render_process_host) {
       render_process_host = CreateRenderProcessHost(
           browser_context, nullptr, site_instance, is_for_guests_only);
     }
     return render_process_host;
   }
-#endif
+#endif  // defined(IE_REDCORE)
 
   // See if the spare RenderProcessHost can be used.
   SpareRenderProcessHostManager& spare_process_manager =
@@ -4102,13 +4103,14 @@ RenderProcessHost* RenderProcessHostImpl::GetProcessHostForSiteInstance(
   // two processes at the same time.  In this case the call to
   // PrepareForFutureRequests will be postponed until later (e.g. until the
   // navigation commits or a cross-site redirect happens).
-#ifdef IE_REDCORE
-  if (spare_was_taken && site_instance->GetRenderMode().core != IE_CORE)
+#if defined(IE_REDCORE)
+  if (spare_was_taken &&
+      site_instance->GetRenderMode().core != ie::IE_CORE)
     spare_process_manager.PrepareForFutureRequests(browser_context);
 #else
   if (spare_was_taken)
     spare_process_manager.PrepareForFutureRequests(browser_context);
-#endif
+#endif  // defined(IE_REDCORE)
 
   if (is_unmatched_service_worker) {
     UnmatchedServiceWorkerProcessTracker::Register(render_process_host,

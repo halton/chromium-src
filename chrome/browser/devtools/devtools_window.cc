@@ -684,9 +684,9 @@ void DevToolsWindow::ToggleDevToolsWindow(
     bool force_open,
     const DevToolsToggleAction& action,
     const std::string& settings) {
-#ifdef IE_REDCORE
-  RendererMode mode = inspected_web_contents->GetRendererMode();
-  if (mode.core == IE_CORE) {
+#if defined(IE_REDCORE)
+  ie::RenderMode mode = inspected_web_contents->GetRendererMode();
+  if (mode.core == ie::IE_CORE) {
 	  HandleIEDevTools(inspected_web_contents);
 	  return;
   }
@@ -1624,20 +1624,21 @@ WebContents* DevToolsWindow::GetInspectedWebContents() {
              : NULL;
 }
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
 void DevToolsWindow::HandleIEDevTools(content::WebContents * web_contents) {
 	if (web_contents == NULL)
 		return;
-	RendererMode mode = web_contents->GetRendererMode();
-	if (mode.core != IE_CORE)
+
+  ie::RenderMode mode = web_contents->GetRendererMode();
+	if (mode.core != ie::IE_CORE)
 		return;
-        content::WebContentsIE* pIEContent =
-            static_cast<content::WebContentsIE*>(web_contents);
-        bool isOpen = pIEContent->IsDevToolsOpened();
-	bool show = !isOpen;
-	pIEContent->ShowDevTools(show);
+
+  content::WebContentsIE* web_contents_ie =
+      static_cast<content::WebContentsIE*>(web_contents);
+
+  web_contents_ie->ShowDevTools(!web_contents_ie->IsDevToolsOpened());
 }
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
 void DevToolsWindow::LoadCompleted() {
   Show(action_on_load_);

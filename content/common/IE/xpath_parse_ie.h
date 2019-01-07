@@ -5,12 +5,12 @@
 #ifndef CONTENT_COMMON_IE_XPATH_PARSE_IE_H_
 #define CONTENT_COMMON_IE_XPATH_PARSE_IE_H_
 
-#include <MsHTML.h>
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <list>
 #include <string>
-#include <vector>
 
-#include "base/win/atl.h"
 #include "content/common/IE/xpath_node_ie.h"
 
 namespace ie {
@@ -40,7 +40,6 @@ class XpathParse {
   };
 
   XpathNode* xpath_node_;
-  // XpathNodePredicate* pNodePredicatesTemp;
   std::wstring xpath_;
   Status status_;
   std::list<XpathNode> node_list_;

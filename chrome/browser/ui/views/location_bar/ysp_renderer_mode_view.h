@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "chrome/browser/ui/views/page_action/page_action_icon_view.h"
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/render_mode_ie.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
 
 class Browser;
@@ -20,7 +20,7 @@ class YspRendererModeView : public PageActionIconView {
                       PageActionIconView::Delegate* delegate);
   ~YspRendererModeView() override;
 
-  void SetToggled(RendererMode mode);
+  void SetToggled(ie::RenderMode mode);
   bool Update() override;
   base::string16 GetTextForTooltipAndAccessibleName() const override;
 
@@ -36,7 +36,7 @@ class YspRendererModeView : public PageActionIconView {
 
  private:
   Browser* browser_;
-  RendererMode renderer_mode_;
+  ie::RenderMode render_mode_;
   base::string16 tooltip_text_;
   DISALLOW_COPY_AND_ASSIGN(YspRendererModeView);
 };

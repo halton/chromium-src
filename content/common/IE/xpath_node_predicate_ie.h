@@ -5,11 +5,10 @@
 #ifndef CONTENT_COMMON_IE_XPATH_NODE_PREDICATES_IE_H_
 #define CONTENT_COMMON_IE_XPATH_NODE_PREDICATES_IE_H_
 
-#include <MsHTML.h>
-#include <string>
-#include <vector>
-
+// atl.h need be in front of the COM headers
 #include "base/win/atl.h"
+
+#include <string>
 
 namespace ie {
 

@@ -16,7 +16,7 @@
 #include "components/download/public/common/download_destination_observer.h"
 #include "components/download/public/common/download_interrupt_reasons_utils.h"
 #include "components/download/public/common/download_stats.h"
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/common_ie.h"
 #include "content/public/browser/browser_thread.h"
 
 namespace ie {

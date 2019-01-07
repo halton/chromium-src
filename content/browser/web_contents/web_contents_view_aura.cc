@@ -96,10 +96,10 @@ WebContentsView* CreateWebContentsView(
     RenderViewHostDelegateView** render_view_host_delegate_view) {
   WebContentsViewAura* rv = NULL;
 #if defined(IE_REDCORE)
-  if (web_contents->GetRendererMode().core == IE_CORE)
+  if (web_contents->GetRendererMode().core == ie::IE_CORE)
     rv = new WebContentsViewIEAura(web_contents, delegate);
   else
-#endif
+#endif  // defined(IE_REDCORE)
     rv = new WebContentsViewAura(web_contents, delegate);
   *render_view_host_delegate_view = rv;
   return rv;

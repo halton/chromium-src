@@ -3979,11 +3979,11 @@ void RenderFrameHostImpl::CommitNavigation(
 
   UpdatePermissionsForNavigation(common_params, request_params);
 
-  #if defined(IE_REDCORE)
+#if defined(IE_REDCORE)
   if (delegate_ && delegate_->GetAsWebContents()) {
     WebContentsImpl* web_contents =
         static_cast<WebContentsImpl*>(delegate_->GetAsWebContents());
-    if (web_contents->GetRendererMode().core == IE_CORE) {
+    if (web_contents->GetRendererMode().core == ie::IE_CORE) {
       WebContentsIE* web_contents_ie = static_cast<WebContentsIE*>(web_contents);
       if (common_params.url.SchemeIsHTTPOrHTTPS() ||
           common_params.url.SchemeIsFile() ||
@@ -3994,7 +3994,7 @@ void RenderFrameHostImpl::CommitNavigation(
       }
     }
   }
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
   // Get back to a clean state, in case we start a new navigation without
   // completing an unload handler.

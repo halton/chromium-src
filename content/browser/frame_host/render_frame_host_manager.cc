@@ -52,9 +52,9 @@
 #include "content/public/common/url_constants.h"
 #include "content/public/common/url_utils.h"
 
-#if defined(REDCORE) && defined(IE_REDCORE)
-#include "content/common/IE/version_ie.h"
-#endif
+#if defined(IE_REDCORE)
+#include "content/common/IE/common_ie.h"
+#endif  // defined(IE_REDCORE)
 
 #if defined(OS_MACOSX)
 #include "ui/gfx/mac/scoped_cocoa_disable_screen_updates.h"
@@ -512,9 +512,9 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
   // The SiteInstance determines whether to switch RenderFrameHost or not.
   bool use_current_rfh =
       (current_site_instance == dest_site_instance
-#if defined(REDCORE) && defined(IE_REDCORE)
-       || current_site_instance->GetRenderMode().core == IE_CORE
-#endif
+#if defined(IE_REDCORE)
+       || current_site_instance->GetRenderMode().core == ie::IE_CORE
+#endif  // defined(IE_REDCORE)
        );
 
   bool notify_webui_of_rf_creation = false;
@@ -560,8 +560,8 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
     DCHECK(!speculative_render_frame_host_);
   } else
 #if defined(IE_REDCORE)
-      if (dest_site_instance->GetRenderMode().core != IE_CORE)
-#endif
+      if (dest_site_instance->GetRenderMode().core != ie::IE_CORE)
+#endif  // defined(IE_REDCORE)
   {
     // If the current RenderFrameHost cannot be used a speculative one is
     // created with the SiteInstance for the current URL. If a speculative
@@ -659,8 +659,8 @@ RenderFrameHostImpl* RenderFrameHostManager::GetFrameHostForNavigation(
     notify_webui_of_rf_creation = true;
 
 #ifdef IE_REDCORE
-    if (dest_site_instance->GetRenderMode().core != IE_CORE) {
-#endif
+    if (dest_site_instance->GetRenderMode().core != ie::IE_CORE) {
+#endif  // defined(IE_REDCORE)
 
     if (navigation_rfh == render_frame_host_.get()) {
       EnsureRenderFrameHostVisibilityConsistent();
@@ -1087,8 +1087,8 @@ RenderFrameHostManager::GetSiteInstanceForNavigation(
 
 #ifdef IE_REDCORE
     SiteInstanceImpl* new_instance_impl = (SiteInstanceImpl*)new_instance.get();
-    if (new_instance_impl->GetRenderMode().core != IE_CORE)
-#endif
+    if (new_instance_impl->GetRenderMode().core != ie::IE_CORE)
+#endif  // defined(IE_REDCORE)
     RenderProcessHostImpl::NotifySpareManagerAboutRecentlyUsedBrowserContext(
         browser_context);
   }

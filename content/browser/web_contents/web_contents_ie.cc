@@ -75,7 +75,7 @@
 #include "content/child/image_decoder.h"
 #include "content/common/IE/browser_host_event_delegant_ie.h"
 #include "content/common/IE/browser_process_ie.h"
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/common_ie.h"
 #include "content/common/browser_plugin/browser_plugin_constants.h"
 #include "content/common/browser_plugin/browser_plugin_messages.h"
 #include "content/common/frame_messages.h"
@@ -210,7 +210,7 @@ void WebContentsIE::Init(const WebContents::CreateParams& params) {
 
   // chrome delete GetRenderProcessHost() from WebContentsImpl
   RenderProcessHost* pHost = GetMainFrame()->GetProcess();
-  if (pHost && rendererMode_.core == IE_CORE)
+  if (pHost && render_mode_.core == ie::IE_CORE)
     pHost->SetTridentCore(true);
 
   CComObject<ie::BrowserHostEventDelegant>::CreateInstance(
@@ -553,11 +553,11 @@ void WebContentsIE::OnFinishNavigate(const GURL& url,
                                      const std::vector<GURL>& favicon_urls) {
   if (browser_event_handler_) {
     int mode = browser_event_handler_->GetDocMode();
-    if (mode > 0 && mode != static_cast<int>(rendererMode_.version) &&
-        rendererMode_.version != ie::DOCNONE &&
-        rendererMode_.version != ie::DOCSYS) {
+    if (mode > 0 && mode != static_cast<int>(render_mode_.version) &&
+        render_mode_.version != ie::DOCNONE &&
+        render_mode_.version != ie::DOCSYS) {
       ie::DocumentMode doc_mode = ie::IE8;
-      switch (rendererMode_.version) {
+      switch (render_mode_.version) {
         case ie::DOC6:
           doc_mode = ie::IE5;
           break;
@@ -614,14 +614,14 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   if (cancel == NULL || browser_event_handler_ == NULL)
     return;
 
-  RendererMode mode;
-  WebContentsDelegate* pDelegate = GetDelegate();
-  if (pDelegate && pDelegate->UrlCompared(url, mode) == false)
-    mode = rendererMode_;
+  ie::RenderMode mode;
+  WebContentsDelegate* delegate = GetDelegate();
+  if (delegate && !delegate->UrlCompared(url, mode))
+    mode = render_mode_;
 
   scoped_refptr<SiteInstance> site_instance =
       SiteInstance::CreateForURL(GetBrowserContext(), url);
-  if (mode.core == IE_CORE)
+  if (mode.core == ie::IE_CORE)
     site_instance->GetProcess()->SetTridentCore(true);
   else
     site_instance->GetProcess()->SetTridentCore(false);
@@ -633,17 +633,19 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   WebContentsImpl* new_contents = NULL;
   std::unique_ptr<WebContents> wbc = WebContents::Create(create_params);
   new_contents = dynamic_cast<WebContentsImpl*>(wbc.get());
-  if (new_contents->GetRendererMode().core == IE_CORE) {
-    WebContentsIE* IEWebContent = dynamic_cast<WebContentsIE*>(new_contents);
-    if (IEWebContent)
-      IEWebContent->SetCreateByIENewWindow(true);
+  if (new_contents->GetRendererMode().core == ie::IE_CORE) {
+    WebContentsIE* web_contents_ie =
+      dynamic_cast<WebContentsIE*>(new_contents);
+    if (web_contents_ie)
+      web_contents_ie->SetCreateByIENewWindow(true);
   }
-  WebContentsDelegate* delegate = GetDelegate();
+
   if (delegate) {
     WindowOpenDisposition disposition =
         WindowOpenDisposition::NEW_FOREGROUND_TAB;
     if ((flag & ie::POPUP) == ie::POPUP)
-      disposition = WindowOpenDisposition::NEW_POPUP;  // NEW_FOREGROUND_TAB;
+      disposition = WindowOpenDisposition::NEW_POPUP;
+
     gfx::Rect initial_rect;
     initial_rect.set_size(create_params.initial_size);
     delegate->AddNewContents(this, std::move(wbc), disposition, initial_rect,
@@ -653,14 +655,14 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
 
   ui::PageTransition transition = ui::PAGE_TRANSITION_LINK;
-  if (mode.core == IE_CORE && (flag & ie::FROMDIALOG) == 0)
+  if (mode.core == ie::IE_CORE && (flag & ie::FROMDIALOG) == 0)
     transition = ui::PAGE_TRANSITION_IE_NEWWINDOW;
   OpenURLParams open_params(url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
                             transition, true /* is_renderer_initiated */);
   new_contents->OpenURL(open_params);
 
   *cancel = true;
-  if (mode.core == IE_CORE) {
+  if (mode.core == ie::IE_CORE) {
     WebContentsIE* ie_contents = NULL;
     ie_contents = static_cast<WebContentsIE*>(new_contents);
     if (ie_contents == NULL)
@@ -886,8 +888,8 @@ bool WebContentsIE::CreateTridentWebView(
   if (browser_event_handler_ == NULL || IsWindow(hwnd_parent) == FALSE)
     return false;
   browser_event_handler_->SetHostHWND(hwnd_parent);
-  SetBrowserEmulation(rendererMode_.emulation);
-  if (browser_event_handler_->CreateBrowser(rendererMode_.emulation,
+  SetBrowserEmulation(render_mode_.emulation);
+  if (browser_event_handler_->CreateBrowser(render_mode_.emulation,
                                             is_new_window_)) {
     // std::wstring ua = L"";
     // switch (ieVer_)
@@ -1267,7 +1269,7 @@ void WebContentsIE::NavigateUrl(
       !PageTransitionTypeIncludingQualifiersIs(
           params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
     b = browser_event_handler_->LoadUrl(url);
-  
+
   if (PageTransitionTypeIncludingQualifiersIs(
           params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
     browser_event_handler_->Refresh();

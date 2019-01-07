@@ -5,11 +5,13 @@
 #ifndef CONTENT_COMMON_IE_IE_EVENT_HANDLER_IE_H_
 #define CONTENT_COMMON_IE_IE_EVENT_HANDLER_IE_H_
 
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <MsHTML.h>
 #include <windows.h>
-#include <string>
 
-#include "base/win/atl.h"
+#include <string>
 
 namespace ie {
 

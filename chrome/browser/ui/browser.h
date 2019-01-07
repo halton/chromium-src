@@ -61,15 +61,12 @@
 #endif
 
 #if defined(REDCORE)
-#include "chrome/browser/ysp_login/ysp_login_manager.h"  // ysp+{IE Function Control}
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif  // defined(REDCORE)
+
 #if defined(IE_REDCORE)
 #include "chrome/browser/ui/views/ysp_ie_login_view.h"
-#endif
-#endif
-
-#if defined(REDCORE)
-#include "chrome/browser/ysp_login/ysp_login_manager.h"
-#endif
+#endif  // defined(IE_REDCORE)
 
 class BrowserContentSettingBubbleModelDelegate;
 class BrowserInstantController;
@@ -140,7 +137,7 @@ class Browser : public TabStripModelObserver,
                 public YSPLoginManagerObserver {
 #else
                 public ui::SelectFileDialog::Listener {
-#endif  // REDCORE
+#endif  // defined(REDCORE)
  public:
   // SessionService::WindowType mirrors these values.  If you add to this
   // enum, look at SessionService::WindowType to see if it needs to be
@@ -178,25 +175,23 @@ class Browser : public TabStripModelObserver,
     // that would be canceled.
     DOWNLOAD_CLOSE_LAST_WINDOW_IN_INCOGNITO_PROFILE,
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
     DOWNLOAD_CLOSE_IE_CONTENT,
-#endif
+#endif  // defined(IE_REDCORE)
   };
 
 #if defined(REDCORE)
   enum YSPLockStatus{UNLOCKED, SCREEN_LOCKED, TOKEN_EXPIRED_LOCKED};
-#endif
+#endif  // defined(REDCORE)
 
   struct CreateParams {
     CreateParams(Profile* profile, bool user_gesture);
     CreateParams(Type type, Profile* profile, bool user_gesture);
-#ifdef REDCORE
+#if defined(REDCORE)
     CreateParams(Profile* profile, bool user_gesture, bool first_create);
-    CreateParams(Type type,
-                 Profile* profile,
-                 bool user_gesture,
-                 bool first_create);
-#endif  // REDCORE
+    CreateParams(Type type, Profile* profile,
+                 bool user_gesture, bool first_create);
+#endif  // defined(REDCORE)
     CreateParams(const CreateParams& other);
 
     static CreateParams CreateForApp(const std::string& app_name,
@@ -232,9 +227,9 @@ class Browser : public TabStripModelObserver,
     // programmatically created.
     bool user_gesture;
 
-#ifdef REDCORE
+#if defined(REDCORE)
     bool first_create = false;
-#endif
+#endif  // defined(REDCORE)
 
     // Supply a custom BrowserWindow implementation, to be used instead of the
     // default. Intended for testing.
@@ -482,7 +477,7 @@ class Browser : public TabStripModelObserver,
                           const int font_size);
 #endif  // defined(WATERMARK) && !defined(IE_REDCORE)
 
-#ifdef REDCORE
+#if defined(REDCORE)
   void AppAutoUpdate();
   void AppAutoUpdate(const std::string& update_data);
 
@@ -495,7 +490,7 @@ class Browser : public TabStripModelObserver,
   bool BlackUrlCompared(const GURL& host);
   bool WhiteUrlCompared(const GURL& host);
   bool FirstCreate();
-#endif  // REDCORE
+#endif  // defined(REDCORE)
 
 #if defined(IE_REDCORE)
   void OnFindWindowsDomainUserInfoEnd(
@@ -503,7 +498,7 @@ class Browser : public TabStripModelObserver,
 
   std::wstring GetIEFunctionControlJsonString();
   void NotifyIEFunctionControl();
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
   // Interface implementations ////////////////////////////////////////////////
 
@@ -607,14 +602,14 @@ class Browser : public TabStripModelObserver,
   void OnLoginSuccess(const base::string16& name,
                       const std::string& head_image_url) override;
   void OnLogout() override;
-#endif  // REDCORE
+#endif  // defined(REDCORE)
 
 #if defined(IE_REDCORE)
   // WebContentsDelegate
-  bool UrlCompared(const GURL& host, RendererMode& mode) override;
+  bool UrlCompared(const GURL& host, ie::RenderMode& mode) override;
   void DidGetWindowsDomainUserInfo(base::string16* username,
                                    base::string16* password) override;
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
  private:
   friend class BrowserTest;
@@ -972,7 +967,7 @@ class Browser : public TabStripModelObserver,
       const std::string& partition_id,
       content::SessionStorageNamespace* session_storage_namespace);
 
-#ifdef REDCORE
+#if defined(REDCORE)
   void OnAutoLockScreenTimer(int64_t timeOutSec);
   void ResetLockScreenTimer(int64_t time);
   void SetExceptionForPopup(int type,
@@ -991,22 +986,22 @@ class Browser : public TabStripModelObserver,
   void ClearPasswordForUserId();
   void ClearUserDataForBrowser(const std::string& user_id);
   void ClearedUserData();
-#endif  // REDCORE
+#endif  // defined(REDCORE)
 
 #if defined(WATERMARK) && !defined(IE_REDCORE)
   void UpdateWatermark();
 #endif  // defined(WATERMARK) && !defined(IE_REDCORE)
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
   void GetKernelFromUrl(const GURL& host,
                         std::string& core_version,
                         std::string& core_emulation);
   void OnTimerSetIEEncUA(base::Time post_task_time);
-  void MatchSystemIEVersion(RendererMode& mode);
+  void MatchSystemIEVersion(ie::RenderMode& mode);
   void TrySetIEConetentZoom(content::WebContents* web_content);
   void ClearIECookies();
   void ClearIECache();
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
   // Data members /////////////////////////////////////////////////////////////
 
@@ -1151,7 +1146,7 @@ class Browser : public TabStripModelObserver,
 #if defined(IE_REDCORE)
   std::unique_ptr<base::RepeatingTimer> ie_crypto_ua_timer_;
   std::vector<LoginBtnInfo> btn_infos_;
-#endif  // IE_REDCORE
+#endif  // defined(IE_REDCORE)
 
 #if defined(REDCORE)
   const int64_t kDefaultLockScreenTime = 600;
@@ -1159,7 +1154,7 @@ class Browser : public TabStripModelObserver,
   YSPLockStatus lock_status_;
   std::unique_ptr<base::RepeatingTimer> auto_lock_timer_;
   base::WeakPtrFactory<Browser> crypto_ua_factory_;
-#endif  // REDCORE
+#endif  // defined(REDCORE)
 
   // The following factory is used for chrome update coalescing.
   base::WeakPtrFactory<Browser> chrome_updater_factory_;

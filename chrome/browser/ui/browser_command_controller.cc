@@ -1052,17 +1052,17 @@ void BrowserCommandController::UpdateCommandsForTabState() {
       BookmarkTabHelper::FromWebContents(current_web_contents)->is_starred());
   window()->ZoomChangedForActiveTab(false);
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
   NavigationEntry* entry =
       current_web_contents->GetController().GetLastCommittedEntry();
   if (entry) {
     GURL url = entry->GetURL();
-    RendererMode mode;
+    ie::RenderMode mode;
     if (url.SchemeIsHTTPOrHTTPS() || url.SchemeIsFile())
       mode = current_web_contents->GetRendererMode();
     window()->SetRendererModeIconToggled(mode);
   }
-#endif
+#endif  // IE_REDCORE
 
   command_updater_.UpdateCommandEnabled(IDC_VIEW_SOURCE,
                                         CanViewSource(browser_));

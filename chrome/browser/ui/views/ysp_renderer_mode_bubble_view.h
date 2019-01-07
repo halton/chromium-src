@@ -16,6 +16,10 @@
 #include "ui/views/controls/button/label_button.h"
 #include "url/gurl.h"
 
+namespace ie{
+struct RenderMode;
+}  // namespace ie
+
 class RendererModeBubbleView : public views::BubbleDialogDelegateView,
                                public views::ButtonListener {
  public:
@@ -26,7 +30,7 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
                          gfx::NativeView parent_window,
                          Browser* browser,
                          const GURL& url,
-                         RendererMode renderer_mode);
+                         ie::RenderMode mode);
 
   static void Hide();
 
@@ -56,14 +60,14 @@ class RendererModeBubbleView : public views::BubbleDialogDelegateView,
   RendererModeBubbleView(views::View* anchor_view,
                          Browser* browser,
                          const GURL& url,
-                         RendererMode mode);
+                         ie::RenderMode mode);
 
  private:
   static RendererModeBubbleView* renderer_mode_bubble_view_;
   views::LabelButton* blink_button_;
   views::LabelButton* ie_button_;
   Browser* browser_;
-  RendererMode renderer_mode_;
+  ie::RenderMode render_mode_;
 };
 
 #endif  // CHROME_BROWSER_UI_VIEWS_YSP_RENDERER_MODE_BUBBLE_VIEW_H_

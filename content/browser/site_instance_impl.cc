@@ -136,9 +136,9 @@ RenderProcessHost* SiteInstanceImpl::GetProcess() {
 
     process_ = RenderProcessHostImpl::GetProcessHostForSiteInstance(this);
 
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
-    process_->SetTridentCore(GetRenderMode().core == IE_CORE);
-#endif  // ysp {+
+#if defined(IE_REDCORE)
+    process_->SetTridentCore(GetRenderMode().core == ie::IE_CORE);
+#endif  // defined(IE_REDCORE)
 
     CHECK(process_);
     process_->AddObserver(this);
@@ -703,11 +703,11 @@ void SiteInstanceImpl::LockToOriginIfNeeded() {
 }
 
 #if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
-void SiteInstanceImpl::SetRenderMode(const RendererMode& mode) {
+void SiteInstanceImpl::SetRenderMode(const ie::RenderMode& mode) {
   render_mode_ = mode;
 }
 
-RendererMode SiteInstanceImpl::GetRenderMode() const {
+ie::RenderMode SiteInstanceImpl::GetRenderMode() const {
   return render_mode_;
 }
 #endif  // ysp {+

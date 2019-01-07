@@ -701,28 +701,18 @@ std::unique_ptr<WebContentsImpl> WebContentsImpl::CreateWithOpener(
   if (opener_rfh)
     opener = opener_rfh->frame_tree_node();
 
-
-
-
-#ifdef REDCORE  // ysp+ {IE Embedded}
-  std::unique_ptr<WebContentsImpl> new_contents;  //WebContentsImpl* new_contents = NULL;
 #if defined(IE_REDCORE)
-  // ysp+ {IE Embedded}
-
-  if (params.renderer_mode.core == IE_CORE)
+  std::unique_ptr<WebContentsImpl> new_contents;
+  if (params.renderer_mode.core == ie::IE_CORE)
     new_contents.reset(new WebContentsIE(params.browser_context));
   else
-#endif
     new_contents.reset(new WebContentsImpl(params.browser_context));
-#if defined(IE_REDCORE)
   if (!params.auto_select_content)
     new_contents->auto_seclect_ = false;
-#endif
-
-#else // chromium
+#else
   std::unique_ptr<WebContentsImpl> new_contents(
       new WebContentsImpl(params.browser_context));
-#endif
+#endif  // defined(IE_REDCORE)
 
   new_contents->SetOpenerForNewContents(opener, params.opener_suppressed);
 
@@ -1867,9 +1857,9 @@ std::unique_ptr<WebContents> WebContentsImpl::Clone() {
   // before.
   CreateParams create_params(GetBrowserContext(), GetSiteInstance());
   create_params.initial_size = GetContainerBounds().size();
-#if defined(REDCORE) && defined(IE_REDCORE)
-  create_params.renderer_mode = rendererMode_;
-#endif
+#if defined(IE_REDCORE)
+  create_params.renderer_mode = render_mode_;
+#endif  // defined(IE_REDCORE)
 
   FrameTreeNode* opener = frame_tree_.root()->opener();
   RenderFrameHostImpl* opener_rfh = nullptr;
@@ -1923,9 +1913,9 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params) {
   // it should be hidden.
   visibility_ =
       params.initially_hidden ? Visibility::HIDDEN : Visibility::VISIBLE;
-#if defined(REDCORE) && defined(IE_REDCORE)
-  rendererMode_ = params.renderer_mode;
-#endif
+#if defined(IE_REDCORE)
+  render_mode_ = params.renderer_mode;
+#endif  // defined(IE_REDCORE)
 
   if (!params.last_active_time.is_null())
     last_active_time_ = params.last_active_time;
@@ -2044,16 +2034,16 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params) {
   NotifySwappedFromRenderManager(
       nullptr, GetRenderManager()->current_frame_host(), true);
 }
-#if defined(REDCORE) && defined(IE_REDCORE)
-RendererMode WebContentsImpl::GetRendererMode() {
-  return rendererMode_;
+
+#if defined(IE_REDCORE)
+ie::RenderMode WebContentsImpl::GetRendererMode() {
+  return render_mode_;
 }
 
-// YSP+ { Kernel switching
 bool WebContentsImpl::IsAutoSelect() {
   return auto_seclect_;
 }
-#endif
+#endif  // defined(IE_REDCORE)
 
 void WebContentsImpl::OnWebContentsDestroyed(WebContentsImpl* web_contents) {
   RemoveDestructionObserver(web_contents);
@@ -2566,38 +2556,44 @@ bool WebContentsImpl::RequestKeyboardLock(
     delegate_->RequestKeyboardLock(this, esc_key_locked_);
   return true;
 }
-#if defined(REDCORE) && defined(IE_REDCORE)  //ysp+ { Kernel switching
-void WebContentsImpl::CreateNewIEWindow(const GURL& url, RendererMode mode) {
 
-	scoped_refptr<SiteInstance> site_instance = SiteInstance::CreateForURL(GetBrowserContext(), url);
-	site_instance->GetProcess()->SetTridentCore(true);
-	site_instance->GetProcess()->Init();
-	CreateParams create_params(GetBrowserContext(), site_instance.get());
-	create_params.renderer_mode = mode;
-	create_params.initial_size = GetContainerBounds().size();
+#if defined(IE_REDCORE)
+void WebContentsImpl::CreateNewIEWindow(const GURL& url,
+                                        ie::RenderMode mode) {
 
-	auto new_ie_content_ptr =  WebContents::Create(create_params);
+  scoped_refptr<SiteInstance> site_instance =
+      SiteInstance::CreateForURL(GetBrowserContext(), url);
+  site_instance->GetProcess()->SetTridentCore(true);
+  site_instance->GetProcess()->Init();
+  CreateParams create_params(GetBrowserContext(), site_instance.get());
+  create_params.renderer_mode = mode;
+  create_params.initial_size = GetContainerBounds().size();
 
-	WebContentsIE* new_contents = static_cast<WebContentsIE*>(new_ie_content_ptr.get());
-	if (new_contents)
-	{
-          WebContentsDelegate* delegate = GetDelegate();
-          if (delegate) {
-            WindowOpenDisposition disposition =
-                WindowOpenDisposition::NEW_FOREGROUND_TAB;
-            gfx::Rect initial_rect;
-            initial_rect.set_size(create_params.initial_size);
-            delegate->AddNewContents(this, std::move(new_ie_content_ptr), disposition,
-                                     initial_rect, false, NULL);
-          }
-          // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
-          OpenURLParams open_params(url, Referrer(), WindowOpenDisposition::CURRENT_TAB,
-                                    ui::PAGE_TRANSITION_LINK,
-                                    true /* is_renderer_initiated */);
-          new_contents->OpenURL(open_params);
-	}
+  auto new_ie_content_ptr =  WebContents::Create(create_params);
+
+  WebContentsIE* new_contents =
+      static_cast<WebContentsIE*>(new_ie_content_ptr.get());
+  if (new_contents) {
+    WebContentsDelegate* delegate = GetDelegate();
+    if (delegate) {
+      WindowOpenDisposition disposition =
+          WindowOpenDisposition::NEW_FOREGROUND_TAB;
+      gfx::Rect initial_rect;
+      initial_rect.set_size(create_params.initial_size);
+      delegate->AddNewContents(this, std::move(new_ie_content_ptr), disposition,
+                               initial_rect, false, NULL);
+    }
+    // new_contents->CreateRenderWidgetHostViewForRenderManager(
+    //     new_contents->GetRenderViewHost());
+    OpenURLParams open_params(url,
+                              Referrer(),
+                              WindowOpenDisposition::CURRENT_TAB,
+                              ui::PAGE_TRANSITION_LINK,
+                              true);
+    new_contents->OpenURL(open_params);
+  }
 }
-#endif
+#endif  // defined(IE_REDCORE)
 
 void WebContentsImpl::CancelKeyboardLock(
     RenderWidgetHostImpl* render_widget_host) {
@@ -2653,15 +2649,15 @@ void WebContentsImpl::CreateNewWindow(
 #if defined(IE_REDCORE)
   WebContentsDelegate* delegate = GetDelegate();
   if (delegate) {
-    RendererMode mode = rendererMode_;
+    ie::RenderMode mode = render_mode_;
     if (delegate->UrlCompared(params.target_url, mode)) {
-      if (mode.core == IE_CORE) {
+      if (mode.core == ie::IE_CORE) {
         CreateNewIEWindow(params.target_url, mode);
         return;
       }
     }
   }
-#endif // IE_REDCORE
+#endif // defined(IE_REDCORE)
 
   // If the opener is to be suppressed, the new window can be in any process.
   // Since routing ids are process specific, we must not have one passed in
@@ -2723,7 +2719,7 @@ void WebContentsImpl::CreateNewWindow(
   create_params.renderer_initiated_creation =
       main_frame_route_id != MSG_ROUTING_NONE;
 #if defined(IE_REDCORE)
-  create_params.renderer_mode = rendererMode_;
+  create_params.renderer_mode = render_mode_;
 #endif
 
   std::unique_ptr<WebContents> new_contents;

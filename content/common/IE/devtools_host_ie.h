@@ -5,6 +5,7 @@
 #ifndef CONTENT_COMMON_IE_DEVTOOLS_HOST_H_
 #define CONTENT_COMMON_IE_DEVTOOLS_HOST_H_
 
+// atl.h need be in front of the COM headers
 #include "base/win/atl.h"
 
 #include <ExDisp.h>

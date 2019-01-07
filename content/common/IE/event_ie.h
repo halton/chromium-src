@@ -5,35 +5,24 @@
 #ifndef CONTENT_COMMON_IE_EVENT_IE_H_
 #define CONTENT_COMMON_IE_EVENT_IE_H_
 
+// atl.h need be in front of the COM headers
 #include "base/win/atl.h"
 
 #include <Exdisp.h>
-#include <MsHtmHst.h>
 #include <Mshtml.h>
-#include <OAIdl.h>
-#include <comutil.h>
+#include <Mshtmhst.h>
+#include <comdef.h>
+
 #include <list>
 #include <string>
 #include <vector>
+
+#include "content/common/IE/common_ie.h"
 
 namespace ie {
 
 class EventHandler;
 class DocHostUIHandler;
-
-enum DocumentMode {
-  // 0x20000=IE11, 0x19000=IE10, 0x18000=IE9,  0x15000=IE8, 0x13000=IE7,
-  // 0x11000=IE5
-  IE11 = 0x20000,
-  IE10 = 0x19000,
-  IE9 = 0x18000,
-  IE8 = 0x15000,
-  IE7 = 0x13000,
-  IE5 = 0x11000
-};
-
-enum NewWindowFlag { TRANSITION = 1, POPUP = 2, FROMDIALOG = 4 };
-
 class DocumentEventIe;
 
 class Event : public DWebBrowserEvents2 {

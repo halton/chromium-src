@@ -43,9 +43,9 @@
 #include "base/android/scoped_java_ref.h"
 #endif
 
-#ifdef IE_REDCORE
-#include "content/common/IE/version_ie.h"
-#endif
+#if defined(IE_REDCORE)
+#include "content/common/IE/render_mode_ie.h"
+#endif  // defined(IE_REDCORE)
 
 namespace blink {
 struct Manifest;
@@ -174,9 +174,9 @@ class WebContents : public PageNavigator, public base::SupportsUserData {
     // WebContents construction should take this into account.
     bool renderer_initiated_creation;
 #ifdef IE_REDCORE
-    bool auto_select_content;    // YSP+ { Kernel switching }
-    RendererMode renderer_mode;  // YSP+ { Kernel switching }
-#endif
+    bool auto_select_content;
+    ie::RenderMode renderer_mode;
+#endif  // IE_REDCORE
 
     // Used to specify how far WebContents::Create can initialize a renderer
     // process.
@@ -942,18 +942,18 @@ class WebContents : public PageNavigator, public base::SupportsUserData {
   // guest.
   virtual BrowserPluginGuest* GetBrowserPluginGuest() const = 0;
 
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+#if defined(IE_REDCORE)
   virtual bool IsAutoSelect() = 0;
-  virtual RendererMode GetRendererMode() = 0;
-#endif
+  virtual ie::RenderMode GetRendererMode() = 0;
+#endif  // IE_REDCORE
 
  private:
   // This interface should only be implemented inside content.
   friend class WebContentsImpl;
 
-#if defined(REDCORE) && defined(IE_REDCORE)  // ysp {+
+#if defined(IE_REDCORE)
   friend class WebContentsIE;
-#endif
+#endif  // IE_REDCORE
 
   WebContents() {}
 };

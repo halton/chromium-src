@@ -5,15 +5,17 @@
 #ifndef CONTENT_COMMON_IE_DOC_HOST_UI_HANDLER_IE_H_
 #define CONTENT_COMMON_IE_DOC_HOST_UI_HANDLER_IE_H_
 
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <DocObj.h>
 #include <DownloadMgr.h>
 #include <ExDisp.h>
 #include <MsHtmHst.h>
 #include <Servprov.h>
 #include <ShObjIdl.h>
-#include <string>
 
-#include "base/win/atl.h"
+#include <string>
 
 namespace ie {
 

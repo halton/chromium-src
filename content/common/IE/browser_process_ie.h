@@ -5,11 +5,14 @@
 #ifndef CONTENT_COMMON_IE_BROWSER_PROCESS_H_
 #define CONTENT_COMMON_IE_BROWSER_PROCESS_H_
 
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <comdef.h>
+
 #include <string>
 #include <vector>
 
-#include "base/win/atl.h"
 #include "content/common/IE/IEInterface.h"
 #include "content/common/IE/event_handler_ie.h"
 
@@ -23,8 +26,8 @@ class ATL_NO_VTABLE BrowserProcess
       public IDispatchImpl<IBrowserContainer,
                            &IID_IBrowserContainer,
                            &LIBID_IEBrowserLib,
-                           0xFFFF,   // wMajor,
-                           0xFFFF>,  // wMinor
+                           0xFFFF,
+                           0xFFFF>,
       public EventHandler {
  public:
   BrowserProcess();

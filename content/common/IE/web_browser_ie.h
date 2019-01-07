@@ -5,13 +5,12 @@
 #ifndef CONTENT_COMMON_IE_WEB_BROWSER_IE_H_
 #define CONTENT_COMMON_IE_WEB_BROWSER_IE_H_
 
+// atl.h need be in front of the COM headers
 #include "base/win/atl.h"
 
 #include <Exdisp.h>
 #include <Mshtml.h>
-#include <Windows.h>
-#include <comdef.h>
-#include <tchar.h>
+
 #include <list>
 #include <map>
 #include <string>
@@ -19,9 +18,11 @@
 
 #include "content/common/IE/doc_host_ui_handler_ie.h"
 #include "content/common/IE/event_ie.h"
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/common_ie.h"
 
 namespace ie {
+
+class Event;
 
 struct PrivateDnsIp {
   PrivateDnsIp();

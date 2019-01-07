@@ -54,9 +54,8 @@
 #include "chrome/browser/ui/pdf/adobe_reader_info_win.h"
 #endif
 
-#ifdef REDCORE
-// ysp+ {
-#include "base/strings/utf_string_conversions.h"  // ysp+
+#if defined(REDCORE)
+#include "base/strings/utf_string_conversions.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/browser_window.h"
@@ -64,8 +63,7 @@
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "chrome/grit/generated_resources.h"
 #include "ui/base/l10n/l10n_util.h"
-// ysp+ }
-#endif /*REDCORE*/
+#endif  // defined(REDCORE)
 
 using content::BrowserThread;
 using download::DownloadItem;

@@ -45,14 +45,16 @@
 #include "extensions/buildflags/buildflags.h"
 #include "url/url_constants.h"
 
-#ifdef REDCORE
+#if defined(REDCORE)
 #include "chrome/browser/ui/simple_message_box.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "chrome/grit/generated_resources.h"
-#include "content/common/IE/version_ie.h"
 #include "ui/base/l10n/l10n_util.h"
-#endif
+#endif  // REDCORE
 
+#if defined(IE_REDCORE)
+#include "content/common/IE/common_ie.h"
+#endif  // IE_REDCORE
 
 #if defined(OS_CHROMEOS)
 #include "chrome/browser/ui/ash/multi_user/multi_user_window_manager.h"
@@ -421,10 +423,11 @@ std::unique_ptr<content::WebContents> CreateTargetContents(
         params.browser->window()->GetNativeWindow();
   }
 #endif
-#ifdef IE_REDCORE
+
+#if defined(IE_REDCORE)
   create_params.renderer_mode = params.renderer_mode;
   create_params.auto_select_content = params.auto_select;
-#endif
+#endif  // IE_REDCORE
 
   std::unique_ptr<WebContents> target_contents =
       WebContents::Create(create_params);
@@ -493,11 +496,11 @@ void Navigate(NavigateParams* params) {
   // GetBrowserForDisposition() has a chance to replace |params->browser| with
   // another one.
 
-#ifdef IE_REDCORE
-  if (params->renderer_mode.core == IE_CORE) {
+#if defined(IE_REDCORE)
+  if (params->renderer_mode.core == ie::IE_CORE) {
     params->source_contents = nullptr;
   } else
-#endif
+#endif  // IE_REDCORE
    if (!params->source_contents && params->browser) {
     params->source_contents =
         params->browser->tab_strip_model()->GetActiveWebContents();
@@ -597,10 +600,10 @@ void Navigate(NavigateParams* params) {
   // Did we use a prerender?
   bool swapped_in_prerender = false;
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
   if (params->source_contents &&
-      params->source_contents->GetRendererMode().core == IE_CORE &&
-      params->url.SchemeIs("chrome") == true) {  //在IE页面开首页等自有页面，转为使用Chrome打开
+      params->source_contents->GetRendererMode().core == ie::IE_CORE &&
+      params->url.SchemeIs("chrome")) {
     params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
   }
 
@@ -617,13 +620,13 @@ void Navigate(NavigateParams* params) {
   }
 
 // TODO(qidi.ma): used for debugging IE core.  should be delete later
-// RendererMode mode;
-// mode.core = IE_CORE;
+// ie::RenderMode mode;
+// mode.core = ie::IE_CORE;
 // mode.version = ie::DOC10;
 // mode.emulation = ie::EMULATION10;
 // params->renderer_mode = mode;
 
-#endif
+#endif  // IE_REDCORE
 
   // If no target WebContents was specified (and we didn't seek and find a
   // singleton), we need to construct one if we are supposed to target a new

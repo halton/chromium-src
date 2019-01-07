@@ -5,18 +5,19 @@
 #ifndef CONTENT_COMMON_IE_BROWSER_HOST_EVENT_DELEGENT_IE_H_
 #define CONTENT_COMMON_IE_BROWSER_HOST_EVENT_DELEGENT_IE_H_
 
+// atl.h need be in front of the COM headers
+#include "base/win/atl.h"
+
 #include <comdef.h>
 
-#include <map>
 #include <string>
 #include <vector>
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
-#include "base/win/atl.h"
 #include "components/download/public/common/download_file_ie.h"
 #include "content/common/IE/IEInterface.h"
-#include "content/common/IE/event_ie.h"
+#include "content/common/IE/common_ie.h"
 
 namespace content {
 class WebContentsIE;
@@ -30,8 +31,8 @@ class ATL_NO_VTABLE BrowserHostEventDelegant
       public IDispatchImpl<IBrowserEventHandler,
                            &IID_IBrowserEventHandler,
                            &LIBID_IEBrowserLib,
-                           /*wMajor =*/0xFFFF,
-                           /*wMinor =*/0xFFFF>,
+                           0xFFFF,
+                           0xFFFF>,
       public IEDownloader {
  public:
   BrowserHostEventDelegant();

@@ -5,11 +5,11 @@
 #ifndef CONTENT_COMMON_IE_XPATH_NODE_IE_H_
 #define CONTENT_COMMON_IE_XPATH_NODE_IE_H_
 
-#include <MsHTML.h>
+#include "base/win/atl.h"
+
 #include <string>
 #include <vector>
 
-#include "base/win/atl.h"
 #include "content/common/IE/xpath_node_predicate_ie.h"
 
 namespace ie {

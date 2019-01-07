@@ -37,8 +37,8 @@
 #include "ui/views/drag_controller.h"
 
 #if defined(IE_REDCORE)
-#include "content/common/IE/version_ie.h"
-#endif
+#include "content/common/IE/render_mode_ie.h"
+#endif  // IE_REDCORE
 
 class CommandUpdater;
 class ContentSettingBubbleModelDelegate;
@@ -56,9 +56,9 @@ class SelectedKeywordView;
 class StarView;
 class TranslateIconView;
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
 class YspRendererModeView;
-#endif
+#endif  // IE_REDCORE
 
 namespace autofill {
 class LocalCardMigrationIconView;
@@ -167,11 +167,11 @@ class LocationBarView : public LocationBar,
   // The star. It may not be visible.  It will be null when |browser_| is null.
   StarView* star_view() { return star_view_; }
 
-#ifdef IE_REDCORE
-  void SetRendererModeToggled(RendererMode mode);
+#if defined(IE_REDCORE)
+  void SetRendererModeToggled(ie::RenderMode mode);
 
   YspRendererModeView* renderer_mode_view() { return ysp_renderer_mode_view_; }
-#endif
+#endif  // IE_REDCORE
 
   // The save credit card icon. It may not be visible.  It will be null when
   // |browser_| is null.
@@ -484,13 +484,13 @@ class LocationBarView : public LocationBar,
   // bar is read-only.
   const bool is_popup_mode_;
 
-#ifdef REDCORE
-  bool address_bar_enabled_;    //ysp+ { function control }
-#endif
+#if defined(REDCORE)
+  bool address_bar_enabled_;
+#endif  // REDCORE
 
-#ifdef IE_REDCORE
+#if defined(IE_REDCORE)
   YspRendererModeView* ysp_renderer_mode_view_;
-#endif
+#endif  // IE_REDCORE
 
   // The theme tint. Updated based on the profile and theme settings.
   OmniboxTint tint_;

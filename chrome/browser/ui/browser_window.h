@@ -142,9 +142,9 @@ class BrowserWindow : public ui::BaseWindow {
   // Sets whether the translate icon is lit for the current tab.
   virtual void SetTranslateIconToggled(bool is_lit) = 0;
 
-#ifdef IE_REDCORE
-  virtual void SetRendererModeIconToggled(RendererMode mode) = 0;
-#endif
+#if defined(IE_REDCORE)
+  virtual void SetRendererModeIconToggled(ie::RenderMode mode) = 0;
+#endif  // defined(IE_REDCORE)
 
   // Called when the active tab changes.  Subclasses which implement
   // TabStripModelObserver should implement this instead of ActiveTabChanged();
@@ -256,11 +256,9 @@ class BrowserWindow : public ui::BaseWindow {
   // |already_bookmarked| is true if the url is already bookmarked.
   virtual void ShowBookmarkBubble(const GURL& url, bool already_bookmarked) = 0;
 
-#ifdef IE_REDCORE
-  // ysp+{}
-  virtual void ShowRendererModeBubble(const GURL& url, RendererMode mode) = 0;
-// ysp+
-#endif
+#if defined(IE_REDCORE)
+  virtual void ShowRendererModeBubble(const GURL& url, ie::RenderMode mode) = 0;
+#endif  // defined(IE_REDCORE)
 
   // Shows the "Save credit card" bubble.
   virtual autofill::SaveCardBubbleView* ShowSaveCreditCardBubble(

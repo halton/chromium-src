@@ -30,7 +30,8 @@
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/renderer_host/render_widget_host_delegate.h"
 #include "content/browser/web_contents/web_contents_impl.h"
-#include "content/common/IE/version_ie.h"
+#include "content/common/IE/common_ie.h"
+#include "content/common/IE/render_mode_ie.h"
 #include "content/common/content_export.h"
 #include "content/public/browser/color_chooser.h"
 #include "content/public/browser/notification_observer.h"
@@ -50,10 +51,10 @@
 #include "ui/gfx/geometry/rect_f.h"
 #include "ui/gfx/geometry/size.h"
 
-struct RendererMode;
 
 namespace ie {
 class BrowserHostEventDelegant;
+struct RenderMode;
 }
 
 namespace net {

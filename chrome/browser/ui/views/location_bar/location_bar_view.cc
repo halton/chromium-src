@@ -356,16 +356,16 @@ void LocationBarView::SetStarToggled(bool on) {
     star_view_->SetToggled(on);
 }
 
-#ifdef IE_REDCORE
-void LocationBarView::SetRendererModeToggled(RendererMode mode) {
+#if defined(IE_REDCORE)
+void LocationBarView::SetRendererModeToggled(ie::RenderMode mode) {
   if (!ysp_renderer_mode_view_)
     return;
 
-  ysp_renderer_mode_view_->SetVisible(mode.core != NONE_CORE);
+  ysp_renderer_mode_view_->SetVisible(mode.core != ie::NONE_CORE);
   ysp_renderer_mode_view_->SetToggled(mode);
   OnChanged();
 }
-#endif
+#endif  // defined(IE_REDCORE)
 
 gfx::Point LocationBarView::GetOmniboxViewOrigin() const {
   gfx::Point origin(omnibox_view_->origin());

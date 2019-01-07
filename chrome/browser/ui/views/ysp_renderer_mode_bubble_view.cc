@@ -65,12 +65,12 @@ RendererModeBubbleView* RendererModeBubbleView::renderer_mode_bubble_view_ =
 RendererModeBubbleView::RendererModeBubbleView(views::View* anchor_view,
                                                Browser* browser,
                                                const GURL& url,
-                                               RendererMode mode)
+                                               ie::RenderMode mode)
     : BubbleDialogDelegateView(anchor_view, views::BubbleBorder::TOP_RIGHT),
       blink_button_(NULL),
       ie_button_(NULL),
       browser_(browser),
-      renderer_mode_(mode) {
+      render_mode_(mode) {
   gfx::Insets inset;
   inset.Set(0, 0, 0, 0);
   set_margins(inset);
@@ -83,12 +83,12 @@ void RendererModeBubbleView::ShowBubble(views::View* anchor_view,
                                         gfx::NativeView parent_window,
                                         Browser* browser,
                                         const GURL& url,
-                                        RendererMode renderer_mode) {
+                                        ie::RenderMode mode) {
   if (renderer_mode_bubble_view_)
     return;
 
   renderer_mode_bubble_view_ =
-      new RendererModeBubbleView(anchor_view, browser, url, renderer_mode);
+      new RendererModeBubbleView(anchor_view, browser, url, mode);
   if (!anchor_view) {
     renderer_mode_bubble_view_->SetAnchorRect(anchor_rect);
     renderer_mode_bubble_view_->set_parent_window(parent_window);
@@ -143,11 +143,11 @@ void RendererModeBubbleView::Init() {
   layout->StartRow(1, 0);
   layout->AddView(ie_button_);
 
-  switch (renderer_mode_.core) {
-    case BLINK_CORE:
+  switch (render_mode_.core) {
+    case ie::BLINK_CORE:
       SetButtonSelected(blink_button_);
       break;
-    case IE_CORE:
+    case ie::IE_CORE:
       SetButtonSelected(ie_button_);
       break;
     default:
@@ -167,13 +167,14 @@ void RendererModeBubbleView::ButtonPressed(views::Button* sender,
                                            const ui::Event& event) {
   if (browser_ == NULL)
     return;
+
   GURL url;
-  RendererMode mode;
-  if (sender == blink_button_ && renderer_mode_.core != BLINK_CORE) {
-    mode.core = BLINK_CORE;
+  ie::RenderMode mode;
+  if (sender == blink_button_ && render_mode_.core != ie::BLINK_CORE) {
+    mode.core = ie::BLINK_CORE;
     chrome::SwitchRendererMode(browser_, url, mode, false);
-  } else if (sender == ie_button_ && renderer_mode_.core != IE_CORE) {
-    mode.core = IE_CORE;
+  } else if (sender == ie_button_ && render_mode_.core != ie::IE_CORE) {
+    mode.core = ie::IE_CORE;
     mode.version = ie::DOCSYS;
     mode.emulation = (ie::Emulation)base::win::GetSystemIEVersion();
     chrome::SwitchRendererMode(browser_, url, mode, false);

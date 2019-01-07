@@ -38,7 +38,8 @@ bool WebContentsDelegate::CanOverscrollContent() const { return false; }
 
 #if defined(IE_REDCORE)
 void WebContentsDelegate::DidGetWindowsDomainUserInfo(
-  base::string16* username, base::string16* password) {}
+  base::string16* username, base::string16* password) {
+}
 #endif  // IE_REDCORE
 
 bool WebContentsDelegate::ShouldSuppressDialogs(WebContents* source) {
@@ -73,8 +74,8 @@ bool WebContentsDelegate::ShouldFocusPageAfterCrash() {
 }
 
 #if defined(IE_REDCORE)
-//YSP+ { Kernel switching
-bool WebContentsDelegate::UrlCompared(const GURL& host, RendererMode& mode) {
+bool WebContentsDelegate::UrlCompared(const GURL& host,
+                                      ie::RenderMode& mode) {
   return false;
 }
 #endif
