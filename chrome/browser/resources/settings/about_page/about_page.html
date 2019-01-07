@@ -218,7 +218,7 @@
             </template>
 </if>
             <div id="help" class="settings-box" on-click="onHelpTap_"
-                actionable>
+                actionable style="display: none">
               <div class="start">$i18n{aboutGetHelpUsingChrome}</div>
               <paper-icon-button-light class="icon-external">
                 <button aria-labelledby="help"></button>
@@ -257,12 +257,12 @@
 
       <settings-section>
         <div class="settings-box padded block">
-          <div class="info-section">
+          <div class="info-section" style="width: 310px">
             <div class="secondary">$i18n{aboutProductTitle}</div>
             <div class="secondary">$i18n{aboutProductCopyright}</div>
           </div>
 
-          <div class="info-section">
+          <div class="info-section"  style="width: 310px">
             <div class="secondary">$i18nRaw{aboutProductLicense}</div>
 <if expr="chromeos">
             <div class="secondary"
