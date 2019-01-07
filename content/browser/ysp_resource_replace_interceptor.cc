@@ -10,6 +10,7 @@
 #include "base/json/json_reader.h"
 #include "base/path_service.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/task/post_task.h"
 #include "chrome/common/chrome_paths.h"
 #include "content/public/browser/browser_thread.h"
 #include "net/url_request/url_request.h"
@@ -149,54 +150,42 @@ static int stringmatchlen(const char* pattern,
   return 0;
 }
 
-// static std::string pathParse(const std::string& path_url) {
-//  std::string file_path;
-//  std::string path_url_parse;
-//  int i;
-
-//  std::string u16_url = path_url;
-//  int offset = u16_url.find('/', 0);
-//  file_path.assign(u16_url, offset + 1, (u16_url.length() - offset + 1));
-//  i = file_path.find('/');
-//  for (; i != -1; i = file_path.find('/'))
-//    file_path.replace(i, 1, "\\");
-
-//  int colon_offset = file_path.find(':');
-//  if (file_path.find(':') != std::string::npos) {
-//    path_url_parse.append(file_path, 0, colon_offset);
-//    path_url_parse.append(file_path, colon_offset + 1,
-//                          file_path.length() - colon_offset - 1);
-//  }
-//  else
-//    path_url_parse.assign(file_path);
-//  //LOG(INFO) << "Path_url:" << path_url << " file_path:" << file_path;
-
-//  return path_url_parse;
-//}
+static std::string PathParse(const std::string& path_url) {
+  std::string file_path;
+  int offset = path_url.find('/', 0);
+  file_path.assign(path_url, offset + 1, (path_url.length() - offset + 1));
+  for (int i = file_path.find('/'); i != -1; i = file_path.find('/'))
+    file_path.replace(i, 1, "\\");
+  int colon_offset = file_path.find(':');
+  std::string path_url_parse;
+  if (file_path.find(':') != std::string::npos) {
+    path_url_parse.append(file_path, 0, colon_offset);
+    path_url_parse.append(file_path, colon_offset + 1,
+                          file_path.length() - colon_offset - 1);
+  } else {
+    path_url_parse.assign(file_path);
+  }
+  return path_url_parse;
+}
 
 std::string YSPResourceReplaceInterceptor::ResourceReplaceCompared(
     const std::string& url) const {
   base::ListValue* resource_replace_list = nullptr;
-  if (url.empty())
+  if (url.empty() || !resource_replace_ ||
+      !resource_replace_->GetList("resourceReplace", &resource_replace_list) ||
+      !resource_replace_list || resource_replace_list->empty())
     return std::string();
-  if (resource_replace_ &&
-      resource_replace_->GetList("resourceReplace", &resource_replace_list)) {
-    if (resource_replace_list && !resource_replace_list->empty()) {
-      for (size_t i = 0; i < resource_replace_list->GetSize(); ++i) {
-        base::DictionaryValue* bm_dict = nullptr;
-        if (resource_replace_list->GetDictionary(i, &bm_dict)) {
-          std::string compared_source_url;
-          bm_dict->GetString("sourceUrl", &compared_source_url);
-          GURL source_url(compared_source_url);
-          // DLOG(INFO) << " url: " << url << " source_url: " <<
-          // source_url.spec(); if (stringmatch(source_url.spec().c_str(),
-          // url.c_str(), true)) {
-          if (source_url.spec() == url) {
-            return compared_source_url;
-          }
-        }
-      }
-    }
+
+  for (size_t i = 0; i < resource_replace_list->GetSize(); ++i) {
+    base::DictionaryValue* bm_dict = nullptr;
+    if (!resource_replace_list->GetDictionary(i, &bm_dict))
+      continue;
+    std::string compared_source_url;
+    bm_dict->GetString("sourceUrl", &compared_source_url);
+    GURL source_url(compared_source_url);
+    if (source_url.spec() != url)
+      continue;
+    return compared_source_url;
   }
   return std::string();
 }
@@ -215,7 +204,6 @@ void YSPResourceReplaceInterceptor::SetResourceReplaceValue(
 
 void YSPResourceReplaceInterceptor::SetValueFormPostTask(
     const std::string& resource_replace) {
-  // DLOG(INFO) << "resource_replace:" << resource_replace;
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&SetResourceReplaceValue, resource_replace));
@@ -231,29 +219,25 @@ net::URLRequestJob* YSPResourceReplaceInterceptor::MaybeInterceptRequest(
   if (!request->url().is_valid())
     return nullptr;
 
-  net::URLRequestJob* job = nullptr;
-  // FIXME(halton): Implement YSPResourceReplaceRequestHandler
-  // base::FilePath path;
+  std::string source_url = ResourceReplaceCompared(request->url().spec());
+  if (source_url.empty())
+    return nullptr;
 
-  // std::string source_url = ResourceReplaceCompared(request->url().spec());
-  // if (!source_url.empty()) {
-  //   base::PathService::Get(chrome::DIR_USER_DATA, &path);
-  //   if (path.empty())
-  //     return job;
-  //   path = path.Append(FILE_PATH_LITERAL("Default\\Resource"));
-  //   // StringPieceType
-  //   path = path.AppendASCII(pathParse(source_url).c_str());
-  //   if (FILE *IsFileExist = base::OpenFile(path, "rb")) {
-  //     base::CloseFile(IsFileExist);
-  //     return new net::URLRequestFileJob(
-  //       request, network_delegate, path,
-  //       BrowserThread::GetBlockingPool()->
-  //       GetTaskRunnerWithShutdownBehavior(
-  //         base::SequencedWorkerPool::SKIP_ON_SHUTDOWN));
-  //   }
-  // }
+  base::FilePath path;
+  base::PathService::Get(chrome::DIR_USER_DATA, &path);
+  if (path.empty())
+    return nullptr;
 
-  return job;
+  path = path.AppendASCII("Default\\Resource");
+  path = path.AppendASCII(PathParse(source_url).c_str());
+  if (!base::PathExists(path))
+    return nullptr;
+
+  return new net::URLRequestFileJob(
+      request, network_delegate, path,
+      base::CreateTaskRunnerWithTraits(
+          {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
+           base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN}));
 }
 
 }  // namespace content
