@@ -18,6 +18,7 @@
 #include "ui/views/controls/label.h"
 
 #ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_account_view.h"
 #include "chrome/browser/ui/views/ysp_lock_screen_view.h"
 #include "chrome/browser/ui/views/ysp_set_pin_view_holder.h"
 #include "chrome/grit/generated_resources.h"
@@ -520,8 +521,8 @@ void OpaqueBrowserFrameViewLayout::LayoutYSPAccountView(views::View* host) {
   if (!account_view_)
     return;
 
-  const int button_width = 32;
-  const int button_height = 32;
+  const int button_width = kAvatarImageSize;
+  const int button_height = kAvatarImageSize;
   int button_width_with_offset = button_width;
   if (!trailing_buttons_.empty())
     button_width_with_offset += kCaptionSpacing;
