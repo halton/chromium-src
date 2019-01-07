@@ -177,7 +177,7 @@ WebContentsIE::WebContentsIE(BrowserContext* browser_context)
       cookie_json_(L""),
       cookie_event_(NULL),
       is_navigate_stopped_(false),
-      need_fire_unload_event_(true),
+      need_fire_unload_event_(false),
       is_new_window_(false),
       query_dns_json_string_(L""),
       weak_factory_for_io_(this),
@@ -456,16 +456,19 @@ void WebContentsIE::Stop() {
 }
 
 bool WebContentsIE::NeedToFireBeforeUnload() {
+  if (!need_fire_unload_event_ && browser_event_handler_) {
+    browser_event_handler_->CloseBrowser();
+    browser_event_handler_->Release();
+    browser_event_handler_ = NULL;
+  }
   return need_fire_unload_event_;
 }
 
 void WebContentsIE::DispatchBeforeUnload() {
-  if (browser_event_handler_) {
+  if (need_fire_unload_event_ && browser_event_handler_) {
     browser_event_handler_->CloseBrowser();
     browser_event_handler_->Release();
     browser_event_handler_ = NULL;
-    need_fire_unload_event_ = false;
-    Close(GetRenderViewHost());
   }
 }
 

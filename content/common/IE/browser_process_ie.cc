@@ -58,6 +58,7 @@ STDMETHODIMP BrowserProcess::CloseBrowser() {
     host_app_->Release();
     host_app_ = NULL;
   }
+  exit(0);
   return S_OK;
 }
 
