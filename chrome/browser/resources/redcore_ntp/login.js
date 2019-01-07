@@ -111,7 +111,7 @@ function switchPage(isLogin) {
           <button class="button block" id="next-btn" name="">确定</button>
         </div>
         <div class="company_userMessage" id="company_userMessage">
-          <h2 id="QRcode">扫描登录</h2>
+          <h2 id="QRcode">扫码登录</h2>
           <h2>账号登录</h2>
           <p class="userName-pack">
             <img src="./imgs/login/user_icon.png">

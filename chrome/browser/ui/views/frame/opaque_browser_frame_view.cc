@@ -281,6 +281,10 @@ void OpaqueBrowserFrameView::ChangeScreenStatus(
       lock_button_->SetVisible(true);
       break;
   }
+  if (browser_view_ && browser_view_->frame() &&
+      browser_view_->frame()->GetFrameView()) {
+    browser_view_->frame()->UpdateWindowTitle();
+  }
 }
 
 //(TODO) fix LockScreenView not respond to mouse click events;

@@ -2972,6 +2972,10 @@ std::string YSPLoginManager::generateUserInfoForSettings() {
         if (data_dict->GetString("user.title", &ret)) {
           return_dict.SetString("title", ret);
         }
+        int source = 0;
+        if (data_dict->GetInteger("user.source", &source)) {
+          return_dict.SetInteger("source", source);
+        }
         if (data_dict->GetString("company.name", &ret)) {
           return_dict.SetString("companyName", ret);
         }
