@@ -14,6 +14,13 @@
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include <string>
 
+namespace {
+const int kAvatarImageSize = 28;
+#if defined(IE_REDCORE)
+typedef BOOL(WINAPI* SetWindowDisplayAffinityPtr)(HWND, DWORD);
+#endif
+}
+
 class BrowserView;
 
 namespace views {
@@ -85,8 +92,8 @@ private:
   std::unique_ptr<gfx::ImageSkia> head_image_;
   base::string16 user_name_;
   std::string head_image_url_;
-  base::WeakPtrFactory<YSPAccountView> weakFactoryForFile;
-  base::WeakPtrFactory<YSPAccountView> weakFactoryForUI;
+  base::WeakPtrFactory<YSPAccountView> weak_factory_for_file_;
+  base::WeakPtrFactory<YSPAccountView> weak_factory_for_ui_;
 
   DISALLOW_COPY_AND_ASSIGN(YSPAccountView);
 };

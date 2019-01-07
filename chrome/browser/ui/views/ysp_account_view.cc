@@ -49,40 +49,12 @@
 #include "chrome/common/chrome_paths.h"
 #include "ui/base/window_open_disposition.h"
 
-namespace {
-
-  const int AvatarImageSize = 32;
-#if defined(IE_REDCORE)
-// comment unused code by webb.
-  // const int AvatarFrameSize = 52;
-
-  // float GetUnscaledEndcapWidth() {
-  //   return GetLayoutInsets(TAB).left() - 0.5f;
-  // }
-
-  typedef BOOL(WINAPI *SetWindowDisplayAffinityPtr)(HWND, DWORD);
-#endif
-}  // namespace
-
-   // static
 const char YSPAccountView::kViewClassName[] = "YSPAccountView";
-const SkColor kAvatarBackground[] = {
-  0xffe13737,
-  0xfffc7936,
-  0xffffad36,
-  0xff71ad2c,
-  0xff2dc6e0,
-  0xff2590ee,
-  0xff5169fa,
-  0xff8158ec,
-  0xffb757df
-};
-const int kAvatarBackgroundSize = sizeof(kAvatarBackground) / sizeof(SkColor);
 
 class YSPAvatarView : public views::Label {
  public:
   YSPAvatarView(const base::string16& text);
-  ~YSPAvatarView() override {};
+  ~YSPAvatarView() override{};
   void SetCircle(bool circle) { is_circle_ = circle; }
 
   void OnPaint(gfx::Canvas* canvas) override;
@@ -92,9 +64,7 @@ class YSPAvatarView : public views::Label {
 };
 
 YSPAvatarView::YSPAvatarView(const base::string16& text)
-  : views::Label(text),
-    is_circle_(false) {
-}
+    : views::Label(text), is_circle_(false) {}
 
 void YSPAvatarView::OnPaint(gfx::Canvas* canvas) {
   if (is_circle_) {
@@ -112,16 +82,16 @@ void YSPAvatarView::OnPaint(gfx::Canvas* canvas) {
 }
 
 YSPAccountView::YSPAccountView(BrowserView* browser_view)
-   : browser_view_(browser_view),
-     head_view_(nullptr),
-     head_image_(nullptr),
-     weakFactoryForFile(this),
-     weakFactoryForUI(this) {
-     set_id(ViewID::VIEW_ID_YSP_ACCOUNT_VIEW);
-     YSPLoginManager::GetInstance()->AddObserver(this);
-     set_notify_enter_exit_on_child(true);
-   SetEventTargeter(
-    std::unique_ptr<views::ViewTargeter>(new views::ViewTargeter(this)));
+    : browser_view_(browser_view),
+      head_view_(nullptr),
+      head_image_(nullptr),
+      weak_factory_for_file_(this),
+      weak_factory_for_ui_(this) {
+  set_id(ViewID::VIEW_ID_YSP_ACCOUNT_VIEW);
+  YSPLoginManager::GetInstance()->AddObserver(this);
+  set_notify_enter_exit_on_child(true);
+  SetEventTargeter(
+      std::unique_ptr<views::ViewTargeter>(new views::ViewTargeter(this)));
 }
 
 YSPAccountView::~YSPAccountView() {
@@ -136,7 +106,7 @@ void YSPAccountView::CreateViews() {
   ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
   head_view_ = new views::ImageView;
   head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR));
-  head_view_->SetImageSize(gfx::Size(AvatarImageSize, AvatarImageSize));
+  head_view_->SetImageSize(gfx::Size(kAvatarImageSize, kAvatarImageSize));
   head_view_->SetDrawCircle(true);
   AddChildView(head_view_);
 
@@ -151,33 +121,19 @@ void YSPAccountView::CreateViews() {
   name_label_->SetAutoColorReadabilityEnabled(false);
   reinterpret_cast<YSPAvatarView *>(name_label_)->SetCircle(true);
   AddChildView(name_label_);
-
-#if 0 // ysp- (LIUWEI) No need frame
-  head_frame_ = new views::ImageView;
-  head_frame_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_AVATAR_FRAME));
-  head_frame_->SetImageSize(gfx::Size(AvatarFrameSize, AvatarFrameSize));
-  AddChildView(head_frame_);
-#endif
 }
 
-// views::View:
 void YSPAccountView::OnPaint(gfx::Canvas* canvas) {
 }
 
 void YSPAccountView::Layout() {
-  int x = (width() - AvatarImageSize) / 2;
-  int y = (height() - AvatarImageSize) / 2;
-  head_view_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
+  int x = (width() - kAvatarImageSize) / 2;
+  int y = (height() - kAvatarImageSize) / 2;
+  head_view_->SetBounds(x, y, kAvatarImageSize, kAvatarImageSize);
   head_view_->SetDrawCircle(true);
   if (name_label_->visible()) {
-    name_label_->SetBounds(x, y, AvatarImageSize, AvatarImageSize);
+    name_label_->SetBounds(x, y, kAvatarImageSize, kAvatarImageSize);
   }
-#if 0 // ysp (LIUWEI) No need to draw frame
-  int fx = x + (AvatarImageSize - AvatarFrameSize) / 2;
-  int fy = y + (AvatarImageSize - AvatarFrameSize) / 2;
-  head_frame_->SetBounds(fx, fy, AvatarFrameSize, AvatarFrameSize);
-#endif
-
 }
 
 void YSPAccountView::OnThemeChanged() {
@@ -238,28 +194,18 @@ void YSPAccountView::OnLoginFailure(const base::string16& message) {
 }
 
 void YSPAccountView::OnConfigDataUpdated(const std::string& type,
-                                         const std::string& data)
-{
-  if (type == "accountInfo")
-  {
-    YSPLoginManager* manager = YSPLoginManager::GetInstance();
-    if (manager->GetYSPUserName() != user_name_ || manager->GetHeadImageUrl() != head_image_url_)
-    {
-      //OnLoginSuccess(manager->GetYSPUserName(), manager->GetHeadImageUrl());
-    }
-  }
-  else if (type == "pc")
-  {
+                                         const std::string& data) {
+  if (type == "pc") {
 #if defined(IE_REDCORE)
     PrefService* pref_service = g_browser_process->local_state();
-    const base::DictionaryValue* activexNoPromptInfo = pref_service->GetDictionary(prefs::kYSPActivexNoPromptInfo);
-
+    const base::DictionaryValue* activex_no_prompt_info =
+        pref_service->GetDictionary(prefs::kYSPActivexNoPromptInfo);
     std::vector<ActivexDownloadInfo> info = YSPLoginManager::GetInstance()->GetActivexDownloadInfo();
     std::vector<ActivexDownloadInfo>::iterator iter = info.begin();
-    for (; iter != info.end(); iter++)
-    {
+    for (; iter != info.end(); iter++) {
       std::string md5 = base::UTF16ToASCII(iter->md5);
-      if (activexNoPromptInfo->HasKey(md5)) continue;
+      if (activex_no_prompt_info->HasKey(md5))
+        continue;
       BeginCheckFileMD5(*iter);
     }
 #endif
@@ -275,48 +221,36 @@ void YSPAccountView::OnLoginSuccess(const base::string16& name,
   user_name_ = name;
   head_image_url_ = head_image_url;
   // TODO: (LIUWEI) Update user head image
-
   Browser* browser = browser_view_->browser();
   if (browser) {
-    //YSP+ { window popup
     browser->SetPopup();
-    //YSP+ } /*window popup*/
   }
-
-#if 0 //TODO: (LIUWEI) For Test only, remove it when manager is available
-  std::string image_url("file://f:/work/image/1.jpg");
-  DownloadImage(image_url);
-#else
-  if(!head_image_url.empty())
+  if (!head_image_url.empty()) {
     DownloadImage(head_image_url);
-  else {
-    // ysp: (LIUWEI) show last name of the user in case of no avatar
+  } else {
     ShowDefaultAvatar();
   }
-#endif
 
 #ifdef IE_REDCORE
-  content::WebContents* webContents = browser_view_->GetActiveWebContents();
-  if(webContents)
-    YSPPACManager::GetInstance()->RequestPAC(webContents);
+  content::WebContents* web_contents = browser_view_->GetActiveWebContents();
+  if (web_contents)
+    YSPPACManager::GetInstance()->RequestPAC(web_contents);
 
   PrefService* pref_service = g_browser_process->local_state();
-  const base::DictionaryValue* activexNoPromptInfo = pref_service->GetDictionary(prefs::kYSPActivexNoPromptInfo);
-
+  const base::DictionaryValue* activex_no_prompt_info =
+      pref_service->GetDictionary(prefs::kYSPActivexNoPromptInfo);
   std::vector<ActivexDownloadInfo> info = YSPLoginManager::GetInstance()->GetActivexDownloadInfo();
   std::vector<ActivexDownloadInfo>::iterator iter = info.begin();
-  for (; iter != info.end(); iter++)
-  {
+  for (; iter != info.end(); iter++) {
     std::string md5 = base::UTF16ToASCII(iter->md5);
-    if (activexNoPromptInfo->HasKey(md5)) continue;
+    if (activex_no_prompt_info->HasKey(md5))
+      continue;
     BeginCheckFileMD5(*iter);
   }
 #endif
   InvalidateLayout();
   browser_view_->frame()->non_client_view()->Layout();
   browser_view_->frame()->non_client_view()->SchedulePaint();
-
-  //browser_view_->SchedulePaint();
 }
 
 void YSPAccountView::OnLogout() {
@@ -338,23 +272,21 @@ void YSPAccountView::OnLogout() {
 #endif
 }
 
-const gfx::ImageSkia* YSPAccountView::GetHeadImage()
-{
+const gfx::ImageSkia* YSPAccountView::GetHeadImage() {
   if (!head_image_.get())
     return ui::ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR);
+
   return head_image_.get();
 }
 
 void YSPAccountView::DownloadImage(const std::string& url) {
-  content::WebContents* webContents =
-    browser_view_->GetActiveWebContents();
-  if (!webContents)
+  content::WebContents* web_contents = browser_view_->GetActiveWebContents();
+  if (!web_contents)
     return;
 
-  webContents->DownloadImage(
-    GURL(url), true, 0, true,
-    base::Bind(&YSPAccountView::DidDownloadFavicon,
-      base::Unretained(this)));
+  web_contents->DownloadImage(
+      GURL(url), true, 0, true,
+      base::Bind(&YSPAccountView::DidDownloadFavicon, base::Unretained(this)));
 }
 
 void YSPAccountView::DidDownloadFavicon(
@@ -370,23 +302,15 @@ void YSPAccountView::DidDownloadFavicon(
     head_view_->SetImage(*head_image_);
     if (YSPLoginView::IsShowing())
       YSPLoginView::SetAndRefreshAvatar(head_image_.get());
-  }
-  else
+  } else {
     ShowDefaultAvatar();
+  }
   Layout();
-
 }
 
 void YSPAccountView::ResetFeatureState() {
-    if (browser_view_) {
+  if (browser_view_)
     browser_view_->toolbar()->location_bar()->SetAddressBarEnable(true);
-  }
-
-  // FIXME(halton): No need
-  // devtools
-  // Browser* browser = browser_view_->browser();
-  // PrefService* prefs = browser->profile()->GetPrefs();
-  // prefs->SetBoolean(prefs::kDevToolsDisabled, false);
 
   UpdateScreenCaptureState(true);
 }
@@ -400,16 +324,18 @@ void YSPAccountView::UpdateScreenCaptureState(bool enable) {
       GetProcAddress(GetModuleHandleA("user32.dll"), "SetWindowDisplayAffinity"));
   if(func_ptr) {
     int num = func_ptr(hwnd, (enable ? 0 /*WDA_NONE*/ : 1 /*WDA_MONITOR*/));
-  if (!num)
-    LOG(INFO) << "SetWindowDisplayAffinity error !";
+    if (!num)
+      LOG(INFO) << "SetWindowDisplayAffinity error !";
   }
 #endif
 }
 
 #if defined(IE_REDCORE)
 void YSPAccountView::BeginCheckFileMD5(const ActivexDownloadInfo info) {
-  content::BrowserThread::PostTask(content::BrowserThread::IO, FROM_HERE,
-    base::Bind(&YSPAccountView::SumMD5, weakFactoryForFile.GetWeakPtr(), info));
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&YSPAccountView::SumMD5, weak_factory_for_file_.GetWeakPtr(),
+                 info));
 }
 
 void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
@@ -421,16 +347,20 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
   str_path += L"\\Activex\\" + info.filename;
   FILE* file = _wfopen(str_path.c_str(), L"rb");
   if (file == NULL) {
-    content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
-      base::Bind(&YSPAccountView::OnSumMD5, weakFactoryForUI.GetWeakPtr(), md5, info));
+    content::BrowserThread::PostTask(
+        content::BrowserThread::UI, FROM_HERE,
+        base::Bind(&YSPAccountView::OnSumMD5, weak_factory_for_ui_.GetWeakPtr(),
+                   md5, info));
     return;
   }
   fseek(file, 0L, SEEK_END);
   int sz = ftell(file);
   fseek(file, 0L, SEEK_SET);
   if (sz == 0)  {
-    content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
-      base::Bind(&YSPAccountView::OnSumMD5, weakFactoryForUI.GetWeakPtr(), md5, info));
+    content::BrowserThread::PostTask(
+        content::BrowserThread::UI, FROM_HERE,
+        base::Bind(&YSPAccountView::OnSumMD5, weak_factory_for_ui_.GetWeakPtr(),
+                   md5, info));
     return;
   }
   char* buff = new char[sz];
@@ -446,8 +376,10 @@ void YSPAccountView::SumMD5(const  ActivexDownloadInfo info) {
   int ms = 0;
   ms = delta.InMilliseconds();
   LOG(INFO) << "SUM " << info.filename << " md5 used " << ms << " ms";
-  content::BrowserThread::PostTask(content::BrowserThread::UI, FROM_HERE,
-    base::Bind(&YSPAccountView::OnSumMD5, weakFactoryForUI.GetWeakPtr(), md5,info));
+  content::BrowserThread::PostTask(
+      content::BrowserThread::UI, FROM_HERE,
+      base::Bind(&YSPAccountView::OnSumMD5, weak_factory_for_ui_.GetWeakPtr(),
+                 md5, info));
 }
 
 void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) {
@@ -457,33 +389,14 @@ void YSPAccountView::OnSumMD5(std::string md5, const  ActivexDownloadInfo info) 
 }
 #endif
 
-void YSPAccountView::ShowDefaultAvatar()
-{
-    base::string16 first_name(user_name_, 0, 1);
-    name_label_->SetText(first_name);
-    name_label_->SetVisible(true);
-    ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
-    head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR_L));
-	return;
-    base::char16 name = 0;
-    if (user_name_.empty())
-        name_label_->SetText(base::string16());
-    else {
-        name = user_name_[0];
-        if ((name < L'a' || name > L'z') && (name < L'A' || name > L'Z')) {
-            size_t pos = user_name_.length() > 2 ? user_name_.length() - 2 : 0;
-            name_label_->SetText(base::string16(user_name_, pos));
-        }
-        else
-            name_label_->SetText(base::string16(1, name));
-    }
-
-    name_label_->SetBackground(views::CreateSolidBackground(kAvatarBackground[(int)name % kAvatarBackgroundSize]));
-    name_label_->SetVisible(true);
-    head_view_->SetImage(NULL);
+void YSPAccountView::ShowDefaultAvatar() {
+  base::string16 first_name(user_name_, 0, 1);
+  name_label_->SetText(first_name);
+  name_label_->SetVisible(true);
+  ui::ResourceBundle& bundle = ui::ResourceBundle::GetSharedInstance();
+  head_view_->SetImage(*bundle.GetImageSkiaNamed(IDR_YSP_LOGIN_AVATAR_L));
 }
 
-views::View* YSPAccountView::TargetForRect(View* root, const gfx::Rect& rect)
-{
+views::View* YSPAccountView::TargetForRect(View* root, const gfx::Rect& rect) {
   return this;
 }
