@@ -19,9 +19,9 @@ $(function() {
     }, 300)
     let _el = $(this)
     if (_el.hasClass('on')) {
-      _el.parents('.rdc-head').siblings('.rdc-content').slideDown();
-    } else {
       _el.parents('.rdc-head').siblings('.rdc-content').slideUp();
+    } else {
+      _el.parents('.rdc-head').siblings('.rdc-content').slideDown();
     }
   });
 
