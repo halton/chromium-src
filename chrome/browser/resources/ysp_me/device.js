@@ -29,7 +29,7 @@ class Device {
            /os x/i.test(str) ? './imgs/macbook.png' :
            /iphone|ios/i.test(str) ? './imgs/iphone.png' :
            /ipad/i.test(str) ? './imgs/iPad.png' :
-           /linux/i.test(str) ? './imgs/linux.png' : './imgs/mac.png'
+           /linux/i.test(str) ? './imgs/linux.png' : './imgs/unknow.png'
   }
 
   initDOM(data) {
@@ -49,7 +49,7 @@ class Device {
             <p>${item.model || ''}</p>
           </div>
           <div class="rdc-ctl">
-            <button class="rdc-btn-icon on">
+            <button class="rdc-btn-icon">
               <span class="rdc-shadow"></span>
               <span class="rdc-caret-arrow rdc-pos-mm"></span>
             </button>

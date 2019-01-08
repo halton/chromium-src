@@ -898,6 +898,7 @@
       <include name="IDR_YSP_ME_IMGS_UPLOAD_ICON_PNG" file="resources\ysp_me\imgs\upload_icon.png" type="BINDATA" />
       <include name="IDR_YSP_ME_IMGS_WINDOWS_PC_PNG" file="resources\ysp_me\imgs\windows_pc.png" type="BINDATA" />
       <include name="IDR_YSP_ME_IMGS_WINDOWSBOOK_PNG" file="resources\ysp_me\imgs\windowsbook.png" type="BINDATA" />
+      <include name="IDR_YSP_ME_IMGS_UNKNOW_PNG" file="resources\ysp_me\imgs\unknow.png" type="BINDATA" />
       <include name="IDR_YSP_ME_INDEX_HTML" file="resources\ysp_me\index.html" flattenhtml="true" allowexternalscript="true" type="BINDATA" />
       <include name="IDR_YSP_ME_INDEX_JS" file="resources\ysp_me\index.js" flattenhtml="true" type="BINDATA" />
       <include name="IDR_YSP_ME_DEVICE_JS" file="resources\ysp_me\device.js" flattenhtml="true" type="BINDATA" />
