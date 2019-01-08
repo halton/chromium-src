@@ -418,6 +418,20 @@ DownloadTargetDeterminer::DoRequestConfirmation() {
 
   next_state_ = STATE_DETERMINE_LOCAL_PATH;
 
+#ifdef REDCORE
+  if (!download_->is_update() &&
+      !YSPLoginManager::GetInstance()->GetDownloadFileAllowed(virtual_path_)) {
+    ScheduleCallbackAndDeleteSelf(
+        download::DOWNLOAD_INTERRUPT_REASON_USER_CANCELED);
+    Browser* browser = chrome::FindLastActive();
+    chrome::ShowWarningMessageBox(
+        browser ? browser->window()->GetNativeWindow() : NULL,
+        l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
+        l10n_util::GetStringUTF16(IDS_YSP_FILE_FILTERED_MESSAGE));
+    return QUIT_DOLOOP;
+  }
+#endif // REDCORE
+
   // Avoid prompting for a download if it isn't in-progress. The user will be
   // prompted once the download is resumed and headers are available.
   if (download_->GetState() == DownloadItem::IN_PROGRESS) {
@@ -489,22 +503,6 @@ DownloadTargetDeterminer::DoDetermineLocalPath() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK(!virtual_path_.empty());
   DCHECK(local_path_.empty());
-
-#ifdef REDCORE
-  // ysp+ {
-  if (!download_->is_update() &&
-      !YSPLoginManager::GetInstance()->GetDownloadFileAllowed(virtual_path_)) {
-    ScheduleCallbackAndDeleteSelf(
-        download::DOWNLOAD_INTERRUPT_REASON_FILE_BLOCKED);
-
-    chrome::ShowWarningMessageBox(
-        NULL, l10n_util::GetStringUTF16(IDS_YSP_URL_FILTERED_TITLE),
-        l10n_util::GetStringUTF16(IDS_YSP_FILE_FILTERED_MESSAGE));
-
-    return QUIT_DOLOOP;
-  }
-// ysp+ }
-#endif /*REDCORE*/
 
   next_state_ = STATE_DETERMINE_MIME_TYPE;
 
