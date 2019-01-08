@@ -485,7 +485,11 @@ void ZoomBubbleView::ButtonPressed(views::Button* sender,
     DCHECK(extension_info_.icon_image) << "Invalid button press.";
     Browser* browser = chrome::FindBrowserWithWebContents(web_contents());
     chrome::AddSelectedTabWithURL(
+#ifdef REDCORE
         browser, GURL(base::StringPrintf("chrome://extensions?id=%s",
+#else
+        browser, GURL(base::StringPrintf("ep://extensions?id=%s",
+#endif // REDCORE
                                          extension_info_.id.c_str())),
         ui::PAGE_TRANSITION_FROM_API);
   } else if (sender == zoom_out_button_) {

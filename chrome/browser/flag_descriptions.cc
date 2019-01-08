@@ -352,8 +352,13 @@ const char kDriveSearchInChromeLauncherDescription[] =
 
 const char kEmbeddedExtensionOptionsName[] = "Embedded extension options";
 const char kEmbeddedExtensionOptionsDescription[] =
+#ifdef REDCORE
+    "Display extension options as an embedded element in ep://extensions "
+    "rather than opening a new tab.";
+#else
     "Display extension options as an embedded element in chrome://extensions "
     "rather than opening a new tab.";
+#endif // REDCORE
 
 const char kEnableAccessibilityObjectModelName[] = "Accessibility Object Model";
 const char kEnableAccessibilityObjectModelDescription[] =
@@ -608,8 +613,13 @@ const char kEnableMacMaterialDesignDownloadShelfDescription[] =
 
 const char kEnablePolicyToolName[] = "Enable policy management page";
 const char kEnablePolicyToolDescription[] =
+#ifdef REDCORE
+    "If enabled, the ep://policy-tool URL loads a page for managing "
+    "policies.";
+#else
     "If enabled, the chrome://policy-tool URL loads a page for managing "
     "policies.";
+#endif // REDCORE
 
 const char kEnablePWAFullCodeCacheName[] = "Enable PWA full code cache";
 const char kEnablePWAFullCodeCacheDescription[] =
@@ -631,8 +641,13 @@ const char kEnableNavigationTracingDescription[] =
 
 const char kEnableNetworkLoggingToFileName[] = "Enable network logging to file";
 const char kEnableNetworkLoggingToFileDescription[] =
+#ifdef REDCORE
+    "Enables network logging to a file named netlog.json in the user data "
+    "directory. The file can be imported into ep://net-internals.";
+#else
     "Enables network logging to a file named netlog.json in the user data "
     "directory. The file can be imported into chrome://net-internals.";
+#endif // REDCORE
 
 const char kEnableNetworkServiceName[] = "Enable network service";
 const char kEnableNetworkServiceDescription[] =
@@ -692,20 +707,34 @@ const char kVizHitTestDrawQuadDescription[] =
 const char kEnableOutOfProcessHeapProfilingName[] =
     "Out of process heap profiling start mode.";
 const char kEnableOutOfProcessHeapProfilingDescription[] =
+#ifdef REDCORE
+    "Creates a profiling service that records stacktraces for all live, "
+    "malloced objects. Heap dumps can be obtained at ep://tracing "
+    "[category:memory-infra] and ep://memory-internals. This setting "
+    "controls which processes are profiled. As long as this setting is not "
+    "disabled, users can start profiling any given process in "
+    "ep://memory-internals.";
+#else
     "Creates a profiling service that records stacktraces for all live, "
     "malloced objects. Heap dumps can be obtained at chrome://tracing "
     "[category:memory-infra] and chrome://memory-internals. This setting "
     "controls which processes are profiled. As long as this setting is not "
     "disabled, users can start profiling any given process in "
     "chrome://memory-internals.";
+#endif // REDCORE
 const char kEnableOutOfProcessHeapProfilingModeMinimal[] = "Browser and GPU";
 const char kEnableOutOfProcessHeapProfilingModeAll[] = "All processes";
 const char kEnableOutOfProcessHeapProfilingModeAllRenderers[] = "All renderers";
 const char kEnableOutOfProcessHeapProfilingModeBrowser[] = "Only browser";
 const char kEnableOutOfProcessHeapProfilingModeGpu[] = "Only GPU.";
 const char kEnableOutOfProcessHeapProfilingModeManual[] =
+#ifdef REDCORE
+    "None by default. Visit ep://memory-internals to choose which "
+    "processes to profile.";
+#else
     "None by default. Visit chrome://memory-internals to choose which "
     "processes to profile.";
+#endif // REDCORE
 const char kEnableOutOfProcessHeapProfilingModeRendererSampling[] =
     "Profile a random sampling of renderer processes, ensuring only one is "
     "ever profiled at a time.";
@@ -713,6 +742,15 @@ const char kEnableOutOfProcessHeapProfilingModeRendererSampling[] =
 const char kOutOfProcessHeapProfilingKeepSmallAllocations[] =
     "Emit small allocations in memlog heap dumps.";
 const char kOutOfProcessHeapProfilingKeepSmallAllocationsDescription[] =
+#ifdef REDCORE
+    "By default, small allocations are pruned from the heap dump. This reduces "
+    "the size of the compressed trace by 100x. If pruning is disabled, the "
+    "ep://tracing UI may be unable to take or load the trace. Save the "
+    "trace directly using ep://memory-internals, and use other mechanisms "
+    "[e.g. diff_heap_profiler.py] to examine the trace. Note that "
+    "automatically uploaded traces will always be pruned. This only affects "
+    "manually taken memory-infra traces.";
+#else
     "By default, small allocations are pruned from the heap dump. This reduces "
     "the size of the compressed trace by 100x. If pruning is disabled, the "
     "chrome://tracing UI may be unable to take or load the trace. Save the "
@@ -720,6 +758,7 @@ const char kOutOfProcessHeapProfilingKeepSmallAllocationsDescription[] =
     "[e.g. diff_heap_profiler.py] to examine the trace. Note that "
     "automatically uploaded traces will always be pruned. This only affects "
     "manually taken memory-infra traces.";
+#endif // REDCORE
 
 const char kOutOfProcessHeapProfilingSampling[] = "Sample memlog allocations";
 const char kOutOfProcessHeapProfilingSamplingDescription[] =
@@ -907,10 +946,17 @@ const char kExtensionContentVerificationEnforce[] =
 const char kExtensionContentVerificationEnforceStrict[] =
     "Enforce strict (hard fail if we can't get hashes)";
 
+#ifdef REDCORE
+const char kExtensionsOnChromeUrlsName[] = "Extensions on ep:// URLs";
+const char kExtensionsOnChromeUrlsDescription[] =
+    "Enables running extensions on ep:// URLs, where extensions explicitly "
+    "request this permission.";
+#else
 const char kExtensionsOnChromeUrlsName[] = "Extensions on chrome:// URLs";
 const char kExtensionsOnChromeUrlsDescription[] =
     "Enables running extensions on chrome:// URLs, where extensions explicitly "
     "request this permission.";
+#endif // REDCORE
 
 const char kFastUnloadName[] = "Fast tab/window close";
 const char kFastUnloadDescription[] =
@@ -1738,6 +1784,19 @@ const char kSingleTabModeDescription[] =
 
 const char kStrictSiteIsolationName[] = "Strict site isolation";
 const char kStrictSiteIsolationDescription[] =
+#ifdef REDCORE
+    "Security mode that enables site isolation for all sites (SitePerProcess). "
+    "In this mode, each renderer process will contain pages from at most one "
+    "site, using out-of-process iframes when needed. NOTE: Site isolation is "
+    "enabled by default on desktop platforms regardless of how this flag is "
+    "set; see ep://process-internals for whether it is currently enabled. "
+    "Setting this flag to 'Enabled' turns on site isolation regardless of the "
+    "default. Here, 'Disabled' is a legacy value that actually means "
+    "'Default,' in which case site isolation may be already enabled based on "
+    "platform, enterprise policy, or field trial. See also "
+    "#site-isolation-trial-opt-out for how to disable site isolation for "
+    "testing.";
+#else
     "Security mode that enables site isolation for all sites (SitePerProcess). "
     "In this mode, each renderer process will contain pages from at most one "
     "site, using out-of-process iframes when needed. NOTE: Site isolation is "
@@ -1749,6 +1808,7 @@ const char kStrictSiteIsolationDescription[] =
     "platform, enterprise policy, or field trial. See also "
     "#site-isolation-trial-opt-out for how to disable site isolation for "
     "testing.";
+#endif // REDCORE
 
 const char kSiteIsolationTrialOptOutName[] = "Site isolation trial opt-out";
 const char kSiteIsolationTrialOptOutDescription[] =
@@ -1792,10 +1852,17 @@ const char kSpeculativePreconnectDescription[] =
 
 const char kSpeculativePrefetchName[] = "Speculative Prefetch";
 const char kSpeculativePrefetchDescription[] =
+#ifdef REDCORE
+    R"*("Speculative Prefetch" fetches likely resources early to improve )*"
+    R"*(load times, based on a local database (see ep://predictors). )*"
+    R"*("Learning" means that only the database construction is enabled, )*"
+    R"*("Prefetching" that learning and prefetching are enabled.)*";
+#else
     R"*("Speculative Prefetch" fetches likely resources early to improve )*"
     R"*(load times, based on a local database (see chrome://predictors). )*"
     R"*("Learning" means that only the database construction is enabled, )*"
     R"*("Prefetching" that learning and prefetching are enabled.)*";
+#endif // REDCORE
 
 const char kSpeculativeServiceWorkerStartOnQueryInputName[] =
     "Enable speculative start of a service worker when a search is predicted.";
@@ -2200,10 +2267,17 @@ const char kWebXrOrientationSensorDeviceDescription[] =
 
 const char kWifiCredentialSyncName[] = "WiFi credential sync";
 const char kWifiCredentialSyncDescription[] =
+#ifdef REDCORE
+    "Enables synchronizing WiFi network settings across devices. When enabled, "
+    "the WiFi credential datatype is registered with Chrome Sync, and WiFi "
+    "credentials are synchronized subject to user preferences. (See also, "
+    "ep://settings/syncSetup.)";
+#else
     "Enables synchronizing WiFi network settings across devices. When enabled, "
     "the WiFi credential datatype is registered with Chrome Sync, and WiFi "
     "credentials are synchronized subject to user preferences. (See also, "
     "chrome://settings/syncSetup.)";
+#endif // REDCORE
 
 const char kZeroCopyName[] = "Zero-copy rasterizer";
 const char kZeroCopyDescription[] =
@@ -3611,10 +3685,17 @@ const char kEnableInputImeApiDescription[] =
 
 const char kAutomaticTabDiscardingName[] = "Automatic tab discarding";
 const char kAutomaticTabDiscardingDescription[] =
+#ifdef REDCORE
+    "If enabled, tabs get automatically discarded from memory when the system "
+    "memory is low. Discarded tabs are still visible on the tab strip and get "
+    "reloaded when clicked on. Info about discarded tabs can be found at "
+    "ep://discards.";
+#else
     "If enabled, tabs get automatically discarded from memory when the system "
     "memory is low. Discarded tabs are still visible on the tab strip and get "
     "reloaded when clicked on. Info about discarded tabs can be found at "
     "chrome://discards.";
+#endif // REDCORE
 
 #endif  // defined(OS_WIN) || defined(OS_MACOSX)
 

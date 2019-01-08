@@ -39,7 +39,11 @@ void GetFilePathAndQuery(const std::string& url,
                          base::FilePath* file_path,
                          std::string* query) {
   // We receive the url with chrome://fileicon/ stripped but GURL expects it.
+#ifdef REDCORE
+  const GURL gurl("ep://fileicon/" + url);
+#else
   const GURL gurl("chrome://fileicon/" + url);
+#endif
   std::string path = net::UnescapeURLComponent(
       gurl.path().substr(1),
       net::UnescapeRule::URL_SPECIAL_CHARS_EXCEPT_PATH_SEPARATORS |

@@ -4165,7 +4165,7 @@ void YSPLoginManager::ReportURLLoading(const GURL& url) {
   if (!login_info_ || !GetUSReportEnabled())
     return;
 
-  if (url.SchemeIs("chrome"))
+  if (url.SchemeIs("ep"))
     return;
 
   // init report fetcher

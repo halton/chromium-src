@@ -381,9 +381,15 @@ std::string ChromeURLs() {
   std::sort(hosts.begin(), hosts.end());
   for (std::vector<std::string>::const_iterator i = hosts.begin();
        i != hosts.end(); ++i) {
+#ifdef REDCORE
+    if (i->find("ep") == std::string::npos) {
+      html += "<li><a href='ep://" + *i + "/'>ep://" + *i + "</a></li>\n";
+    }
+#else
     if (i->find("chrome") == std::string::npos) {
       html += "<li><a href='chrome://" + *i + "/'>chrome://" + *i + "</a></li>\n";
     }
+#endif // REDCORE
   }
   html += "</ul>\n<h2>For Debug</h2>\n"
       "<p>The following pages are for debugging purposes only. Because they "

@@ -17,7 +17,11 @@
 namespace {
 const char kHelpCenterConnectionHelpUrl[] =
     "https://support.google.com/chrome/answer/6098869";
+#ifdef REDCORE
+const char kBundledConnectionHelpUrl[] = "ep://connection-help";
+#else
 const char kBundledConnectionHelpUrl[] = "chrome://connection-help";
+#endif // REDCORE
 
 void MaybeRedirectToBundledHelp(content::WebContents* web_contents) {
   if (!base::FeatureList::IsEnabled(features::kBundledConnectionHelpFeature))

@@ -24,7 +24,11 @@
 using content::BrowserThread;
 
 namespace {
+#ifdef REDCORE
+const char kGlobalCookieSetURL[] = "ep://cookieset";
+#else
 const char kGlobalCookieSetURL[] = "chrome://cookieset";
+#endif // REDCORE
 }  // namespace
 
 BrowsingDataCookieHelper::BrowsingDataCookieHelper(

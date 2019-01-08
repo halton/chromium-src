@@ -116,6 +116,36 @@ static std::string SerializeCommand(
 }
 
 net::NetworkTrafficAnnotationTag kPortForwardingControllerTrafficAnnotation =
+#ifdef REDCORE
+    net::DefineNetworkTrafficAnnotation("port_forwarding_controller_socket",
+                                        R"(
+        semantics {
+          sender: "Port Forwarding Controller"
+          description:
+            "For remote debugging local Android device, one might need to "
+            "enable reverse tethering for forwarding local ports from the "
+            "device to some ports on the host. This socket pumps the traffic "
+            "between the two."
+          trigger:
+            "A user connects to an Android device using remote debugging and "
+            "enables port forwarding on ep://inspect."
+          data: "Any data requested from the local port on Android device."
+          destination: OTHER
+          destination_other:
+            "Data is sent to the target that user selects in ep://inspect."
+        }
+        policy {
+          cookies_allowed: YES
+          cookies_store: "user"
+          setting:
+            "This request cannot be disabled in settings, however it would be "
+            "sent only if user enables port fowarding in ep://inspect and "
+            "USB debugging in the Android device system settings."
+          policy_exception_justification:
+            "Not implemented, policies defined on Android device will apply "
+            "here."
+        })");
+#else
     net::DefineNetworkTrafficAnnotation("port_forwarding_controller_socket",
                                         R"(
         semantics {
@@ -144,6 +174,7 @@ net::NetworkTrafficAnnotationTag kPortForwardingControllerTrafficAnnotation =
             "Not implemented, policies defined on Android device will apply "
             "here."
         })");
+#endif // REDCORE
 
 class SocketTunnel : public network::mojom::ResolveHostClient {
  public:
