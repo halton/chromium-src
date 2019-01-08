@@ -634,10 +634,10 @@ void DownloadItemImpl::Resume() {
 void DownloadItemImpl::Cancel(bool user_cancel) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DVLOG(20) << __func__ << "() download = " << DebugString(true);
-#if defined(REDCORE) && defined(IE_REDCORE)
-  if (!is_ie_download_)
+#if defined(IE_REDCORE)
+  if (is_ie_download_)
     return;
-#endif
+#endif  // defined(IE_REDCORE)
 
   InterruptAndDiscardPartialState(
       user_cancel ? DOWNLOAD_INTERRUPT_REASON_USER_CANCELED
