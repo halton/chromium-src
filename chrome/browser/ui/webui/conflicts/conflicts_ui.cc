@@ -24,7 +24,11 @@ content::WebUIDataSource* CreateConflictsUIHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUIConflictsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
+#ifdef REDCORE
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
 
   source->AddResourcePath("conflicts.js", IDR_ABOUT_CONFLICTS_JS);
   source->SetDefaultResource(IDR_ABOUT_CONFLICTS_HTML);

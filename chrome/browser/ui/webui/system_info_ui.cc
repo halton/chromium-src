@@ -57,12 +57,21 @@ class SystemInfoUIHTMLSource : public content::URLDataSource{
   }
   std::string GetContentSecurityPolicyScriptSrc() const override {
     // 'unsafe-eval' and 'unsafe-inline' are added to script-src.
+#ifdef REDCORE
+    return "script-src 'self' ep://resources 'unsafe-eval' "
+        "'unsafe-inline';";
+#else
     return "script-src 'self' chrome://resources 'unsafe-eval' "
         "'unsafe-inline';";
+#endif // REDCORE
   }
 
   std::string GetContentSecurityPolicyStyleSrc() const override {
+#ifdef REDCORE
+    return "style-src 'self' ep://resources 'unsafe-inline';";
+#else
     return "style-src 'self' chrome://resources 'unsafe-inline';";
+#endif // REDCORE
   }
 
  private:

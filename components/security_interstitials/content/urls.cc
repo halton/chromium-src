@@ -7,6 +7,10 @@
 namespace security_interstitials {
 
 const char kChromeUIConnectionHelpHost[] = "connection-help";
+#ifdef REDCORE
+const char kChromeUIConnectionHelpURL[] = "ep://connection-help";
+#else
 const char kChromeUIConnectionHelpURL[] = "chrome://connection-help";
+#endif // REDCORE
 
 }  // namespace security_interstitials

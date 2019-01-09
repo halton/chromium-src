@@ -6,6 +6,18 @@
 
 namespace safe_browsing {
 
+#ifdef REDCORE
+const char kChromeUISafeBrowsingURL[] = "ep://safe-browsing/";
+const char kChromeUISafeBrowsingHost[] = "safe-browsing";
+const char kSbUnderConstruction[] =
+    "The safe browsing page is under construction.";
+const char kChromeUISafeBrowsingMatchMalwareUrl[] =
+    "ep://safe-browsing/match?type=malware";
+const char kChromeUISafeBrowsingMatchPhishingUrl[] =
+    "ep://safe-browsing/match?type=phishing";
+const char kChromeUISafeBrowsingMatchUnwantedUrl[] =
+    "ep://safe-browsing/match?type=unwanted";
+#else
 const char kChromeUISafeBrowsingURL[] = "chrome://safe-browsing/";
 const char kChromeUISafeBrowsingHost[] = "safe-browsing";
 const char kSbUnderConstruction[] =
@@ -16,5 +28,6 @@ const char kChromeUISafeBrowsingMatchPhishingUrl[] =
     "chrome://safe-browsing/match?type=phishing";
 const char kChromeUISafeBrowsingMatchUnwantedUrl[] =
     "chrome://safe-browsing/match?type=unwanted";
+#endif // REDCORE
 
 }  // namespace safe_browsing

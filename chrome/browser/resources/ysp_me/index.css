@@ -345,7 +345,6 @@ li {
   position: relative;
   display: flex;
   line-height: 30px;
-  margin-bottom: 20px;
 }
 
 .rdc-container-user .rdc-item .rdc-info .rdc-head .img {
@@ -419,6 +418,7 @@ li {
 }
 
 .rdc-content {
+  margin-top: 10px;
   position: relative;
 }
 

@@ -22,8 +22,13 @@ DomainReliabilityInternalsUI::DomainReliabilityInternalsUI(
     : content::WebUIController(web_ui) {
   content::WebUIDataSource* html_source = content::WebUIDataSource::Create(
       chrome::kChromeUIDomainReliabilityInternalsHost);
+#ifdef REDCORE
+  html_source->OverrideContentSecurityPolicyScriptSrc(
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
   html_source->OverrideContentSecurityPolicyScriptSrc(
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
   html_source->AddResourcePath("domain_reliability_internals.css",
       IDR_DOMAIN_RELIABILITY_INTERNALS_CSS);
   html_source->AddResourcePath("domain_reliability_internals.js",

@@ -35,7 +35,11 @@ namespace errors = manifest_errors;
 
 namespace {
 
+#ifdef REDCORE
+const char kOverrideExtentUrlPatternFormat[] = "ep://%s/*";
+#else
 const char kOverrideExtentUrlPatternFormat[] = "chrome://%s/*";
+#endif // REDCORE
 
 }  // namespace
 

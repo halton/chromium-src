@@ -49,7 +49,7 @@ class Device {
             <p>${item.model || ''}</p>
           </div>
           <div class="rdc-ctl">
-            <button class="rdc-btn-icon on">
+            <button class="rdc-btn-icon">
               <span class="rdc-shadow"></span>
               <span class="rdc-caret-arrow rdc-pos-mm"></span>
             </button>

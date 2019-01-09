@@ -159,7 +159,11 @@ void NotificationImageReady(const std::string extension_name,
   std::string id = kCrashedNotificationPrefix + extension_id;
   message_center::Notification notification(
       message_center::NOTIFICATION_TYPE_SIMPLE, id, base::string16(), message,
+#ifdef REDCORE
+      notification_icon, base::string16(), GURL("ep://extension-crash"),
+#else
       notification_icon, base::string16(), GURL("chrome://extension-crash"),
+#endif // REDCORE
       message_center::NotifierId(message_center::NotifierId::SYSTEM_COMPONENT,
                                  kNotifierId),
       {}, delegate);

@@ -3933,23 +3933,29 @@ bool YSPLoginManager::FileTypeInBlacklist(const base::FilePath& file_path) {
 
 bool YSPLoginManager::FileTypeInPolicylist(const std::string& policy_path,
                                            const base::FilePath& file_path) {
-  if (strategy_info_) {
-    base::DictionaryValue* data_dict = nullptr;
-    if (strategy_info_->GetDictionary("data", &data_dict)) {
-      base::ListValue* list = nullptr;
-      if (data_dict && data_dict->GetList(policy_path, &list)) {
-        if (list && !list->empty()) {
-          for (size_t i = 0; i < list->GetSize(); i++) {
-            base::FilePath::StringType key;
-            list->GetString(i, &key);
-            base::FilePath::StringType key_ext = FILE_PATH_LITERAL(".") + key;
-            if (file_path.MatchesExtension(key_ext))
-              return true;
-          }
-        }
-      }
-    }
+  if (!strategy_info_) {
+    return false;
   }
+
+  base::DictionaryValue* data_dict = nullptr;
+  base::ListValue* list = nullptr;
+  if (!strategy_info_->GetDictionary("data", &data_dict) ||
+      !data_dict || !data_dict->GetList(policy_path, &list) ||
+      !list || list->empty()) {
+    return false;
+  }
+
+  base::FilePath::StringType dot_char = FILE_PATH_LITERAL(".");
+  for (size_t i = 0; i < list->GetSize(); i++) {
+    base::FilePath::StringType key;
+    list->GetString(i, &key);
+    if (key.find(dot_char, 0) != 0) {
+      key = dot_char + key;
+    }
+    if (file_path.MatchesExtension(key))
+      return true;
+  }
+
   return false;
 }
 
@@ -4159,7 +4165,7 @@ void YSPLoginManager::ReportURLLoading(const GURL& url) {
   if (!login_info_ || !GetUSReportEnabled())
     return;
 
-  if (url.SchemeIs("chrome"))
+  if (url.SchemeIs("ep"))
     return;
 
   // init report fetcher

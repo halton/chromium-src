@@ -25,7 +25,11 @@ content::WebUIDataSource* CreateSignInInternalsHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUISignInInternalsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
+#ifdef REDCORE
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
 
   source->SetJsonPath("strings.js");
   source->AddResourcePath("signin_internals.js", IDR_SIGNIN_INTERNALS_INDEX_JS);

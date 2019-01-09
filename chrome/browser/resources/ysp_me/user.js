@@ -76,7 +76,7 @@ class User {
       $('#rdc_user_head_img').attr('src', user.avatarPath)
     }
     $('#rdc_user_head_info').html(`<p>${user.headName || ''}</p> <p>${user.email || ''} </p>`)
-    $('#rdc_user_head_info').next().html(`<button class="rdc-btn-icon on">
+    $('#rdc_user_head_info').next().html(`<button class="rdc-btn-icon">
       <span class="rdc-shadow"></span>
       <span class="rdc-caret-arrow rdc-pos-mm"></span>
     </button>`)
@@ -99,7 +99,7 @@ class User {
       </div> 
       <div class="rdc-ctl-br"> 
         <button id="btn_rdc_loginout" class="rdc-btn">退出登录</button> 
-        <button id="btn_rdc_modify_psw" class="rdc-btn primary">修改密码</button> 
+        ${user.source === 4 ? '' : '<button id="btn_rdc_modify_psw" class="rdc-btn primary">修改密码</button>'} 
       </div> 
     </div> `)
   }

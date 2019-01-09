@@ -34,7 +34,11 @@ struct RecentBookmark {
 };
 
 const char* kBookmarksURLBlacklist[] = {
+#ifdef REDCORE
+    "ep://newtab/", "ep-native://newtab/", "ep://bookmarks/"};
+#else
     "chrome://newtab/", "chrome-native://newtab/", "chrome://bookmarks/"};
+#endif // REDCORE
 
 const char kBookmarkLastVisitDateOnMobileKey[] = "last_visited";
 const char kBookmarkLastVisitDateOnDesktopKey[] = "last_visited_desktop";

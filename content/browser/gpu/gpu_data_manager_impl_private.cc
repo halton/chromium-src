@@ -345,7 +345,11 @@ bool GpuDataManagerImplPrivate::GpuAccessAllowed(std::string* reason) const {
               switches::kDisableGpu))
         *reason += "through commandline switch --disable-gpu.";
       else
+#ifdef REDCORE
+        *reason += "in ep://settings.";
+#else
         *reason += "in chrome://settings.";
+#endif //REDCORE
     }
     return false;
   }
