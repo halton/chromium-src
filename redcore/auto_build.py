@@ -182,7 +182,7 @@ def buildRelease49Win():
 def buildRelease70Win():
   autoBuild = "%s \
     cd %s &&;\
-    gn gen out/Release --args=\"is_component_build=false is_debug=false is_official_build=false enable_nacl=false enable_precompiled_headers=false\" &&;\
+    gn gen out/Release --args=\"is_official_build=true enable_nacl=false\" &&;\
     ninja -C out/Release mini_installer \
     " % (getDiskString(_WORKING_DIR), _WORKING_DIR)
   execCmd(autoBuild)
