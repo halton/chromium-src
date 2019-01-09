@@ -721,7 +721,7 @@ HWND BrowserHostEventDelegant::CreateHostWindow(HWND parent_window) {
   RegisterWndClass(instance);
   HWND window_handle =
       CreateWindowW(L"YSPHostWnd", L"",
-                    WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                    WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
                     0, 0, 0, 0, parent_window, nullptr, instance, nullptr);
 
   // 为了解决设置SetWindowDisplayAffinity(WDA_MONITOR)用来屏蔽截屏后,
