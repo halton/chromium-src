@@ -132,7 +132,13 @@ class ATL_NO_VTABLE BrowserProcess
   HWND ie_handle_;
   VARIANT_BOOL should_be_show_;
 };
-OBJECT_ENTRY_AUTO(__uuidof(BrowserContainer), BrowserProcess)
+
+// TODO (halton): Below macro will cause duplicate symbols of
+// CComObjectRootEx<CComMultiThreadModel> when component build,
+// See details at http://jira.yunshipei.info/browse/RDC-6622
+// Comment out below code and will check root cause in futhure.
+
+// OBJECT_ENTRY_AUTO(__uuidof(BrowserContainer), BrowserProcess)
 
 }  // namespace ie
 

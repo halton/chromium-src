@@ -118,7 +118,12 @@ class ATL_NO_VTABLE HttpMonitorIe
   IInternetBindInfo* bind_info_;
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(HttpMonitor), HttpMonitorIe)
+// TODO (halton): Below macro will cause duplicate symbols of
+// CComObjectRootEx<CComMultiThreadModel> when component build,
+// See details at http://jira.yunshipei.info/browse/RDC-6622
+// Comment out below code and will check root cause in futhure.
+
+// OBJECT_ENTRY_AUTO(__uuidof(HttpMonitor), HttpMonitorIe)
 
 class ProtocolSinkIe : public IServiceProvider,
                        public IInternetProtocolSink,

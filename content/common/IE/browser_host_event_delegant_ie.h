@@ -165,7 +165,12 @@ class ATL_NO_VTABLE BrowserHostEventDelegant
   base::WeakPtrFactory<BrowserHostEventDelegant> update_dl_data_weak_factory_;
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(BrowserHost), BrowserHostEventDelegant)
+// TODO (halton): Below macro will cause duplicate symbols of
+// CComObjectRootEx<CComMultiThreadModel> when component build,
+// See details at http://jira.yunshipei.info/browse/RDC-6622
+// Comment out below code and will check root cause in futhure.
+
+// OBJECT_ENTRY_AUTO(__uuidof(BrowserHost), BrowserHostEventDelegant)
 
 }  // namespace ie
 
