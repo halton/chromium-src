@@ -213,7 +213,11 @@ std::string GetSecureDirectiveValues(
         base::StartsWith(source_lower,
                          "http://localhost:", base::CompareCase::SENSITIVE) ||
         isNonWildcardTLD(source_lower, "https://", true) ||
+#ifdef REDCORE
+        isNonWildcardTLD(source_lower, "ep://", false) ||
+#else
         isNonWildcardTLD(source_lower, "chrome://", false) ||
+#endif // REDCORE
         isNonWildcardTLD(source_lower,
                          std::string(extensions::kExtensionScheme) +
                              url::kStandardSchemeSeparator,

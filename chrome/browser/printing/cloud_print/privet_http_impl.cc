@@ -707,6 +707,32 @@ std::unique_ptr<PrivetURLLoader> PrivetHTTPClientImpl::CreateURLLoader(
   replacements.SetPortStr(port);
 
   net::NetworkTrafficAnnotationTag traffic_annotation =
+#ifdef REDCORE
+      net::DefineNetworkTrafficAnnotation("privet_http_impl", R"(
+        semantics {
+          sender: "Cloud Print"
+          description:
+            "Cloud Print local printing uses these requests to query "
+            "information from printers on local network and send print jobs to "
+            "them."
+          trigger:
+            "Print Preview; New printer on network; ep://devices/"
+          data:
+            "Printer information, settings and document for printing."
+          destination: OTHER
+        }
+        policy {
+          cookies_allowed: NO
+          setting:
+            "Users can enable or disable background requests by 'Show "
+            "notifications when new printers are detected on the network' in "
+            "Chromium's settings under Advanced Settings, Google Cloud Print. "
+            "User triggered requests, like from print preview or "
+            "ep://devices/ cannot be disabled."
+          policy_exception_justification:
+            "Not implemented, it's good to do so."
+        })");
+#else
       net::DefineNetworkTrafficAnnotation("privet_http_impl", R"(
         semantics {
           sender: "Cloud Print"
@@ -731,6 +757,7 @@ std::unique_ptr<PrivetURLLoader> PrivetHTTPClientImpl::CreateURLLoader(
           policy_exception_justification:
             "Not implemented, it's good to do so."
         })");
+#endif // REDCORE
   return std::make_unique<PrivetURLLoader>(url.ReplaceComponents(replacements),
                                            request_type, url_loader_factory_,
                                            traffic_annotation, delegate);

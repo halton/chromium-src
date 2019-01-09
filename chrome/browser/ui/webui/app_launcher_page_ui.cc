@@ -135,18 +135,31 @@ bool AppLauncherPageUI::HTMLSource::AllowCaching() const {
 std::string AppLauncherPageUI::HTMLSource::GetContentSecurityPolicyScriptSrc()
     const {
   // 'unsafe-inline' is added to script-src.
+#ifdef REDCORE
+  return "script-src ep://resources 'self' 'unsafe-eval' 'unsafe-inline';";
+#else
   return "script-src chrome://resources 'self' 'unsafe-eval' 'unsafe-inline';";
+#endif // REDCORE
 }
 
 std::string AppLauncherPageUI::HTMLSource::GetContentSecurityPolicyStyleSrc()
     const {
+#ifdef REDCORE
+  return "style-src 'self' ep://resources ep://theme 'unsafe-inline';";
+#else
   return "style-src 'self' chrome://resources chrome://theme 'unsafe-inline';";
+#endif // REDCORE
 }
 
 std::string AppLauncherPageUI::HTMLSource::GetContentSecurityPolicyImgSrc()
     const {
+#ifdef REDCORE
+  return "img-src ep://extension-icon ep://theme ep://resources "
+      "data:;";
+#else
   return "img-src chrome://extension-icon chrome://theme chrome://resources "
       "data:;";
+#endif // REDCORE
 }
 
 AppLauncherPageUI::HTMLSource::~HTMLSource() {}

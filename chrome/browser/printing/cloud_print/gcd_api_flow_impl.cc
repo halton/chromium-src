@@ -46,6 +46,7 @@ const std::string GetOAuthHeaderValue(const std::string& token) {
 net::NetworkTrafficAnnotationTag GetNetworkTrafficAnnotation(
     GCDApiFlow::Request::NetworkTrafficAnnotation type) {
   if (type == CloudPrintApiFlowRequest::TYPE_PRIVET_REGISTER) {
+#ifdef REDCORE
     return DefineNetworkTrafficAnnotation("cloud_print_privet_register", R"(
         semantics {
           sender: "Cloud Print"
@@ -65,8 +66,48 @@ net::NetworkTrafficAnnotationTag GetNetworkTrafficAnnotation(
           setting: "User triggered requests cannot be disabled."
           policy_exception_justification: "Not implemented, it's good to do so."
         })");
+#else
+    return DefineNetworkTrafficAnnotation("cloud_print_privet_register", R"(
+        semantics {
+          sender: "Cloud Print"
+          description:
+            "Registers a locally discovered Privet printer with a Cloud Print "
+            "Server."
+          trigger:
+            "Users can select Privet printers on ep://devices/ and "
+            "register them."
+          data:
+            "Token id for a printer retrieved from a previous request to a "
+            "Cloud Print Server."
+          destination: OTHER
+        }
+        policy {
+          cookies_allowed: NO
+          setting: "User triggered requests cannot be disabled."
+          policy_exception_justification: "Not implemented, it's good to do so."
+        })");
+#endif // REDCORE
   } else {
     DCHECK_EQ(CloudPrintApiFlowRequest::TYPE_SEARCH, type);
+#ifdef REDCORE
+    return DefineNetworkTrafficAnnotation("cloud_print_search", R"(
+        semantics {
+          sender: "Cloud Print"
+          description:
+            "Queries a Cloud Print Server for the list of printers."
+          trigger:
+            "ep://devices/ fetches the list when the user logs in, "
+            "re-enable the Cloud Print service, or manually requests a printer "
+            "list refresh."
+          data: "None"
+          destination: OTHER
+        }
+        policy {
+          cookies_allowed: NO
+          setting: "User triggered requests cannot be disabled."
+          policy_exception_justification: "Not implemented, it's good to do so."
+        })");
+#else
     return DefineNetworkTrafficAnnotation("cloud_print_search", R"(
         semantics {
           sender: "Cloud Print"
@@ -84,6 +125,7 @@ net::NetworkTrafficAnnotationTag GetNetworkTrafficAnnotation(
           setting: "User triggered requests cannot be disabled."
           policy_exception_justification: "Not implemented, it's good to do so."
         })");
+#endif // REDCORE
   }
 }
 

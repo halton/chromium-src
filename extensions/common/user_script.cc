@@ -146,7 +146,7 @@ void UserScript::add_exclude_url_pattern(const URLPattern& pattern) {
 
 bool UserScript::MatchesURL(const GURL& url) const {
 #ifdef REDCORE  //TODO(matianzhi) Support Extensions Insert JS on newtab page
-  if (url.spec() == "chrome://newtab/")
+  if (url.spec() == "ep://newtab/")
     return true;
 #endif
   if (!url_set_.is_empty()) {

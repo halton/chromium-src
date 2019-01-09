@@ -70,7 +70,11 @@ IndexedDBInternalsUI::IndexedDBInternalsUI(WebUI* web_ui)
   WebUIDataSource* source =
       WebUIDataSource::Create(kChromeUIIndexedDBInternalsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
+#ifdef REDCORE
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
   source->SetJsonPath("strings.js");
   source->AddResourcePath("indexeddb_internals.js",
                           IDR_INDEXED_DB_INTERNALS_JS);
@@ -339,6 +343,27 @@ void IndexedDBInternalsUI::OnDownloadDataReady(
   const GURL url = GURL(FILE_PATH_LITERAL("file://") + zip_path.value());
   WebContents* web_contents = web_ui()->GetWebContents();
   net::NetworkTrafficAnnotationTag traffic_annotation =
+#ifdef REDCORE
+      net::DefineNetworkTrafficAnnotation("indexed_db_internals_handler", R"(
+        semantics {
+          sender: "Indexed DB Internals"
+          description:
+            "This is an internal Chrome webpage that displays debug "
+            "information about IndexedDB usage and data, used by developers."
+          trigger: "When a user navigates to ep://indexeddb-internals/."
+          data: "None."
+          destination: LOCAL
+        }
+        policy {
+          cookies_allowed: NO
+          setting:
+            "This feature cannot be disabled by settings, but it's only "
+            "triggered by navigating to the specified URL."
+          policy_exception_justification:
+            "Not implemented. Indexed DB is Enterplorer's internal local data "
+            "storage."
+        })");
+#else
       net::DefineNetworkTrafficAnnotation("indexed_db_internals_handler", R"(
         semantics {
           sender: "Indexed DB Internals"
@@ -358,6 +383,7 @@ void IndexedDBInternalsUI::OnDownloadDataReady(
             "Not implemented. Indexed DB is Chrome's internal local data "
             "storage."
         })");
+#endif // REDCORE
   std::unique_ptr<download::DownloadUrlParameters> dl_params(
       DownloadRequestUtils::CreateDownloadForWebContentsMainFrame(
           web_contents, url, traffic_annotation));

@@ -48,9 +48,15 @@ namespace chrome_pdf {
 
 namespace {
 
+#ifdef REDCORE
+const char kChromePrint[] = "ep://print/";
+const char kChromeExtension[] =
+    "ep-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai";
+#else
 const char kChromePrint[] = "chrome://print/";
 const char kChromeExtension[] =
     "chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai";
+#endif // REDCORE
 
 // Constants used in handling postMessage() messages.
 const char kType[] = "type";

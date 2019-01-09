@@ -30,6 +30,29 @@ ProfileAvatarDownloader::ProfileAvatarDownloader(
   GURL url(std::string(kHighResAvatarDownloadUrlPrefix) +
            profiles::GetDefaultAvatarIconFileNameAtIndex(icon_index));
   net::NetworkTrafficAnnotationTag traffic_annotation =
+#ifdef REDCORE
+      net::DefineNetworkTrafficAnnotation("profile_avatar", R"(
+        semantics {
+          sender: "Profile Avatar Downloader"
+          description:
+            "The Chromium binary comes with a bundle of low-resolution "
+            "versions of avatar images. When the user selects an avatar in "
+            "ep://settings, Chromium will download a high-resolution "
+            "version from Google's static content servers for use in the "
+            "people manager UI."
+          trigger:
+            "User selects a new avatar in ep://settings for their profile"
+          data: "None, only the filename of the png to download."
+          destination: GOOGLE_OWNED_SERVICE
+        }
+        policy {
+          cookies_allowed: NO
+          setting: "This feature cannot be disabled in settings."
+          policy_exception_justification:
+            "No content is being uploaded or saved; this request merely "
+            "downloads a publicly available PNG file."
+        })");
+#else
       net::DefineNetworkTrafficAnnotation("profile_avatar", R"(
         semantics {
           sender: "Profile Avatar Downloader"
@@ -51,6 +74,7 @@ ProfileAvatarDownloader::ProfileAvatarDownloader(
             "No content is being uploaded or saved; this request merely "
             "downloads a publicly available PNG file."
         })");
+#endif // REDCORE
   fetcher_.reset(new BitmapFetcher(url, this, traffic_annotation));
 }
 

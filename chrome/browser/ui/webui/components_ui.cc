@@ -41,8 +41,13 @@ content::WebUIDataSource* CreateComponentsUIHTMLSource(Profile* profile) {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUIComponentsHost);
 
+#ifdef REDCORE
+  source->OverrideContentSecurityPolicyScriptSrc(
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
   source->OverrideContentSecurityPolicyScriptSrc(
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
   source->AddLocalizedString("componentsTitle", IDS_COMPONENTS_TITLE);
   source->AddLocalizedString("componentsNoneInstalled",
                              IDS_COMPONENTS_NONE_INSTALLED);

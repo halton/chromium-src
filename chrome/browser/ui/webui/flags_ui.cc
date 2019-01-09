@@ -60,7 +60,11 @@ content::WebUIDataSource* CreateFlagsUIHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUIFlagsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
+#ifdef REDCORE
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
 
   source->AddLocalizedString(flags_ui::kFlagsRestartNotice,
                              IDS_FLAGS_UI_RELAUNCH_NOTICE);

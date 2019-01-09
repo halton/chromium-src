@@ -20,7 +20,11 @@ content::WebUIDataSource* CreateSyncInternalsHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUISyncInternalsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
+#ifdef REDCORE
+      "script-src ep://resources 'self' 'unsafe-eval';");
+#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
+#endif // REDCORE
 
   source->SetJsonPath("strings.js");
   source->AddResourcePath(syncer::sync_ui_util::kSyncIndexJS,

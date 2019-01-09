@@ -428,7 +428,11 @@ std::string InterstitialHTMLSource::GetSource() const {
 
 std::string InterstitialHTMLSource::GetContentSecurityPolicyScriptSrc() const {
   // 'unsafe-inline' is added to script-src.
+#ifdef REDCORE
+  return "script-src ep://resources 'self' 'unsafe-inline';";
+#else
   return "script-src chrome://resources 'self' 'unsafe-inline';";
+#endif // REDCORE
 }
 
 std::string InterstitialHTMLSource::GetContentSecurityPolicyStyleSrc() const {

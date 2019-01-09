@@ -309,7 +309,11 @@ scoped_refptr<viz::ContextProvider> Gpu::CreateContextProvider(
   return base::MakeRefCounted<ContextProviderCommandBuffer>(
       std::move(gpu_channel), GetGpuMemoryBufferManager(), stream_id,
       stream_priority, gpu::kNullSurfaceHandle,
+#ifdef REDCORE
+      GURL("ep://gpu/MusContextFactory"), automatic_flushes,
+#else
       GURL("chrome://gpu/MusContextFactory"), automatic_flushes,
+#endif // REDCORE
       support_locking, support_grcontext, gpu::SharedMemoryLimits(), attributes,
       command_buffer_metrics::ContextType::MUS_CLIENT);
 }

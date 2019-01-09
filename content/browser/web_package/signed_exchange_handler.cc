@@ -471,7 +471,11 @@ void SignedExchangeHandler::OnVerifyCert(
         devtools_proxy_.get(),
         "Certificate must have CanSignHttpExchangesDraft extension. To ignore "
         "this error for testing, enable "
+#ifdef REDCORE
+        "ep://flags/#allow-sxg-certs-without-extension.",
+#else
         "chrome://flags/#allow-sxg-certs-without-extension.",
+#endif // REDCORE
         std::make_pair(0 /* signature_index */,
                        SignedExchangeError::Field::kSignatureCertUrl));
     RunErrorCallback(net::ERR_INVALID_SIGNED_EXCHANGE);

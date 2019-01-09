@@ -1073,7 +1073,11 @@ GpuProcessTransportFactory::CreateContextCommon(
 
   constexpr bool automatic_flushes = false;
 
+#ifdef REDCORE
+  GURL url("ep://gpu/GpuProcessTransportFactory::CreateContextCommon");
+#else
   GURL url("chrome://gpu/GpuProcessTransportFactory::CreateContextCommon");
+#endif // REDCORE
   return base::MakeRefCounted<ws::ContextProviderCommandBuffer>(
       std::move(gpu_channel_host), GetGpuMemoryBufferManager(), stream_id,
       stream_priority, surface_handle, url, automatic_flushes, support_locking,
