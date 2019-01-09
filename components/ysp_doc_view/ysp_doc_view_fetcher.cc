@@ -2,24 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ysp+
-#ifdef REDCORE
 #include "components/ysp_doc_view/ysp_doc_view_fetcher.h"
 
 #include <string.h>
-#include <utility>
 
-#include "base/bind.h"
 #include "base/files/file_util.h"
-#include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/common/service_manager_connection.h"
-#include "extensions/common/extension_urls.h"
-#include "net/base/load_flags.h"
 #include "net/base/mime_util.h"
 #include "net/url_request/url_fetcher.h"
-#include "net/url_request/url_request_status.h"
 #include "services/data_decoder/public/cpp/safe_json_parser.h"
 
 namespace {
@@ -34,22 +26,25 @@ const char kMultipartBoundary[] = "------xdcehKrkohmfeHiwreFiAVfchoDd------";
 YSPDocViewFetcher::YSPDocViewFetcher(
     YSPDocViewFetcherDelegate* delegate,
     net::URLRequestContextGetter* request_context)
-    : delegate_(delegate), request_context_(request_context) {}
+    : delegate_(delegate),
+      request_context_(request_context) {
+}
 
-YSPDocViewFetcher::~YSPDocViewFetcher() {}
+YSPDocViewFetcher::~YSPDocViewFetcher() {
+}
 
-void YSPDocViewFetcher::Start(const std::string& uploadUrl,
-                              const base::FilePath& localPath) {
-  upload_url_ = uploadUrl;
-  if (!base::PathExists(localPath))
+void YSPDocViewFetcher::Start(const std::string& upload_url,
+                              const base::FilePath& local_path) {
+  upload_url_ = upload_url;
+  if (!base::PathExists(local_path))
     return;
 
   std::string file_data;
-  if (!base::ReadFileToString(localPath, &file_data))
+  if (!base::ReadFileToString(local_path, &file_data))
     return;
 
   std::string convert_type = "1";
-  if (localPath.MatchesExtension(FILE_PATH_LITERAL(".pdf"))) {
+  if (local_path.MatchesExtension(FILE_PATH_LITERAL(".pdf"))) {
     convert_type = "14";
   }
   std::string post_data;
@@ -61,7 +56,7 @@ void YSPDocViewFetcher::Start(const std::string& uploadUrl,
   post_data.append(kMultipartBoundary);
   post_data.append("\r\nContent-Disposition: form-data; name=\"file");
   post_data.append("\"; filename=\"");
-  post_data.append(localPath.BaseName().AsUTF8Unsafe());
+  post_data.append(local_path.BaseName().AsUTF8Unsafe());
   post_data.append("\"\r\nContent-Type: application/octet-stream\r\n\r\n");
   // file data
   post_data.append(file_data.data(), file_data.size());
@@ -81,11 +76,11 @@ void YSPDocViewFetcher::DoStart(const std::string& post_data) {
   content_type.append(kMultipartBoundary);
 
   GURL requestUrl(upload_url_ + kUploadUrl);
-  if (!requestUrl.is_valid()) {
+  if (!requestUrl.is_valid())
     return;
-  }
-  data_fetcher_ =
-      net::URLFetcher::Create(requestUrl, net::URLFetcher::POST, this);
+
+  data_fetcher_ = net::URLFetcher::Create(
+      requestUrl, net::URLFetcher::POST, this);
   data_fetcher_->SetRequestContext(request_context_);
   data_fetcher_->SetUploadData(content_type, post_data);
   data_fetcher_->Start();
@@ -112,7 +107,8 @@ void YSPDocViewFetcher::OnURLFetchComplete(const net::URLFetcher* source) {
 
   std::unique_ptr<net::URLFetcher> fetcher(std::move(data_fetcher_));
 
-  if (!fetcher->GetStatus().is_success() || fetcher->GetResponseCode() != 200) {
+  if (!fetcher->GetStatus().is_success() ||
+      fetcher->GetResponseCode() != 200) {
     delegate_->OnDocViewRequestFailure();
     return;
   }
@@ -127,4 +123,3 @@ void YSPDocViewFetcher::OnURLFetchComplete(const net::URLFetcher* source) {
       base::Bind(&YSPDocViewFetcher::OnJsonParseSuccess, AsWeakPtr()),
       base::Bind(&YSPDocViewFetcher::OnJsonParseFailure, AsWeakPtr()));
 }
-#endif  // REDCORE

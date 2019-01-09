@@ -513,6 +513,7 @@ target(link_target_type, "renderer") {
     "p2p/socket_client_impl.h",
     "p2p/socket_dispatcher.cc",
     "p2p/socket_dispatcher.h",
+    "pepper/fullscreen_container.h",
     "peripheral_content_heuristic.cc",
     "peripheral_content_heuristic.h",
     "push_messaging/push_messaging_client.cc",
@@ -632,7 +633,7 @@ target(link_target_type, "renderer") {
     "worker_thread_registry.cc",
     "worker_thread_registry.h",
   ]
-  
+
    if (is_ie_redcore) {
       sources += [
         #ysp+ {IE Embedded}
@@ -641,7 +642,7 @@ target(link_target_type, "renderer") {
       "//content/renderer/renderer_main_ie.cc",
       ]
    }
-  
+
 
   if (!is_component_build) {
     if (is_win && is_official_build) {
@@ -656,6 +657,8 @@ target(link_target_type, "renderer") {
     "//content:content_implementation",
     "//build/config/compiler:no_size_t_to_int_warning",
   ]
+
+  defines = []
 
   public_deps = [
     "//content/common:mojo_bindings",
@@ -800,7 +803,7 @@ target(link_target_type, "renderer") {
   allow_circular_includes_from = []
 
   if (is_ie_redcore) {
-    defines = ["_WINDLL"]
+    defines += ["_WINDLL"]
   }
 
   if (use_aura) {

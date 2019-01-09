@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ysp+
-#ifdef REDCORE
 #ifndef COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
 #define COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
 
-#include <memory>
 #include <string>
 
 #include "base/files/file_path.h"
-#include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "net/url_request/url_fetcher_delegate.h"
 #include "url/gurl.h"
@@ -26,7 +22,6 @@ class URLFetcher;
 class URLRequestContextGetter;
 }  // namespace net
 
-// YSPDocViewFetcherDelegate
 class YSPDocViewFetcherDelegate {
  public:
   virtual void OnDocViewRequestFailure() = 0;
@@ -38,7 +33,6 @@ class YSPDocViewFetcherDelegate {
   virtual ~YSPDocViewFetcherDelegate() {}
 };
 
-// YSPDocViewFetcher
 class YSPDocViewFetcher : public base::SupportsWeakPtr<YSPDocViewFetcher>,
                           public net::URLFetcherDelegate {
  public:
@@ -46,7 +40,7 @@ class YSPDocViewFetcher : public base::SupportsWeakPtr<YSPDocViewFetcher>,
                     net::URLRequestContextGetter* request_context);
   ~YSPDocViewFetcher() override;
 
-  void Start(const std::string& uploadUrl, const base::FilePath& localPath);
+  void Start(const std::string& upload_url, const base::FilePath& local_path);
 
  private:
   void DoStart(const std::string& post_data);
@@ -67,4 +61,3 @@ class YSPDocViewFetcher : public base::SupportsWeakPtr<YSPDocViewFetcher>,
 };
 
 #endif  // COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_FETCHER_H_
-#endif  // REDCORE

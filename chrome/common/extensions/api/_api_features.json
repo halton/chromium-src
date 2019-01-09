@@ -102,7 +102,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "automationInternal": {
@@ -125,7 +125,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bookmarks/*"
+      "ep://bookmarks/*"
     ]
   }],
   "bookmarks": [{
@@ -136,8 +136,8 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bookmarks/*",
-      "chrome://welcome/email"
+      "ep://bookmarks/*",
+      "ep://welcome/email"
     ]
   }],
   "bookmarks.export": [{
@@ -151,7 +151,7 @@
     "contexts": ["webui"],
     "dependencies": [],
     "matches": [
-      "chrome://bookmarks/*"
+      "ep://bookmarks/*"
     ]
   }],
   "bookmarks.import": [{
@@ -165,7 +165,7 @@
     "contexts": ["webui"],
     "dependencies": [],
     "matches": [
-      "chrome://bookmarks/*"
+      "ep://bookmarks/*"
     ]
   }],
   "brailleDisplayPrivate": {
@@ -241,7 +241,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://version/*"
+      "ep://version/*"
     ],
     "platforms": ["chromeos"]
   }],
@@ -254,10 +254,10 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://chrome-signin/*",
-      "chrome://media-router/*",
-      "chrome://mobilesetup/*",
-      "chrome://oobe/*"
+      "ep://chrome-signin/*",
+      "ep://media-router/*",
+      "ep://mobilesetup/*",
+      "ep://oobe/*"
     ]
   }],
   "cloudPrintPrivate": {
@@ -334,9 +334,9 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://extensions/*",
-      "chrome://extensions-frame/*",
-      "chrome://chrome/extensions/*"
+      "ep://extensions/*",
+      "ep://extensions-frame/*",
+      "ep://chrome/extensions/*"
     ]
   }],
   // All devtools APIs are implemented by hand, so don't compile them.
@@ -451,7 +451,7 @@
     "internal": true,
     "channel": "stable",
     "contexts": ["webui"],
-    "matches": ["chrome://extensions-frame/*", "chrome://extensions/*"]
+    "matches": ["ep://extensions-frame/*", "ep://extensions/*"]
   }],
   // This is not a real API, only here for documentation purposes.
   // See http://crbug.com/275944 for background.
@@ -546,7 +546,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "instanceID": {
@@ -560,7 +560,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "launcherSearchProvider": {
@@ -628,7 +628,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "permissions": {
@@ -673,8 +673,8 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://multidevice-setup/*",
-      "chrome://settings/*"
+      "ep://multidevice-setup/*",
+      "ep://settings/*"
     ],
     "platforms": ["chromeos"]
   },
@@ -685,7 +685,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://print/*"
+      "ep://print/*"
     ]
   }],
   "rtcPrivate": {
@@ -707,7 +707,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "signedInDevices": {
@@ -742,7 +742,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bookmarks/*"
+      "ep://bookmarks/*"
     ]
   }],
   "terminalPrivate": {
@@ -769,7 +769,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "virtualKeyboardPrivate": {
@@ -847,7 +847,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bookmarks/*"
+      "ep://bookmarks/*"
     ]
   }],
   "yspmanager": {

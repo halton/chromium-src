@@ -84,8 +84,8 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bluetooth-pairing/*",
-      "chrome://settings/*"
+      "ep://bluetooth-pairing/*",
+      "ep://settings/*"
     ]
   }],
   "bluetoothLowEnergy": {
@@ -100,8 +100,8 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bluetooth-pairing/*",
-      "chrome://settings/*"
+      "ep://bluetooth-pairing/*",
+      "ep://settings/*"
     ]
   }],
   "bluetoothSocket": {
@@ -165,8 +165,8 @@
       "channel": "stable",
       "contexts": ["webui"],
       "matches": [
-        "chrome://cast/*",
-        "chrome://media-router/*"
+        "ep://cast/*",
+        "ep://media-router/*"
       ]
     }
   ],
@@ -199,15 +199,15 @@
       "channel": "stable",
       "contexts": ["webui"],
       "matches": [
-        "chrome://cast/*",
-        "chrome://extensions-frame/*",
-        "chrome://extensions/*",
-        "chrome://home/*",
-        "chrome://chrome-signin/*",
-        "chrome://media-router/*",
-        "chrome://mobilesetup/*",
-        "chrome://oobe/*",
-        "chrome://assistant-optin/*"
+        "ep://cast/*",
+        "ep://extensions-frame/*",
+        "ep://extensions/*",
+        "ep://home/*",
+        "ep://chrome-signin/*",
+        "ep://media-router/*",
+        "ep://mobilesetup/*",
+        "ep://oobe/*",
+        "ep://assistant-optin/*"
       ]
     }
   ],
@@ -239,10 +239,10 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://extensions/*",
-      "chrome://extensions-frame/*",
-      "chrome://chrome/extensions/*",
-      "chrome://settings/*"
+      "ep://extensions/*",
+      "ep://extensions-frame/*",
+      "ep://chrome/extensions/*",
+      "ep://settings/*"
     ]
   }],
   "management.getPermissionWarningsByManifest": {
@@ -272,11 +272,11 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://bookmarks/*",
-      "chrome://extensions/*",
-      "chrome://settings/*",
-      "chrome://sync-confirmation/*",
-      "chrome://welcome/*"
+      "ep://bookmarks/*",
+      "ep://extensions/*",
+      "ep://settings/*",
+      "ep://sync-confirmation/*",
+      "ep://welcome/*"
     ]
   }],
   "metricsPrivate.getIsCrashReportingEnabled": {
@@ -350,11 +350,11 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://network/*",
-      "chrome://oobe/*",
-      "chrome://internet-config-dialog/*",
-      "chrome://internet-detail-dialog/*",
-      "chrome://settings/*"
+      "ep://network/*",
+      "ep://oobe/*",
+      "ep://internet-config-dialog/*",
+      "ep://internet-detail-dialog/*",
+      "ep://settings/*"
     ]
   }],
   "power": {
@@ -487,7 +487,7 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://settings/*"
+      "ep://settings/*"
     ]
   }],
   "system.memory": {
@@ -526,9 +526,9 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://extensions/*",
-      "chrome://extensions-frame/*",
-      "chrome://chrome/extensions/*"
+      "ep://extensions/*",
+      "ep://extensions-frame/*",
+      "ep://chrome/extensions/*"
     ]
   }],
   "types": {
@@ -570,12 +570,12 @@
     "internal": true,
     "contexts": ["webui"],
     "matches": [
-      "chrome://chrome-signin/*",
-      "chrome://home/*",
-      "chrome://media-router/*",
-      "chrome://mobilesetup/*",
-      "chrome://oobe/*",
-      "chrome://assistant-optin/*"
+      "ep://chrome-signin/*",
+      "ep://home/*",
+      "ep://media-router/*",
+      "ep://mobilesetup/*",
+      "ep://oobe/*",
+      "ep://assistant-optin/*"
     ]
   }],
   "webViewInternal": [{
@@ -587,12 +587,12 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://chrome-signin/*",
-      "chrome://home/*",
-      "chrome://media-router/*",
-      "chrome://mobilesetup/*",
-      "chrome://oobe/*",
-      "chrome://assistant-optin/*"
+      "ep://chrome-signin/*",
+      "ep://home/*",
+      "ep://media-router/*",
+      "ep://mobilesetup/*",
+      "ep://oobe/*",
+      "ep://assistant-optin/*"
     ]
   }],
   "webViewRequest": [{
@@ -602,12 +602,12 @@
     "channel": "stable",
     "contexts": ["webui"],
     "matches": [
-      "chrome://chrome-signin/*",
-      "chrome://home/*",
-      "chrome://media-router/*",
-      "chrome://mobilesetup/*",
-      "chrome://oobe/*",
-      "chrome://assistant-optin/*"
+      "ep://chrome-signin/*",
+      "ep://home/*",
+      "ep://media-router/*",
+      "ep://mobilesetup/*",
+      "ep://oobe/*",
+      "ep://assistant-optin/*"
     ]
   }]
 }

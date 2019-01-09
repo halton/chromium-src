@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ysp+
-#ifdef REDCORE
 #ifndef COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
 #define COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
 
-#include <memory>
 #include <string>
-#include <vector>
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -55,7 +51,7 @@ class YSPDocViewManager : public base::SupportsWeakPtr<YSPDocViewManager>,
 
   void DownloadItemRemoved(bool success);
 
-  bool IsDocViewType(const base::FilePath& filePath);
+  bool IsDocViewType(const base::FilePath& file_path);
 
  private:
   ~YSPDocViewManager() override;
@@ -70,4 +66,3 @@ class YSPDocViewManager : public base::SupportsWeakPtr<YSPDocViewManager>,
 };
 
 #endif  // COMPONENTS_YSP_DOC_VIEW_YS_DOC_VIEW_MANAGER_H_
-#endif  // REDCORE

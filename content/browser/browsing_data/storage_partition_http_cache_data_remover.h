@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/sequenced_task_runner_helpers.h"
 #include "base/time/time.h"
+#include "content/common/content_export.h"
 #include "net/base/completion_callback.h"
 #include "url/gurl.h"
 
@@ -28,7 +29,7 @@ class StoragePartition;
 class GeneratedCodeCacheContext;
 
 // Helper to remove http cache data from a StoragePartition.
-class StoragePartitionHttpCacheDataRemover {
+class CONTENT_EXPORT StoragePartitionHttpCacheDataRemover {
  public:
   // Creates a StoragePartitionHttpCacheDataRemover that deletes cache entries
   // in the time range between |delete_begin| (inclusively) and |delete_end|

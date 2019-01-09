@@ -1,8 +1,10 @@
-# //ysp+ { login }
+# Copyright 2018 The Redcore (Beijing) Technology Co.,Ltd. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 import("//build/config/ui.gni")
 
-source_set("ysp_doc_view") {
+static_library("ysp_doc_view") {
   sources = [
     "ysp_doc_view_fetcher.cc",
     "ysp_doc_view_fetcher.h",
@@ -12,14 +14,8 @@ source_set("ysp_doc_view") {
 
   deps = [
     "//base",
-    "//base:i18n",
-    "//components/pref_registry",
-    "//components/query_parser",
-    "//components/strings",
-    "//components/url_formatter",
-    "//content/public/common:interfaces",
+    "//content/public/common",
     "//net",
-    "//services/network/public/mojom",
     "//skia",
     "//url",
   ]
