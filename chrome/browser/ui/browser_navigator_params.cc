@@ -26,25 +26,25 @@ NavigateParams::NavigateParams(Browser* a_browser,
                                ui::PageTransition a_transition)
     : url(a_url),
       transition(a_transition),
-#if defined(IE_REDOCRE)
+#if defined(IE_REDCORE)
       browser(a_browser),
       auto_select(true) {
   renderer_mode.core = ie::BLINK_CORE;
 #else
       browser(a_browser) {
-#endif  // defined(IE_REDOCRE)
+#endif  // defined(IE_REDCORE)
 }
 
 NavigateParams::NavigateParams(Browser* a_browser,
                                std::unique_ptr<WebContents> contents_to_insert)
     : contents_to_insert(std::move(contents_to_insert)),
-#if defined(IE_REDOCRE)
+#if defined(IE_REDCORE)
       browser(a_browser),
       auto_select(true) {
   renderer_mode.core = ie::BLINK_CORE;
 #else
       browser(a_browser) {
-#endif  // defined(IE_REDOCRE)
+#endif  // defined(IE_REDCORE)
 }
 #endif  // !defined(OS_ANDROID)
 
@@ -55,13 +55,13 @@ NavigateParams::NavigateParams(Profile* a_profile,
       disposition(WindowOpenDisposition::NEW_FOREGROUND_TAB),
       transition(a_transition),
       window_action(SHOW_WINDOW),
-#if defined(IE_REDOCRE)
+#if defined(IE_REDCORE)
       initiating_profile(a_profile),
       auto_select(true) {
   renderer_mode.core = ie::BLINK_CORE;
 #else
       initiating_profile(a_profile) {
-#endif  // defined(IE_REDOCRE)
+#endif  // defined(IE_REDCORE)
 }
 
 NavigateParams::NavigateParams(NavigateParams&&) = default;
