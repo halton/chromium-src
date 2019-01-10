@@ -28,12 +28,12 @@
 #include "url/origin.h"
 
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
 // ysp+{IE Embedded}
 namespace ie {
 class IEDownloader;
 }
-#endif
+#endif  // defined(IE_REDCORE)
 
 namespace download {
 
@@ -316,14 +316,14 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
 
   DownloadSource download_source() const { return download_source_; }
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
   // ysp+ {IE Embedded}
   void SetIEDownloader(ie::IEDownloader* downloader);
   ie::IEDownloader* IEDownloader();
   bool IsUseIEDownloader();
   void SetIEDownloadResponseheader(const std::wstring header);
   std::wstring IEDownloadResponseheader();
-#endif
+#endif  // defined(IE_REDCORE)
 
  private:
   OnStartedCallback callback_;
@@ -355,12 +355,12 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
   const net::NetworkTrafficAnnotationTag traffic_annotation_;
   std::string request_origin_;
   DownloadSource download_source_;
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
   // ysp+ {IE Embedded}
-  bool useIeDownload;
-  ie::IEDownloader* pIEDownloader;
-  std::wstring ieResponseHeader;
-#endif
+  bool use_ie_download_;
+  ie::IEDownloader* ie_downloader_;
+  std::wstring ie_response_header_;
+#endif  // defined(IE_REDCORE)
   DISALLOW_COPY_AND_ASSIGN(DownloadUrlParameters);
 };
 

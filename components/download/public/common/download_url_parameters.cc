@@ -42,35 +42,38 @@ DownloadUrlParameters::DownloadUrlParameters(
       fetch_error_body_(false),
       transient_(false),
       traffic_annotation_(traffic_annotation),
-      download_source_(DownloadSource::UNKNOWN) {}
+      download_source_(DownloadSource::UNKNOWN),
+      use_ie_download_(false),
+      ie_downloader_(nullptr),
+      ie_response_header_(L"") {}
 
 DownloadUrlParameters::~DownloadUrlParameters() = default;
 
-#if defined(REDCORE) && defined(IE_REDCORE)
+#if defined(IE_REDCORE)
 // ysp+ {IE Embedded}
 void DownloadUrlParameters::SetIEDownloader(ie::IEDownloader* downloader) {
-  pIEDownloader = downloader;
-  useIeDownload = true;
+  ie_downloader_ = downloader;
+  use_ie_download_ = true;
 }
 
 ie::IEDownloader* DownloadUrlParameters::IEDownloader() {
-  return pIEDownloader;
+  return ie_downloader_;
 }
 
 bool DownloadUrlParameters::IsUseIEDownloader() {
-  if (pIEDownloader && useIeDownload)
+  if (ie_downloader_ && use_ie_download_)
     return true;
   return false;
 }
 
 void DownloadUrlParameters::SetIEDownloadResponseheader(
     const std::wstring header) {
-  ieResponseHeader = header;
+  ie_response_header_ = header;
 }
 
 std::wstring DownloadUrlParameters::IEDownloadResponseheader() {
-  return ieResponseHeader;
+  return ie_response_header_;
 }
-#endif
+#endif  // defined(IE_REDCORE)
 
 }  // namespace download
