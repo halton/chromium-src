@@ -118,12 +118,12 @@ class ATL_NO_VTABLE HttpMonitorIe
   IInternetBindInfo* bind_info_;
 };
 
+#if !defined(REDCORE_COMPONENT_BUILD)
 // TODO (halton): Below macro will cause duplicate symbols of
 // CComObjectRootEx<CComMultiThreadModel> when component build,
 // See details at http://jira.yunshipei.info/browse/RDC-6622
-// Comment out below code and will check root cause in futhure.
-
-// OBJECT_ENTRY_AUTO(__uuidof(HttpMonitor), HttpMonitorIe)
+OBJECT_ENTRY_AUTO(__uuidof(HttpMonitor), HttpMonitorIe)
+#endif
 
 class ProtocolSinkIe : public IServiceProvider,
                        public IInternetProtocolSink,

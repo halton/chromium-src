@@ -153,6 +153,10 @@ config("feature_flags") {
       defines += [ "IE_REDCORE=1" ]
     }
   }
+  
+  if(is_component_build){
+    defines += [ "REDCORE_COMPONENT_BUILD=1" ]
+  }
 }
 
 # Debug/release ----------------------------------------------------------------
