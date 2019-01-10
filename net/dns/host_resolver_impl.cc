@@ -2344,60 +2344,79 @@ base::ListValue* HostResolverImpl::AbsoluteLinkDnsCompared(
 // ysp+ { private Reverse DNS
 std::string DomainSplice(const std::string& domain, const GURL& url) {
   std::string ip = url.host();
-  if (!domain.empty() && !ip.empty()) {
-    if (domain.find('*') != std::string::npos) {
-      std::string domain_str = domain;
-      std::string ip_str = ip;
-      while (ip_str.find('.') != std::string::npos) {
-        size_t offset = ip_str.find('.');
-        ip_str.replace(offset, 1, 1, '_');
-      }
-      int offset = domain_str.find('*');
-      std::string post_domain = "";
-      post_domain.assign(domain_str, offset + 1,
-                         domain_str.length() - offset - 1);
-      return "redcore_gw_" + url.scheme() + "_" + ip_str + "_" + url.port() +
-             post_domain;
-    }
-  }
-  return std::string();
+  if (domain.empty() || ip.empty())
+    return std::string();
+
+  while (ip.find('.') != std::string::npos)
+    ip.replace(ip.find('.'), 1, 1, '_');
+
+  std::string post_domain = "";
+  post_domain = (domain.find('*') != std::string::npos) ?
+                (domain.c_str() +1 ) :
+                ("." + domain);
+
+  std::string port = url.port();
+  if (port.empty())
+    port = (url.scheme() == "https") ? "443" : "80";
+
+// Example: https://www.example.com:8080
+// Convert to  redcore_gw_https_www_example_com_8080.domain
+   return "redcore_gw_" + url.scheme() + "_" + ip + "_" + port + post_domain;
 }
 
-std::string HostResolverImpl::AbsoluteLinkReverseDnsCompared(const GURL& url) {
-  std::string ip_address = url.host();
+bool HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(const GURL& url,
+    std::string& rurl, std::string& port) {
   base::ListValue* private_dns_list = nullptr;
-  if (private_dns_dict_.get() &&
-      private_dns_dict_->GetList("reverseDNSList", &private_dns_list)) {
-    if (private_dns_list && !private_dns_list->empty()) {
-      for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
-        base::DictionaryValue* bm_dict = nullptr;
-        if (private_dns_list->GetDictionary(i, &bm_dict)) {
-          std::string addr = "";
-          if (bm_dict->GetString("appIP", &addr)) {
-            std::string domain = "";
-            bm_dict->GetString("domain", &domain);
-            if (ip_address == addr) {
-              return domain;
-            } else if (addr.find('/') != std::string::npos) {
-              IPAddress ip_number, ip_prefix;
-              size_t prefix_length_in_bits;
-              if (ParseCIDRBlock(addr, &ip_prefix, &prefix_length_in_bits)) {
-                if (ParseURLHostnameToAddress(ip_address, &ip_number)) {
-                  if (IPAddressMatchesPrefix(ip_number, ip_prefix,
-                                             prefix_length_in_bits))
-                    return DomainSplice(domain, url);
-                }
-              }
-            }
-          }
-        }
+
+  if (!private_dns_dict_.get() ||
+      !private_dns_dict_->GetList("reverseDNSList", &private_dns_list))
+    return false;
+
+  if (!private_dns_list || private_dns_list->empty())
+    return false;
+
+  for (size_t i = 0; i < private_dns_list->GetSize(); ++i) {
+    base::DictionaryValue* bm_dict = nullptr;
+    if (!private_dns_list->GetDictionary(i, &bm_dict))
+      return false;
+    bool is_link = true;
+    bm_dict->GetBoolean("isInternalLinkEnabled", &is_link);
+    if (is_link)
+      continue;
+
+    std::string addr = "";
+    std::string domain = "";
+    base::ListValue* address_list = nullptr;
+    if (!bm_dict->GetString("appIP", &addr) ||
+        !bm_dict->GetString("domain", &domain) ||
+        !bm_dict->GetList("gatewayIP", &address_list))
+      return false;
+
+    std::string gateway = "";
+    address_list->GetString(0, &gateway);
+    if (gateway.find(":") != std::string::npos)
+      port = gateway.substr(gateway.find(":") + 1, gateway.size());
+
+    if (url.host() == addr) {
+      rurl = DomainSplice(domain, url);
+      return true;
+    }
+
+    if (addr.find('/') != std::string::npos) {
+      IPAddress ip_number, ip_prefix;
+      size_t prefix_length_in_bits;
+      if (ParseCIDRBlock(addr, &ip_prefix, &prefix_length_in_bits) &&
+          ParseURLHostnameToAddress(url.host(), &ip_number) &&
+          IPAddressMatchesPrefix(ip_number, ip_prefix, prefix_length_in_bits)) {
+        rurl = DomainSplice(domain, url);
+        return true;
       }
     }
   }
-  return std::string();
+  return false;
 }
 
-#endif  // REDCORE
+#endif  // defined(REDCORE)
 
 void HostResolverImpl::SetDnsClient(std::unique_ptr<DnsClient> dns_client) {
   // DnsClient and config must be updated before aborting DnsTasks, since doing
@@ -2436,6 +2455,21 @@ int HostResolverImpl::Resolve(const RequestInfo& info,
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   DCHECK(callback);
   DCHECK(out_req);
+
+#if defined(REDCORE)
+  base::ListValue* address_list = PrivateDnsCompared(info.hostname());
+  if (address_list && !address_list->empty()) {
+    cache_->clear();
+    for (size_t i = 0; i < address_list->GetSize(); ++i) {
+      std::string ipaddr = "";
+      address_list->GetString(i, &ipaddr);
+      IPAddress address;
+      if (ParseURLHostnameToAddress(ipaddr, &address))
+        addresses->push_back(IPEndPoint(address, info.port()));
+    }
+    return OK;
+  }
+#endif // defined(REDCORE)
 
   auto request = std::make_unique<RequestImpl>(
       source_net_log, info.host_port_pair(),

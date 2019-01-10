@@ -317,7 +317,6 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
   DownloadSource download_source() const { return download_source_; }
 
 #if defined(IE_REDCORE)
-  // ysp+ {IE Embedded}
   void SetIEDownloader(ie::IEDownloader* downloader);
   ie::IEDownloader* IEDownloader();
   bool IsUseIEDownloader();
@@ -356,7 +355,6 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadUrlParameters {
   std::string request_origin_;
   DownloadSource download_source_;
 #if defined(IE_REDCORE)
-  // ysp+ {IE Embedded}
   bool use_ie_download_;
   ie::IEDownloader* ie_downloader_;
   std::wstring ie_response_header_;

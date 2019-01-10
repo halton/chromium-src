@@ -42,15 +42,18 @@ DownloadUrlParameters::DownloadUrlParameters(
       fetch_error_body_(false),
       transient_(false),
       traffic_annotation_(traffic_annotation),
+#if defined(IE_REDCORE)
       download_source_(DownloadSource::UNKNOWN),
       use_ie_download_(false),
       ie_downloader_(nullptr),
       ie_response_header_(L"") {}
+#else
+      download_source_(DownloadSource::UNKNOWN) {}
+#endif  // defined(IE_REDCORE)
 
 DownloadUrlParameters::~DownloadUrlParameters() = default;
 
 #if defined(IE_REDCORE)
-// ysp+ {IE Embedded}
 void DownloadUrlParameters::SetIEDownloader(ie::IEDownloader* downloader) {
   ie_downloader_ = downloader;
   use_ie_download_ = true;

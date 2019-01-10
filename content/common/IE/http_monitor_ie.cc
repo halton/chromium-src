@@ -53,15 +53,19 @@ STDMETHODIMP HttpMonitorIe::Start(LPCWSTR url,
   IClassFactory* factory = NULL;
   HRESULT handle_result;
 
+  std::string port = "";
+  std::string domain = "";
+  if (net::HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(
+      GURL(url), domain, port))
+    return INET_E_USE_DEFAULT_PROTOCOLHANDLER;
+
   std::wstring url_tmp = url;
   std::transform(url_tmp.begin(), url_tmp.end(), url_tmp.begin(), ::tolower);
-  size_t pos = url_tmp.find(L"https://");
-  if (pos == 0) {
+  if (url_tmp.find(L"https://") == 0) {
     handle_result = CoGetClassObject(CLSID_HttpSProtocol, CLSCTX_ALL, 0,
                                      IID_IClassFactory, (void**)&factory);
   } else {
-    pos = url_tmp.find(L"http://");
-    if (pos == 0)
+    if (url_tmp.find(L"http://") == 0)
       handle_result = CoGetClassObject(CLSID_HttpSProtocol, CLSCTX_ALL, 0,
                                        IID_IClassFactory, (void**)&factory);
   }
@@ -75,19 +79,10 @@ STDMETHODIMP HttpMonitorIe::Start(LPCWSTR url,
     return INET_E_USE_DEFAULT_PROTOCOLHANDLER;
 
   // 绝对链接处理
-  GURL redcore_url(url_tmp);
-  std::string domain =
-      net::HostResolverImpl::AbsoluteLinkReverseDnsCompared(redcore_url);
-  if (!domain.empty()) {
-    std::string port = "";
-    if (redcore_url.port() != "") {
-      port = ":" + redcore_url.port();
-    }
-    std::string dest_url =
-        "https://" + domain + port + redcore_url.PathForRequest();
-    DLOG(INFO) << "dest_url: " << dest_url;
-    url_tmp = base::SysNativeMBToWide(dest_url);
-  }
+  std::string dest_url =
+      "https://" + domain + ":" + port + GURL(url).PathForRequest();
+  DLOG(INFO) << "dest_url: " << dest_url;
+  url_tmp = base::SysNativeMBToWide(dest_url);
 
   protocol_->AddRef();
   bind_info_ = bind_info;

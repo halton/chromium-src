@@ -191,8 +191,8 @@ class NET_EXPORT HostResolverImpl
   static void SetPrivateDnsValue(const std::string& private_dns_string);
   static base::ListValue* AbsoluteLinkDnsCompared(
       const std::string& host);
-  static std::string AbsoluteLinkReverseDnsCompared(
-      const GURL& url);
+  static bool AbsoluteLinkUrlComparedAndRevert(const GURL& url,
+      std::string& rurl, std::string& port);
   static base::ListValue* PrivateDnsCompared(const std::string& host);
   static std::string PrivateReverseDnsCompared(const std::string& ip_address);
   static std::unique_ptr<base::DictionaryValue>& private_dns_dict_;

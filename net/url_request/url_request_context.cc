@@ -124,25 +124,21 @@ std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
     const GURL& url,
     RequestPriority priority,
     URLRequest::Delegate* delegate) const {
-#ifdef REDCORE  // ysp+ { private Reverse DNS
-  GURL redcore_url(url);
-  std::string domain =
-      net::HostResolverImpl::AbsoluteLinkReverseDnsCompared(url);
-  if (!domain.empty()) {
-    std::string port = "";
-    if (url.port() != "") {
-      port = ":" + url.port();
-    }
-    std::string dest_url = "https://" + domain + port + url.PathForRequest();
-    redcore_url = GURL(dest_url);
+
+#if defined(REDCORE)
+  std::string port = "";
+  std::string domain = "";
+  std::string dest_url = url.spec();
+  if (net::HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(
+      url, domain, port)) {
+    dest_url = "https://" + domain + ":" + port + url.PathForRequest();
     DLOG(INFO) << "dest_url: " << dest_url;
   }
-  return base::WrapUnique(new URLRequest(redcore_url, priority, delegate, this,
-                                         network_delegate_,
-                                         MISSING_TRAFFIC_ANNOTATION));
-#endif  // ysp+ }
-
+  return CreateRequest(GURL(dest_url), priority,
+      delegate, MISSING_TRAFFIC_ANNOTATION);
+#else
   return CreateRequest(url, priority, delegate, MISSING_TRAFFIC_ANNOTATION);
+#endif // defined(REDCORE)
 }
 
 std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
@@ -150,8 +146,22 @@ std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
     RequestPriority priority,
     URLRequest::Delegate* delegate,
     NetworkTrafficAnnotationTag traffic_annotation) const {
+
+#if defined(REDCORE)
+  std::string port = "";
+  std::string domain = "";
+  std::string dest_url = url.spec();
+  if (net::HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(
+      url, domain, port)) {
+    dest_url = "https://" + domain + ":" + port + url.PathForRequest();
+    DLOG(INFO) << "dest_url: " << dest_url;
+  }
+  return base::WrapUnique(new URLRequest(GURL(dest_url),
+      priority, delegate, this, network_delegate_, traffic_annotation));
+#else
   return base::WrapUnique(new URLRequest(
       url, priority, delegate, this, network_delegate_, traffic_annotation));
+#endif // defined(REDCORE)
 }
 
 void URLRequestContext::set_cookie_store(CookieStore* cookie_store) {
