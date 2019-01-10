@@ -124,6 +124,10 @@ def nsisPackage():
   fileObject.write(buffstr)
   fileObject.close()
   print "modify nsis version.nsh:", getBuildVersion()
+  # 移除原有.exe文件
+  for file in os.listdir(nsisDir):
+    if file.endswith(".exe"):
+      os.remove(os.path.join(nsisDir, file))
   # 打包
   execCmd("\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" /V2 \"" + os.path.join(nsisDir, "nsis_main_redcore.nsi") + "\"")
   execCmd("\"C:\\Program Files (x86)\\NSIS\\Unicode\\makensis.exe\" /V2 \"" + os.path.join(nsisDir, "nsis_update_redcore.nsi") + "\"")

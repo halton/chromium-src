@@ -115,8 +115,12 @@ def gitPushVersionChangeTo1redcore(chromeVersion, redcoreVersion):
     cd %s &&;\
     git add chrome/VERSION &&;\
     git commit -m \"%s\" &&;\
-    git push git@github.com:1redcore/chromium-src.git %s\
-    " % (getDiskString(_WORKING_DIR), _WORKING_DIR, commitMessage, _BRANCH_NAME)
+    git stash clear &&;\
+    git stash &&;\
+    git pull --rebase git@github.com:1redcore/chromium-src.git %s &&;\
+    git push git@github.com:1redcore/chromium-src.git %s &&;\
+    git stash pop\
+    " % (getDiskString(_WORKING_DIR), _WORKING_DIR, commitMessage, _BRANCH_NAME, _BRANCH_NAME)
   execCmd(pushCmdLine)
 
 
@@ -126,6 +130,7 @@ def gitPushVersionChangeToCustomize(chromeVersion, redcoreVersion):
     cd %s &&;\
     git add . &&;\
     git commit -m \"%s\" &&;\
+    git pull --rebase git@github.com:1redcore/browser-customize.git master:master &&;\
     git push git@github.com:1redcore/browser-customize.git master:master\
     " % (getDiskString(_WORKING_DIR), os.path.join(_WORKING_DIR, "redcore", "browser-customize"), commitMessage)
   execCmd(pushCmdLine)
