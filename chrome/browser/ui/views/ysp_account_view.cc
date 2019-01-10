@@ -145,7 +145,7 @@ const char* YSPAccountView::GetClassName() const {
 
 bool YSPAccountView::OnMousePressed(const ui::MouseEvent& event) {
   // TODO (LIUWEI): work around when personal settings are not ready
-  const GURL url("ep://me");
+  const GURL url("chrome://me");
   const content::Referrer ref(url, blink::kWebReferrerPolicyDefault);
   content::OpenURLParams param(url,
                                ref,

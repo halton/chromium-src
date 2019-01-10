@@ -268,11 +268,7 @@ const char kBackgroundRequiredForPlatformApps[] =
 const char kCannotAccessAboutUrl[] =
     "Cannot access \"*\" at origin \"*\". Extension must have permission to "
     "access the frame's origin, and matchAboutBlank must be true.";
-#ifdef REDCORE
-const char kCannotAccessChromeUrl[] = "Cannot access a ep:// URL";
-#else
 const char kCannotAccessChromeUrl[] = "Cannot access a chrome:// URL";
-#endif // REDCORE
 const char kCannotAccessExtensionUrl[] =
     "Cannot access a chrome-extension:// URL of different extension";
 // This deliberately does not contain a URL. Otherwise an extension can parse

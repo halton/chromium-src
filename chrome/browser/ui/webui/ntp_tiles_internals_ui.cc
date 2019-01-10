@@ -120,11 +120,7 @@ content::WebUIDataSource* CreateNTPTilesInternalsHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUINTPTilesInternalsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
-#ifdef REDCORE
-      "script-src ep://resources 'self' 'unsafe-eval';");
-#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
-#endif // REDCORE
 
   source->AddResourcePath("ntp_tiles_internals.js", IDR_NTP_TILES_INTERNALS_JS);
   source->AddResourcePath("ntp_tiles_internals.css",

@@ -122,25 +122,6 @@ void DownloadInternalsUIMessageHandler::HandleStartDownload(
   params.request_params.url = url;
 
   net::NetworkTrafficAnnotationTag traffic_annotation =
-#ifdef REDCORE
-      net::DefineNetworkTrafficAnnotation("download_internals_webui_source", R"(
-          semantics {
-            sender: "Download Internals Page"
-            description:
-              "Starts a download with background download service in WebUI."
-            trigger:
-              "User clicks on the download button in "
-              "ep://download-internals."
-            data: "None"
-            destination: WEBSITE
-          }
-          policy {
-            cookies_allowed: YES
-            cookies_store: "user"
-            setting: "This feature cannot be disabled by settings."
-            policy_exception_justification: "Not implemented."
-          })");
-#else
       net::DefineNetworkTrafficAnnotation("download_internals_webui_source", R"(
           semantics {
             sender: "Download Internals Page"
@@ -158,7 +139,6 @@ void DownloadInternalsUIMessageHandler::HandleStartDownload(
             setting: "This feature cannot be disabled by settings."
             policy_exception_justification: "Not implemented."
           })");
-#endif // REDCORE
 
   params.traffic_annotation =
       net::MutableNetworkTrafficAnnotationTag(traffic_annotation);

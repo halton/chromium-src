@@ -20,11 +20,7 @@ DownloadInternalsUI::DownloadInternalsUI(content::WebUI* web_ui)
   content::WebUIDataSource* html_source =
       content::WebUIDataSource::Create(chrome::kChromeUIDownloadInternalsHost);
   html_source->OverrideContentSecurityPolicyScriptSrc(
-#ifdef REDCORE
-      "script-src ep://resources 'self' 'unsafe-eval';");
-#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
-#endif // REDCORE
 
   // Required resources.
   html_source->SetJsonPath("strings.js");

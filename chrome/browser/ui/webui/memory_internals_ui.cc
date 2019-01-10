@@ -87,13 +87,8 @@ std::string GetMessageString() {
     case Mode::kManual:
     default:
       return std::string(
-#ifdef REDCORE
-          "Memory logging must be manually enabled for each process via "
-          "ep://memory-internals.");
-#else
           "Memory logging must be manually enabled for each process via "
           "chrome://memory-internals.");
-#endif // REDCORE
   }
 #elif defined(ADDRESS_SANITIZER)
   return "Memory logging is not available in this build because a memory "

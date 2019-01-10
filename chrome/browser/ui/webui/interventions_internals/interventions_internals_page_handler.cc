@@ -53,21 +53,12 @@ const char kIgnorePreviewsBlacklistFlagHtmlId[] = "ignore-previews-blacklist";
 
 // Links to flags in chrome://flags.
 // TODO(thanhdle): Refactor into vector of structs. crbug.com/787010.
-#ifdef REDCORE
-const char kPreviewsAllowedFlagLink[] = "ep://flags/#allow-previews";
-const char kEctFlagLink[] = "ep://flags/#force-effective-connection-type";
-const char kNoScriptFlagLink[] = "ep://flags/#enable-noscript-previews";
-const char kOfflinePageFlagLink[] = "ep://flags/#enable-offline-previews";
-const char kIgnorePreviewsBlacklistLink[] =
-    "ep://flags/#ignore-previews-blacklist";
-#else
 const char kPreviewsAllowedFlagLink[] = "chrome://flags/#allow-previews";
 const char kEctFlagLink[] = "chrome://flags/#force-effective-connection-type";
 const char kNoScriptFlagLink[] = "chrome://flags/#enable-noscript-previews";
 const char kOfflinePageFlagLink[] = "chrome://flags/#enable-offline-previews";
 const char kIgnorePreviewsBlacklistLink[] =
     "chrome://flags/#ignore-previews-blacklist";
-#endif
 
 const char kDefaultFlagValue[] = "Default";
 

@@ -351,11 +351,7 @@ AppCacheInternalsUI::AppCacheInternalsUI(WebUI* web_ui)
   WebUIDataSource* source =
       WebUIDataSource::Create(kChromeUIAppCacheInternalsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
-#ifdef REDCORE
-      "script-src ep://resources 'self' 'unsafe-eval';");
-#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
-#endif // REDCORE
 
   source->SetJsonPath("strings.js");
   source->AddResourcePath("appcache_internals.js", IDR_APPCACHE_INTERNALS_JS);

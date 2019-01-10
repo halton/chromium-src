@@ -6,11 +6,7 @@
 
 namespace dom_distiller {
 
-#ifdef REDCORE
-const char kChromeUIDomDistillerURL[] = "ep://dom-distiller/";
-#else
 const char kChromeUIDomDistillerURL[] = "chrome://dom-distiller/";
-#endif // REDCORE
 const char kChromeUIDomDistillerHost[] = "dom-distiller";
 
 }  // namespace dom_distiller

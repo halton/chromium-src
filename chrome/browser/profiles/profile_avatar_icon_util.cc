@@ -248,11 +248,7 @@ const SkColor kAvatarBubbleGaiaBackgroundColor =
     SkColorSetRGB(0xf5, 0xf5, 0xf5);
 const SkColor kUserManagerBackgroundColor = SkColorSetRGB(0xee, 0xee, 0xee);
 
-#ifdef REDCORE
-const char kDefaultUrlPrefix[] = "ep://theme/IDR_PROFILE_AVATAR_";
-#else
 const char kDefaultUrlPrefix[] = "chrome://theme/IDR_PROFILE_AVATAR_";
-#endif // REDCORE
 const char kGAIAPictureFileName[] = "Google Profile Picture.png";
 const char kHighResAvatarFolderName[] = "Avatars";
 
@@ -364,11 +360,7 @@ int GetPlaceholderAvatarIconResourceID() {
 }
 
 std::string GetPlaceholderAvatarIconUrl() {
-#ifdef REDCORE
-  return "ep://theme/IDR_PROFILE_AVATAR_PLACEHOLDER_LARGE";
-#else
   return "chrome://theme/IDR_PROFILE_AVATAR_PLACEHOLDER_LARGE";
-#endif // REDCORE
 }
 
 const IconResourceInfo* GetDefaultAvatarIconResourceInfo(size_t index) {

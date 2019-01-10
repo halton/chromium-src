@@ -20,11 +20,7 @@ content::WebUIDataSource* CreateInvalidationsHTMLSource() {
   content::WebUIDataSource* source =
       content::WebUIDataSource::Create(chrome::kChromeUIInvalidationsHost);
   source->OverrideContentSecurityPolicyScriptSrc(
-#ifdef REDCORE
-      "script-src ep://resources 'self' 'unsafe-eval';");
-#else
       "script-src chrome://resources 'self' 'unsafe-eval';");
-#endif // REDCORE
   source->AddResourcePath("about_invalidations.js", IDR_ABOUT_INVALIDATIONS_JS);
   source->SetDefaultResource(IDR_ABOUT_INVALIDATIONS_HTML);
   source->UseGzip();

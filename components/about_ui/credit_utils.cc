@@ -44,13 +44,8 @@ std::string GetCredits(bool include_scripts) {
   BrotliDecoderDestroyInstance(decoder);
   if (include_scripts) {
     response +=
-#ifdef REDCORE
-        "\n<script src=\"ep://resources/js/cr.js\"></script>\n"
-        "<script src=\"ep://credits/credits.js\"></script>\n";
-#else
         "\n<script src=\"chrome://resources/js/cr.js\"></script>\n"
         "<script src=\"chrome://credits/credits.js\"></script>\n";
-#endif // REDCORE
   }
   response += "</body>\n</html>";
   return response;

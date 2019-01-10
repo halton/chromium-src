@@ -491,11 +491,7 @@ void MdDownloadsDOMHandler::RetryDownload(const base::ListValue* args) {
       render_frame_host->GetRoutingID(),
       storage_partition->GetURLRequestContext(), traffic_annotation);
   dl_params->set_content_initiated(true);
-#ifdef REDCORE
-  dl_params->set_initiator(url::Origin::Create(GURL("ep://downloads")));
-#else
   dl_params->set_initiator(url::Origin::Create(GURL("chrome://downloads")));
-#endif // REDCORE
   dl_params->set_download_source(download::DownloadSource::FROM_RENDERER);
 
   content::BrowserContext::GetDownloadManager(web_contents->GetBrowserContext())

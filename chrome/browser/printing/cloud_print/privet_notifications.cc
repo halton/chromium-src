@@ -57,11 +57,7 @@ namespace {
 const int kTenMinutesInSeconds = 600;
 const char kPrivetInfoKeyUptime[] = "uptime";
 const char kPrivetNotificationID[] = "privet_notification";
-#ifdef REDCORE
-const char kPrivetNotificationOriginUrl[] = "ep://devices";
-#else
 const char kPrivetNotificationOriginUrl[] = "chrome://devices";
-#endif
 const int kStartDelaySeconds = 5;
 
 enum PrivetNotificationsEvent {

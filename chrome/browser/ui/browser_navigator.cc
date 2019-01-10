@@ -603,7 +603,7 @@ void Navigate(NavigateParams* params) {
 #if defined(IE_REDCORE)
   if (params->source_contents &&
       params->source_contents->GetRendererMode().core == ie::IE_CORE &&
-      params->url.SchemeIs("ep")) {
+      params->url.SchemeIs("chrome")) {
     params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
   }
 

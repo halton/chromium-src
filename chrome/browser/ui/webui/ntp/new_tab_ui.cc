@@ -191,33 +191,19 @@ bool NewTabUI::NewTabHTMLSource::ShouldReplaceExistingSource() const {
 std::string NewTabUI::NewTabHTMLSource::GetContentSecurityPolicyScriptSrc()
     const {
   // 'unsafe-inline' and google resources are added to script-src.
-#ifdef REDCORE
-  return "script-src ep://resources 'self' 'unsafe-eval' 'unsafe-inline' "
-      "*.google.com *.gstatic.com;";
-#else
   return "script-src chrome://resources 'self' 'unsafe-eval' 'unsafe-inline' "
       "*.google.com *.gstatic.com;";
-#endif // REDCORE
 }
 
 std::string NewTabUI::NewTabHTMLSource::GetContentSecurityPolicyStyleSrc()
     const {
-#ifdef REDCORE
-  return "style-src 'self' ep://resources 'unsafe-inline' ep://theme;";
-#else
   return "style-src 'self' chrome://resources 'unsafe-inline' chrome://theme;";
-#endif // REDCORE
 }
 
 std::string NewTabUI::NewTabHTMLSource::GetContentSecurityPolicyImgSrc()
     const {
-#ifdef REDCORE
-  return "img-src ep-search://thumb ep-search://thumb2 "
-      "ep-search://theme ep://theme data:;";
-#else
   return "img-src chrome-search://thumb chrome-search://thumb2 "
       "chrome-search://theme chrome://theme data:;";
-#endif // REDCORE
 }
 
 std::string NewTabUI::NewTabHTMLSource::GetContentSecurityPolicyChildSrc()

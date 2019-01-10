@@ -69,11 +69,7 @@ scoped_refptr<ws::ContextProviderCommandBuffer> CreateContextProviderImpl(
   attributes.enable_gles2_interface = support_gles2_interface;
   attributes.enable_raster_interface = support_raster_interface;
 
-#ifdef REDCORE
-  GURL url("ep://gpu/VizProcessTransportFactory::CreateContextProvider");
-#else
   GURL url("chrome://gpu/VizProcessTransportFactory::CreateContextProvider");
-#endif // REDCORE
   return base::MakeRefCounted<ws::ContextProviderCommandBuffer>(
       std::move(gpu_channel_host), gpu_memory_buffer_manager,
       kGpuStreamIdDefault, kGpuStreamPriorityUI, gpu::kNullSurfaceHandle,

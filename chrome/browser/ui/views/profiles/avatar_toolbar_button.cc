@@ -142,9 +142,9 @@ void AvatarToolbarButton::NotifyClick(const ui::Event& event) {
   std::string url_str;
   if (YSPLoginManager::GetInstance()->GetLoginStatus()) {
     YSPLoginManager::GetInstance()->GetAutoConfigfetcher(true);
-    url_str = "ep://settings";
+    url_str = "chrome://settings";
   } else {
-    url_str = "ep://newtab";
+    url_str = "chrome://newtab";
   }
 
   const GURL url(url_str);
