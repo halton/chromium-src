@@ -34,6 +34,7 @@ source_set("ysp_login") {
   deps = [
     "//base",
     "//base:i18n",
+    "//chrome/common:mojo_bindings",
     "//components/favicon_base",
     "//components/keyed_service/core",
     "//components/pref_registry",
