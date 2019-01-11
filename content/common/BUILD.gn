@@ -410,9 +410,14 @@ source_set("common") {
     sources += [
       # YSP
       "../../third_party/minhook/src/buffer.c",
+      "../../third_party/minhook/src/buffer.h",
+      "../../third_party/minhook/src/hde/hde32.c",
+      "../../third_party/minhook/src/hde/hde32.h",
       "../../third_party/minhook/src/hde/hde64.c",
+      "../../third_party/minhook/src/hde/hde64.h",
       "../../third_party/minhook/src/hook.c",
       "../../third_party/minhook/src/trampoline.c",
+      "../../third_party/minhook/src/trampoline.h",
       "IE/browser_host_event_delegant_ie.cc",
       "IE/browser_host_event_delegant_ie.h",
       "IE/browser_process_ie.cc",
