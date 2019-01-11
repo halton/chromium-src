@@ -55,7 +55,7 @@ STDMETHODIMP HttpMonitorIe::Start(LPCWSTR url,
 
   std::string port = "";
   std::string domain = "";
-  if (net::HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(
+  if (!net::HostResolverImpl::AbsoluteLinkUrlComparedAndRevert(
       GURL(url), domain, port))
     return INET_E_USE_DEFAULT_PROTOCOLHANDLER;
 
