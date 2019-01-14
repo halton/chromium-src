@@ -36,7 +36,13 @@ Options::Options(int argc, const char** argv)
       argv(argv),
       gl_implementation("swiftshader-webgl"),
       product_name_and_version(GetProductNameAndVersion()),
-      user_agent(content::BuildUserAgentFromProduct(product_name_and_version)),
+#ifdef REDCORE
+      user_agent(
+          content::BuildUserAgentFromProduct(product_name_and_version, "")),
+#else
+      user_agent(
+          content::BuildUserAgentFromProduct(product_name_and_version)),
+#endif  // if defined(REDCORE)
       window_size(kDefaultWindowSize),
       font_render_hinting(kDefaultFontRenderHinting) {
 }

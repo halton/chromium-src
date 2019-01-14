@@ -41,6 +41,10 @@
 #include "chrome/browser/extensions/api/passwords_private/passwords_private_utils.h"
 #endif
 
+#ifdef REDCORE
+#include "base/strings/utf_string_conversions.h"
+#endif
+
 using base::StringPiece;
 using password_manager::PasswordStore;
 
@@ -138,17 +142,57 @@ int AddPasswordOperation::GetRedoLabelId() const {
 
 PasswordManagerPresenter::PasswordManagerPresenter(
     PasswordUIView* password_view)
-    : populater_(this),
+    :
+#ifdef REDCORE
+      start_delay_timer_(std::make_unique<base::OneShotTimer>()),
+#endif
+      populater_(this),
       exception_populater_(this),
       password_view_(password_view) {
   DCHECK(password_view_);
+#ifdef REDCORE
+  YSPLoginManager::GetInstance()->AddObserver(this);
+#endif
 }
 
 PasswordManagerPresenter::~PasswordManagerPresenter() {
   PasswordStore* store = GetPasswordStore();
   if (store)
     store->RemoveObserver(this);
+#ifdef REDCORE
+  YSPLoginManager::GetInstance()->RemoveObserver(this);
+#endif
 }
+
+#ifdef REDCORE
+void PasswordManagerPresenter::OnLoginRequestFailure(const std::string& error) {
+}
+
+void PasswordManagerPresenter::OnLoginResponseParseFailure(
+    const std::string& error) {}
+
+void PasswordManagerPresenter::OnLoginFailure(const base::string16& message) {}
+
+void PasswordManagerPresenter::OnLoginSuccess(
+    const base::string16& name,
+    const std::string& head_image_url) {
+  DLOG(INFO) << "start update password: login success";
+  start_delay_timer_->Stop();
+  start_delay_timer_->Start(FROM_HERE, base::TimeDelta::FromMilliseconds(1000),
+                            this, &PasswordManagerPresenter::OnStartDelayTimer);
+}
+
+void PasswordManagerPresenter::OnStartDelayTimer() {
+  UpdatePasswordLists();
+}
+
+void PasswordManagerPresenter::OnLogout() {
+  DLOG(INFO) << "start update password: logout success";
+  UpdatePasswordLists();
+}
+
+void PasswordManagerPresenter::OnTokenStatusChanged(const std::string& type) {}
+#endif
 
 void PasswordManagerPresenter::Initialize() {
   PasswordStore* store = GetPasswordStore();
@@ -343,7 +387,21 @@ void PasswordManagerPresenter::PasswordListPopulater::Populate() {
 
 void PasswordManagerPresenter::PasswordListPopulater::OnGetPasswordStoreResults(
     std::vector<std::unique_ptr<autofill::PasswordForm>> results) {
+#ifdef REDCORE
+  page_->password_list_.clear();
+  base::string16 user_id =
+      base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetUserId());
+  for (size_t i = 0; i < results.size(); i++) {
+    const auto& form = results[i];
+    if (!form->ysp_username_value.empty() &&
+        user_id != form->ysp_username_value)
+      continue;
+    page_->password_list_.push_back(
+        std::make_unique<autofill::PasswordForm>(*form));
+  }
+#else
   page_->password_list_ = std::move(results);
+#endif
   password_manager::SortEntriesAndHideDuplicates(&page_->password_list_,
                                                  &page_->password_duplicates_);
   page_->SetPasswordList();

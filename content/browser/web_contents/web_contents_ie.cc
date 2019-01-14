@@ -227,21 +227,12 @@ void WebContentsIE::OnRendererHostViewSize(const gfx::Size& size) {
   GetRenderWidgetHostView()->Hide();
   RECT rc;
   ::GetWindowRect(render_host_hwnd_, &rc);
-  POINT ptOrg;
-  ptOrg.x = rc.left;
-  ptOrg.y = rc.top;
-  POINT ptEnd;
-  ptEnd.x = rc.right;
-  ptEnd.y = rc.bottom;
-  HWND hwnd = GetParent(render_host_hwnd_);
-  ::ScreenToClient(hwnd, &ptOrg);
-  ::ScreenToClient(hwnd, &ptEnd);
-  RECT rect;
-  rect.left = ptOrg.x;
-  rect.top = ptOrg.y;
-  rect.right = ptEnd.x;
-  rect.bottom = ptEnd.y;
-  browser_event_handler_->SetBrowserRect(rect);
+  browser_event_handler_->SetBrowserRect(rc);
+}
+
+void WebContentsIE::OnWindowMove() {
+  gfx::Size size(0, 0);
+  OnRendererHostViewSize(size);
 }
 
 void WebContentsIE::SetIECookie(const GURL& url) {
@@ -414,8 +405,6 @@ void WebContentsIE::Focus() {
       view->Hide();
     }
   }
-  if (browser_event_handler_)
-    browser_event_handler_->Show(true);
 }
 
 RenderFrameHostImpl* WebContentsIE::GetFocusedFrame() {
@@ -632,10 +621,9 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   create_params.initial_size = GetContainerBounds().size();
   WebContentsImpl* new_contents = NULL;
   std::unique_ptr<WebContents> wbc = WebContents::Create(create_params);
-  new_contents = dynamic_cast<WebContentsImpl*>(wbc.get());
+  new_contents = (WebContentsImpl*)(wbc.get());
   if (new_contents->GetRendererMode().core == ie::IE_CORE) {
-    WebContentsIE* web_contents_ie =
-      dynamic_cast<WebContentsIE*>(new_contents);
+    WebContentsIE* web_contents_ie = (WebContentsIE*)(new_contents);
     if (web_contents_ie)
       web_contents_ie->SetCreateByIENewWindow(true);
   }
