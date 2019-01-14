@@ -621,10 +621,9 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   create_params.initial_size = GetContainerBounds().size();
   WebContentsImpl* new_contents = NULL;
   std::unique_ptr<WebContents> wbc = WebContents::Create(create_params);
-  new_contents = dynamic_cast<WebContentsImpl*>(wbc.get());
+  new_contents = (WebContentsImpl*)(wbc.get());
   if (new_contents->GetRendererMode().core == ie::IE_CORE) {
-    WebContentsIE* web_contents_ie =
-      dynamic_cast<WebContentsIE*>(new_contents);
+    WebContentsIE* web_contents_ie = (WebContentsIE*)(new_contents);
     if (web_contents_ie)
       web_contents_ie->SetCreateByIENewWindow(true);
   }
