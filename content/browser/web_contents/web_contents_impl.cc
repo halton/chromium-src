@@ -2043,6 +2043,8 @@ ie::RenderMode WebContentsImpl::GetRendererMode() {
 bool WebContentsImpl::IsAutoSelect() {
   return auto_seclect_;
 }
+
+void WebContentsImpl::OnWindowMove() {}
 #endif  // defined(IE_REDCORE)
 
 void WebContentsImpl::OnWebContentsDestroyed(WebContentsImpl* web_contents) {

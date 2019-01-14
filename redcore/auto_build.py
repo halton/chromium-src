@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
 import codecs
+import os
 import platform
+import shutil
 from build_utils import execCmd
 from build_utils import getBuildType
 from build_utils import getDiskString
+from build_utils import getMajorVersion
 
 
 parser = argparse.ArgumentParser(description = 'manual to this script')
@@ -111,17 +113,27 @@ def gitPull():
 
 def gitPushVersionChangeTo1redcore(chromeVersion, redcoreVersion):
   commitMessage = "%s the internal version is %s ; modify windows version to %s ;" % (_PRODUCT_NAME, chromeVersion, redcoreVersion)
-  pushCmdLine = "%s \
-    cd %s &&;\
-    git add chrome/VERSION &&;\
-    git commit -m \"%s\" &&;\
-    git stash clear &&;\
-    git stash &&;\
-    git pull --rebase git@github.com:1redcore/chromium-src.git %s &&;\
-    git push git@github.com:1redcore/chromium-src.git %s &&;\
-    git stash pop\
-    " % (getDiskString(_WORKING_DIR), _WORKING_DIR, commitMessage, _BRANCH_NAME, _BRANCH_NAME)
-  execCmd(pushCmdLine)
+  if _IS_MASTER_BRANCH:
+    pushCmdLine = "%s \
+      cd %s &&;\
+      git add chrome/VERSION &&;\
+      git commit -m \"%s\" &&;\
+      git pull --rebase git@github.com:1redcore/chromium-src.git %s &&;\
+      git push git@github.com:1redcore/chromium-src.git %s \
+      " % (getDiskString(_WORKING_DIR), _WORKING_DIR, commitMessage, _BRANCH_NAME, _BRANCH_NAME)
+    execCmd(pushCmdLine)
+  else:
+    pushCmdLine = "%s \
+      cd %s &&;\
+      git add chrome/VERSION &&;\
+      git commit -m \"%s\" &&;\
+      git stash clear &&;\
+      git stash &&;\
+      git pull --rebase git@github.com:1redcore/chromium-src.git %s &&;\
+      git push git@github.com:1redcore/chromium-src.git %s &&;\
+      git stash pop\
+      " % (getDiskString(_WORKING_DIR), _WORKING_DIR, commitMessage, _BRANCH_NAME, _BRANCH_NAME)
+    execCmd(pushCmdLine)
 
 
 def gitPushVersionChangeToCustomize(chromeVersion, redcoreVersion):
@@ -155,14 +167,22 @@ def gitResetWorkSpace():
 
 
 def gclient():
-  cleanBuildCmdLine = ""
-  if _CLEAN_BUILD:
-    cleanBuildCmdLine = "ninja -C out/Release mini_installer -t clean &&;"
+  releaseDir = os.path.join(_WORKING_DIR, "out", "Release")
+  if _CLEAN_BUILD and os.path.exists(releaseDir) and os.listdir(releaseDir):
+    shutil.rmtree(releaseDir)
+    #TODO:(zhangchao)恢复out/Release/gm 目录，以后国密脱离二进制后删除
+    resetLine = "%s\
+    cd %s &&;\
+    git reset --hard HEAD \
+    " % (getDiskString(_WORKING_DIR), _WORKING_DIR)
+    execCmd(resetLine)
+  gclientArgs = ""
+  if getMajorVersion(_WORKING_DIR) == 70:
+    gclientArgs = "--with_branch_heads --with_tags"
   gclientCmdLine = "%s \
     cd %s &&;\
-    %s\
-    gclient sync \
-    " % (getDiskString(_WORKING_DIR), _WORKING_DIR, cleanBuildCmdLine)
+    gclient sync %s\
+    " % (getDiskString(_WORKING_DIR), _WORKING_DIR, gclientArgs)
   execCmd(gclientCmdLine)
 
 
