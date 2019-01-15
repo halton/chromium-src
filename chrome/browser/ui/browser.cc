@@ -3886,6 +3886,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
   std::string server_url = YSPLoginManager::GetInstance()->GetManageServer();
   std::string device_id =
       YSPLoginManager::GetInstance()->GetValueForKey("deviceId");
+  std::string manage_server = YSPLoginManager::GetInstance()->GetValueForKey("domain");
   std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
   std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
   content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
@@ -3909,8 +3910,10 @@ void Browser::OnLoginSuccess(const base::string16& name,
   std::string private_dns_string = "";
   base::DictionaryValue* private_dns_dict =
       YSPLoginManager::GetInstance()->GetPrivateDNS();
-  if (private_dns_dict)
+  if (private_dns_dict) {
+    private_dns_dict->SetString("ManageServer", manage_server);
     base::JSONWriter::Write(*private_dns_dict, &private_dns_string);
+  }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
