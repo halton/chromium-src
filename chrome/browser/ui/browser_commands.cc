@@ -1193,9 +1193,18 @@ void ToggleRequestTabletSite(Browser* browser) {
   } else {
     entry->SetIsOverridingUserAgent(true);
     std::string product = version_info::GetProductNameAndVersionForUserAgent();
-    current_tab->SetUserAgentOverride(content::BuildUserAgentFromOSAndProduct(
-                                          kOsOverrideForTabletSite, product),
-                                      false);
+#ifdef REDCORE
+    current_tab->SetUserAgentOverride(
+        content::BuildUserAgentFromOSAndProduct(kOsOverrideForTabletSite,
+                                                product,
+                                                version_info::GetYSPProductNameAndVersionForUserAgent()),
+        false);
+#else
+    current_tab->SetUserAgentOverride(
+        content::BuildUserAgentFromOSAndProduct(kOsOverrideForTabletSite,
+                                                product),
+        false);
+#endif  // if defined(REDCORE)
   }
   controller.Reload(content::ReloadType::ORIGINAL_REQUEST_URL, true);
 }
@@ -1388,6 +1397,6 @@ void ShowRendererModeSwitchBubble(Browser* browser, ie::RenderMode mode) {
   GURL url = entry->GetURL();
   browser->window()->ShowRendererModeBubble(url, mode);
 }
-#endif  // REDCORE
+#endif  // defined(IE_REDCORE)
 
 }  // namespace chrome
