@@ -510,6 +510,8 @@ bool BrowserHostEventDelegant::LoadUrl(const std::wstring& url) {
   if (web_browser2_ == NULL)
     return false;
 
+  LOG(INFO) << "Load Url: " << url;
+
   HRESULT result = S_OK;
   std::vector<variant_t> params;
   variant_t ret;

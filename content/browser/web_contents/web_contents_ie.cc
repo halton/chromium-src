@@ -1229,7 +1229,6 @@ void WebContentsIE::NavigateUrl(
   if (entry)
     curUrl = entry->GetURL();
 
-  bool b = false;
   if (!PageTransitionTypeIncludingQualifiersIs(
           params->transition_type,
           ui::PageTransition::PAGE_TRANSITION_RELOAD) &&
@@ -1251,16 +1250,13 @@ void WebContentsIE::NavigateUrl(
                    params->url, false));
   }
 
-  if (!PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type,
-          ui::PageTransition::PAGE_TRANSITION_IE_NEWWINDOW) &&
-      !PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
-    b = browser_event_handler_->LoadUrl(url);
-
   if (PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
+          params->transition_type,
+          ui::PageTransition::PAGE_TRANSITION_RELOAD)) {
     browser_event_handler_->Refresh();
+  } else {
+    browser_event_handler_->LoadUrl(url);
+  }
 
   // //chjy
   // RenderFrameHostImpl* rfh = GetMainFrame();
