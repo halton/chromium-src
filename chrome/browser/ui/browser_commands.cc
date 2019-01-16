@@ -1193,9 +1193,10 @@ void ToggleRequestTabletSite(Browser* browser) {
   } else {
     entry->SetIsOverridingUserAgent(true);
     std::string product = version_info::GetProductNameAndVersionForUserAgent();
-    current_tab->SetUserAgentOverride(content::BuildUserAgentFromOSAndProduct(
-                                          kOsOverrideForTabletSite, product),
-                                      false);
+    current_tab->SetUserAgentOverride(
+        content::BuildUserAgentFromOSAndProduct(
+            kOsOverrideForTabletSite, product),
+        false);
   }
   controller.Reload(content::ReloadType::ORIGINAL_REQUEST_URL, true);
 }
@@ -1388,6 +1389,6 @@ void ShowRendererModeSwitchBubble(Browser* browser, ie::RenderMode mode) {
   GURL url = entry->GetURL();
   browser->window()->ShowRendererModeBubble(url, mode);
 }
-#endif  // REDCORE
+#endif  // defined(IE_REDCORE)
 
 }  // namespace chrome

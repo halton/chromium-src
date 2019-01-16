@@ -45,7 +45,10 @@ bool VisitDatabase::InitVisitTable() {
             // longer used and should NOT be read or written from any longer.
             "visit_duration INTEGER DEFAULT 0 NOT NULL,"
             "incremented_omnibox_typed_score BOOLEAN DEFAULT FALSE NOT NULL,"
-            "YSPUserName varchar(100))"))
+#ifdef REDCORE
+            "ysp_user_id varchar(100))"
+#endif
+    ))
       return false;
   }
 
@@ -90,6 +93,18 @@ bool VisitDatabase::DropVisitTable() {
 // static
 void VisitDatabase::FillVisitRow(const sql::Statement& statement,
                                  VisitRow* visit) {
+#ifdef REDCORE
+  visit->visit_id = statement.ColumnInt64(0);
+  visit->url_id = statement.ColumnInt64(1);
+  visit->visit_time = base::Time::FromInternalValue(statement.ColumnInt64(2));
+  visit->ysp_user_id = statement.ColumnString(3);
+  visit->referring_visit = statement.ColumnInt64(4);
+  visit->transition = ui::PageTransitionFromInt(statement.ColumnInt(5));
+  visit->segment_id = statement.ColumnInt64(6);
+  visit->visit_duration =
+      base::TimeDelta::FromInternalValue(statement.ColumnInt64(7));
+  visit->incremented_omnibox_typed_score = statement.ColumnBool(8);
+#else
   visit->visit_id = statement.ColumnInt64(0);
   visit->url_id = statement.ColumnInt64(1);
   visit->visit_time = base::Time::FromInternalValue(statement.ColumnInt64(2));
@@ -99,6 +114,7 @@ void VisitDatabase::FillVisitRow(const sql::Statement& statement,
   visit->visit_duration =
       base::TimeDelta::FromInternalValue(statement.ColumnInt64(6));
   visit->incremented_omnibox_typed_score = statement.ColumnBool(7);
+#endif
 }
 
 // static
@@ -150,6 +166,22 @@ bool VisitDatabase::FillVisitVectorWithOptions(sql::Statement& statement,
 }
 
 VisitID VisitDatabase::AddVisit(VisitRow* visit, VisitSource source) {
+#ifdef REDCORE
+  sql::Statement statement(GetDB().GetCachedStatement(
+      SQL_FROM_HERE,
+      "INSERT INTO visits "
+      "(url, visit_time, ysp_user_id, from_visit, transition, segment_id, "
+      "visit_duration, incremented_omnibox_typed_score) "
+      "VALUES (?,?,?,?,?,?,?,?)"));
+  statement.BindInt64(0, visit->url_id);
+  statement.BindInt64(1, visit->visit_time.ToInternalValue());
+  statement.BindString(2, visit->ysp_user_id);
+  statement.BindInt64(3, visit->referring_visit);
+  statement.BindInt64(4, visit->transition);
+  statement.BindInt64(5, visit->segment_id);
+  statement.BindInt64(6, visit->visit_duration.ToInternalValue());
+  statement.BindBool(7, visit->incremented_omnibox_typed_score);
+#else
   sql::Statement statement(GetDB().GetCachedStatement(
       SQL_FROM_HERE,
       "INSERT INTO visits "
@@ -163,6 +195,7 @@ VisitID VisitDatabase::AddVisit(VisitRow* visit, VisitSource source) {
   statement.BindInt64(4, visit->segment_id);
   statement.BindInt64(5, visit->visit_duration.ToInternalValue());
   statement.BindBool(6, visit->incremented_omnibox_typed_score);
+#endif
 
   if (!statement.Run()) {
     DVLOG(0) << "Failed to execute visit insert statement:  "
@@ -240,6 +273,22 @@ bool VisitDatabase::UpdateVisitRow(const VisitRow& visit) {
   if (visit.visit_id == visit.referring_visit)
     return false;
 
+#ifdef REDCORE
+  sql::Statement statement(GetDB().GetCachedStatement(
+      SQL_FROM_HERE,
+      "UPDATE visits SET "
+      "url=?,visit_time=?,ysp_user_id=?,from_visit=?,transition=?,segment_id=?,"
+      "visit_duration=?,incremented_omnibox_typed_score=? WHERE id=?"));
+  statement.BindInt64(0, visit.url_id);
+  statement.BindInt64(1, visit.visit_time.ToInternalValue());
+  statement.BindString(2, visit.ysp_user_id);
+  statement.BindInt64(3, visit.referring_visit);
+  statement.BindInt64(4, visit.transition);
+  statement.BindInt64(5, visit.segment_id);
+  statement.BindInt64(6, visit.visit_duration.ToInternalValue());
+  statement.BindBool(7, visit.incremented_omnibox_typed_score);
+  statement.BindInt64(8, visit.visit_id);
+#else
   sql::Statement statement(GetDB().GetCachedStatement(
       SQL_FROM_HERE,
       "UPDATE visits SET "
@@ -253,6 +302,7 @@ bool VisitDatabase::UpdateVisitRow(const VisitRow& visit) {
   statement.BindInt64(5, visit.visit_duration.ToInternalValue());
   statement.BindBool(6, visit.incremented_omnibox_typed_score);
   statement.BindInt64(7, visit.visit_id);
+#endif
 
   return statement.Run();
 }
@@ -743,7 +793,7 @@ bool VisitDatabase::GetVisitsForUserId(const std::string& user_id,
 
   sql::Statement statement(GetDB().GetCachedStatement(
       SQL_FROM_HERE, "SELECT" HISTORY_VISIT_ROW_FIELDS "FROM visits "
-                     "WHERE YSPUserName == ?"));
+                     "WHERE ysp_user_id == ?"));
 
   statement.BindString(0, user_id);
 
