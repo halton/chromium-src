@@ -391,7 +391,7 @@ std::string GetProduct() {
 std::string GetYSPProduct() {
 	return version_info::GetYSPProductNameAndVersionForUserAgent();
 }
-#endif
+#endif  // if defined(REDCORE)
 
 }  // namespace
 
@@ -405,14 +405,15 @@ std::string GetUserAgent() {
   }
 
   std::string product = GetProduct();
-#ifdef REDCORE //TODO(matianzhi) modify UserAgent
-  product += " " + GetYSPProduct();
-#endif
 #if defined(OS_ANDROID)
   if (command_line->HasSwitch(switches::kUseMobileUserAgent))
     product += " Mobile";
 #endif
+#ifdef REDCORE
+  return content::BuildUserAgentFromProduct(product, GetYSPProduct());
+#else
   return content::BuildUserAgentFromProduct(product);
+#endif  // if defined(REDCORE)
 }
 
 ChromeContentClient::ChromeContentClient() {

@@ -876,9 +876,9 @@ std::pair<URLID, VisitID> HistoryBackend::AddPageVisit(
 
   // Add the visit with the time to the database.
 #ifdef REDCORE
-  std::string uuidKey = "onlyid";
-  std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
-  VisitRow visit_info(url_id, time, username, referring_visit, transition, 0,
+  std::string user_id =
+      YSPLoginManager::GetInstance()->GetUserId();
+  VisitRow visit_info(url_id, time, user_id, referring_visit, transition, 0,
                       should_increment_typed_count);
 #else
   VisitRow visit_info(url_id, time, referring_visit, transition, 0,
@@ -935,10 +935,10 @@ void HistoryBackend::AddPagesWithDetails(const URLRows& urls,
     if (visit_source != SOURCE_SYNCED) {
       // Make up a visit to correspond to the last visit to the page.
 #ifdef REDCORE
-      std::string uuidKey = "onlyid";
-      std::string username = YSPLoginManager::GetInstance()->GetValueForKey(uuidKey);
+      std::string user_id =
+          YSPLoginManager::GetInstance()->GetUserId();
       VisitRow visit_info(
-          url_id, i->last_visit(), username, 0,
+          url_id, i->last_visit(), user_id, 0,
           ui::PageTransitionFromInt(ui::PAGE_TRANSITION_LINK |
                                     ui::PAGE_TRANSITION_CHAIN_START |
                                     ui::PAGE_TRANSITION_CHAIN_END),
@@ -1358,7 +1358,7 @@ void HistoryBackend::QueryHistoryBasic(const QueryOptions& options,
         (visit.transition & ui::PAGE_TRANSITION_BLOCKED) != 0);
 
 #ifdef REDCORE
-    url_result.set_YSPUserName(visit.ysp_username);
+    url_result.SetYSPUserID(visit.ysp_user_id);
 #endif
 
     // We don't set any of the query-specific parts of the URLResult, since

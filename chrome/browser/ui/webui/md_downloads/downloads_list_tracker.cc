@@ -31,6 +31,10 @@
 #include "third_party/icu/source/i18n/unicode/datefmt.h"
 #include "ui/base/l10n/time_format.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif
+
 using content::BrowserContext;
 using download::DownloadItem;
 using content::DownloadManager;
@@ -123,7 +127,19 @@ void DownloadsListTracker::StartAndSendChunk() {
   std::advance(it, sent_to_page_);
 
   base::ListValue list;
+#ifdef REDCORE
+  std::string ysp_user_id =
+      YSPLoginManager::GetInstance()->GetUserId();
+#endif
   while (it != sorted_items_.end() && list.GetSize() < chunk_size_) {
+#ifdef REDCORE
+    if (!(*it)->GetYSPUserID().empty() &&
+        (*it)->GetYSPUserID() !=
+            ysp_user_id) {
+      ++it;
+      continue;
+    }
+#endif
     list.Append(CreateDownloadItemValue(*it));
     ++it;
   }

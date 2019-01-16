@@ -243,9 +243,10 @@ class VisitDatabase {
 
 // Columns, in order, of the visit table.
 #ifdef REDCORE
-#define HISTORY_VISIT_ROW_FIELDS                                        \
-  " id,url,visit_time,from_visit,transition,segment_id,visit_duration," \
-  "YSPUserName "
+#define HISTORY_VISIT_ROW_FIELDS                                           \
+  " id,url,visit_time,ysp_user_id,from_visit,transition,segment_id,visit_" \
+  "duration,"                                                              \
+  "incremented_omnibox_typed_score "
 #else
 #define HISTORY_VISIT_ROW_FIELDS                                        \
   " id,url,visit_time,from_visit,transition,segment_id,visit_duration," \
