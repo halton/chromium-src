@@ -984,6 +984,7 @@ class Browser : public TabStripModelObserver,
   void ClearStartupAndHomePages();
   void UpdateStrategy();
   void ClearPasswordForUserId();
+  void ClearAllCookies();
   void ClearUserDataForBrowser(const std::string& user_id);
   void ClearedUserData();
 #endif  // defined(REDCORE)
@@ -1152,6 +1153,7 @@ class Browser : public TabStripModelObserver,
   const int64_t kDefaultLockScreenTime = 600;
   bool first_create_;
   YSPLockStatus lock_status_;
+  net::URLRequestContextGetter* sb_context_;
   std::unique_ptr<base::RepeatingTimer> auto_lock_timer_;
   base::WeakPtrFactory<Browser> crypto_ua_factory_;
 #endif  // defined(REDCORE)
