@@ -8,17 +8,6 @@
 
 namespace headless {
 
-#ifdef REDCORE
-std::string BuildUserAgentFromProduct(const std::string& product,
-                                      const std::string& ysp_product) {
-  return content::BuildUserAgentFromProduct(product, ysp_product);
-}
-
-std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
-                                           const std::string& product,
-                                           const std::string& ysp_product) {
-  return content::BuildUserAgentFromOSAndProduct(os_info, product, ysp_product);
-#else
 std::string BuildUserAgentFromProduct(const std::string& product) {
   return content::BuildUserAgentFromProduct(product);
 }
@@ -26,7 +15,6 @@ std::string BuildUserAgentFromProduct(const std::string& product) {
 std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
                                            const std::string& product) {
   return content::BuildUserAgentFromOSAndProduct(os_info, product);
-#endif  // if defined(REDCORE)
 }
 
 }  // namespace headless

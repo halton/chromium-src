@@ -157,18 +157,21 @@ std::string getUserAgentPlatform() {
 std::string BuildUserAgentFromProduct(const std::string& product,
                                       const std::string& ysp_product) {
   std::string os_info;
-  base::StringAppendF(&os_info, "%s%s", getUserAgentPlatform().c_str(),
-                      BuildOSCpuInfo(false).c_str());
-  return BuildUserAgentFromOSAndProduct(os_info, product, ysp_product);
+  base::StringAppendF(
+      &os_info,
+      "%s %s",
+      BuildUserAgentFromOSAndProduct(os_info, product).c_str(),
+      ysp_product.c_str());
+  return os_info;
 }
-#else
+#endif  // if defined(REDCORE)
+
 std::string BuildUserAgentFromProduct(const std::string& product) {
   std::string os_info;
   base::StringAppendF(&os_info, "%s%s", getUserAgentPlatform().c_str(),
                       BuildOSCpuInfo(false).c_str());
   return BuildUserAgentFromOSAndProduct(os_info, product);
 }
-#endif  // if defined(REDCORE)
 
 #if defined(OS_ANDROID)
 std::string BuildUserAgentFromProductAndExtraOSInfo(
@@ -183,30 +186,12 @@ std::string BuildUserAgentFromProductAndExtraOSInfo(
 }
 #endif
 
-#ifdef REDCORE
-std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
-                                           const std::string& product,
-                                           const std::string& ysp_product) {
-#else
 std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
                                            const std::string& product) {
-#endif  // if defined(REDCORE)
   // Derived from Safari's UA string.
   // This is done to expose our product name in a manner that is maximally
   // compatible with Safari, we hope!!
   std::string user_agent;
-#ifdef REDCORE //TODO(matianzhi) modify UserAgent
-  base::StringAppendF(
-	  &user_agent,
-	  "Mozilla/5.0 (%s) AppleWebKit/%d.%d (KHTML, like Gecko) %s Safari/%d.%d %s",
-	  os_info.c_str(),
-	  WEBKIT_VERSION_MAJOR,
-	  WEBKIT_VERSION_MINOR,
-	  product.c_str(),
-      WEBKIT_VERSION_MAJOR,
-      WEBKIT_VERSION_MINOR,
-      ysp_product.c_str());
-#else
   base::StringAppendF(
       &user_agent,
       "Mozilla/5.0 (%s) AppleWebKit/%d.%d (KHTML, like Gecko) %s Safari/%d.%d",
@@ -216,7 +201,6 @@ std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
       product.c_str(),
       WEBKIT_VERSION_MAJOR,
       WEBKIT_VERSION_MINOR);
-#endif  // if defined(REDCORE)
   return user_agent;
 }
 

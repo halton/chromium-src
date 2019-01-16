@@ -9,17 +9,9 @@
 
 namespace headless {
 
-#ifdef REDCORE
-std::string BuildUserAgentFromProduct(const std::string& product,
-                                      const std::string& ysp_product);
-std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
-                                           const std::string& product,
-                                           const std::string& ysp_product);
-#else
 std::string BuildUserAgentFromProduct(const std::string& product);
 std::string BuildUserAgentFromOSAndProduct(const std::string& os_info,
                                            const std::string& product);
-#endif  // if defined(REDCORE)
 
 }  // namespace headless
 
