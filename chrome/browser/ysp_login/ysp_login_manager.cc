@@ -2139,7 +2139,7 @@ void YSPLoginManager::SetPushData(const std::string& value) {
             base::DictionaryValue::From(std::move(user_info_value));
         std::string server, username, password;
         user_info_dict->GetString("server", &server);
-        user_info_dict->GetString("username", &username);
+        user_info_dict->GetString("userName", &username);
         user_info_dict->GetString("password", &password);
         if (!server.empty() && !username.empty() && !password.empty()) {
           StartLogin(server, username, password);
