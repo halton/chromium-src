@@ -780,7 +780,7 @@ void WebContentsIE::QueryDnsOnIOThread(const std::wstring& host) {
   std::wstring ip_list_json_string = L"";
   hostStr = base::UTF16ToASCII(host);
   base::ListValue* json = NULL;
-  json = net::HostResolverImpl::PrivateDnsCompared(hostStr);
+  json = net::HostResolverImpl::PrivateDnsAndAbsoluteLink(hostStr);
   if (json) {
     std::string buff = "";
     base::JSONWriter::Write(*json, &buff);
