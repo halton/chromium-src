@@ -1193,18 +1193,10 @@ void ToggleRequestTabletSite(Browser* browser) {
   } else {
     entry->SetIsOverridingUserAgent(true);
     std::string product = version_info::GetProductNameAndVersionForUserAgent();
-#ifdef REDCORE
     current_tab->SetUserAgentOverride(
-        content::BuildUserAgentFromOSAndProduct(kOsOverrideForTabletSite,
-                                                product,
-                                                version_info::GetYSPProductNameAndVersionForUserAgent()),
+        content::BuildUserAgentFromOSAndProduct(
+            kOsOverrideForTabletSite, product),
         false);
-#else
-    current_tab->SetUserAgentOverride(
-        content::BuildUserAgentFromOSAndProduct(kOsOverrideForTabletSite,
-                                                product),
-        false);
-#endif  // if defined(REDCORE)
   }
   controller.Reload(content::ReloadType::ORIGINAL_REQUEST_URL, true);
 }
