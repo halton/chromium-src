@@ -73,7 +73,7 @@ class VisitRow {
            base::Time arg_visit_time,
 #ifdef REDCORE
            const std::string&
-               arg_ysp_username,  // YSP+ { User information isolation }
+               arg_ysp_user_id,
 #endif
            VisitID arg_referring_visit,
            ui::PageTransition arg_transition,
@@ -91,7 +91,7 @@ class VisitRow {
   base::Time visit_time;
 
 #ifdef REDCORE
-  std::string ysp_username;  // YSP+ { User information isolation }
+  std::string ysp_user_id;  // YSP+ { User information isolation }
 #endif
 
   // Indicates another visit that was the referring page for this one.

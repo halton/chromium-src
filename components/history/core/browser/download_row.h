@@ -108,6 +108,10 @@ struct DownloadRow {
   // The GUID of the download in the database. Not changed by UpdateDownload().
   std::string guid;
 
+#ifdef REDCORE
+  std::string ysp_user_id;
+#endif
+
   // Whether this download has ever been opened from the browser.
   bool opened = false;
 
@@ -125,10 +129,6 @@ struct DownloadRow {
   // Data slices that have been downloaded so far. The slices must be ordered
   // by their offset.
   std::vector<DownloadSliceInfo> download_slice_info;
-
-#ifdef REDCORE
-  std::string ysp_username;
-#endif
 };
 
 }  // namespace history

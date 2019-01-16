@@ -216,9 +216,8 @@ std::string GetOsVersionStr() {
     system_version = "Windows 8";
   else if (version == base::win::VERSION_WIN8_1)
     system_version = "Windows 8.1";
-  else if (version == base::win::VERSION_WIN10)
-    system_version = "Windows 10";
-  else if (version == base::win::VERSION_WIN10_TH2)
+  else if (version >= base::win::VERSION_WIN10 &&
+           version <= base::win::VERSION_WIN10_RS4)
     system_version = "Windows 10";
   else if (version == base::win::VERSION_WIN_LAST)
     system_version = "unknown";
