@@ -642,6 +642,7 @@ Browser::Browser(const CreateParams& params)
 #if defined(REDCORE)
       first_create_(params.first_create),
       lock_status_(UNLOCKED),
+      sb_context_(nullptr),
       auto_lock_timer_(std::make_unique<base::RepeatingTimer>()),
       crypto_ua_factory_(this),
 #endif  // REDCORE
@@ -3809,6 +3810,13 @@ void Browser::OnConfigDataUpdated(const std::string& type,
             base::Bind(&net::URLRequestHttpJob::SetDomainDictValue,
                        domain_dict_string));
       }
+    } else {
+      content::BrowserThread::PostTask(
+          content::BrowserThread::IO, FROM_HERE,
+          base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
+      content::BrowserThread::PostTask(
+          content::BrowserThread::IO, FROM_HERE,
+          base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
     }
   }
 }
@@ -3885,6 +3893,7 @@ void Browser::OnLoginSuccess(const base::string16& name,
   std::string server_url = YSPLoginManager::GetInstance()->GetManageServer();
   std::string device_id =
       YSPLoginManager::GetInstance()->GetValueForKey("deviceId");
+  std::string manage_server = YSPLoginManager::GetInstance()->GetValueForKey("domain");
   std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
   std::string company_id = YSPLoginManager::GetInstance()->GetCompanyId();
   content::WebContents* contents = tab_strip_model_->GetActiveWebContents();
@@ -3908,8 +3917,10 @@ void Browser::OnLoginSuccess(const base::string16& name,
   std::string private_dns_string = "";
   base::DictionaryValue* private_dns_dict =
       YSPLoginManager::GetInstance()->GetPrivateDNS();
-  if (private_dns_dict)
+  if (private_dns_dict) {
+    private_dns_dict->SetString("ManageServer", manage_server);
     base::JSONWriter::Write(*private_dns_dict, &private_dns_string);
+  }
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HostResolverImpl::SetPrivateDnsValue,
@@ -4034,6 +4045,10 @@ void Browser::OnLogout() {
   SetWatermarkString(str, 0x00000000, 0);
 #endif
   ResetLockScreenTimer(kDefaultLockScreenTime);
+  sb_context_ = profile()->GetRequestContext();
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&Browser::ClearAllCookies, base::Unretained(this)));
 }
 
 // json 串格式如下：
@@ -4416,20 +4431,15 @@ void Browser::ClearPasswordForUserId() {
   }
 }
 
-// FIXME(halton): how to pass callback
-/*
-static void ClearCookiesOnIOThread(const std::string& user_id,
-net::URLRequestContextGetter* rq_context, const base::Closure& callback) {
+void Browser::ClearAllCookies() {
   DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
   net::CookieStore* cookie_store =
-      rq_context->GetURLRequestContext()->cookie_store();
+      sb_context_->GetURLRequestContext()->cookie_store();
   if (cookie_store) {
-    // FIXME(halton): how to pass callback
-    // cookie_store->DeleteAllForUserIdAsync(user_id,
-IgnoreArgument<int>(callback));
+    cookie_store->DeleteAllAsync(net::CookieStore::DeleteCallback());
+    base::RunLoop().RunUntilIdle();
   }
 }
-*/
 
 void Browser::ClearUserDataForBrowser(const std::string& user_id) {
   history::HistoryService* history_service =
@@ -4447,17 +4457,10 @@ void Browser::ClearUserDataForBrowser(const std::string& user_id) {
     download_prefs->SetSaveFilePath(download_prefs->DownloadPath());
   }
 
-  scoped_refptr<net::URLRequestContextGetter> sb_context =
-      profile()->GetRequestContext();
-  // FIXME(halton): how to pass callback
-  /*
+  sb_context_ = profile()->GetRequestContext();
   content::BrowserThread::PostTask(
-    content::BrowserThread::IO, FROM_HERE,
-    base::Bind(&ClearCookiesOnIOThread, user_id, std::move(sb_context),
-      UIThreadTrampoline(
-        base::Bind(&Browser::ClearedUserData,
-          weak_factory_.GetWeakPtr()))));
-  */
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&Browser::ClearAllCookies, base::Unretained(this)));
 
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,

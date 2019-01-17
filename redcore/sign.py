@@ -258,10 +258,9 @@ class MacOperation:
 def signAndPackage():
   if platform.system() == "Windows":
     firstSignWithNewKey()
-    # firstSignWithOldkey()
+    reLink()
     nsisPackage()
     finalSignWithNewKey()
-    # finalSignWithOldKey()
     renameExe()
   elif platform.system() == "Darwin":
     mac = MacOperation(_WORKING_DIR)    

@@ -291,7 +291,7 @@ DownloadItemImpl::DownloadItemImpl(
     const base::FilePath& current_path,
     const base::FilePath& target_path,
 #ifdef REDCORE
-    const std::string& ysp_username,  // YSP+ { User information isolation }
+    const std::string& ysp_user_id,
 #endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
@@ -349,12 +349,12 @@ DownloadItemImpl::DownloadItemImpl(
       received_slices_(received_slices),
       is_updating_observers_(false),
 #ifdef REDCORE
-      ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),          // ysp+
-      is_update_(false),            // ysp+
+      ysp_user_id_(ysp_user_id),
+      is_doc_view_(false),
+      is_update_(false),
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false),  // ysp+
+      is_ie_download_(false),
 // render_process_host_id_(-1), //ysp+
 // render_frame_host_id_(-1), //ysp+
 #endif
@@ -371,7 +371,7 @@ DownloadItemImpl::DownloadItemImpl(
     DownloadItemImplDelegate* delegate,
     uint32_t download_id,
 #ifdef REDCORE
-    const std::string& ysp_username,  // YSP+ { User information isolation }
+    const std::string& ysp_user_id,
 #endif
     const DownloadCreateInfo& info)
     : request_info_(info.url_chain,
@@ -409,12 +409,12 @@ DownloadItemImpl::DownloadItemImpl(
       request_headers_(info.request_headers),
       download_source_(info.download_source),
 #ifdef REDCORE
-      ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),          // ysp+
-      is_update_(false),            // ysp+
+      ysp_user_id_(ysp_user_id),
+      is_doc_view_(false),
+      is_update_(false),
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false),  // ysp+
+      is_ie_download_(false),
 // render_process_host_id_(info.render_process_id), //ysp+
 // render_frame_host_id_(info.render_frame_id), //ysp+
 #endif
@@ -430,7 +430,7 @@ DownloadItemImpl::DownloadItemImpl(
     DownloadItemImplDelegate* delegate,
     uint32_t download_id,
 #ifdef REDCORE
-    const std::string& ysp_username,  // YSP+ { User information isolation }
+    const std::string& ysp_user_id,
 #endif
     const base::FilePath& path,
     const GURL& url,
@@ -447,14 +447,14 @@ DownloadItemImpl::DownloadItemImpl(
       destination_info_(path, path, 0, false, std::string(), base::Time()),
       is_updating_observers_(false),
 #ifdef REDCORE
-      ysp_username_(ysp_username),  // YSP+ { User information isolation }
-      is_doc_view_(false),          // ysp+
-      is_update_(false),            // ysp+
+      ysp_user_id_(ysp_user_id),
+      is_doc_view_(false),
+      is_update_(false),
 #endif
 #if defined(IE_REDCORE)
-      is_ie_download_(false),  // ysp+
-// render_process_host_id_(-1), //ysp+
-// render_frame_host_id_(-1), //ysp+
+      is_ie_download_(false),
+// render_process_host_id_(-1),
+// render_frame_host_id_(-1),
 #endif
       weak_ptr_factory_(this) {
   job_ = DownloadJobFactory::CreateJob(this, std::move(request_handle),
@@ -2649,8 +2649,8 @@ const char* DownloadItemImpl::DebugResumeModeString(ResumeMode mode) {
 }
 
 #ifdef REDCORE
-std::string DownloadItemImpl::GetYSPUserName() const {
-  return ysp_username_;
+std::string DownloadItemImpl::GetYSPUserID() const {
+  return ysp_user_id_;
 }
 
 bool DownloadItemImpl::is_doc_view() {
