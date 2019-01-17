@@ -628,17 +628,7 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
       web_contents_ie->SetCreateByIENewWindow(true);
   }
 
-  if (delegate) {
-    WindowOpenDisposition disposition =
-        WindowOpenDisposition::NEW_FOREGROUND_TAB;
-    if ((flag & ie::POPUP) == ie::POPUP)
-      disposition = WindowOpenDisposition::NEW_POPUP;
-
-    gfx::Rect initial_rect;
-    initial_rect.set_size(create_params.initial_size);
-    delegate->AddNewContents(this, std::move(wbc), disposition, initial_rect,
-                             false, NULL);
-  }
+  new_contents->delegate_ = delegate;
 
   // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
 
