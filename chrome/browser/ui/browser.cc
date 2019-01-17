@@ -3810,6 +3810,13 @@ void Browser::OnConfigDataUpdated(const std::string& type,
             base::Bind(&net::URLRequestHttpJob::SetDomainDictValue,
                        domain_dict_string));
       }
+    } else {
+      content::BrowserThread::PostTask(
+          content::BrowserThread::IO, FROM_HERE,
+          base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
+      content::BrowserThread::PostTask(
+          content::BrowserThread::IO, FROM_HERE,
+          base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
     }
   }
 }

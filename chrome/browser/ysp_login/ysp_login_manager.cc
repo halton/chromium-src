@@ -2356,6 +2356,7 @@ void YSPLoginManager::Logout() {
   }
   // clear local cache
   ClearCache();
+  NotifyConfigureUpdate("gatewayDomain", "");
 }
 
 // YSP+ { Resource Replace
