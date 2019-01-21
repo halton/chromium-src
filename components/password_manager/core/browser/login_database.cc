@@ -1181,6 +1181,9 @@ LoginDatabase::EncryptionResult LoginDatabase::InitPasswordFormFromStatement(
   form->password_element = s.ColumnString16(COLUMN_PASSWORD_ELEMENT);
   form->password_value = decrypted_password;
   form->submit_element = s.ColumnString16(COLUMN_SUBMIT_ELEMENT);
+#ifdef REDCORE
+  form->ysp_username_value = s.ColumnString16(COLUMN_YSP_USERNAME_VALUE);
+#endif
   tmp = s.ColumnString(COLUMN_SIGNON_REALM);
   form->signon_realm = tmp;
   form->preferred = (s.ColumnInt(COLUMN_PREFERRED) > 0);

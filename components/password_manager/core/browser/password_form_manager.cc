@@ -741,6 +741,10 @@ void PasswordFormManager::CreatePendingCredentials() {
   if (!IsValidAndroidFacetURI(pending_credentials_.signon_realm))
     pending_credentials_.action = submitted_form_->action;
 
+#ifdef REDCORE
+  pending_credentials_.ysp_username_value =
+      base::UTF8ToUTF16(YSPLoginManager::GetInstance()->GetUserId());
+#endif
   pending_credentials_.password_value = password_to_save.first;
   pending_credentials_.preferred = submitted_form_->preferred;
   pending_credentials_.form_has_autofilled_value =
