@@ -260,11 +260,11 @@ SPECIAL_CASES = {
         "License Android Compatible": "yes",
         "License File": "/third_party/swiftshader/LICENSE.txt",
     },
-	os.path.join('third_party', 'gmssl'): {
-        "Name": "gmssl",
+    os.path.join('third_party', 'GmSSL'): {
+        "Name": "GmSSL",
         "URL": "http://gmssl.org/",
-        "License": "GmSSL License",
-        "License File": "/third_party/gmssl/LICENSE.txt",
+        "License": "BSD",
+        "License File": "third_party/GmSSL/LICENSE",
     },
 }
 
