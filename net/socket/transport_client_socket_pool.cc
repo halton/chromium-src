@@ -348,10 +348,10 @@ int TransportConnectJob::DoTransportConnect() {
   std::string server_ip = "";
   int time_diff = 0;
   access_cmd = "tcp/" + port;
-  std::string key = "dJjCl43TR4TkcEO2W9aW4rJGFMYaWe9oFrtfhMNVzSM=";
+  std::string key = "hKvtToZD8PZR8/GztldoThB3Z3uMcN4g2FRuf9kHY/8=";
   std::string hmac_key =
-      "02LbTG8yoariufYrbigLgvax4lYhWtND5AFLDcf2EGeu4/"
-      "bd3VxovZwFNAkdC4PowALnosuDhZKkUKm/41Rx8g==";
+      "f36tZ1ak+Q+gZOBcn+j/rARvZHZKa/GJqjcZxZhe8j9Mtq"
+      "uGqoRRE/F6oFEt0+nKCmi/Etue/M+FG9a2okn8Fw==";
 
   if (DomainCompared(compared_host, &device_id, &username, &server_ip,
                      time_diff)) {
