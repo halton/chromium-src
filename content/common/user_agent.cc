@@ -160,7 +160,7 @@ std::string BuildUserAgentFromProduct(const std::string& product,
   base::StringAppendF(
       &os_info,
       "%s %s",
-      BuildUserAgentFromOSAndProduct(os_info, product).c_str(),
+      BuildUserAgentFromProduct(product).c_str(),
       ysp_product.c_str());
   return os_info;
 }
