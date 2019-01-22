@@ -2114,6 +2114,10 @@ void BrowserView::OnWidgetMove() {
   LocationBarView* location_bar_view = GetLocationBarView();
   if (location_bar_view)
     location_bar_view->GetOmniboxView()->CloseOmniboxPopup();
+
+#if defined(IE_REDCORE)
+  contents_web_view()->GetWebContents()->OnWindowMove();
+#endif  // defined(IE_REDCORE)
 }
 
 views::Widget* BrowserView::GetWidget() {

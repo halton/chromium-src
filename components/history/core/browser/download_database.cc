@@ -313,6 +313,9 @@ bool DownloadDatabase::InitDownloadTable() {
       "CREATE TABLE %s ("
       "id INTEGER PRIMARY KEY,"             // Primary key.
       "guid VARCHAR NOT NULL,"              // GUID.
+#ifdef REDCORE
+      "ysp_user_id VARCHAR NOT NULL,"
+#endif
       "current_path LONGVARCHAR NOT NULL,"  // Current disk location
       "target_path LONGVARCHAR NOT NULL,"   // Final disk location
       "start_time INTEGER NOT NULL,"        // When the download was started.
@@ -423,7 +426,11 @@ void DownloadDatabase::QueryDownloads(std::vector<DownloadRow>* results) {
   sql::Statement statement_main(GetDB().GetCachedStatement(
       SQL_FROM_HERE,
       base::StringPrintf(
+#ifdef REDCORE
+          "SELECT id, guid, ysp_user_id, current_path, target_path, mime_type, "
+#else
           "SELECT id, guid, current_path, target_path, mime_type, "
+#endif
           "original_mime_type, start_time, received_bytes, total_bytes, state, "
           "danger_type, interrupt_reason, hash, end_time, opened, "
           "last_access_time, transient, referrer, site_url, tab_url, "
@@ -442,6 +449,9 @@ void DownloadDatabase::QueryDownloads(std::vector<DownloadRow>* results) {
     int64_t signed_id = statement_main.ColumnInt64(column++);
     bool valid = ConvertIntToDownloadId(signed_id, &(info->id));
     info->guid = statement_main.ColumnString(column++);
+#ifdef REDCORE
+    info->ysp_user_id = statement_main.ColumnString(column++);
+#endif
     info->current_path = ColumnFilePath(statement_main, column++);
     info->target_path = ColumnFilePath(statement_main, column++);
     info->mime_type = statement_main.ColumnString(column++);
@@ -569,7 +579,11 @@ bool DownloadDatabase::UpdateDownload(const DownloadRow& data) {
   sql::Statement statement(GetDB().GetCachedStatement(
       SQL_FROM_HERE,
       base::StringPrintf("UPDATE %s "
+#ifdef REDCORE
+                         "SET ysp_user_id=?, current_path=?, target_path=?, "
+#else
                          "SET current_path=?, target_path=?, "
+#endif
                          "mime_type=?, original_mime_type=?, "
                          "received_bytes=?, state=?, "
                          "danger_type=?, interrupt_reason=?, hash=?, "
@@ -580,6 +594,9 @@ bool DownloadDatabase::UpdateDownload(const DownloadRow& data) {
                          kDownloadsTable)
           .c_str()));
   int column = 0;
+#ifdef REDCORE
+  statement.BindString(column++, data.ysp_user_id);
+#endif
   BindFilePath(statement, data.current_path, column++);
   BindFilePath(statement, data.target_path, column++);
   statement.BindString(column++, data.mime_type);
@@ -654,14 +671,22 @@ bool DownloadDatabase::CreateDownload(const DownloadRow& info) {
         SQL_FROM_HERE,
         base::StringPrintf(
             "INSERT INTO %s "
+#ifdef REDCORE
+            "(id, guid, ysp_user_id, current_path, target_path, mime_type, "
+#else
             "(id, guid, current_path, target_path, mime_type, "
+#endif
             "original_mime_type, "
             " start_time, received_bytes, total_bytes, state, danger_type, "
             " interrupt_reason, hash, end_time, opened, last_access_time, "
             "transient, referrer, site_url, tab_url, tab_referrer_url, "
             "http_method, "
             " by_ext_id, by_ext_name, etag, last_modified) "
+#ifdef REDCORE
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+#else
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+#endif
             "        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             "        ?, ?, ?, ?, ?, ?)",
             kDownloadsTable)
@@ -670,6 +695,9 @@ bool DownloadDatabase::CreateDownload(const DownloadRow& info) {
     int column = 0;
     statement_insert.BindInt(column++, DownloadIdToInt(info.id));
     statement_insert.BindString(column++, info.guid);
+#ifdef REDCORE
+    statement_insert.BindString(column++, info.ysp_user_id);
+#endif
     BindFilePath(statement_insert, info.current_path, column++);
     BindFilePath(statement_insert, info.target_path, column++);
     statement_insert.BindString(column++, info.mime_type);

@@ -189,6 +189,8 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
   void QueryDnsOnIOThread(const std::wstring& host);
   void QueryDnsFinished(const std::wstring& ip_list_json_string);
 
+  void OnWindowMove() override;
+
  private:
   bool CreateTridentWebView(const gfx::AcceleratedWidget& hwnd_parent,
                             const gfx::Size& size);

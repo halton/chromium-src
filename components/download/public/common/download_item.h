@@ -476,7 +476,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItem : public base::SupportsUserData {
   virtual void SimulateErrorForTesting(DownloadInterruptReason reason) = 0;
 
 #ifdef REDCORE
-  virtual std::string GetYSPUserName()
+  virtual std::string GetYSPUserID()
       const = 0;  // YSP+ { User information isolation }
   virtual bool is_doc_view() = 0;
   virtual void set_is_doc_view(bool doc_view) = 0;
