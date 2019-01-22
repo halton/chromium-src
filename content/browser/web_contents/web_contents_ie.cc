@@ -743,11 +743,11 @@ bool WebContentsIE::IsDownloading() {
   return false;
 }
 
-void WebContentsIE::SendFunctionControl(const std::wstring& jsonStr) {
+void WebContentsIE::SendFunctionControl(const std::wstring& json_string) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   if (browser_event_handler_ == NULL)
     return;
-  browser_event_handler_->SendFunctionControl(jsonStr);
+  browser_event_handler_->SendFunctionControl(json_string);
 }
 
 void WebContentsIE::SetCreateByIENewWindow(bool is_new) {
@@ -757,36 +757,36 @@ void WebContentsIE::SetCreateByIENewWindow(bool is_new) {
 void WebContentsIE::OnQueryPrivateDns(const std::wstring& host,
                                       std::wstring* ip_list_json_string) {
   query_dns_json_string_.clear();
+  base::RunLoop run_loop;
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&WebContentsIE::QueryDnsOnIOThread,
-                 weak_factory_for_io_.GetWeakPtr(), host));
-  // base::MessageLoopForUI::current()->Run();
+                 weak_factory_for_io_.GetWeakPtr(), host,
+                 run_loop.QuitClosure()));
+  run_loop.Run();
   *ip_list_json_string = query_dns_json_string_;
 }
 
-void WebContentsIE::QueryDnsOnIOThread(const std::wstring& host) {
-  std::string hostStr = "";
+void WebContentsIE::QueryDnsOnIOThread(const std::wstring& host,
+                                       base::Closure done) {
   std::wstring ip_list_json_string = L"";
-  hostStr = base::UTF16ToASCII(host);
-  base::ListValue* json = NULL;
-  json = net::HostResolverImpl::PrivateDnsAndAbsoluteLink(hostStr);
+  std::string host_string = base::UTF16ToASCII(host);
+  base::ListValue* json =
+      net::HostResolverImpl::PrivateDnsAndAbsoluteLink(host_string);
   if (json) {
     std::string buff = "";
     base::JSONWriter::Write(*json, &buff);
     ip_list_json_string = base::UTF8ToUTF16(buff);
   }
-  content::BrowserThread::PostTask(
-      content::BrowserThread::UI, FROM_HERE,
-      base::Bind(&WebContentsIE::QueryDnsFinished, self_.GetWeakPtr(),
-                 ip_list_json_string));
+  QueryDnsFinished(ip_list_json_string);
+
+  std::move(done).Run();
 }
 
 void WebContentsIE::QueryDnsFinished(const std::wstring& ip_list_json_string) {
   if (ip_list_json_string.empty() == false) {
     query_dns_json_string_ = ip_list_json_string;
   }
-  // base::MessageLoopForUI::current()->QuitWhenIdle();
 }
 
 void WebContentsIE::OnURLFetchComplete(const net::URLFetcher* source) {

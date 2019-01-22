@@ -258,6 +258,8 @@ class WebBrowser : public IOleClientSite,
 
   static HWND GetMainFrameHwnd(HWND window_handle);
 
+  static std::list<std::wstring> JsonStrToIpList(const std::wstring& json_str);
+
   void AddUAString(const std::wstring& user_agent);
 
   CComPtr<IHTMLDOMNode> GetRootDomNode();
