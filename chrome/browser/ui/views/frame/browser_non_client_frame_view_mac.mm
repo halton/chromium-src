@@ -48,6 +48,12 @@ BrowserNonClientFrameViewMac::BrowserNonClientFrameViewMac(
       prefs::kShowFullscreenToolbar,
       base::BindRepeating(&BrowserNonClientFrameViewMac::UpdateFullscreenTopUI,
                           base::Unretained(this), false));
+
+#ifdef REDCORE
+  account_view_ = new YSPAccountView(browser_view);
+  AddChildView(account_view_);
+  account_view_->Init();
+#endif
 }
 
 BrowserNonClientFrameViewMac::~BrowserNonClientFrameViewMac() {
@@ -215,6 +221,13 @@ int BrowserNonClientFrameViewMac::NonClientHitTest(const gfx::Point& point) {
       return HTCLIENT;
     }
   }
+
+#ifdef REDCORE
+  if (account_view_ && account_view_->visible() &&
+      account_view_->GetMirroredBounds().Contains(point))
+    return HTCLIENT;
+#endif
+
   int component = frame()->client_view()->NonClientHitTest(point);
 
   // BrowserView::NonClientHitTest will return HTNOWHERE for points that hit
@@ -283,6 +296,16 @@ void BrowserNonClientFrameViewMac::Layout() {
                                        button_size.height());
   }
   BrowserNonClientFrameView::Layout();
+
+#ifdef REDCORE
+  if(account_view_) {
+    account_view_->SetBounds(width()-browser_view()->tabstrip()->height()-blank_strip_width_,
+                             blank_strip_width_,
+                             browser_view()->tabstrip()->height(),
+                             browser_view()->tabstrip()->height());
+    account_view_->SetVisible(true);
+  }
+#endif
 }
 
 void BrowserNonClientFrameViewMac::OnPaint(gfx::Canvas* canvas) {

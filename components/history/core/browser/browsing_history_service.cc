@@ -116,6 +116,9 @@ struct BrowsingHistoryService::QueryHistoryState
 BrowsingHistoryService::HistoryEntry::HistoryEntry(
     BrowsingHistoryService::HistoryEntry::EntryType entry_type,
     const GURL& url,
+#ifdef REDCORE
+    const std::string& ysp_user_id,
+#endif
     const base::string16& title,
     base::Time time,
     const std::string& client_id,
@@ -124,6 +127,9 @@ BrowsingHistoryService::HistoryEntry::HistoryEntry(
     bool blocked_visit) {
   this->entry_type = entry_type;
   this->url = url;
+#ifdef REDCORE
+  this->ysp_user_id = ysp_user_id;
+#endif
   this->title = title;
   this->time = time;
   this->client_id = client_id;
@@ -539,10 +545,20 @@ void BrowsingHistoryService::QueryComplete(
   std::vector<HistoryEntry>& output = state->local_results;
   output.reserve(output.size() + results->size());
 
+#ifdef REDCORE
+  std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+#endif
   for (size_t i = 0; i < results->size(); ++i) {
     URLResult const& page = (*results)[i];
+#ifdef REDCORE
+    if (!page.GetYSPUserID().empty() && page.GetYSPUserID() != user_id)
+      continue;
+#endif
     // TODO(dubroy): Use sane time (crbug.com/146090) here when it's ready.
     output.push_back(HistoryEntry(HistoryEntry::LOCAL_ENTRY, page.url(),
+#ifdef REDCORE
+                                  page.GetYSPUserID(),
+#endif
                                   page.title(), page.visit_time(),
                                   std::string(), !state->search_text.empty(),
                                   page.snippet().text(), page.blocked_visit()));
@@ -681,8 +697,15 @@ void BrowsingHistoryService::WebHistoryQueryComplete(
           std::string client_id;
           id->GetString("client_id", &client_id);
 
+#ifdef REDCORE
+          std::string user_id = YSPLoginManager::GetInstance()->GetUserId();
+#endif
           state->remote_results.push_back(HistoryEntry(
-              HistoryEntry::REMOTE_ENTRY, gurl, title, time, client_id,
+              HistoryEntry::REMOTE_ENTRY, gurl,
+#ifdef REDCORE
+            user_id,
+#endif
+            title, time, client_id,
               !state->search_text.empty(), base::string16(),
               /* blocked_visit */ false));
         }
