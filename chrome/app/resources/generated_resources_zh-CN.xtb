@@ -3075,7 +3075,7 @@
 <translation id="563535393368633106">使用前先询问（推荐）</translation>
 <translation id="5636996382092289526">要使用“<ph name="NETWORK_ID" />”，您可能需要先<ph name="LINK_START" />访问该网络的登录页面<ph name="LINK_END" />，该页面会在几秒钟后自动打开。如果未打开，就表示该网络无法使用。</translation>
 <translation id="5637476008227280525">移动数据开关</translation>
-<translation id="5638309510554459422">在 <ph name="BEGIN_LINK" />Chrome 网上应用店<ph name="END_LINK" />中查找扩展程序和主题背景</translation>
+<translation id="5638309510554459422"><ph name="BEGIN_LINK" /><ph name="END_LINK" />暂无扩展程序</translation>
 <translation id="5638497698949808140">上次更新时间：<ph name="HOURS" /> 小时前</translation>
 <translation id="5639549361331209298">重新加载此网页，按下可查看更多选项</translation>
 <translation id="5642508497713047">CRL 签名人</translation>

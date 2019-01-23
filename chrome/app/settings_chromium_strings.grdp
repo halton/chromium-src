@@ -4,7 +4,7 @@
   <!-- About Page -->
   <if expr="not chromeos">
     <message name="IDS_SETTINGS_ABOUT_PROGRAM" desc="Menu title for the About Chromium page.">
-      About Chromium
+      About Enterplorer
     </message>
     <message name="IDS_SETTINGS_GET_HELP_USING_CHROME" desc="Text of the button which takes the user to the Chrome help page.">
       Get help with Chromium

@@ -667,10 +667,9 @@ TypedURLSyncBridge::MergeResult TypedURLSyncBridge::MergeUrls(
         ++visit_ix;
       }
 #ifdef REDCORE
-      std::string uuid_key = "onlyid";
-      std::string username =
-          YSPLoginManager::GetInstance()->GetValueForKey(uuid_key);
-      VisitRow visit(url.id(), new_visit->first, username, 0, new_visit->second,
+      std::string user_id =
+          YSPLoginManager::GetInstance()->GetUserId();
+      VisitRow visit(url.id(), new_visit->first, user_id, 0, new_visit->second,
                      0, HistoryBackend::IsTypedIncrement(new_visit->second));
 #else
       VisitRow visit(url.id(), new_visit->first, 0, new_visit->second, 0,

@@ -21,6 +21,11 @@
 #include "components/undo/undo_manager.h"
 #include "ui/shell_dialogs/select_file_dialog.h"
 
+#ifdef REDCORE
+#include "base/timer/timer.h"
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif
+
 namespace autofill {
 struct PasswordForm;
 }
@@ -32,6 +37,9 @@ class PasswordUIView;
 // PasswordStore operations and updates the view on PasswordStore changes.
 class PasswordManagerPresenter
     : public password_manager::PasswordStore::Observer,
+#ifdef REDCORE
+      public YSPLoginManagerObserver,
+#endif
       public password_manager::CredentialProviderInterface {
  public:
   // |password_view| the UI view that owns this presenter, must not be NULL.
@@ -83,6 +91,20 @@ class PasswordManagerPresenter
  private:
   friend class PasswordManagerPresenterTest;
 
+#ifdef REDCORE
+  // YSPLoginManagerObserver implementation
+  void OnLoginRequestFailure(const std::string& error) override;
+  void OnLoginResponseParseFailure(const std::string& error) override;
+  void OnLoginFailure(const base::string16& message) override;
+  void OnLoginSuccess(const base::string16& name,
+                      const std::string& head_image_url) override;
+  void OnLogout() override;
+  void OnTokenStatusChanged(const std::string& type) override;
+
+  void OnStartDelayTimer();
+
+  std::unique_ptr<base::OneShotTimer> start_delay_timer_;
+#endif
   // Sets the password and exception list of the UI view.
   void SetPasswordList();
   void SetPasswordExceptionList();

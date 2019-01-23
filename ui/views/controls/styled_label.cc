@@ -152,6 +152,10 @@ gfx::FontList StyledLabel::GetDefaultFontList() const {
 
 void StyledLabel::AddStyleRange(const gfx::Range& range,
                                 const RangeStyleInfo& style_info) {
+#ifdef REDCORE
+  if (range.is_empty())
+    return;
+#endif
   DCHECK(!range.is_reversed());
   DCHECK(!range.is_empty());
   DCHECK(gfx::Range(0, text_.size()).Contains(range));
@@ -397,6 +401,9 @@ gfx::Size StyledLabel::CalculateAndDoLayout(int width, bool dry_run) {
         // should only occur if there is insufficient vertical space remaining.
         // ElideRectangleText always adds a single character, even if there is
         // no room horizontally.
+#ifdef REDCORE
+        break;
+#endif
         DCHECK_NE(0, elide_result & gfx::INSUFFICIENT_SPACE_VERTICAL);
         break;
       }

@@ -479,7 +479,7 @@ Function MainInstallLogic
     SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
     SetOverwrite try
     File nsis_src\gm\gmcert-hd\*.*
-    ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
+    DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "REDCORE_ENGINES"
     SetOutPath "$SYSDIR"
     SetOverwrite try
     File nsis_src\gm\KeyGDBApi.dll

@@ -945,6 +945,7 @@ class WebContents : public PageNavigator, public base::SupportsUserData {
 #if defined(IE_REDCORE)
   virtual bool IsAutoSelect() = 0;
   virtual ie::RenderMode GetRendererMode() = 0;
+  virtual void OnWindowMove() = 0;
 #endif  // IE_REDCORE
 
  private:
