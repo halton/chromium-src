@@ -52,6 +52,8 @@ content::WebUIDataSource* CreateWebUIDataSource() {
                                IDR_YSP_ME_IMGS_WINDOWS_PC_PNG);
   html_source->AddResourcePath("imgs/windowsbook.png",
                                IDR_YSP_ME_IMGS_WINDOWSBOOK_PNG);
+  html_source->AddResourcePath("imgs/unknow.png",
+                               IDR_YSP_ME_IMGS_UNKNOW_PNG);
 
   html_source->SetDefaultResource(IDR_YSP_ME_INDEX_HTML);
   html_source->SetJsonPath("strings.js");

@@ -7,6 +7,10 @@
 
 namespace browser_defaults {
 
+#if defined(REDCORE) 
+const bool kBrowserAliveWithNoWindows = false;
+const bool kShowExitMenuItem = true;
+#else
 #if defined(OS_CHROMEOS) || defined(OS_MACOSX)
 const bool kBrowserAliveWithNoWindows = true;
 const bool kShowExitMenuItem = false;
@@ -14,6 +18,7 @@ const bool kShowExitMenuItem = false;
 const bool kBrowserAliveWithNoWindows = false;
 const bool kShowExitMenuItem = true;
 #endif
+#endif  // REDCORE
 
 #if defined(OS_CHROMEOS)
 const bool kShowUpgradeMenuItem = false;

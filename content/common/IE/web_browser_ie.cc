@@ -1062,8 +1062,7 @@ void WINAPI DetourFreeAddrInfoExW(PADDRINFOEX info) {
   }
 
   if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
-      verNum == base::win::VERSION_WIN10 ||
-      verNum == base::win::VERSION_WIN10_TH2) {
+      verNum >= base::win::VERSION_WIN10) {
     PADDRINFOEXW pcur = info;
 
     while (pcur != NULL) {
@@ -1099,8 +1098,7 @@ DetourGetAddrInfoExW(PCTSTR pName,
 
   int verNum = base::win::OSInfo::GetInstance()->version();
   if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
-      verNum == base::win::VERSION_WIN10 ||
-      verNum == base::win::VERSION_WIN10_TH2) {
+      verNum >= base::win::VERSION_WIN10) {
     HWND hwnd = WebBrowser::GetWebBrowser()->GetControlWindow();
     PrivateDnsIp dns_ip;
     dns_ip.host = pName;
@@ -1180,8 +1178,7 @@ void WINAPI DetourFreeAddrInfoW(ADDRINFOW* info) {
 
   int verNum = base::win::OSInfo::GetInstance()->version();
   if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
-      verNum == base::win::VERSION_WIN10 ||
-      verNum == base::win::VERSION_WIN10_TH2) {
+      verNum >= base::win::VERSION_WIN10) {
     PADDRINFOW pcur = info;
     while (pcur != NULL) {
       PADDRINFOW pnext = pcur->ai_next;
@@ -1206,8 +1203,7 @@ int WINAPI DetourGetAddrInfoW(PCWSTR pNodeName,
 
   int verNum = base::win::OSInfo::GetInstance()->version();
   if (verNum == base::win::VERSION_XP || verNum == base::win::VERSION_WIN7 ||
-      verNum == base::win::VERSION_WIN10 ||
-      verNum == base::win::VERSION_WIN10_TH2) {
+      verNum >= base::win::VERSION_WIN10) {
     PrivateDnsIp dns_ip;
     dns_ip.host = pNodeName;
     dns_ip.ip_list.clear();
@@ -1311,6 +1307,7 @@ WebBrowser::WebBrowser(HWND parent_handle,
       login_info_password_(L""),
       login_info_url_(L"") {
   InitializeCriticalSectionAndSpinCount(&critical_section, 0x00004000);
+  InitializeCriticalSection(&addr_info_section_);
   MH_Initialize();
 
   ::SetRect(&rect_object_, -1, -1, 0, 0);
@@ -1420,23 +1417,29 @@ bool WebBrowser::CreateBrowser(bool is_new) {
 
   int sysIEVer = base::win::GetSystemIEVersion();
   if (sysIEVer >= 10 && sysIEVer <= 11) {
-    // TODO(qidi.ma): disable private dns functionality, should be opened before product release
-    // if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoExW", &DetourGetAddrInfoExW,
-    //                      (LPVOID*)&fpGetAddrInfoExW) != MH_OK)
-    //   return false;
-    // if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoExW",
-    //                      &DetourFreeAddrInfoExW,
-    //                      (LPVOID*)&fpFreeAddrInfoExW) != MH_OK)
-    //   return false;
-    // if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
-    //   return false;
-    // } else if (sysIEVer >= 6 && sysIEVer <= 9) {
-    //   if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoW", &DetourGetAddrInfoW,
-    //                        (LPVOID*)&fpGetAddrInfoW) != MH_OK)
-    //     return false;
-    //   if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoW", &DetourFreeAddrInfoW,
-    //                        (LPVOID*)&fpFreeAddrInfoW) != MH_OK)
-    //     return false;
+    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoExW",
+                         (LPVOID)&DetourGetAddrInfoExW,
+                         (LPVOID*)&fpGetAddrInfoExW) != MH_OK)
+      return false;
+
+    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoExW",
+                         (LPVOID)&DetourFreeAddrInfoExW,
+                         (LPVOID*)&fpFreeAddrInfoExW) != MH_OK)
+      return false;
+
+    if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
+      return false;
+  } else if (sysIEVer >= 6 && sysIEVer <= 9) {
+    if (MH_CreateHookApi(L"ws2_32.dll", "GetAddrInfoW",
+                         (LPVOID)&DetourGetAddrInfoW,
+                         (LPVOID*)&fpGetAddrInfoW) != MH_OK)
+      return false;
+
+    if (MH_CreateHookApi(L"ws2_32.dll", "FreeAddrInfoW",
+                         (LPVOID)&DetourFreeAddrInfoW,
+                         (LPVOID*)&fpFreeAddrInfoW) != MH_OK)
+      return false;
+
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
       return false;
   }
@@ -2020,6 +2023,18 @@ LRESULT WebBrowser::SubClassControlWndProc(HWND window_handle,
     WebBrowser::GetWebBrowser()->UpdateCookie(*json_string);
     delete json_string;
     return TRUE;
+  } else if (message == WM_QUERYDNS && w_param && l_param) {
+    HANDLE query_dns_event = (HANDLE)w_param;
+    PrivateDnsIp* dns_ip = (PrivateDnsIp*)l_param;
+    dns_ip->ip_list.clear();
+    if (WebBrowser::GetWebBrowser()) {
+      std::wstring ip_list_str = L"";
+      WebBrowser::GetWebBrowser()->delegate_->OnQueryPrivateDNS(dns_ip->host,
+                                                                &ip_list_str);
+      dns_ip->ip_list = JsonStrToIpList(ip_list_str);
+    }
+    SetEvent(query_dns_event);
+    return TRUE;
   } else if (message == WM_DESTROY) {
     if (WebBrowser::GetWebBrowser())
       WebBrowser::GetWebBrowser()->event_handler_->ResetDocHostUIHandler();
@@ -2248,6 +2263,32 @@ HWND WebBrowser::GetMainFrameHwnd(HWND window_handle) {
 
   GetLastError();
   return hMainFrameWnd;
+}
+
+std::list<std::wstring> WebBrowser::JsonStrToIpList(
+    const std::wstring& json_str) {
+  std::list<std::wstring> ip_list;
+  if (json_str.empty())
+    return ip_list;
+
+  std::string utf8_str = base::UTF16ToUTF8(json_str);
+  std::unique_ptr<base::Value> root = base::JSONReader().ReadToValue(utf8_str);
+  if (root.get() == NULL || root->is_list() == false)
+    return ip_list;
+
+  base::ListValue* list = NULL;
+  root->GetAsList(&list);
+  if (list == NULL)
+    return ip_list;
+
+  base::ListValue::const_iterator iter = list->begin();
+  for (; iter != list->end(); iter++) {
+    std::wstring ip = L"";
+    (*iter).GetAsString(&ip);
+    if (ip.empty() == false)
+      ip_list.push_back(ip);
+  }
+  return ip_list;
 }
 
 void WebBrowser::AddUAString(const std::wstring& user_agent) {

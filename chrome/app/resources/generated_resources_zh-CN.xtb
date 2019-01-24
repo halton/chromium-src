@@ -2849,7 +2849,7 @@
 <translation id="5327248766486351172">名称</translation>
 <translation id="532776649628038357">我同意</translation>
 <translation id="532943162177641444">请点按您的 <ph name="PHONE_NAME" /> 设备上的通知，以设置可供此设备使用的移动热点。</translation>
-<translation id="5329858601952122676">删除(&amp;D)</translation>
+<translation id="5329858601952122676">删除</translation>
 <translation id="5329945517224105597">您的 Google 助理可根据您屏幕上的内容，提供更多相关建议和具体操作。您可在 Google 助理的“设置”中更改此项设置</translation>
 <translation id="5330145655348521461">这些文件已在其他桌面打开。请转至<ph name="USER_NAME" />(<ph name="MAIL_ADDRESS" />)查看这些文件。</translation>
 <translation id="5330512191124428349">获取信息</translation>
@@ -3075,7 +3075,7 @@
 <translation id="563535393368633106">使用前先询问（推荐）</translation>
 <translation id="5636996382092289526">要使用“<ph name="NETWORK_ID" />”，您可能需要先<ph name="LINK_START" />访问该网络的登录页面<ph name="LINK_END" />，该页面会在几秒钟后自动打开。如果未打开，就表示该网络无法使用。</translation>
 <translation id="5637476008227280525">移动数据开关</translation>
-<translation id="5638309510554459422">在 <ph name="BEGIN_LINK" />Chrome 网上应用店<ph name="END_LINK" />中查找扩展程序和主题背景</translation>
+<translation id="5638309510554459422"><ph name="BEGIN_LINK" /><ph name="END_LINK" />暂无扩展程序</translation>
 <translation id="5638497698949808140">上次更新时间：<ph name="HOURS" /> 小时前</translation>
 <translation id="5639549361331209298">重新加载此网页，按下可查看更多选项</translation>
 <translation id="5642508497713047">CRL 签名人</translation>
@@ -3630,7 +3630,7 @@
 <translation id="6459488832681039634">使用所选内容查找</translation>
 <translation id="6459799433792303855">活动窗口已移至另一显示屏。</translation>
 <translation id="6460601847208524483">查找下一个</translation>
-<translation id="6463795194797719782">修改(&amp;E)</translation>
+<translation id="6463795194797719782">修改</translation>
 <translation id="6466988389784393586">打开所有书签(&amp;O)</translation>
 <translation id="6468485451923838994">字体</translation>
 <translation id="6472207088655375767">一次性密码</translation>

@@ -165,7 +165,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& ysp_username,  // YSP+ { User information isolation }
+      const std::string& ysp_user_id,
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -195,7 +195,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       DownloadItemImplDelegate* delegate,
       uint32_t id,
 #ifdef REDCORE
-      const std::string& ysp_username,  // YSP+ { User information isolation }
+      const std::string& ysp_user_id,
 #endif
       const DownloadCreateInfo& info);
 
@@ -205,7 +205,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
       DownloadItemImplDelegate* delegate,
       uint32_t id,
 #ifdef REDCORE
-      const std::string& ysp_username,  // YSP+ { User information isolation }
+      const std::string& ysp_user_id,
 #endif
       const base::FilePath& path,
       const GURL& url,
@@ -296,7 +296,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   void SimulateErrorForTesting(DownloadInterruptReason reason) override;
 
 #ifdef REDCORE
-  std::string GetYSPUserName() const override;
+  std::string GetYSPUserID() const override;
   bool is_doc_view() override;
   void set_is_doc_view(bool doc_view) override;
   bool is_update() override;
@@ -797,7 +797,7 @@ class COMPONENTS_DOWNLOAD_EXPORT DownloadItemImpl
   THREAD_CHECKER(thread_checker_);
 
 #ifdef REDCORE
-  std::string ysp_username_;  // YSP+ { User information isolation }
+  std::string ysp_user_id_;
   bool is_doc_view_;
   bool is_update_;
 #endif

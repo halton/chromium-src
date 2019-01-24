@@ -67,6 +67,11 @@ bool BookmarkTabHelper::ShouldShowBookmarkBar() const {
       !prefs->GetBoolean(bookmarks::prefs::kShowBookmarkBar))
     return false;
 
+#ifdef REDCORE
+  if (!prefs->GetBoolean(bookmarks::prefs::kShowBookmarkBar))
+    return false;
+#endif
+
   return IsNTP(web_contents());
 }
 

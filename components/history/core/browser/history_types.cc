@@ -19,7 +19,7 @@ VisitRow::VisitRow() {}
 VisitRow::VisitRow(URLID arg_url_id,
                    base::Time arg_visit_time,
 #ifdef REDCORE
-                   const std::string& arg_ysp_username,
+                   const std::string& arg_ysp_user_id,
 #endif
                    VisitID arg_referring_visit,
                    ui::PageTransition arg_transition,
@@ -28,7 +28,7 @@ VisitRow::VisitRow(URLID arg_url_id,
     : url_id(arg_url_id),
       visit_time(arg_visit_time),
 #ifdef REDCORE
-      ysp_username(arg_ysp_username),
+      ysp_user_id(arg_ysp_user_id),
 #endif
       referring_visit(arg_referring_visit),
       transition(arg_transition),
