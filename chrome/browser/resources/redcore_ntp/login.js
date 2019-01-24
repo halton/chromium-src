@@ -234,7 +234,6 @@ function Login() {
   this.userid = new Validator('#userid')
   this.password = new Validator('#password')
   this.address = new Validator('#address')
-  this.protocal = $("#protocal").text()
 
   // login
   var loginServer = function() {
@@ -248,9 +247,8 @@ function Login() {
       _this.errorTip('请输入密码');
       return;
     }
-    var domain = `${_this.protocal}${$.trim(_this.domain.val())}`
-    console.log(domain)
-    if (domain) {
+    var domain = `${$("#protocal").text()}${$.trim(_this.domain.val())}`
+    if (_this.domain.val()) {
       let url = new URL(domain)
       let regDomain = /[a-za-z0-9][\w\u4E00-\u9FA5]*(\.[\w\u4E00-\u9FA5]+)+/
       let regIp = /^(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|[1-9])(\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)){3}$/
@@ -333,7 +331,7 @@ function Login() {
   // 点击二维码
   $('#QRcode').click(function() {
     $('#code_pack').css('visibility', 'hidden');
-    serverAddress = `${_this.protocal}${$.trim(_this.domain.val())}` || 'https://ysp.redcore.cn';
+    serverAddress = `${$("#protocal").text()}${$.trim(_this.domain.val())}` || 'https://ysp.redcore.cn';
     // 建立长连接
     window.__page_to_content_script__(serverAddress, deviceId);
     $('#code_pack_qrcodeInvalid').hide();
@@ -511,7 +509,9 @@ Login.prototype.loading = function() {
  * @param {*} data
  */
 Login.prototype.setLoginInfo = function(data) {
-  this.domain.val(data.domain)
+  let infoDomain = new URL(data.domain)
+  $("#protocal").html(`${infoDomain.protocol}//`)
+  this.domain.val(infoDomain.host)
   this.userid.val(data.userid)
 }
 Login.prototype.setAutoLoginStatus = function(data) {
