@@ -406,9 +406,10 @@ ContentVerifyJob* ContentVerifier::CreateJobFor(
   DCHECK_CURRENTLY_ON(content::BrowserThread::IO);
 
 #ifdef REDCORE 
-  // YSP(wangping)+ { block sso and push server verify }
+  // ysp_sso.crx           
   if(extension_id == "ahejmjlfdnkngmajdfanadcgmdmgahda" || 
-     extension_id == "fcaphanmjmojbiifpbagiaoofocpldcm"){
+  // push_server.crx
+     extension_id == "pgigkojhmdneillbbpcajchbggkphhjp"){
     return NULL;
   }
 #endif // REDCORE

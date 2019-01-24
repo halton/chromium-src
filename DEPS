@@ -1141,6 +1141,9 @@ deps = {
   'src/redcore/browser_customize':
     'https://github.com/1redcore/browser-customize@refs/remotes/origin/master',
 
+  'src/third_party/GmSSL':
+    'https://github.com/1redcore/GmSSL.git@refs/remotes/origin/master',
+
   # TODO(halton): Use official https://github.com/TsudaKageyu/minhook
   # after issue #74 get fixed.
   'src/third_party/minhook':

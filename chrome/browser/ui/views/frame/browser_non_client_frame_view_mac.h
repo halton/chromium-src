@@ -12,6 +12,10 @@
 #include "chrome/browser/ui/views/profiles/profile_indicator_icon.h"
 #include "components/prefs/pref_change_registrar.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/views/ysp_account_view.h"
+#endif
+
 @class FullscreenToolbarControllerViews;
 
 class BrowserNonClientFrameViewMac : public BrowserNonClientFrameView {
@@ -70,6 +74,11 @@ class BrowserNonClientFrameViewMac : public BrowserNonClientFrameView {
 
   base::scoped_nsobject<FullscreenToolbarControllerViews>
       fullscreen_toolbar_controller_;
+
+#ifdef REDCORE
+  YSPAccountView* account_view_;
+  const int blank_strip_width_ = 7;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(BrowserNonClientFrameViewMac);
 };
