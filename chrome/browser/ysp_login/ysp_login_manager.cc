@@ -2166,6 +2166,23 @@ void YSPLoginManager::SetPushData(const std::string& value) {
               GetSdpDevicefetcher();
             }
           }
+        } else if (type == "removeUser") {
+          std::string user_id = "";
+          if (push_data_dict &&
+              push_data_dict->GetString("data.content.userId", &user_id) &&
+              GetUserId() == user_id) {
+              // clear user data
+            NotifyConfigureUpdate("removeUser", "");
+            Logout();
+          }
+        } else if (type == "disableUser") {
+          std::string user_id = "";
+          if (push_data_dict &&
+              push_data_dict->GetString("data.content.userId", &user_id) &&
+              GetUserId() == user_id) {
+            NotifyConfigureUpdate("disableUser", "");
+            Logout();
+          }
         }
       }
     } else if (event_id == "reconnect") {
