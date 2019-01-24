@@ -30,6 +30,10 @@
 #include "components/sync/driver/sync_service_observer.h"
 #include "url/gurl.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ysp_login/ysp_login_manager.h"
+#endif
+
 namespace syncer {
 class SyncService;
 class SyncServiceObserver;
@@ -65,6 +69,9 @@ class BrowsingHistoryService : public HistoryServiceObserver,
 
     HistoryEntry(EntryType type,
                  const GURL& url,
+#ifdef REDCORE
+                 const std::string& ysp_user_id,
+#endif
                  const base::string16& title,
                  base::Time time,
                  const std::string& client_id,
@@ -83,6 +90,10 @@ class BrowsingHistoryService : public HistoryServiceObserver,
     EntryType entry_type;
 
     GURL url;
+
+#ifdef REDCORE
+    std::string ysp_user_id;
+#endif
 
     base::string16 title;  // Title of the entry. May be empty.
 

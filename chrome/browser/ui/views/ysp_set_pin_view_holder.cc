@@ -26,10 +26,17 @@
 #include "ui/views/layout/grid_layout.h"
 
 YSPSetPINViewHolder::YSPSetPINViewHolder(
+#if !defined(OS_MACOSX)
     OpaqueBrowserFrameView* opaque_browser_frame_view,
     BrowserView* browser_view)
     : ysp_set_pin_view_(
           new YSPSetPINView(opaque_browser_frame_view, browser_view)) {
+#else
+    YspViewsManagerMac* ysp_views_manager_mac,
+    BrowserView* browser_view)
+    : ysp_set_pin_view_(
+          new YSPSetPINView(ysp_views_manager_mac, browser_view)) {
+#endif
   const ui::ThemeProvider* tp = browser_view->frame()->GetThemeProvider();
   SetImage(tp->GetImageSkiaNamed(IDR_YSP_SET_PIN_BACKGROUND));
   AddChildView(ysp_set_pin_view_);

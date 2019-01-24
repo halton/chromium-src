@@ -36,7 +36,12 @@ FullscreenToolbarStyle GetUserPreferredToolbarStyle(
 BrowserNonClientFrameViewMac::BrowserNonClientFrameViewMac(
     BrowserFrame* frame,
     BrowserView* browser_view)
+#ifdef REDCORE
+    : BrowserNonClientFrameView(frame, browser_view),
+      views_manager_(nullptr) {
+#else
     : BrowserNonClientFrameView(frame, browser_view) {
+#endif  // REDCORE
   fullscreen_toolbar_controller_.reset([[FullscreenToolbarControllerViews alloc]
       initWithBrowserView:browser_view]);
   PrefService* pref_service = browser_view->GetProfile()->GetPrefs();
@@ -48,6 +53,12 @@ BrowserNonClientFrameViewMac::BrowserNonClientFrameViewMac(
       prefs::kShowFullscreenToolbar,
       base::BindRepeating(&BrowserNonClientFrameViewMac::UpdateFullscreenTopUI,
                           base::Unretained(this), false));
+
+#ifdef REDCORE
+  views_manager_ = new YspViewsManagerMac(this, browser_view);
+  views_manager_->InitRedcoreViews();
+  views_manager_->FirstCreateCheck();
+#endif
 }
 
 BrowserNonClientFrameViewMac::~BrowserNonClientFrameViewMac() {
@@ -215,6 +226,14 @@ int BrowserNonClientFrameViewMac::NonClientHitTest(const gfx::Point& point) {
       return HTCLIENT;
     }
   }
+
+#ifdef REDCORE
+  int result = views_manager_->HitTestImpl(point);
+  if (result != HTNOWHERE) {
+    return result;
+  }
+#endif
+
   int component = frame()->client_view()->NonClientHitTest(point);
 
   // BrowserView::NonClientHitTest will return HTNOWHERE for points that hit
@@ -282,6 +301,9 @@ void BrowserNonClientFrameViewMac::Layout() {
     profile_switcher_button->SetBounds(button_x, button_y, button_size.width(),
                                        button_size.height());
   }
+#ifdef REDCORE
+  views_manager_->LayoutRedcoreViews(x(), y(), width(), height());
+#endif
   BrowserNonClientFrameView::Layout();
 }
 
@@ -344,3 +366,24 @@ int BrowserNonClientFrameViewMac::TopUIFullscreenYOffset() const {
   return [[fullscreen_toolbar_controller_ menubarTracker] menubarFraction] *
          (menu_bar_height + title_bar_height);
 }
+
+#ifdef REDCORE
+bool BrowserNonClientFrameViewMac::DoesIntersectRect(
+    const views::View* target,
+    const gfx::Rect& rect) const {
+  bool result = views_manager_->DoesIntersectRectImpl();
+  if (result) {
+    return true;
+  }
+  return BrowserNonClientFrameView::DoesIntersectRect(target, rect);
+}
+
+bool BrowserNonClientFrameViewMac::OnMousePressed(const ui::MouseEvent& event) {
+  if (views_manager_->OnMousePressedImpl(event)) {
+    return true;
+  }
+
+  return parent()->OnMousePressed(event);
+}
+#endif  // REDCORE
+
