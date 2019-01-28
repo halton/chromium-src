@@ -3834,10 +3834,13 @@ void Browser::OnLoginRequestFailure(const std::string& error) {
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+#endif
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
-#endif
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
@@ -3857,10 +3860,13 @@ void Browser::OnLoginResponseParseFailure(const std::string& error) {
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+#endif
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
-#endif
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
@@ -3880,10 +3886,13 @@ void Browser::OnLoginFailure(const base::string16& message) {
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+#endif
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
-#endif
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
   content::RenderWidgetHostImpl::setDisableDrag(false);
 }
 
@@ -4031,10 +4040,13 @@ void Browser::OnLogout() {
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::HttpStreamParser::SetGMStreamValue, ""));
+#endif
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::TransportConnectJob::SetDomainDictValue, ""));
-#endif
+  content::BrowserThread::PostTask(
+      content::BrowserThread::IO, FROM_HERE,
+      base::Bind(&net::URLRequestHttpJob::SetDomainDictValue, ""));
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&net::URLRequestHttpJob::SetYspSso, "", ""));
