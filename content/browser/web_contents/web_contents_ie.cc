@@ -1001,8 +1001,8 @@ void WebContentsIE::SetBrowserEmulation(ie::Emulation emulation) {
                    L"Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION",
                    &key);
   if (err == ERROR_SUCCESS) {
-    err = RegSetValueEx(key, L"RedCore.exe", 0, REG_DWORD, (const BYTE*)&value,
-                        sizeof(value));
+    err = RegSetValueEx(key, L"enterplorer.exe", 0, REG_DWORD,
+                        (const BYTE*)&value, sizeof(value));
     RegCloseKey(key);
   }
 }
@@ -1156,51 +1156,12 @@ void WebContentsIE::NavigateUrl(
   if (browser_event_handler_ == NULL)
     return;
 
-  //  old navigation code is removed: pending_render_view_host()
-  // if (GetRenderManager() && GetRenderManager()->pending_render_view_host())
-  // {
-  //   RenderFrameHost* pFrameHost =
-  //   GetRenderManager()->pending_render_view_host()->GetMainFrame();
-  //   RenderFrameHostImpl* pFrameHostImpl =
-  //   static_cast<RenderFrameHostImpl*>(pFrameHost); if (pFrameHost)
-  //     GetRenderManager()->DidNavigateFrame(pFrameHostImpl, false);
-  // }
-
-  RenderFrameHostImpl* rfh = GetMainFrame();
-  if (rfh) {
-    // NavigationHandleImpl::Create会触发WebContentsImpl::DidStartNavigation函数，从而进入黑白名单过滤功能
+  if (is_navigate_stopped_) {
+    // 让地址栏的URL恢复到之前的URL
+    controller_.DiscardPendingEntry(true);
+    controller_.delegate()->NotifyNavigationStateChanged(INVALIDATE_TYPE_URL);
     is_navigate_stopped_ = false;
-    std::unique_ptr<NavigationHandleImpl> navHandle =
-        NavigationHandleImpl::Create(
-            params->url, std::vector<GURL>(), rfh->frame_tree_node(),
-            true,   // is_renderer_initiated
-            false,  // is_same_document
-            base::TimeTicks::Now(), 0,
-            false,                  // started_from_context_menu
-            CSPDisposition::CHECK,  // should_check_main_world_csp
-            false,                  // is_form_submission
-            nullptr,                // navigation_ui_data
-            "GET", net::HttpRequestHeaders(),
-            nullptr,  // resource_request_body
-            Referrer(),
-            false,  // has_user_gesture
-            ui::PAGE_TRANSITION_LINK,
-            false,  // is_external_protocol
-            REQUEST_CONTEXT_TYPE_LOCATION);
-    // NavigationHandleImpl::Create(params.url, rfh->frame_tree_node(),
-    // base::TimeTicks::Now());
-    DidFinishNavigation(navHandle.get());
-    navHandle.release();
-    if (is_navigate_stopped_) {
-      // 让地址栏的URL恢复到之前的URL
-      FrameHostMsg_DidFailProvisionalLoadWithError_Params errorParams;
-      errorParams.url = params->url;
-      errorParams.error_code = -3;
-      errorParams.error_description = L"未知错误";
-      rfh->frame_tree_node()->navigator()->DidFailProvisionalLoadWithError(
-          rfh, errorParams);
-      return;
-    }
+    return;
   }
 
   base::FilePath path;
