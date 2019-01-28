@@ -32,6 +32,7 @@
 
 #ifdef REDCORE
 #include "base/json/json_reader.h"
+#include "base/time/time.h"
 #include "net/base/sockaddr_storage.h"
 #include "net/socket/ysp_spa_packet.h"
 #include "base/threading/platform_thread.h"
@@ -238,6 +239,12 @@ int TransportConnectJob::DoLoop(int result) {
         break;
       case STATE_RESOLVE_HOST_COMPLETE:
         rv = DoResolveHostComplete(rv);
+#ifdef REDCORE
+        if (rv != 0) {
+          LOG(INFO) << "\nhost:" << group_name_
+                    << ", DoResolveHostComplete failed code: " << rv;
+        }
+#endif  // REDCORE
         break;
       case STATE_TRANSPORT_CONNECT:
         DCHECK_EQ(OK, rv);
@@ -245,6 +252,12 @@ int TransportConnectJob::DoLoop(int result) {
         break;
       case STATE_TRANSPORT_CONNECT_COMPLETE:
         rv = DoTransportConnectComplete(rv);
+#ifdef REDCORE
+        if (rv != 0) {
+          LOG(INFO) << "\nhost:" << group_name_
+                    << ", DoTransportConnectComplete failed code: " << rv;
+        }
+#endif  // REDCORE
         break;
       default:
         NOTREACHED();
@@ -367,6 +380,7 @@ int TransportConnectJob::DoTransportConnect() {
       DLOG(INFO) << "redcore_spa_knock: " << ret << " device_id: " << device_id
                  << " username: " << username << " access_cmd: " << access_cmd
                  << " server_ip: " << server_ip;
+      LOG(INFO)  << "\nredcore_spa_knock:  time: " << base::Time::Now();
       base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
       rv = transport_socket_->Connect(base::Bind(
           &TransportConnectJob::OnIOComplete, base::Unretained(this)));
@@ -382,6 +396,7 @@ int TransportConnectJob::DoTransportConnect() {
     DLOG(INFO) << "login redcore_spa_knock:" << ret
                << " device_id: " << device_id << " username: " << username
                << " access_cmd: " << access_cmd << " server_ip: " << server_ip;
+    LOG(INFO) << "\nredcore_spa_knock:  time: " << base::Time::Now();
     base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
     rv = transport_socket_->Connect(
         base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));

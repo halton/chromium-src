@@ -723,6 +723,7 @@ void URLRequestHttpJob::Start() {
               spa_value += " POLICYID(" + strategy_id + ") COMPANYID(" +
                            company_id + ")";
               request_info_.extra_headers.SetHeader("User-Agent", spa_value);
+              LOG(INFO) << "User-Agent: " << spa_value << "\nfor url :\n" << url;
               break;
               //}
             }
