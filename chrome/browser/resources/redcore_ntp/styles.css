@@ -114,6 +114,7 @@ body, #content {
 .company_domain input{
   margin-top: 20px !important;
   margin-bottom: 0px !important;
+  padding-left: 110px;
 }
 .company_domain button {
   margin-top: 130px
@@ -124,6 +125,65 @@ body, #content {
   margin-top: 8px;
 }
 
+#domain {
+  position: relative;
+}
+
+#arrow_back {
+  position: absolute;
+  top:-40px;
+  left: -40px;
+  cursor: pointer;
+}
+
+#domain_protocal {
+  position: absolute;
+  top:123px;
+  left:15px;
+  width: 85px;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 10px:
+  font-size: 14px;
+  border-right: 1px solid #ccc;
+}
+
+#domain_protocal span {
+  font-size: 14px;
+  cursor:pointer;
+}
+
+#domain_protocal img {
+  position: absolute;
+  top: 12px;
+  right: 9px;
+  cursor:pointer;
+  transform: rotate(180deg);
+  transition: transform .3s;
+}
+
+#domain_protocal_change {
+  list-style: none;
+  display: none;
+  position: absolute;
+  top:160px;
+  left:0;
+  margin: 0;
+  padding-left: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  background: rgba(51,51,51,0.80);
+}
+
+#domain_protocal_change li {
+  width: 100px;
+  height: 35px;
+  line-height: 35px;
+  padding-left: 20px;
+  color:#FFFFFF;
+  cursor: pointer;
+  border-bottom: 1px solid #999999;
+}
 /*登录页*/
 
 /*设置服务器地址按钮*/
@@ -291,7 +351,7 @@ body, #content {
 }
 #code_tip img {
   display: block;
-  width: 130px;
+  width: 170px;
 }
 /*扫描成功*/
 #code_pack_qrcodeSuccess, #code_pack_qrcodeInvalid{
@@ -384,7 +444,65 @@ body, #content {
   padding: 0px 5px;
   vertical-align: bottom;
   height: 14px;
+
+
   display: inline-block;
+}
+
+/*扫码下载Enterplorer弹窗*/
+#login_model {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.80);
+  z-index: 999;
+}
+
+#blue_bg {
+  display: none;
+  width: 440px;
+  height: 650px;
+  position: fixed;
+  z-index: 1111;
+  top:50%;
+  left: 50%;
+  margin-left: -220px;
+  margin-top: -325px;
+  background-image: linear-gradient(-180deg, #3178FF 0%, #42B0FD 100%);
+  border-radius: 4px;
+}
+
+#blue_bg #white_bg {
+  width: 369px;
+  height: 494px;
+  border-radius: 4px;
+  margin:35px auto;
+  background-image: url("./imgs/white_bg.png");
+  overflow: hidden;
+}
+
+#blue_bg #white_bg p {
+  width: 188px;
+  height: 30px;
+  line-height: 30px;
+  margin:60px auto;
+  text-align:center;
+}
+
+#blue_bg #white_bg img {
+  display: block;
+  width: 172px;
+  height: 172px;
+  margin:0 auto;
+}
+
+#blue_bg #close_code {
+  display: block;
+  margin:0 auto;
+  transform: rotate(0deg);
+  transition: transform .3s;
+  cursor: pointer;
 }
 
 /* 首页样式开始————————————————————————————————————————————————————————————————————————————————————*/
@@ -756,7 +874,7 @@ body::-webkit-scrollbar-track {
   font-size: 16px;
   text-align: center;
   padding: 9px 20px;
-  background-image:linear-gradient(-225deg, #40a7ff 0%, #2c5bff 100%);
+  background-image:linear-gradient(135deg, #4AA0FF 0%, #2F48FF 100%);
   border-radius: 2px;
   border: 0;
   box-sizing: border-box;

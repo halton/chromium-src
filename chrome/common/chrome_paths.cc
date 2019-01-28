@@ -510,6 +510,10 @@ bool PathProvider(int key, base::FilePath* result) {
     case chrome::DIR_DEFAULT_APPS:
 #if defined(OS_MACOSX)
       cur = base::mac::FrameworkBundlePath();
+#if defined(REDCORE)
+      cur = cur.Append(FILE_PATH_LITERAL("Versions"));
+      cur = cur.Append(FILE_PATH_LITERAL("Current"));
+#endif
       cur = cur.Append(FILE_PATH_LITERAL("Default Apps"));
 #else
       if (!base::PathService::Get(chrome::DIR_APP, &cur))

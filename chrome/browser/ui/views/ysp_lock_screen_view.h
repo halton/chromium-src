@@ -10,7 +10,6 @@
 #include "base/memory/weak_ptr.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "chrome/browser/ui/browser.h"
-#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "ui/views/border.h"
@@ -22,6 +21,12 @@
 #include "ui/views/controls/link_listener.h"
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/controls/textfield/textfield_controller.h"
+
+#if !defined(OS_MACOSX)
+#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
+#else
+#include "chrome/browser/ui/views/frame/ysp_views_manager_mac.h"
+#endif
 
 namespace views {
 class GridLayout;
@@ -38,7 +43,13 @@ class Border;
 
 class Browser;
 class BrowserView;
+
+#if !defined(OS_MACOSX)
 class OpaqueBrowserFrameView;
+#else
+class YspViewsManagerMac;
+#endif
+
 class ThreadTaskRunnerHandle;
 
 class YSPLockScreenView : public content::WebContentsDelegate,
@@ -49,8 +60,13 @@ class YSPLockScreenView : public content::WebContentsDelegate,
                           public YSPLoginManagerObserver {
  public:
   static void ShowLockedScreen(BrowserView* browser_view);
+#if !defined(OS_MACOSX)
   YSPLockScreenView(OpaqueBrowserFrameView* opaque_browser_frame_view,
                     BrowserView* browser_view);
+#else
+  YSPLockScreenView(YspViewsManagerMac* ysp_views_manager_mac,
+                    BrowserView* browser_view);
+#endif
   ~YSPLockScreenView() override;
 
   void Lock();
@@ -119,7 +135,12 @@ class YSPLockScreenView : public content::WebContentsDelegate,
 
   base::string16 user_name_;
   PrefChangeRegistrar profile_pref_registrar_;
+
+#if !defined(OS_MACOSX)
   OpaqueBrowserFrameView* opaque_browser_frame_view_;
+#else
+  YspViewsManagerMac* ysp_views_manager_mac_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(YSPLockScreenView);
 };

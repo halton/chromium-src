@@ -30,7 +30,8 @@ void URLRow::Swap(URLRow* other) {
   url_.Swap(&other->url_);
   title_.swap(other->title_);
 #ifdef REDCORE
-  ysp_username_ = other->ysp_username_;  // YSP+ { User information isolation }
+  ysp_user_id_.swap(
+      other->ysp_user_id_);
 #endif
   std::swap(visit_count_, other->visit_count_);
   std::swap(typed_count_, other->typed_count_);

@@ -227,21 +227,12 @@ void WebContentsIE::OnRendererHostViewSize(const gfx::Size& size) {
   GetRenderWidgetHostView()->Hide();
   RECT rc;
   ::GetWindowRect(render_host_hwnd_, &rc);
-  POINT ptOrg;
-  ptOrg.x = rc.left;
-  ptOrg.y = rc.top;
-  POINT ptEnd;
-  ptEnd.x = rc.right;
-  ptEnd.y = rc.bottom;
-  HWND hwnd = GetParent(render_host_hwnd_);
-  ::ScreenToClient(hwnd, &ptOrg);
-  ::ScreenToClient(hwnd, &ptEnd);
-  RECT rect;
-  rect.left = ptOrg.x;
-  rect.top = ptOrg.y;
-  rect.right = ptEnd.x;
-  rect.bottom = ptEnd.y;
-  browser_event_handler_->SetBrowserRect(rect);
+  browser_event_handler_->SetBrowserRect(rc);
+}
+
+void WebContentsIE::OnWindowMove() {
+  gfx::Size size(0, 0);
+  OnRendererHostViewSize(size);
 }
 
 void WebContentsIE::SetIECookie(const GURL& url) {
@@ -414,8 +405,6 @@ void WebContentsIE::Focus() {
       view->Hide();
     }
   }
-  if (browser_event_handler_)
-    browser_event_handler_->Show(true);
 }
 
 RenderFrameHostImpl* WebContentsIE::GetFocusedFrame() {
@@ -632,25 +621,14 @@ void WebContentsIE::OnLoadUrlInNewContent(const GURL& url,
   create_params.initial_size = GetContainerBounds().size();
   WebContentsImpl* new_contents = NULL;
   std::unique_ptr<WebContents> wbc = WebContents::Create(create_params);
-  new_contents = dynamic_cast<WebContentsImpl*>(wbc.get());
+  new_contents = (WebContentsImpl*)(wbc.get());
   if (new_contents->GetRendererMode().core == ie::IE_CORE) {
-    WebContentsIE* web_contents_ie =
-      dynamic_cast<WebContentsIE*>(new_contents);
+    WebContentsIE* web_contents_ie = (WebContentsIE*)(new_contents);
     if (web_contents_ie)
       web_contents_ie->SetCreateByIENewWindow(true);
   }
 
-  if (delegate) {
-    WindowOpenDisposition disposition =
-        WindowOpenDisposition::NEW_FOREGROUND_TAB;
-    if ((flag & ie::POPUP) == ie::POPUP)
-      disposition = WindowOpenDisposition::NEW_POPUP;
-
-    gfx::Rect initial_rect;
-    initial_rect.set_size(create_params.initial_size);
-    delegate->AddNewContents(this, std::move(wbc), disposition, initial_rect,
-                             false, NULL);
-  }
+  new_contents->delegate_ = delegate;
 
   // new_contents->CreateRenderWidgetHostViewForRenderManager(new_contents->GetRenderViewHost());
 
@@ -765,11 +743,11 @@ bool WebContentsIE::IsDownloading() {
   return false;
 }
 
-void WebContentsIE::SendFunctionControl(const std::wstring& jsonStr) {
+void WebContentsIE::SendFunctionControl(const std::wstring& json_string) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   if (browser_event_handler_ == NULL)
     return;
-  browser_event_handler_->SendFunctionControl(jsonStr);
+  browser_event_handler_->SendFunctionControl(json_string);
 }
 
 void WebContentsIE::SetCreateByIENewWindow(bool is_new) {
@@ -779,36 +757,36 @@ void WebContentsIE::SetCreateByIENewWindow(bool is_new) {
 void WebContentsIE::OnQueryPrivateDns(const std::wstring& host,
                                       std::wstring* ip_list_json_string) {
   query_dns_json_string_.clear();
+  base::RunLoop run_loop;
   content::BrowserThread::PostTask(
       content::BrowserThread::IO, FROM_HERE,
       base::Bind(&WebContentsIE::QueryDnsOnIOThread,
-                 weak_factory_for_io_.GetWeakPtr(), host));
-  // base::MessageLoopForUI::current()->Run();
+                 weak_factory_for_io_.GetWeakPtr(), host,
+                 run_loop.QuitClosure()));
+  run_loop.Run();
   *ip_list_json_string = query_dns_json_string_;
 }
 
-void WebContentsIE::QueryDnsOnIOThread(const std::wstring& host) {
-  std::string hostStr = "";
+void WebContentsIE::QueryDnsOnIOThread(const std::wstring& host,
+                                       base::Closure done) {
   std::wstring ip_list_json_string = L"";
-  hostStr = base::UTF16ToASCII(host);
-  base::ListValue* json = NULL;
-  json = net::HostResolverImpl::PrivateDnsCompared(hostStr);
+  std::string host_string = base::UTF16ToASCII(host);
+  base::ListValue* json =
+      net::HostResolverImpl::PrivateDnsAndAbsoluteLink(host_string);
   if (json) {
     std::string buff = "";
     base::JSONWriter::Write(*json, &buff);
     ip_list_json_string = base::UTF8ToUTF16(buff);
   }
-  content::BrowserThread::PostTask(
-      content::BrowserThread::UI, FROM_HERE,
-      base::Bind(&WebContentsIE::QueryDnsFinished, self_.GetWeakPtr(),
-                 ip_list_json_string));
+  QueryDnsFinished(ip_list_json_string);
+
+  std::move(done).Run();
 }
 
 void WebContentsIE::QueryDnsFinished(const std::wstring& ip_list_json_string) {
   if (ip_list_json_string.empty() == false) {
     query_dns_json_string_ = ip_list_json_string;
   }
-  // base::MessageLoopForUI::current()->QuitWhenIdle();
 }
 
 void WebContentsIE::OnURLFetchComplete(const net::URLFetcher* source) {
@@ -1023,8 +1001,8 @@ void WebContentsIE::SetBrowserEmulation(ie::Emulation emulation) {
                    L"Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION",
                    &key);
   if (err == ERROR_SUCCESS) {
-    err = RegSetValueEx(key, L"RedCore.exe", 0, REG_DWORD, (const BYTE*)&value,
-                        sizeof(value));
+    err = RegSetValueEx(key, L"enterplorer.exe", 0, REG_DWORD,
+                        (const BYTE*)&value, sizeof(value));
     RegCloseKey(key);
   }
 }
@@ -1178,51 +1156,12 @@ void WebContentsIE::NavigateUrl(
   if (browser_event_handler_ == NULL)
     return;
 
-  //  old navigation code is removed: pending_render_view_host()
-  // if (GetRenderManager() && GetRenderManager()->pending_render_view_host())
-  // {
-  //   RenderFrameHost* pFrameHost =
-  //   GetRenderManager()->pending_render_view_host()->GetMainFrame();
-  //   RenderFrameHostImpl* pFrameHostImpl =
-  //   static_cast<RenderFrameHostImpl*>(pFrameHost); if (pFrameHost)
-  //     GetRenderManager()->DidNavigateFrame(pFrameHostImpl, false);
-  // }
-
-  RenderFrameHostImpl* rfh = GetMainFrame();
-  if (rfh) {
-    // NavigationHandleImpl::Create会触发WebContentsImpl::DidStartNavigation函数，从而进入黑白名单过滤功能
+  if (is_navigate_stopped_) {
+    // 让地址栏的URL恢复到之前的URL
+    controller_.DiscardPendingEntry(true);
+    controller_.delegate()->NotifyNavigationStateChanged(INVALIDATE_TYPE_URL);
     is_navigate_stopped_ = false;
-    std::unique_ptr<NavigationHandleImpl> navHandle =
-        NavigationHandleImpl::Create(
-            params->url, std::vector<GURL>(), rfh->frame_tree_node(),
-            true,   // is_renderer_initiated
-            false,  // is_same_document
-            base::TimeTicks::Now(), 0,
-            false,                  // started_from_context_menu
-            CSPDisposition::CHECK,  // should_check_main_world_csp
-            false,                  // is_form_submission
-            nullptr,                // navigation_ui_data
-            "GET", net::HttpRequestHeaders(),
-            nullptr,  // resource_request_body
-            Referrer(),
-            false,  // has_user_gesture
-            ui::PAGE_TRANSITION_LINK,
-            false,  // is_external_protocol
-            REQUEST_CONTEXT_TYPE_LOCATION);
-    // NavigationHandleImpl::Create(params.url, rfh->frame_tree_node(),
-    // base::TimeTicks::Now());
-    DidFinishNavigation(navHandle.get());
-    navHandle.release();
-    if (is_navigate_stopped_) {
-      // 让地址栏的URL恢复到之前的URL
-      FrameHostMsg_DidFailProvisionalLoadWithError_Params errorParams;
-      errorParams.url = params->url;
-      errorParams.error_code = -3;
-      errorParams.error_description = L"未知错误";
-      rfh->frame_tree_node()->navigator()->DidFailProvisionalLoadWithError(
-          rfh, errorParams);
-      return;
-    }
+    return;
   }
 
   base::FilePath path;
@@ -1241,7 +1180,6 @@ void WebContentsIE::NavigateUrl(
   if (entry)
     curUrl = entry->GetURL();
 
-  bool b = false;
   if (!PageTransitionTypeIncludingQualifiersIs(
           params->transition_type,
           ui::PageTransition::PAGE_TRANSITION_RELOAD) &&
@@ -1263,16 +1201,13 @@ void WebContentsIE::NavigateUrl(
                    params->url, false));
   }
 
-  if (!PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type,
-          ui::PageTransition::PAGE_TRANSITION_IE_NEWWINDOW) &&
-      !PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
-    b = browser_event_handler_->LoadUrl(url);
-
   if (PageTransitionTypeIncludingQualifiersIs(
-          params->transition_type, ui::PageTransition::PAGE_TRANSITION_RELOAD))
+          params->transition_type,
+          ui::PageTransition::PAGE_TRANSITION_RELOAD)) {
     browser_event_handler_->Refresh();
+  } else {
+    browser_event_handler_->LoadUrl(url);
+  }
 
   // //chjy
   // RenderFrameHostImpl* rfh = GetMainFrame();

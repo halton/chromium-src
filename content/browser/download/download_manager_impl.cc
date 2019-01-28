@@ -221,7 +221,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       const base::FilePath& current_path,
       const base::FilePath& target_path,
 #ifdef REDCORE
-      const std::string& ysp_username,
+      const std::string& ysp_user_id,
 #endif
       const std::vector<GURL>& url_chain,
       const GURL& referrer_url,
@@ -248,7 +248,7 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
     return new download::DownloadItemImpl(
         delegate, guid, download_id, current_path, target_path,
 #ifdef REDCORE
-        ysp_username,
+        ysp_user_id,
 #endif
         url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
         original_mime_type, start_time, end_time, etag, last_modified,
@@ -261,8 +261,8 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       uint32_t download_id,
       const download::DownloadCreateInfo& info) override {
 #ifdef REDCORE
-    std::string ysp_username = YspCryptoSingleton::GetInstance()->GetUserId();
-    return new download::DownloadItemImpl(delegate, download_id, ysp_username,
+    std::string ysp_user_id = YspCryptoSingleton::GetInstance()->GetUserId();
+    return new download::DownloadItemImpl(delegate, download_id, ysp_user_id,
                                           info);
 #else
     return new download::DownloadItemImpl(delegate, download_id, info);
@@ -278,8 +278,8 @@ class DownloadItemFactoryImpl : public download::DownloadItemFactory {
       std::unique_ptr<download::DownloadRequestHandleInterface> request_handle)
       override {
 #ifdef REDCORE
-    std::string ysp_username = YspCryptoSingleton::GetInstance()->GetUserId();
-    return new download::DownloadItemImpl(delegate, download_id, ysp_username,
+    std::string ysp_user_id = YspCryptoSingleton::GetInstance()->GetUserId();
+    return new download::DownloadItemImpl(delegate, download_id, ysp_user_id,
                                           path, url, mime_type,
                                           std::move(request_handle));
 #else
@@ -985,7 +985,7 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
     const base::FilePath& current_path,
     const base::FilePath& target_path,
 #ifdef REDCORE
-    const std::string& ysp_username,
+    const std::string& ysp_user_id,
 #endif
     const std::vector<GURL>& url_chain,
     const GURL& referrer_url,
@@ -1021,7 +1021,7 @@ download::DownloadItem* DownloadManagerImpl::CreateDownloadItem(
   download::DownloadItemImpl* item = item_factory_->CreatePersistedItem(
       this, guid, id, current_path, target_path,
 #ifdef REDCORE
-      ysp_username,
+      ysp_user_id,
 #endif
       url_chain, referrer_url, site_url, tab_url, tab_refererr_url, mime_type,
       original_mime_type, start_time, end_time, etag, last_modified,
@@ -1352,7 +1352,7 @@ void DownloadManagerImpl::RemoveDownloadsForUserid(const std::string& userid) {
   for (const auto& it : downloads_) {
     download::DownloadItemImpl* download = it.second.get();
     if (download->GetState() != download::DownloadItem::IN_PROGRESS &&
-        download->GetYSPUserName() == userid) {
+        download->GetYSPUserID() == userid) {
       download->Remove();
     }
     DownloadRemoved(download);

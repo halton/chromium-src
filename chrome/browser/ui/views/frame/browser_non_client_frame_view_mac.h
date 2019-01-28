@@ -12,6 +12,10 @@
 #include "chrome/browser/ui/views/profiles/profile_indicator_icon.h"
 #include "components/prefs/pref_change_registrar.h"
 
+#ifdef REDCORE
+#include "chrome/browser/ui/views/frame/ysp_views_manager_mac.h"
+#endif
+
 @class FullscreenToolbarControllerViews;
 
 class BrowserNonClientFrameViewMac : public BrowserNonClientFrameView {
@@ -46,6 +50,12 @@ class BrowserNonClientFrameViewMac : public BrowserNonClientFrameView {
   void Layout() override;
   gfx::Size GetMinimumSize() const override;
 
+#ifdef REDCORE
+  bool OnMousePressed(const ui::MouseEvent& event) override;
+  bool DoesIntersectRect(const views::View* target,
+                         const gfx::Rect& rect) const override;
+#endif
+
  protected:
   // views::View:
   void OnPaint(gfx::Canvas* canvas) override;
@@ -70,6 +80,9 @@ class BrowserNonClientFrameViewMac : public BrowserNonClientFrameView {
 
   base::scoped_nsobject<FullscreenToolbarControllerViews>
       fullscreen_toolbar_controller_;
+#ifdef REDCORE
+  YspViewsManagerMac* views_manager_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(BrowserNonClientFrameViewMac);
 };

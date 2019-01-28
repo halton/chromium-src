@@ -189,26 +189,7 @@ PasswordStoreDefault::FillMatchingLogins(const FormDigest& form) {
   for (auto& login : matched_forms) {
     if (login->ysp_username_value.empty() ||
         (login->ysp_username_value == username)) {
-      std::unique_ptr<PasswordForm> new_form(new PasswordForm());
-      new_form->action = login->action;
-      new_form->form_data = login->form_data;
-      new_form->icon_url = login->icon_url;
-      new_form->is_public_suffix_match = login->is_public_suffix_match;
-      new_form->origin = login->origin;
-      new_form->password_element = login->password_element;
-      new_form->password_value = login->password_value;
-      new_form->scheme = login->scheme;
-      new_form->signon_realm = login->signon_realm;
-      new_form->skip_zero_click = login->skip_zero_click;
-      new_form->submit_element = login->submit_element;
-      new_form->times_used = login->times_used;
-      new_form->type = login->type;
-      new_form->username_element = login->username_element;
-      new_form->username_value = login->username_value;
-      new_form->ysp_app_name_value = login->ysp_app_name_value;
-      new_form->ysp_login_type_value = login->ysp_login_type_value;
-      new_form->ysp_username_value = login->ysp_username_value;
-      new_matched_forms.push_back(std::move(new_form));
+      new_matched_forms.push_back(std::move(login));
     }
   }
   return new_matched_forms;
