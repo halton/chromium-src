@@ -326,6 +326,7 @@ base::scoped_nsobject<NSMenuItem> BuildWindowMenu(
   return item;
 }
 
+#if !defined(REDCORE)
 base::scoped_nsobject<NSMenuItem> BuildHelpMenu(NSApplication* nsapp,
                                                 AppController* app_controller) {
   base::scoped_nsobject<NSMenuItem> item =
@@ -342,6 +343,7 @@ base::scoped_nsobject<NSMenuItem> BuildHelpMenu(NSApplication* nsapp,
   [nsapp setHelpMenu:[item submenu]];
   return item;
 }
+#endif  // !defined(REDCORE)
 
 }  // namespace
 
@@ -353,7 +355,11 @@ void BuildMainMenu(NSApplication* nsapp, AppController* app_controller) {
   static const Builder kBuilderFuncs[] = {
       &BuildAppMenu,    &BuildFileMenu,    &BuildEditMenu,
       &BuildViewMenu,   &BuildHistoryMenu, &BuildBookmarksMenu,
+#if !defined(REDCORE)
       &BuildPeopleMenu, &BuildWindowMenu,  &BuildHelpMenu,
+#else
+      &BuildPeopleMenu, &BuildWindowMenu,
+#endif  // !defined(REDCORE)
   };
   for (auto* builder : kBuilderFuncs) {
     [main_menu addItem:builder(nsapp, app_controller)];
