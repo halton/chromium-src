@@ -284,6 +284,10 @@ template("generate_mini_installer") {
       no_default_deps = true
       ldflags += [ "/ENTRY:MainEntryPoint" ]
     }
+
+    if (is_redcore) {
+      deps += [ "//third_party/GmSSL:build_gmssl" ]
+    }
   }
 }
 

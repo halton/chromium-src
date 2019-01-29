@@ -25,7 +25,7 @@ function switchPage(isLogin) {
             <div class="peeler-content"> <h4>主页背景</h4>
               <ul id="list-unstyled">
                 <li> <img class="bg-li" id="bg-1" src="./imgs/background/abb-1.png"> <img class="selected" src="./imgs/selected_icon.png">
-                  <p>迷夜（默认）</p>
+                  <p>Enterplorer（默认）</p>
                 </li>
                 <li> <img class="bg-li" id="bg-2" src="./imgs/background/abb-2.png"> <img class="selected" src="./imgs/selected_icon.png">
                   <p>星河</p>
@@ -105,8 +105,17 @@ function switchPage(isLogin) {
         <div class="cut_off_line"></div>
         <div class="company_domain" id="company_domain">
           <h2 class="set_server">服务器地址</h2>
+          <image id="arrow_back" src="./imgs/arrow_back.png"/>
           <input id="domain" type="text" class="field field-block" 
-                 placeholder="https://ysp.redcore.cn" pattern="\S+" tip="" />
+                 placeholder="ysp.redcore.cn" pattern="\S+" tip="" />
+          <div id="domain_protocal">
+            <span id="protocal">https://</span>
+            <image id="img_arrow" src="./imgs/domain_arrow.png"/>
+          </div>
+          <ul id="domain_protocal_change">
+            <li>https://</li>
+            <li>http://</li>
+          </ul>
           <p>忘记服务器地址？请联系您的企业管理员获取。</p>
           <button class="button block" id="next-btn" name="">确定</button>
         </div>
@@ -153,9 +162,9 @@ function switchPage(isLogin) {
               <p>请在手机上确认登录</p>
             </div>
             <div id="error-row1" class="row code-row"> <span class="error-tip" id="error-tip1"></span> </div>
-            <p id="app_tip">请使用 Mobile 扫描二维码</p>
+            <p id="app_tip">请使用 Enterplorer移动端 扫描二维码</p>
             <p class="app_group"> <img src="./imgs/login/Group.png" alt=""> </p>
-              <p class="download"> <a href="https://www.redcore.cn/download/index.html">下载 Redcore mobile</a> </p>
+            <p class="download"> <a href="javascript:;">下载 Enterplorer移动端</a> </p>
           </div>
         </div>
         <div class="forgetPassword" id="forgetPassword">
@@ -164,6 +173,16 @@ function switchPage(isLogin) {
           <p class="bottom"> <button id="closeTip">确定</button> </p>
         </div>
       </div>
+      <div id="blue_bg">
+        <div id="white_bg">
+          <p>扫码下载 Enterplorer</p>
+          <image id="mobile_code" src="./imgs/mobile_code.png"/>
+        </div>
+        <div>
+          <image id="close_code" src="./imgs/close_code.png"/>
+        </div>
+      </div>
+      <div id="login_model"></div>
     </div>`);
   }
 }
@@ -218,37 +237,29 @@ function Login() {
 
   // login
   var loginServer = function() {
-
-    if (!_this.userid.val()) {
+    var userid = $.trim(_this.userid.val())
+    var password = $.trim(_this.password.val())
+    if (!userid) {
       _this.errorTip('请输入个人账号');
       return;
     }
-    if (!_this.password.val()) {
+    if (!password) {
       _this.errorTip('请输入密码');
       return;
     }
-    var domain = _this.domain.val()
-    if (domain) {
-      if (!(domain.startsWith('http://') || domain.startsWith('https://'))) {
+    var domain = `${$("#protocal").text()}${$.trim(_this.domain.val())}`
+    if (_this.domain.val()) {
+      let url = new URL(domain)
+      let regDomain = /[a-za-z0-9][\w\u4E00-\u9FA5]*(\.[\w\u4E00-\u9FA5]+)+/
+      let regIp = /^(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|[1-9])(\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)){3}$/
+      if (!(regDomain.test(url.host) || regIp.test(url.host))) {
         _this.errorTip('请输入正确的服务器地址')
         return
-      } else {
-        let url = new URL(domain)
-        let regDomain = /[a-za-z0-9][\w\u4E00-\u9FA5]*(\.[\w\u4E00-\u9FA5]+)+/
-        let regIp = /^(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|[1-9])(\.(1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d)){3}$/
-        if (!(regDomain.test(url.host) || regIp.test(url.host))) {
-          _this.errorTip('请输入正确的服务器地址')
-          return
-        }
       }
     } else {
-      // 正式地址
       domain = 'https://ysp.redcore.cn'
-
-      // 测试地址
-      //domain = 'http://api.enterplorer.net'
     }
-    HOMEPROXY.login(domain, _this.userid.val(), _this.password.val());
+    HOMEPROXY.login(domain, userid, password);
     _this.loading();
   }
 
@@ -261,6 +272,10 @@ function Login() {
   // 填入企业域名点击下一步
   $('#next-btn').click(function() {
     domainVer();
+  });
+
+  $('#arrow_back').click(function() {
+    $('#next-btn').click();
   });
 
   // 返回上一步添加企业域名
@@ -316,7 +331,7 @@ function Login() {
   // 点击二维码
   $('#QRcode').click(function() {
     $('#code_pack').css('visibility', 'hidden');
-    serverAddress = _this.domain.val() || 'https://ysp.redcore.cn';
+    serverAddress = `${$("#protocal").text()}${$.trim(_this.domain.val())}` || 'https://ysp.redcore.cn';
     // 建立长连接
     window.__page_to_content_script__(serverAddress, deviceId);
     $('#code_pack_qrcodeInvalid').hide();
@@ -438,6 +453,40 @@ function Login() {
     $('#forgetPassword').hide();
   });
 
+  //切换协议
+  var protocalFlag = 1;
+  var protocal = $("#protocal").text();
+  var toggleProtocal = function() {
+    if(protocalFlag == 1){
+      $("#img_arrow").css("transform","rotate(360deg)");
+      $("#domain_protocal_change").slideDown(300);
+      protocalFlag = 2;
+    } else {
+      $("#img_arrow").css("transform","rotate(180deg)");
+      $("#domain_protocal_change").slideUp(300);
+      protocalFlag = 1;
+    }
+  };
+  $("#domain_protocal").click(function(){
+    toggleProtocal();
+  });
+  $("#domain_protocal_change li").click(function(){
+    protocal = $(this).text();
+    $("#protocal").html(protocal);
+    $("#img_arrow").css("transform","rotate(180deg)");
+    $("#domain_protocal_change").slideUp(300);
+    protocalFlag = 1;
+  });
+
+  // 下载Enterplorer移动端的弹窗
+  $(".download").click(function(){
+    $("#login_model").show();
+    $("#blue_bg").show();
+  });
+  $("#close_code").click(function(){
+    $("#login_model").hide();
+    $("#blue_bg").hide();
+  });
 }
 
 
@@ -460,7 +509,9 @@ Login.prototype.loading = function() {
  * @param {*} data
  */
 Login.prototype.setLoginInfo = function(data) {
-  this.domain.val(data.domain)
+  let infoDomain = new URL(data.domain)
+  $("#protocal").html(`${infoDomain.protocol}//`)
+  this.domain.val(infoDomain.host)
   this.userid.val(data.userid)
 }
 Login.prototype.setAutoLoginStatus = function(data) {

@@ -62,6 +62,10 @@ class DefaultStateProvider : public WindowSizer::StateProvider {
     bounds->SetRect(left, top, std::max(0, right - left),
                     std::max(0, bottom - top));
 
+#ifdef REDCORE
+    maximized = true;
+#endif
+
     int work_area_top = 0;
     int work_area_left = 0;
     int work_area_bottom = 0;

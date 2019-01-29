@@ -195,6 +195,8 @@ class NET_EXPORT HostResolverImpl
       std::string& rurl, std::string& port);
   static base::ListValue* PrivateDnsCompared(const std::string& host);
   static std::string PrivateReverseDnsCompared(const std::string& ip_address);
+  static base::ListValue* PrivateDnsAndAbsoluteLink(const std::string& host);
+  static bool IsInternet(const std::string& url);
   static std::unique_ptr<base::DictionaryValue>& private_dns_dict_;
 #endif
 

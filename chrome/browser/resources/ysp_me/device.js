@@ -29,7 +29,7 @@ class Device {
            /os x/i.test(str) ? './imgs/macbook.png' :
            /iphone|ios/i.test(str) ? './imgs/iphone.png' :
            /ipad/i.test(str) ? './imgs/iPad.png' :
-           /linux/i.test(str) ? './imgs/linux.png' : './imgs/mac.png'
+           /linux/i.test(str) ? './imgs/linux.png' : './imgs/unknow.png'
   }
 
   initDOM(data) {

@@ -2126,9 +2126,8 @@ void AddSearchStrings(content::WebUIDataSource* html_source, Profile* profile) {
   };
   AddLocalizedStringsBulk(html_source, localized_strings,
                           arraysize(localized_strings));
-  base::string16 search_explanation_text = l10n_util::GetStringFUTF16(
-      IDS_SETTINGS_SEARCH_EXPLANATION,
-      base::ASCIIToUTF16(chrome::kOmniboxLearnMoreURL));
+  base::string16 search_explanation_text =
+      l10n_util::GetStringUTF16(IDS_SETTINGS_SEARCH_EXPLANATION);
   html_source->AddString("searchExplanation", search_explanation_text);
 #if defined(OS_CHROMEOS)
   html_source->AddBoolean("enableVoiceInteraction", is_assistant_allowed);

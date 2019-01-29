@@ -44,8 +44,14 @@ namespace {
 // The visible height of the shadow above the tabs. Clicks in this area are
 // treated as clicks to the frame, rather than clicks to the tab.
 const int kTabShadowSize = 2;
+
+#if !defined(OS_MACOSX)
 // The tabstrip is inset 56 px from the left frame border.
 const int kTabStripLeftSpacing = 56;
+#else
+const int kTabStripLeftSpacing = 66;
+#endif
+
 // The number of pixels the constrained window should overlap the bottom
 // of the omnibox.
 const int kConstrainedWindowOverlap = 3;
