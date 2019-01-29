@@ -206,7 +206,7 @@ std::string YspCryptoHeader::GetHmacEncString(const std::string& message_type,
 	//memcpy(key, cryptoHeaderkey::pwd, 8);
 	//memcpy(key, cryptoHeaderkey::sal, 8);
 	//memcpy(key, cryptoHeaderkey::iv, 16);
-	key = "hIxw20i48TZV3bHB6hPjkujMLYa5gsAj";
+	key = "uHc2NRU4OZ6pvquna7ba6GMwWVRdoxgH";
         std::string value = version + "#" + base::IntToString(type) + "#" +
                             client_id_hex + "#" + time_stamp_hex + "#" +
                             message_type + "#" + uri;
