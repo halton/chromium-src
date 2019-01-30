@@ -26,7 +26,11 @@
 
 const SkColor kTextfieldBackgroundColor = SkColorSetRGB(241, 243, 244);
 
+#if !defined(OS_MACOSX)
 YSPSetPINView::YSPSetPINView(OpaqueBrowserFrameView* opaque_browser_frame_view,
+#else
+YSPSetPINView::YSPSetPINView(YspViewsManagerMac* ysp_views_manager_mac,
+#endif
                              BrowserView* browser_view)
     : dialog_header_image_(new views::ImageView()),
       title_label_(nullptr),
@@ -37,7 +41,11 @@ YSPSetPINView::YSPSetPINView(OpaqueBrowserFrameView* opaque_browser_frame_view,
       confirm_pin_textfield_(nullptr),
       confirm_button_(nullptr),
       prompt_label_(nullptr),
+#if !defined(OS_MACOSX)
       opaque_browser_frame_view_(opaque_browser_frame_view) {
+#else
+      ysp_views_manager_mac_(ysp_views_manager_mac) {
+#endif
   dialog_header_image_->SetDrawCircle(false);
 
   SetBackground(views::CreateSolidBackground(SK_ColorTRANSPARENT));
@@ -165,8 +173,13 @@ void YSPSetPINView::Submit() {
     return;
   }
   YSPLoginManager::GetInstance()->UpdatePinKey(base::UTF16ToUTF8(pin_text));
+#if !defined(OS_MACOSX)
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::BROWSER_SCREEN);
+#else
+  ysp_views_manager_mac_->ChangeScreenStatus(
+      YspViewsManagerMac::BROWSER_SCREEN);
+#endif
 }
 
 bool YSPSetPINView::IsDigitString(const base::string16& text) {

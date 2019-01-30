@@ -370,6 +370,7 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
 #if defined(IE_REDCORE)
   bool IsAutoSelect() override;
   ie::RenderMode GetRendererMode() override;
+  void OnWindowMove() override;
 #endif  // defined(IE_REDCORE)
 
   void Stop() override;
