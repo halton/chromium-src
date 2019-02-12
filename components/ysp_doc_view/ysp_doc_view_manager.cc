@@ -142,6 +142,11 @@ bool YSPDocViewManager::IsDocViewType(const base::FilePath& file_path) {
   if (!prewview_doc_online->GetList("format", &format_list))
     return false;
 
+  // checking file formats:
+  // ".xlsx", ".xls", ".ppt", ".pptx", ".doc"
+  // ".docx", ".rtf", ".eio", ".uof", ".uos",
+  // ".xml", ".txt", ".dat", ".log", ".wps",
+  // ".dps", ".et", ".zip", ".rar", ".pdf"
   for (size_t i = 0; i < format_list->GetSize(); i++) {
     base::FilePath::StringType format;
     format_list->GetString(i, &format);
@@ -149,29 +154,8 @@ bool YSPDocViewManager::IsDocViewType(const base::FilePath& file_path) {
     if (!format.empty() && file_path.MatchesExtension(file_ext))
       return true;
   }
-  // if (file_path.MatchesExtension(FILE_PATH_LITERAL(".xlsx")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".xls")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".ppt")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".pptx")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".doc")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".docx")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".rtf")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".eio")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".uof")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".uos")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".xml")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".txt")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".dat")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".log")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".wps")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".dps")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".et")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".zip")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".rar")) ||
-  // file_path.MatchesExtension(FILE_PATH_LITERAL(".pdf"))) {
-  // result = true;
-  //}
+
   DLOG(INFO) << "YSPDocViewManager::IsDocViewType: "
              << " of file: " << file_path.value();
-  return true;
+  return false;
 }
