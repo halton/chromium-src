@@ -58,11 +58,11 @@ class URLRow {
   }
 
 #ifdef REDCORE
-  const std::string& YSPUserName() const { return ysp_username_; }
+  const std::string& GetYSPUserID() const { return ysp_user_id_; }
 
-  void set_YSPUserName(const std::string& ysp_username) {
-    if (ysp_username != ysp_username_) {
-      ysp_username_ = ysp_username;
+  void SetYSPUserID(const std::string& ysp_user_id) {
+    if (ysp_user_id != ysp_user_id_) {
+      ysp_user_id_ = ysp_user_id;
     }
   }
 #endif
@@ -123,7 +123,7 @@ class URLRow {
   base::string16 title_;
 
 #ifdef REDCORE
-  std::string ysp_username_;  // YSP+ { User information isolation }
+  std::string ysp_user_id_;
 #endif
 
   // Total number of times this URL has been visited.

@@ -3430,6 +3430,18 @@ jumbo_split_static_library("ui") {
         ]
       }
 
+      if (is_mac && is_redcore) {
+        sources += [
+          "views/frame/ysp_views_manager_mac.cc",
+          "views/frame/ysp_views_manager_mac.h",
+        ]
+
+        sources -= [
+          "views/frame/opaque_browser_frame_view.cc",
+          "views/frame/opaque_browser_frame_view.h",
+        ]
+      }
+
       if (use_aura) {
         deps += [
           "//services/ws/public/cpp",

@@ -473,16 +473,6 @@ Function MainInstallLogic
     SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm"
     SetOverwrite try
     File nsis_src\gm\gmcrypto.dll
-    SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert"
-    SetOverwrite try
-    File nsis_src\gm\gmcert\*.*
-    SetOutPath "$INSTDIR\Application\${CHROME_VERSION}\gm\gmcert-hd"
-    SetOverwrite try
-    File nsis_src\gm\gmcert-hd\*.*
-    ${EnvVarUpdate} $0 "REDCORE_ENGINES" "A" "HKLM" "$INSTDIR\Application\${CHROME_VERSION}\gm"
-    SetOutPath "$SYSDIR"
-    SetOverwrite try
-    File nsis_src\gm\KeyGDBApi.dll
     IfErrors 0 +3
     ${LogText} "Copy GM files faild"
   onEnd:

@@ -31,7 +31,9 @@ void check_update(bool relaunch)
         return;
     }
     NSLog(@"[YSP] Found update path, start updating...");
-    const char *rel_path_cstring = "/Contents/Versions/" CHROME_VERSION_STRING "/" PRODUCT_FULLNAME_STRING " Framework.framework/autoupdate.sh";
+    const char *rel_path_cstring = "/Contents/Versions/" CHROME_VERSION_STRING
+                                    "/" PRODUCT_FULLNAME_STRING
+                                    " Framework.framework/Resources/autoupdate.sh";
     NSString *rel_path = [NSString stringWithCString:rel_path_cstring encoding:NSUTF8StringEncoding];
     const char *installerPath = [[bundlePath stringByAppendingString:rel_path] UTF8String];
     NSLog(@"[YSP] installer Path: %s", installerPath);

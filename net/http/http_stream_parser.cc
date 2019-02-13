@@ -256,6 +256,10 @@ int HttpStreamParser::SendRequest(
   std::string request = request_line + headers.ToString();
   request_headers_length_ = request.size();
 
+#ifdef REDCORE
+  LOG(INFO) << "\nsend request:\n" << request;
+#endif  // REDCORE
+
   if (request_->upload_data_stream != NULL) {
     request_body_send_buf_ =
         base::MakeRefCounted<SeekableIOBuffer>(kRequestBodyBufferSize);
@@ -1139,6 +1143,10 @@ void HttpStreamParser::CalculateResponseBodySize() {
   //
   // Since the 205 status code implies that no additional content will be
   // provided, a server MUST NOT generate a payload in a 205 response.
+#ifdef REDCORE
+  LOG(INFO) << "\nrequest:" << request_->url.spec()
+            << "\nresponse_code: " << response_->headers->response_code();
+#endif  // REDCORE
   if (response_->headers->response_code() / 100 == 1) {
     response_body_length_ = 0;
   } else {

@@ -9,7 +9,6 @@
 
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
-#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ui/views/ysp_set_pin_view.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "content/public/browser/web_contents_delegate.h"
@@ -19,6 +18,12 @@
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/controls/textfield/textfield_controller.h"
 
+#if !defined(OS_MACOSX)
+#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
+#else
+#include "chrome/browser/ui/views/frame/ysp_views_manager_mac.h"
+#endif
+
 namespace views {
 class ImageView;
 }  // namespace views
@@ -27,11 +32,16 @@ class Browser;
 class BrowserView;
 class YSPSetPINView;
 class OpaqueBrowserFrameView;
+class YspViewsManagerMac;
 
 class YSPSetPINViewHolder : public content::WebContentsDelegate,
                             public views::ImageView {
  public:
+#if !defined(OS_MACOSX)
   YSPSetPINViewHolder(OpaqueBrowserFrameView* opaque_browser_frame_view,
+#else
+  YSPSetPINViewHolder(YspViewsManagerMac* ysp_views_manager_mac,
+#endif
                       BrowserView* browser_view);
   ~YSPSetPINViewHolder() override;
 

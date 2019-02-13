@@ -12,6 +12,7 @@
 #include "base/mac/foundation_util.h"
 #include "base/mac/mac_util.h"
 #include "base/strings/sys_string_conversions.h"
+#include "chrome/common/chrome_version.h"
 
 //#include "chrome/browser/ysp_update/ysp_update_manager.h"
 void PrepareUpdate(std::string path)
@@ -29,9 +30,13 @@ void PrepareUpdate(std::string path)
       NSLog(@"%@", [err localizedDescription]);
     } else {
       NSLog(@"[YSP] notify: Unarchiving completed");
-      // copy Redcore.app/Contents to /Application/Recore.app/Contents.update
+      // copy Enterplorer.app/Contents to /Application/Enterplorer.app/Contents.update
       NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
-      NSString *fromPath = [[archivePath stringByDeletingPathExtension] stringByAppendingString:@"/Redcore.app/Contents"];
+      std::string strAppPath("/");
+      NSString *appPath = base::SysUTF8ToNSString(strAppPath.append(PRODUCT_FULLNAME_STRING)
+                                                            .append(".app/Contents"));
+      NSString *fromPath = [[archivePath stringByDeletingPathExtension]
+                              stringByAppendingString:appPath];
       NSString *toPath = [bundlePath stringByAppendingString:@"/Contents.update"];
       NSFileManager *manager = [NSFileManager defaultManager];
 

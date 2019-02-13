@@ -32,6 +32,7 @@
 
 #ifdef REDCORE
 #include "base/json/json_reader.h"
+#include "base/time/time.h"
 #include "net/base/sockaddr_storage.h"
 #include "net/socket/ysp_spa_packet.h"
 #include "base/threading/platform_thread.h"
@@ -238,6 +239,12 @@ int TransportConnectJob::DoLoop(int result) {
         break;
       case STATE_RESOLVE_HOST_COMPLETE:
         rv = DoResolveHostComplete(rv);
+#ifdef REDCORE
+        if (rv != 0) {
+          LOG(INFO) << "\nhost:" << group_name_
+                    << ", DoResolveHostComplete failed code: " << rv;
+        }
+#endif  // REDCORE
         break;
       case STATE_TRANSPORT_CONNECT:
         DCHECK_EQ(OK, rv);
@@ -245,6 +252,12 @@ int TransportConnectJob::DoLoop(int result) {
         break;
       case STATE_TRANSPORT_CONNECT_COMPLETE:
         rv = DoTransportConnectComplete(rv);
+#ifdef REDCORE
+        if (rv != 0) {
+          LOG(INFO) << "\nhost:" << group_name_
+                    << ", DoTransportConnectComplete failed code: " << rv;
+        }
+#endif  // REDCORE
         break;
       default:
         NOTREACHED();
@@ -348,10 +361,10 @@ int TransportConnectJob::DoTransportConnect() {
   std::string server_ip = "";
   int time_diff = 0;
   access_cmd = "tcp/" + port;
-  std::string key = "dJjCl43TR4TkcEO2W9aW4rJGFMYaWe9oFrtfhMNVzSM=";
+  std::string key = "hKvtToZD8PZR8/GztldoThB3Z3uMcN4g2FRuf9kHY/8=";
   std::string hmac_key =
-      "02LbTG8yoariufYrbigLgvax4lYhWtND5AFLDcf2EGeu4/"
-      "bd3VxovZwFNAkdC4PowALnosuDhZKkUKm/41Rx8g==";
+      "f36tZ1ak+Q+gZOBcn+j/rARvZHZKa/GJqjcZxZhe8j9Mtq"
+      "uGqoRRE/F6oFEt0+nKCmi/Etue/M+FG9a2okn8Fw==";
 
   if (DomainCompared(compared_host, &device_id, &username, &server_ip,
                      time_diff)) {
@@ -367,6 +380,7 @@ int TransportConnectJob::DoTransportConnect() {
       DLOG(INFO) << "redcore_spa_knock: " << ret << " device_id: " << device_id
                  << " username: " << username << " access_cmd: " << access_cmd
                  << " server_ip: " << server_ip;
+      LOG(INFO)  << "\nredcore_spa_knock:  time: " << base::Time::Now();
       base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
       rv = transport_socket_->Connect(base::Bind(
           &TransportConnectJob::OnIOComplete, base::Unretained(this)));
@@ -382,6 +396,7 @@ int TransportConnectJob::DoTransportConnect() {
     DLOG(INFO) << "login redcore_spa_knock:" << ret
                << " device_id: " << device_id << " username: " << username
                << " access_cmd: " << access_cmd << " server_ip: " << server_ip;
+    LOG(INFO) << "\nredcore_spa_knock:  time: " << base::Time::Now();
     base::PlatformThread::Sleep(TimeDelta::FromMilliseconds(10));
     rv = transport_socket_->Connect(
         base::Bind(&TransportConnectJob::OnIOComplete, base::Unretained(this)));

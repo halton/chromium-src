@@ -40,10 +40,17 @@ void YSPLockScreenView::ShowLockedScreen(BrowserView* browser_view) {
 }
 
 YSPLockScreenView::YSPLockScreenView(
+#if !defined(OS_MACOSX)
     OpaqueBrowserFrameView* opaque_browser_frame_view,
     BrowserView* browser_view)
     : browser_view_(browser_view),
       opaque_browser_frame_view_(opaque_browser_frame_view) {
+#else
+    YspViewsManagerMac* ysp_views_manager_mac,
+    BrowserView* browser_view)
+    : browser_view_(browser_view),
+      ysp_views_manager_mac_(ysp_views_manager_mac) {
+#endif
   browser_ = browser_view->browser();
 
   const ui::ThemeProvider* tp = browser_view_->frame()->GetThemeProvider();
@@ -267,8 +274,12 @@ void YSPLockScreenView::Unlock() {
 }
 
 void YSPLockScreenView::LockInternal() {
+#if !defined(OS_MACOSX)
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::LOCK_SCREEN);
+#else
+  ysp_views_manager_mac_->ChangeScreenStatus(YspViewsManagerMac::LOCK_SCREEN);
+#endif
   if ((password_text_.at(0)->text()).empty()) {
     views::FocusManager* focus_manager = browser_view_->GetFocusManager();
     if (focus_manager) {
@@ -280,8 +291,13 @@ void YSPLockScreenView::LockInternal() {
 }
 
 void YSPLockScreenView::UnlockInternal() {
+#if !defined(OS_MACOSX)
   opaque_browser_frame_view_->ChangeScreenStatus(
       OpaqueBrowserFrameView::BROWSER_SCREEN);
+#else
+  ysp_views_manager_mac_->ChangeScreenStatus(
+      YspViewsManagerMac::BROWSER_SCREEN);
+#endif
 }
 
 int YSPLockScreenView::GetLeftTop(int window_width, int view_width) {

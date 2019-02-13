@@ -26,13 +26,13 @@ std::string GetVersionNumber() {
 
 #ifdef REDCORE
 std::string GetYSPProductNameAndVersionForUserAgent() {
-  return "RedCore/" + GetYSPVersionNumber();
+  return "Enterplorer/" + GetYSPVersionNumber();
 }
 
 std::string GetYSPVersionNumber() {
   return YSP_PRODUCT_VERSION;
 }
-#endif
+#endif  // if defined(REDCORE)
 
 const base::Version& GetVersion() {
   static const base::NoDestructor<base::Version> version(GetVersionNumber());
@@ -72,7 +72,7 @@ std::string GetOSType() {
   return "Solaris";
 #else
   return "Unknown";
-#endif
+#endif  // defined(OS_WIN)
 }
 
 std::string GetChannelString(Channel channel) {
