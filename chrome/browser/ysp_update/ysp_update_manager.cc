@@ -16,6 +16,7 @@
 #include "base/native_library.h"
 #include "base/path_service.h"
 #include "base/run_loop.h"
+#include "base/memory/singleton.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "base/version.h"
@@ -34,6 +35,7 @@
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/download_manager.h"
+#include "content/public/browser/download_request_utils.h"
 #include "content/public/browser/web_contents.h"
 #include "net/url_request/url_request_context.h"
 #include "ui/base/l10n/l10n_util.h"
@@ -276,10 +278,6 @@ chrome::MessageBoxResult YSPShowMessageBox(
   return dialog->RunDialogAndGetResult();
 }
 
-namespace {
-YSPUpdateManager* g_instance = nullptr;
-}  // namespace
-
 YSPUpdateManager::YSPUpdateManager()
     : started_(false), update_fetcher_(nullptr) {}
 
@@ -290,12 +288,15 @@ YSPUpdateManager::~YSPUpdateManager() {
   }
 }
 
+YSPUpdateManager::UpdateInfo::UpdateInfo()
+    : update_type(YSPUpdateManager::AUTO_UPDATE) {}
+
+YSPUpdateManager::UpdateInfo::~UpdateInfo() {}
+
 // static
 YSPUpdateManager* YSPUpdateManager::GetInstance() {
-  if (!g_instance) {
-    g_instance = new YSPUpdateManager;
-  }
-  return g_instance;
+  return base::Singleton<YSPUpdateManager, base::DefaultSingletonTraits<
+                                               YSPUpdateManager>>::get();
 }
 
 void YSPUpdateManager::RequestUpdate(content::WebContents* webContents,
@@ -385,74 +386,32 @@ void YSPUpdateManager::OnAutoUpdateDownload(
     if (!dataDict)
       return;
     bool enable_autoUpdate = false;
-    int updateType = 2;
-    std::string fileName = "", fileMD5 = "", version_str = "", fileUrl = "",
-                md5 = "";
+    UpdateInfo update_info;
+
     base::FilePath path;
     dataDict->GetBoolean("Enable_ClientAutoUpdate", &enable_autoUpdate);
-    dataDict->GetString("ClientFileName", &fileName);
-    dataDict->GetString("ClientFileMd5", &fileMD5);
-    dataDict->GetString("ClientVersion", &version_str);
-    dataDict->GetString("ClientFileUrl", &fileUrl);
-    dataDict->GetInteger("ClientUpdateType", &updateType);
+    dataDict->GetString("ClientFileName", &update_info.file_name);
+    dataDict->GetString("ClientFileMd5", &update_info.file_md5);
+    dataDict->GetString("ClientVersion", &update_info.version_str);
+    dataDict->GetString("ClientFileUrl", &update_info.file_url);
+    dataDict->GetInteger("ClientUpdateType", &update_info.update_type);
     DLOG(INFO) << "YSPUpdateManager enable_autoUpdate: " << enable_autoUpdate
-               << ", fileName: " << fileName << ", fileMD5:" << fileMD5
-               << ", version_str:" << version_str << ", fileUrl:" << fileUrl
-               << ", updateType:" << updateType;
+               << ", fileName: " << update_info.file_name 
+               << ", fileMD5:" << update_info.file_md5
+               << ", version_str:" << update_info.version_str
+               << ", fileUrl:" << update_info.file_url
+               << ", updateType:" << update_info.update_type;
 
-    if (enable_autoUpdate == 0)
+    if (!enable_autoUpdate)
       return;
-    base::PathService::Get(chrome::DIR_DEFAULT_DOWNLOADS, &path);
-    std::string lver_string = version_info::GetYSPVersionNumber();
-    DLOG(INFO) << "path: " << path.value();
-    path = path.AppendASCII(fileName);
-
-    if (!version_str.empty()) {
-      base::Version remote_version(version_str);
-      base::Version local_version(lver_string);
-      if (!remote_version.IsValid())
-        return;
-      if (local_version.CompareTo(remote_version) < 0) {
-        LOG(INFO) << "Should update from " << lver_string << " to "
-                  << version_str;
-        if (updateType == 1 && enable) {
-          YSPShowMessageBox(
-              web_contents_,
-              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_TITLE),
-              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_MESSAGE),
-              chrome::MESSAGE_BOX_TYPE_QUESTION,
-              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_OK),
-              l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_CANCEL),
-              std::unique_ptr<base::DictionaryValue>(
-                  static_cast<base::DictionaryValue*>(
-                      response_data.release())));
-        } else {
-          std::string file_data;
-          bool status = base::ReadFileToString(path, &file_data);
-          if (!status || file_data.empty()) {
-            StartDownload(GURL(fileUrl), path);
-            return;
-          }
-          base::MD5Digest digest = {{0}};
-          base::MD5Sum(file_data.c_str(), file_data.length(), &digest);
-          md5 = base::MD5DigestToBase16(digest);
-          if (md5 != fileMD5) {
-            StartDownload(GURL(fileUrl), path);
-          } else {
-#if defined(OS_WIN)  // TODO (ysp) : Fix it on Mac
-            std::wstring wPath = path.value();
-            HINSTANCE num = ShellExecute(NULL, L"open", wPath.c_str(), NULL,
-                                         NULL, SW_SHOWNORMAL);
-            if ((int)(num) <= 32) {
-              DLOG(INFO) << "File execute failure!";
-            }
+      
+#if defined(OS_WIN)
+    update_info.platform_type = "windows";
 #elif defined(OS_MACOSX)
-            PrepareUpdate(path.value());
+    update_info.platform_type = "mac";
 #endif
-          }
-        }
-      }
-    }
+
+    DoAutoUpdateDownload(update_info, std::move(response_data), enable);
   }
 }
 
@@ -460,63 +419,84 @@ void YSPUpdateManager::OnAutoUpdateDownload(const std::string& update_data) {
   if (!update_data.empty()) {
     std::unique_ptr<base::Value> rootValue =
         base::JSONReader::Read(update_data);
-    base::DictionaryValue* dataDict =
-        base::DictionaryValue::From(std::move(rootValue)).get();
+    std::unique_ptr<base::DictionaryValue> dataDict =
+        base::DictionaryValue::From(std::move(rootValue));
     if (!dataDict)
       return;
-    std::string platformType = "", fileName = "", fileMD5 = "",
-                version_str = "", fileUrl = "", md5 = "";
-    base::FilePath path;
-    dataDict->GetString("fileName", &fileName);
-    dataDict->GetString("md5", &fileMD5);
-    dataDict->GetString("version", &version_str);
-    dataDict->GetString("url", &fileUrl);
-    dataDict->GetString("type", &platformType);
-    DLOG(INFO) << "YSPUpdateManager fileName: " << fileName
-               << ", fileMD5:" << fileMD5 << ", version_str:" << version_str
-               << ", fileUrl:" << fileUrl << ", platformType:" << platformType;
+    
+    UpdateInfo update_info;
+    dataDict->GetString("fileName", &update_info.file_name);
+    dataDict->GetString("md5", &update_info.file_md5);
+    dataDict->GetString("version", &update_info.version_str);
+    dataDict->GetString("url", &update_info.file_url);
+    dataDict->GetString("type", &update_info.platform_type);
+    DLOG(INFO) << "YSPUpdateManager fileName: " << update_info.file_name
+               << ", fileMD5:" << update_info.file_md5
+               << ", version_str:" << update_info.version_str
+               << ", fileUrl:" << update_info.file_url
+               << ", platformType:" << update_info.platform_type;
 
-    base::PathService::Get(chrome::DIR_DEFAULT_DOWNLOADS, &path);
-    std::string lver_string = version_info::GetYSPVersionNumber();
-    DLOG(INFO) << "path: " << path.value();
-    path = path.AppendASCII(fileName);
+    DoAutoUpdateDownload(update_info, std::move(dataDict));
+  }
+}
 
-    if (!version_str.empty()) {
-      base::Version remote_version(version_str);
-      base::Version local_version(lver_string);
-      if (!remote_version.IsValid())
-        return;
-      if (local_version.CompareTo(remote_version) < 0) {
-        LOG(INFO) << "Should update from " << lver_string << " to "
-                  << version_str;
-        std::string file_data;
-        bool status = base::ReadFileToString(path, &file_data);
-        if (!status || file_data.empty()) {
-          StartDownload(GURL(fileUrl), path);
-          return;
-        }
-        base::MD5Digest digest = {{0}};
-        base::MD5Sum(file_data.c_str(), file_data.length(), &digest);
-        md5 = base::MD5DigestToBase16(digest);
-        if (md5 != fileMD5) {
-          StartDownload(GURL(fileUrl), path);
-        }
+void YSPUpdateManager::DoAutoUpdateDownload(const UpdateInfo& update_info,
+                                            std::unique_ptr<base::DictionaryValue> response_data,
+                                            bool enable) {
+  base::FilePath path;
+  base::PathService::Get(chrome::DIR_DEFAULT_DOWNLOADS, &path);
+  std::string lver_string = version_info::GetYSPVersionNumber();
+  DLOG(INFO) << "path: " << path.value();
+  path = path.AppendASCII(update_info.file_name);
+
+  if (update_info.version_str.empty())
+    return;
+  base::Version remote_version(update_info.version_str);
+  base::Version local_version(lver_string);
+  if (!remote_version.IsValid() || local_version.CompareTo(remote_version) >= 0)
+    return;
+
+  LOG(INFO) << "Should update from " << lver_string << " to "
+            << update_info.version_str;
+  if (update_info.update_type == REMIND_UPDATE && enable) {
+    YSPShowMessageBox(
+        web_contents_,
+        l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_TITLE),
+        l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_MESSAGE),
+        chrome::MESSAGE_BOX_TYPE_QUESTION,
+        l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_OK),
+        l10n_util::GetStringUTF16(IDS_YSP_AUTO_UPDATE_BUTTON_CANCEL),
+        std::unique_ptr<base::DictionaryValue>(
+            static_cast<base::DictionaryValue*>(
+                response_data.release())));
+    return;
+  }
+
+  std::string file_data;
+  bool status = base::ReadFileToString(path, &file_data);
+  if (!status || file_data.empty()) {
+    StartDownload(GURL(update_info.file_url), path);
+    return;
+  }
+  base::MD5Digest digest = {{0}};
+  base::MD5Sum(file_data.c_str(), file_data.length(), &digest);
+  if (update_info.file_md5 != base::MD5DigestToBase16(digest)) {
+    StartDownload(GURL(update_info.file_url), path);
+  } else {
 #if defined(OS_WIN)  // TODO (ysp) : Fix it on Mac
-        if (platformType == "windows") {
-          std::wstring wPath = path.value();
-          HINSTANCE num = ShellExecute(NULL, L"open", wPath.c_str(), NULL, NULL,
-                                       SW_SHOWNORMAL);
-          if ((int)(num) <= 32) {
-            DLOG(INFO) << "File execute failure!";
-          }
-        }
-#elif defined(OS_MACOSX)
-        if (platformType == "mac") {
-          PrepareUpdate(path.value());
-        }
-#endif
+    if (update_info.platform_type == "windows") {
+      std::wstring wPath = path.value();
+      HINSTANCE num = ShellExecute(NULL, L"open", wPath.c_str(), NULL, NULL,
+                                  SW_SHOWNORMAL);
+      if ((int)(num) <= 32) {
+        DLOG(INFO) << "File execute failure!";
       }
     }
+#elif defined(OS_MACOSX)
+    if (update_info.platform_type == "mac") {
+      PrepareUpdate(path.value());
+    }
+#endif
   }
 }
 
@@ -527,20 +507,20 @@ void YSPUpdateManager::StartDownload(const GURL& package_url,
 
   DLOG(INFO) << "YSPUpdateManager::StartDownload";
 
-  // FIXME(halton):
-  // content::DownloadManager* download_manager =
-  //     content::BrowserContext::GetDownloadManager(
-  //         web_contents_->GetBrowserContext());
-  //
-  // std::unique_ptr<download::DownloadUrlParameters> download_parameters(
-  //     download::DownloadUrlParameters::FromWebContents(web_contents_,
-  //                                                      package_url));
-  // download_parameters->set_file_path(base::FilePath(updateFilePath));
-  // download_parameters->set_callback(
-  //     base::Bind(&YSPUpdateManager::DownloadStarted,
-  //     base::Unretained(this)));
-  // //RecordDownloadSource(DOWNLOAD_INITIATED_BY_PLUGIN_INSTALLER);
-  // download_manager->DownloadUrl(std::move(download_parameters));
+  content::DownloadManager* download_manager =
+      content::BrowserContext::GetDownloadManager(
+          web_contents_->GetBrowserContext());
+
+  std::unique_ptr<download::DownloadUrlParameters> download_parameters(
+        content::DownloadRequestUtils::CreateDownloadForWebContentsMainFrame(
+            web_contents_, package_url, NO_TRAFFIC_ANNOTATION_YET));
+  
+  download_parameters->set_file_path(base::FilePath(updateFilePath));
+  download_parameters->set_callback(
+      base::Bind(&YSPUpdateManager::DownloadStarted,
+      base::Unretained(this)));
+
+  download_manager->DownloadUrl(std::move(download_parameters));
 }
 
 void YSPUpdateManager::DownloadStarted(
@@ -556,7 +536,5 @@ void YSPUpdateManager::DownloadStarted(
 #elif defined(OS_MACOSX)
   item->SetOpenWhenComplete(false);
 #endif
-  // FIXME(halton): no SetIsTempory, still need to set?
-  // item->SetIsTemporary(false);
   item->AddObserver(this);
 }

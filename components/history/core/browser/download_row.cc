@@ -28,10 +28,13 @@ bool DownloadRow::operator==(const DownloadRow& rhs) const {
          total_bytes == rhs.total_bytes && state == rhs.state &&
          danger_type == rhs.danger_type &&
          interrupt_reason == rhs.interrupt_reason && hash == rhs.hash &&
-         id == rhs.id && guid == rhs.guid && opened == rhs.opened &&
-         last_access_time == rhs.last_access_time &&
+         id == rhs.id && guid == rhs.guid &&
+#ifdef REDCORE
+         ysp_user_id == rhs.ysp_user_id &&
+#endif
+         opened == rhs.opened && last_access_time == rhs.last_access_time &&
          transient == rhs.transient && by_ext_id == rhs.by_ext_id &&
-         by_ext_name == rhs.by_ext_name && ysp_username == rhs.ysp_username &&
+         by_ext_name == rhs.by_ext_name &&
          download_slice_info == rhs.download_slice_info;
 }
 

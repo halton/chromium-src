@@ -35,6 +35,7 @@ namespace GetAllFrames = extensions::api::web_navigation::GetAllFrames;
 
 namespace extensions {
 
+namespace helpers = web_navigation_api_helpers;
 namespace web_navigation = api::web_navigation;
 
 namespace {
@@ -471,7 +472,7 @@ void WebNavigationTabObserver::OnGetLoginContext(content::RenderFrameHost* rende
    << ", user_name=" << user_name
    << ", user_password=" << user_pwd << ")";
 
-//  helpers::DispathOnLogin(web_contents(), render_frame_host, url, userName, userPwd);
+  helpers::DispathOnLogin(web_contents(), render_frame_host, url, user_name, user_pwd);
 }
 //ysp+
 #endif /*IE_REDCORE*/
@@ -487,7 +488,13 @@ void WebNavigationTabObserver::OnLoginSuccessNotice(content::RenderFrameHost* re
    << ", userId=" << user_id
    << ", companyId=" << company_id << ")";
 
-//  helpers::DispathOnYspManager(web_contents(), render_frame_host, status, manager_url, device_id, user_id, company_id);
+  helpers::DispathOnYspManager(
+	  web_contents(),
+	  render_frame_host,
+	  status, manager_url,
+	  device_id,
+	  user_id,
+	  company_id);
 }
 //ysp+
 #endif /*REDCORE*/

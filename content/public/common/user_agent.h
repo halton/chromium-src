@@ -24,6 +24,12 @@ CONTENT_EXPORT std::string BuildOSCpuInfo(bool include_android_build_number);
 
 // Helper function to generate a full user agent string from a short
 // product name.
+#ifdef REDCORE
+CONTENT_EXPORT std::string BuildUserAgentFromProduct(
+    const std::string& product,
+    const std::string& ysp_product);
+#endif  // if defined(REDCORE)
+
 CONTENT_EXPORT std::string BuildUserAgentFromProduct(
     const std::string& product);
 

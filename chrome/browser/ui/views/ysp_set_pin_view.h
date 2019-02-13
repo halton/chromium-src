@@ -9,7 +9,6 @@
 
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
-#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
 #include "chrome/browser/ysp_login/ysp_login_manager.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "ui/views/bubble/bubble_dialog_delegate_view.h"
@@ -19,6 +18,12 @@
 #include "ui/views/controls/image_view.h"
 #include "ui/views/controls/textfield/textfield.h"
 #include "ui/views/controls/textfield/textfield_controller.h"
+
+#if !defined(OS_MACOSX)
+#include "chrome/browser/ui/views/frame/opaque_browser_frame_view.h"
+#else
+#include "chrome/browser/ui/views/frame/ysp_views_manager_mac.h"
+#endif
 
 namespace views {
 class GridLayout;
@@ -30,14 +35,21 @@ class Textfield;
 
 class Browser;
 class BrowserView;
+#if !defined(OS_MACOSX)
 class OpaqueBrowserFrameView;
-
+#else
+class YspViewsManagerMac;
+#endif
 class YSPSetPINView : public content::WebContentsDelegate,
                       public views::ImageView,
                       public views::ButtonListener,
                       public views::TextfieldController {
  public:
+#if !defined(OS_MACOSX)
   YSPSetPINView(OpaqueBrowserFrameView* opaque_browser_frame_view,
+#else
+  YSPSetPINView(YspViewsManagerMac* ysp_views_manager_mac,
+#endif
                 BrowserView* browser_view);
   ~YSPSetPINView() override;
 
@@ -68,8 +80,11 @@ class YSPSetPINView : public content::WebContentsDelegate,
   views::LabelButton* confirm_button_;
   views::Label* prompt_label_;
 
+#if !defined(OS_MACOSX)
   OpaqueBrowserFrameView* opaque_browser_frame_view_;
-
+#else
+  YspViewsManagerMac* ysp_views_manager_mac_;
+#endif
   void Submit();
   bool IsDigitString(const base::string16& text);
 };

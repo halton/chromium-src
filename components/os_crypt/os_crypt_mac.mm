@@ -218,28 +218,93 @@ void OSCrypt::UseLockedMockKeychainForTesting(bool use_locked) {
 }
 
 #ifdef REDCORE
-// static 
-bool OSCrypt::EncryptString(
-    const std::string& plaintext,
-    const std::string& key_text,
-    std::string* ciphertext) {
-  // TODO(sunlm04)    
+bool OSCrypt::EncryptString16(const base::string16& plaintext,
+                              const std::string& key_text,
+                              std::string* ciphertext) {
+  return EncryptString(base::UTF16ToUTF8(plaintext), key_text, ciphertext);
+}
+
+bool OSCrypt::DecryptString16(const std::string& ciphertext,
+                              const std::string& key_text,
+                              base::string16* plaintext) {
+  std::string utf8;
+  if (!DecryptString(ciphertext, key_text, &utf8))
+    return false;
+
+  *plaintext = base::UTF8ToUTF16(utf8);
   return true;
 }
 
-// static 
-bool OSCrypt::DecryptString(
-    const std::string& ciphertext,
-    const std::string& key_text,
-    std::string* plaintext) {
-  // TODO(sunlm04)
+bool OSCrypt::EncryptString(const std::string& plaintext,
+                            const std::string& key_text,
+                            std::string* ciphertext) {
+  if (plaintext.empty()) {
+    *ciphertext = std::string();
+    return true;
+  }
+
+  crypto::SymmetricKey* encryption_key = GetEncryptionKey();
+  if (!encryption_key)
+    return false;
+
+  std::string iv(kCCBlockSizeAES128, ' ');
+  crypto::Encryptor encryptor;
+  if (!encryptor.Init(encryption_key, crypto::Encryptor::CBC, iv))
+    return false;
+
+  if (!encryptor.Encrypt(plaintext, ciphertext))
+    return false;
+
+  // Prefix the cypher text with version information.
+  ciphertext->insert(0, kEncryptionVersionPrefix);
+  return true;
+}
+
+bool OSCrypt::DecryptString(const std::string& ciphertext,
+                            const std::string& key_text,
+                            std::string* plaintext) {
+  if (ciphertext.empty()) {
+    *plaintext = std::string();
+    return true;
+  }
+
+  // Check that the incoming cyphertext was indeed encrypted with the expected
+  // version.  If the prefix is not found then we'll assume we're dealing with
+  // old data saved as clear text and we'll return it directly.
+  // Credit card numbers are current legacy data, so false match with prefix
+  // won't happen.
+  if (ciphertext.find(kEncryptionVersionPrefix) != 0) {
+    *plaintext = ciphertext;
+    return true;
+  }
+
+  // Strip off the versioning prefix before decrypting.
+  std::string raw_ciphertext =
+      ciphertext.substr(strlen(kEncryptionVersionPrefix));
+
+  crypto::SymmetricKey* encryption_key = GetEncryptionKey();
+  if (!encryption_key) {
+    VLOG(1) << "Decryption failed: could not get the key";
+    return false;
+  }
+
+  std::string iv(kCCBlockSizeAES128, ' ');
+  crypto::Encryptor encryptor;
+  if (!encryptor.Init(encryption_key, crypto::Encryptor::CBC, iv))
+    return false;
+
+  if (!encryptor.Decrypt(raw_ciphertext, plaintext)) {
+    VLOG(1) << "Decryption failed";
+    return false;
+  }
+
   return true;
 }
 
 // static
 bool OSCrypt::IsSupportHardwareCrypto() {
   // TODO(sunlm04)
-  return true;
+  return false;
 }
 
 // static 

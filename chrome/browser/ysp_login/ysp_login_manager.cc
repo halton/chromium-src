@@ -216,9 +216,8 @@ std::string GetOsVersionStr() {
     system_version = "Windows 8";
   else if (version == base::win::VERSION_WIN8_1)
     system_version = "Windows 8.1";
-  else if (version == base::win::VERSION_WIN10)
-    system_version = "Windows 10";
-  else if (version == base::win::VERSION_WIN10_TH2)
+  else if (version >= base::win::VERSION_WIN10 &&
+           version <= base::win::VERSION_WIN10_RS4)
     system_version = "Windows 10";
   else if (version == base::win::VERSION_WIN_LAST)
     system_version = "unknown";
@@ -2140,7 +2139,7 @@ void YSPLoginManager::SetPushData(const std::string& value) {
             base::DictionaryValue::From(std::move(user_info_value));
         std::string server, username, password;
         user_info_dict->GetString("server", &server);
-        user_info_dict->GetString("username", &username);
+        user_info_dict->GetString("userName", &username);
         user_info_dict->GetString("password", &password);
         if (!server.empty() && !username.empty() && !password.empty()) {
           StartLogin(server, username, password);
@@ -2166,6 +2165,23 @@ void YSPLoginManager::SetPushData(const std::string& value) {
             } else {
               GetSdpDevicefetcher();
             }
+          }
+        } else if (type == "removeUser") {
+          std::string user_id = "";
+          if (push_data_dict &&
+              push_data_dict->GetString("data.content.userId", &user_id) &&
+              GetUserId() == user_id) {
+              // clear user data
+            NotifyConfigureUpdate("removeUser", "");
+            Logout();
+          }
+        } else if (type == "disableUser") {
+          std::string user_id = "";
+          if (push_data_dict &&
+              push_data_dict->GetString("data.content.userId", &user_id) &&
+              GetUserId() == user_id) {
+            NotifyConfigureUpdate("disableUser", "");
+            Logout();
           }
         }
       }
@@ -2357,6 +2373,7 @@ void YSPLoginManager::Logout() {
   }
   // clear local cache
   ClearCache();
+  NotifyConfigureUpdate("gatewayDomain", "");
 }
 
 // YSP+ { Resource Replace

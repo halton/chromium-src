@@ -10,7 +10,6 @@
 
 #include <memory.h>
 #include <string.h>
-// #include <vector.h>
 
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
@@ -26,14 +25,16 @@ namespace content {
 class WebContents;
 }
 
+namespace base {
+template <typename T>
+struct DefaultSingletonTraits;
+}
+
 // Singleton class
 class YSPUpdateManager : public base::SupportsWeakPtr<YSPUpdateManager>,
-                         public base::RefCounted<YSPUpdateManager>,
                          public YSPUpdateFetcherDelegate,
                          public download::DownloadItem::Observer {
  public:
-  YSPUpdateManager();
-
   static YSPUpdateManager* GetInstance();
 
   void RequestUpdate(content::WebContents* webContents,
@@ -59,7 +60,29 @@ class YSPUpdateManager : public base::SupportsWeakPtr<YSPUpdateManager>,
   void StartDownload(const GURL& package_url, base::FilePath updateFilePath);
 
  private:
+  enum UpdateType {
+    REMIND_UPDATE = 1,
+    AUTO_UPDATE,
+  };
+
+  struct UpdateInfo {
+    UpdateInfo();
+    ~UpdateInfo();
+    std::string file_name;
+    std::string file_md5;
+    std::string file_url;
+    std::string version_str;
+    std::string platform_type;
+    int update_type;
+  };
+
+  YSPUpdateManager();
   ~YSPUpdateManager() override;
+  friend struct base::DefaultSingletonTraits<YSPUpdateManager>;
+
+  void DoAutoUpdateDownload(const UpdateInfo& update_info,
+                            std::unique_ptr<base::DictionaryValue> response_data,
+                            bool enable = true);
   void DownloadStarted(download::DownloadItem* item,
                        download::DownloadInterruptReason interrupt_reason);
 

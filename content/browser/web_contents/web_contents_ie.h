@@ -181,13 +181,15 @@ class CONTENT_EXPORT WebContentsIE : public WebContentsImpl,
                       const std::vector<std::wstring>& cookies);
   bool IsDownloading();
 
-  void SendFunctionControl(const std::wstring& jsonStr);
+  void SendFunctionControl(const std::wstring& json_string);
   void SetCreateByIENewWindow(bool is_new);
 
   void OnQueryPrivateDns(const std::wstring& host,
                          std::wstring* ip_list_json_string);
-  void QueryDnsOnIOThread(const std::wstring& host);
+  void QueryDnsOnIOThread(const std::wstring& host, base::Closure done);
   void QueryDnsFinished(const std::wstring& ip_list_json_string);
+
+  void OnWindowMove() override;
 
  private:
   bool CreateTridentWebView(const gfx::AcceleratedWidget& hwnd_parent,
