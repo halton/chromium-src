@@ -55,8 +55,8 @@ rm "${app_dir}/.need_update"
 
 echo "update success"
 if [[ ${relaunch} == "yes" ]]; then
-    echo "startup Redcore"
-    exec "${cur_dir}/MacOS/Redcore"
+    echo "startup Enterplorer"
+    exec "${cur_dir}/MacOS/Enterplorer"
 fi
 
 exit 0
